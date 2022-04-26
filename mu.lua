@@ -5,11 +5,6 @@ curses.echo(false) -- unclear why implicit echo can't handle newlines, regardles
 stdscr:clear()
 stdscr:scrollok(true)
 
-local function gather_results(success, ...)
-  local n = select('#', ...)
-  return success, { n = n, ... }
-end
-
 local function readline()
   local result = ''
   while true do
@@ -22,6 +17,7 @@ local function readline()
   return result
 end
 
+-- based on https://github.com/hoelzro/lua-repl
 function eval_print(f)
   local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
   if success then
@@ -37,6 +33,11 @@ function eval_print(f)
   stdscr:addch('\n')
 end
 
+local function gather_results(success, ...)
+  local n = select('#', ...)
+  return success, { n = n, ... }
+end
+
 local new_expr = true
 local buf = ''
 while true do
@@ -46,6 +47,7 @@ while true do
     stdscr:addstr('>> ')
   end
   buf = buf .. readline()
+  -- print value of expression the way Lua 5.3 does it: by prepending 'return' to the line
   local f = load('return '..buf, 'REPL')
   if f then
     buf = ''
