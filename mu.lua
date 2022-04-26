@@ -22,6 +22,21 @@ local function readline()
   return result
 end
 
+function eval_print(f)
+  local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
+  if success then
+    for i, result in ipairs(results) do
+      if i > 1 then
+        stdscr:addch('\t')
+      end
+      stdscr:addstr(tostring(result))
+    end
+  else
+    stdscr:addstr(tostring(result[1]))
+  end
+  stdscr:addch('\n')
+end
+
 local new_expr = true
 local buf = ''
 while true do
@@ -31,46 +46,23 @@ while true do
     stdscr:addstr('>> ')
   end
   buf = buf .. readline()
-  local f, err = load('return '..buf, 'REPL')
+  local f = load('return '..buf, 'REPL')
   if f then
     buf = ''
     new_expr = true
-    local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
-    if success then
-      for i, result in ipairs(results) do
-        if i > 1 then
-          stdscr:addch('\t')
-        end
-        stdscr:addstr(tostring(result))
-      end
-    else
-      stdscr:addstr(tostring(result[1]))
-    end
-    stdscr:addch('\n')
+    eval_print(f)
   else
     local f, err = load(buf, 'REPL')
     if f then
       buf = ''
       new_expr = true
-      local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
-      if success then
-        for _, result in ipairs(results) do
-          if i > 1 then
-            stdscr:addch('\t')
-          end
-          stdscr:addstr(tostring(result))
-        end
-      else
-        stdscr:addstr(tostring(result[1]))
-      end
-      stdscr:addch('\n')
+      eval_print(f)
     else
-      stdscr:addstr(err..'\n')
       if string.match(err, "'<eof>'$") or string.match(err, "<eof>$") then
         buf = buf .. '\n'
         new_expr = false
       else
-        print(err)
+        stdscr:addstr(err..'\n')
         buf = ''
         new_expr = true
       end
