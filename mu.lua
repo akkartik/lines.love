@@ -37,12 +37,16 @@ while true do
     new_expr = true
     local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
     if success then
-      for _, result in ipairs(results) do
-        print(result)
+      for i, result in ipairs(results) do
+        if i > 1 then
+          stdscr:addch('\t')
+        end
+        stdscr:addstr(tostring(result))
       end
     else
-      print(results[1])
+      stdscr:addstr(tostring(result[1]))
     end
+    stdscr:addch('\n')
   else
     local f, err = load(buf, 'REPL')
     if f then
@@ -51,11 +55,15 @@ while true do
       local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
       if success then
         for _, result in ipairs(results) do
-          print(result)
+          if i > 1 then
+            stdscr:addch('\t')
+          end
+          stdscr:addstr(tostring(result))
         end
       else
-        print(results[1])
+        stdscr:addstr(tostring(result[1]))
       end
+      stdscr:addch('\n')
     else
       stdscr:addstr(err..'\n')
       if string.match(err, "'<eof>'$") or string.match(err, "<eof>$") then
