@@ -34,11 +34,40 @@ function love.keypressed(key, scancode, isrepeat)
     -- do nothing
   elseif key == 'lalt' or key == 'ralt' then
     -- do nothing
+  elseif key == 'lshift' or key == 'rshift' then
+    -- do nothing
   elseif love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl') then
-    lines[#lines] = lines[#lines]..' aaa'
+    if key == 'r' then
+      lines[#lines+1] = eval(lines[#lines])[1]
+      lines[#lines+1] = ''
+    end
   else
     lines[#lines] = lines[#lines]..key
   end
+end
+
+function eval(buf)
+  local f = load('return '..buf, 'REPL')
+  if f then
+    return call_gather(f)
+  end
+  local f, err = load(buf, 'REPL')
+  if f then
+    return call_gather(f)
+  else
+    return {err}
+  end
+end
+
+-- based on https://github.com/hoelzro/lua-repl
+function call_gather(f)
+  local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
+  return results
+end
+
+function gather_results(success, ...)
+  local n = select('#', ...)
+  return success, { n = n, ... }
 end
 
 function love.keyreleased(key, scancode)
