@@ -11,9 +11,13 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 1, 1, width-1, height-1)
   love.graphics.setColor(0, 0, 0)
+  local text
   for i, line in ipairs(lines) do
-    love.graphics.print(line, 12, i*12)
+    text = love.graphics.newText(love.graphics.getFont(), line)
+    love.graphics.draw(text, 12, i*15)
   end
+  -- cursor
+  love.graphics.print('_', 12+text:getWidth(), #lines*15)
 end
 
 function love.update(dt)
