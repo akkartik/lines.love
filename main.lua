@@ -1,4 +1,5 @@
 require 'keychord'
+local utf8 = require 'utf8'
 
 lines = {}
 width, height, flags = 0, 0, nil
@@ -35,6 +36,15 @@ function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   if chord == 'return' then
     table.insert(lines, '')
+  elseif chord == 'backspace' then
+    if #lines > 1 and lines[#lines] == '' then
+      table.remove(lines)
+    else
+      local byteoffset = utf8.offset(lines[#lines], -1)
+      if byteoffset then
+        lines[#lines] = string.sub(lines[#lines], 1, byteoffset-1)
+      end
+    end
   elseif chord == 'C-r' then
     lines[#lines+1] = eval(lines[#lines])[1]
     lines[#lines+1] = ''
