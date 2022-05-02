@@ -28,6 +28,8 @@ end
 function love.keypressed(key, scancode, isrepeat)
   if key == 'return' then
     table.insert(lines, '')
+  elseif key == 'space' then
+    lines[#lines] = lines[#lines]..' '
   else
     lines[#lines] = lines[#lines]..key
   end
