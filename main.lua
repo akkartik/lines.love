@@ -3,6 +3,7 @@ local utf8 = require 'utf8'
 
 lines = {}
 width, height, flags = 0, 0, nil
+exec_payload = nil
 
 function love.load()
   table.insert(lines, '')
@@ -24,6 +25,10 @@ function love.draw()
   end
   -- cursor
   love.graphics.print('_', 12+text:getWidth(), #lines*15)
+
+  if exec_payload then
+    call_gather(exec_payload)
+  end
 end
 
 function love.update(dt)
@@ -47,8 +52,9 @@ function keychord_pressed(chord)
       end
     end
   elseif chord == 'C-r' then
-    lines[#lines+1] = eval(lines[#lines])[1]
-    lines[#lines+1] = ''
+    eval(lines[#lines])
+--?     lines[#lines+1] = eval(lines[#lines])[1]
+--?     lines[#lines+1] = ''
   end
 end
 
@@ -64,11 +70,15 @@ end
 function eval(buf)
   local f = load('return '..buf, 'REPL')
   if f then
-    return call_gather(f)
+    exec_payload = f
+    return
+--?     return call_gather(f)
   end
   local f, err = load(buf, 'REPL')
   if f then
-    return call_gather(f)
+    exec_payload = f
+    return
+--?     return call_gather(f)
   else
     return {err}
   end
