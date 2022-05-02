@@ -30,6 +30,12 @@ function love.keypressed(key, scancode, isrepeat)
     table.insert(lines, '')
   elseif key == 'space' then
     lines[#lines] = lines[#lines]..' '
+  elseif key == 'lctrl' or key == 'rctrl' then
+    -- do nothing
+  elseif key == 'lalt' or key == 'ralt' then
+    -- do nothing
+  elseif love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl') then
+    lines[#lines] = lines[#lines]..' aaa'
   else
     lines[#lines] = lines[#lines]..key
   end
