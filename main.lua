@@ -8,6 +8,7 @@ function love.load()
   table.insert(lines, '')
   love.window.setMode(0, 0)  -- maximize
   width, height, flags = love.window.getMode()
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
 end
 
 function love.draw()
