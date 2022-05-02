@@ -1,3 +1,5 @@
+require 'keychord'
+
 lines = {}
 width, height, flags = 0, 0, nil
 
@@ -25,25 +27,27 @@ end
 function love.update(dt)
 end
 
-function love.keypressed(key, scancode, isrepeat)
-  if key == 'return' then
+function love.textinput(t)
+  lines[#lines] = lines[#lines]..t
+end
+
+function keychord_pressed(chord)
+  -- Don't handle any keys here that would trigger love.textinput above.
+  if chord == 'return' then
     table.insert(lines, '')
-  elseif key == 'space' then
-    lines[#lines] = lines[#lines]..' '
-  elseif key == 'lctrl' or key == 'rctrl' then
-    -- do nothing
-  elseif key == 'lalt' or key == 'ralt' then
-    -- do nothing
-  elseif key == 'lshift' or key == 'rshift' then
-    -- do nothing
-  elseif love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl') then
-    if key == 'r' then
-      lines[#lines+1] = eval(lines[#lines])[1]
-      lines[#lines+1] = ''
-    end
-  else
-    lines[#lines] = lines[#lines]..key
+  elseif chord == 'C-r' then
+    lines[#lines+1] = eval(lines[#lines])[1]
+    lines[#lines+1] = ''
   end
+end
+
+function love.keyreleased(key, scancode)
+end
+
+function love.mousepressed(x, y, button)
+end
+
+function love.mousereleased(x, y, button)
 end
 
 function eval(buf)
@@ -68,13 +72,4 @@ end
 function gather_results(success, ...)
   local n = select('#', ...)
   return success, { n = n, ... }
-end
-
-function love.keyreleased(key, scancode)
-end
-
-function love.mousepressed(x, y, button)
-end
-
-function love.mousereleased(x, y, button)
 end
