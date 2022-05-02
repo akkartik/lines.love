@@ -10,6 +10,8 @@ end
 function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 1, 1, width-1, height-1)
+  love.graphics.setColor(1, 1, 0)
+  love.graphics.rectangle('fill', 1, 1, 400, 10*12)
   love.graphics.setColor(0, 0, 0)
   local text
   for i, line in ipairs(lines) do
