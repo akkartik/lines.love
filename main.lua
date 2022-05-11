@@ -1,5 +1,6 @@
 require 'keychord'
 require 'button'
+require 'repl'
 local utf8 = require 'utf8'
 
 lines = {}
@@ -66,8 +67,9 @@ function love.draw()
   -- cursor
   love.graphics.print('_', 25+text:getWidth()*1.5, y)
 
+  -- display side effect
   if exec_payload then
-    call_gather(exec_payload)
+    run(exec_payload)
   end
 end
 
@@ -117,9 +119,10 @@ function keychord_pressed(chord)
       end
     end
   elseif chord == 'C-r' then
-    eval(lines[#lines])
---?     lines[#lines+1] = eval(lines[#lines])[1]
---?     lines[#lines+1] = ''
+    lines[#lines+1] = eval(lines[#lines])[1]
+    lines[#lines+1] = ''
+  elseif chord == 'C-d' then
+    parse_into_exec_payload(lines[#lines])
   end
 end
 
@@ -128,32 +131,4 @@ end
 
 function love.mousepressed(x, y, button)
   propagate_to_button_handers(x, y, button)
-end
-
-function eval(buf)
-  local f = load('return '..buf, 'REPL')
-  if f then
-    exec_payload = f
-    return
---?     return call_gather(f)
-  end
-  local f, err = load(buf, 'REPL')
-  if f then
-    exec_payload = f
-    return
---?     return call_gather(f)
-  else
-    return {err}
-  end
-end
-
--- based on https://github.com/hoelzro/lua-repl
-function call_gather(f)
-  local success, results = gather_results(xpcall(f, function(...) return debug.traceback() end))
-  return results
-end
-
-function gather_results(success, ...)
-  local n = select('#', ...)
-  return success, { n = n, ... }
 end
