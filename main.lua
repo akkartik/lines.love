@@ -37,11 +37,12 @@ function love.draw()
                    end})
     elseif type(line) == 'table' then
       -- line drawing
-      love.graphics.setColor(0,0,0)
+      love.graphics.setColor(0.75,0.75,0.75)
       line.y = y
       love.graphics.rectangle('line', 12,y, line.w,line.h)
       y = y+line.h
 
+      love.graphics.setColor(0,0,0)
       for _,shape in ipairs(line.shapes) do
         prev = nil
         for _,point in ipairs(shape) do
