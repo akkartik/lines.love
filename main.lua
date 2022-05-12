@@ -172,14 +172,21 @@ function keychord_pressed(chord)
   elseif chord == 'C-d' then
     parse_into_exec_payload(lines[#lines])
   elseif chord == 'C-l' then
-    for i,drawing in ipairs(lines) do
-      if type(drawing) == 'table' then
-        local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
-          for j,shape in ipairs(drawing.shapes) do
-            if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
-              convert_line(drawing,j,shape)
-            end
+    local drawing,i,shape = select_shape_at_mouse()
+    if drawing then
+      convert_line(drawing,i,shape)
+    end
+  end
+end
+
+function select_shape_at_mouse()
+  for _,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      local x, y = love.mouse.getX(), love.mouse.getY()
+      if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+        for i,shape in ipairs(drawing.shapes) do
+          if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
+            return drawing,i,shape
           end
         end
       end
