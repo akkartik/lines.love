@@ -77,10 +77,11 @@ function love.update(dt)
   if love.mouse.isDown('1') then
     for i, line in ipairs(lines) do
       if type(line) == 'table' then
+        local drawing = line
         local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= line.y and y < line.y + line.h and x >= 12 and x < 12+line.w then
-          lines.current = line
-          process_drag(line,love.mouse.getX(),love.mouse.getY())
+        if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+          lines.current = drawing
+          process_drag(drawing,love.mouse.getX(),love.mouse.getY())
         end
       end
     end
