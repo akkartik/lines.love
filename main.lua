@@ -92,7 +92,7 @@ function love.update(dt)
 end
 
 function love.mousepressed(x,y, button)
-  propagate_to_button_handers(x,y, button)
+  propagate_to_button_handlers(x,y, button)
   propagate_to_drawings(x,y, button)
 end
 
