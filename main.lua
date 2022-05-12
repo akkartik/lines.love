@@ -4,6 +4,7 @@ require 'repl'
 local utf8 = require 'utf8'
 
 lines = {}
+mode = ''
 width, height, flags = 0, 0, nil
 exec_payload = nil
 
@@ -43,8 +44,12 @@ function love.draw()
       love.graphics.rectangle('line', 12,y, line.w,line.h)
       y = y+line.h
 
-      love.graphics.setColor(0,0,0)
       for _,shape in ipairs(line.shapes) do
+        if shape.selected then
+          love.graphics.setColor(1,0,0)
+        else
+          love.graphics.setColor(0,0,0)
+        end
         prev = nil
         for _,point in ipairs(shape) do
           if prev then
@@ -74,7 +79,7 @@ function love.draw()
 end
 
 function love.update(dt)
-  if love.mouse.isDown('1') then
+  if love.mouse.isDown('1') and mode == 'draw' then
     if lines.current then
       local drawing = lines.current
       if type(drawing) == 'table' then
@@ -93,14 +98,54 @@ function love.mousepressed(x,y, button)
 end
 
 function propagate_to_drawings(x,y, button)
+  mode = 'grab'
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
         lines.current = drawing
+        for _,shape in ipairs(drawing.shapes) do
+          if on_freehand(x,y, shape) then
+            shape.selected = true
+            return
+          end
+        end
       end
     end
   end
+  mode = 'draw'
+end
+
+function on_freehand(x,y, shape)
+  local prev
+  for _,p in ipairs(shape) do
+    if prev then
+      if on_line(x,y, {x1=prev.x,y1=prev.y, x2=p.x,y2=p.y}) then
+        return true
+      end
+    end
+    prev = p
+  end
+  return false
+end
+
+function on_line(x,y, shape)
+  if shape.x1 == shape.x2 then
+    local y1,y2 = shape.y1,shape.y2
+    if y1 > y2 then
+      y1,y2 = y2,y2
+    end
+    return y >= y1 and y <= y2
+  end
+  -- has the right slope and intercept
+  local m = (shape.y2 - shape.y1) / (shape.x2 - shape.x1)
+  local yp = shape.y1 + m*(x-shape.x1)
+  if yp < 0.95*y or yp > 1.05*y then
+    return false
+  end
+  -- between endpoints
+  local k = (x-shape.x1) / (shape.x2-shape.x1)
+  return k > -0.05 and k < 1.05
 end
 
 function love.mousereleased(x,y, button)
