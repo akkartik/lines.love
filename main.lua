@@ -26,7 +26,7 @@ function love.draw()
     text = love.graphics.newText(love.graphics.getFont(), line)
     if line == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
-        icon = function(x, y)
+        icon = function(x,y)
                  love.graphics.setColor(0.7,0.7,0.7)
                  love.graphics.rectangle('line', x,y, 12,12)
                  love.graphics.line(4,y+6, 16,y+6)
@@ -126,6 +126,6 @@ end
 function love.keyreleased(key, scancode)
 end
 
-function love.mousepressed(x, y, button)
-  propagate_to_button_handers(x, y, button)
+function love.mousepressed(x,y, button)
+  propagate_to_button_handers(x,y, button)
 end
