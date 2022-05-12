@@ -4,7 +4,6 @@ require 'repl'
 local utf8 = require 'utf8'
 
 lines = {}
-mode = ''
 width, height, flags = 0, 0, nil
 exec_payload = nil
 
@@ -45,7 +44,7 @@ function love.draw()
       y = y+line.h
 
       for _,shape in ipairs(line.shapes) do
-        if shape.selected then
+        if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
           love.graphics.setColor(1,0,0)
         else
           love.graphics.setColor(0,0,0)
@@ -79,7 +78,7 @@ function love.draw()
 end
 
 function love.update(dt)
-  if love.mouse.isDown('1') and mode == 'draw' then
+  if love.mouse.isDown('1') then
     if lines.current then
       local drawing = lines.current
       if type(drawing) == 'table' then
@@ -98,22 +97,14 @@ function love.mousepressed(x,y, button)
 end
 
 function propagate_to_drawings(x,y, button)
-  mode = 'grab'
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
         lines.current = drawing
-        for _,shape in ipairs(drawing.shapes) do
-          if on_freehand(x,y, shape) then
-            shape.selected = true
-            return
-          end
-        end
       end
     end
   end
-  mode = 'draw'
 end
 
 function on_freehand(x,y, shape)
