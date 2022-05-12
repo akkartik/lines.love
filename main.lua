@@ -40,8 +40,8 @@ function love.draw()
       -- line drawing
       love.graphics.setColor(0.75,0.75,0.75)
       line.y = y
-      love.graphics.rectangle('line', 12,y, line.w,line.h)
       y = y+line.h
+      love.graphics.rectangle('line', 12,line.y, line.w,line.h)
 
       for _,shape in ipairs(line.shapes) do
         if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
