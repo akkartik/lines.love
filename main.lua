@@ -171,7 +171,28 @@ function keychord_pressed(chord)
     lines[#lines+1] = ''
   elseif chord == 'C-d' then
     parse_into_exec_payload(lines[#lines])
+  elseif chord == 'C-l' then
+    for i,drawing in ipairs(lines) do
+      if type(drawing) == 'table' then
+        local x, y = love.mouse.getX(), love.mouse.getY()
+        if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+          for j,shape in ipairs(drawing.shapes) do
+            if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
+              convert_line(drawing,j,shape)
+            end
+          end
+        end
+      end
+    end
   end
+end
+
+function convert_line(drawing, i, shape)
+  -- Perhaps we should do a more sophisticated "simple linear regression"
+  -- here:
+  --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
+  -- But this works well enough for close-to-linear strokes.
+  drawing.shapes[i] = {shape[1], shape[#shape]}
 end
 
 function love.keyreleased(key, scancode)
