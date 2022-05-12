@@ -5,6 +5,17 @@ local utf8 = require 'utf8'
 
 lines = {}
 screenw, screenh, screenflags = 0, 0, nil
+
+-- All drawings span 100% of some conceptual 'page width' and divide it up
+-- into 256 parts. `drawingw` describes their width in pixels.
+drawingw = 400  -- pixels
+function pixels(n)  -- parts to pixels
+  return n*drawingw/256
+end
+function coord(n)  -- pixels to parts
+  return math.floor(n*256/drawingw)
+end
+
 exec_payload = nil
 
 function love.load()
@@ -34,17 +45,19 @@ function love.draw()
                  love.graphics.setColor(0, 0, 0)
                end,
         onpress1 = function()
-                     table.insert(lines, i, {y=y, w=400, h=200, pending={}, shapes={}})
+                     table.insert(lines, i, {y=y, h=256/2, pending={}, shapes={}})
                    end})
     elseif type(line) == 'table' then
       -- line drawing
       love.graphics.setColor(0.75,0.75,0.75)
       line.y = y
-      y = y+line.h
-      love.graphics.rectangle('line', 12,line.y, line.w,line.h)
+      y = y+pixels(line.h)
+      love.graphics.rectangle('line', 12,line.y, drawingw,pixels(line.h))
+
+      local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-line.y)
 
       for _,shape in ipairs(line.shapes) do
-        if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
+        if on_freehand(mx,my, shape) then
           love.graphics.setColor(1,0,0)
         else
           love.graphics.setColor(0,0,0)
@@ -52,7 +65,7 @@ function love.draw()
         prev = nil
         for _,point in ipairs(shape) do
           if prev then
-            love.graphics.line(prev.x,prev.y, point.x,point.y)
+            love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
           end
           prev = point
         end
@@ -60,7 +73,7 @@ function love.draw()
       prev = nil
       for _,point in ipairs(line.pending) do
         if prev then
-          love.graphics.line(prev.x,prev.y, point.x,point.y)
+          love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
         end
         prev = point
       end
@@ -83,8 +96,8 @@ function love.update(dt)
       local drawing = lines.current
       if type(drawing) == 'table' then
         local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
-          table.insert(drawing.pending, {x=love.mouse.getX(), y=love.mouse.getY()})
+        if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+          table.insert(drawing.pending, {x=coord(love.mouse.getX()-12), y=coord(love.mouse.getY()-drawing.y)})
         end
       end
     end
@@ -100,7 +113,7 @@ function propagate_to_drawings(x,y, button)
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
         lines.current = drawing
       end
     end
@@ -191,9 +204,10 @@ function select_shape_at_mouse()
   for _,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
-          if on_freehand(love.mouse.getX(),love.mouse.getY(), shape) then
+          if on_freehand(mx,my, shape) then
             return drawing,i,shape
           end
         end
