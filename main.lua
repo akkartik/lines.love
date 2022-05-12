@@ -88,6 +88,10 @@ function love.update(dt)
   end
 end
 
+function love.mousepressed(x,y, button)
+  propagate_to_button_handers(x,y, button)
+end
+
 function love.mousereleased(x,y, button)
   if lines.current then
     if lines.current.pending then
@@ -124,8 +128,4 @@ function keychord_pressed(chord)
 end
 
 function love.keyreleased(key, scancode)
-end
-
-function love.mousepressed(x,y, button)
-  propagate_to_button_handers(x,y, button)
 end
