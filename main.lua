@@ -176,6 +176,11 @@ function keychord_pressed(chord)
     if drawing then
       convert_line(drawing,i,shape)
     end
+  elseif chord == 'C-m' then
+    local drawing,i,shape = select_shape_at_mouse()
+    if drawing then
+      convert_horvert(drawing,i,shape)
+    end
   end
 end
 
@@ -200,6 +205,17 @@ function convert_line(drawing, i, shape)
   --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
   -- But this works well enough for close-to-linear strokes.
   drawing.shapes[i] = {shape[1], shape[#shape]}
+end
+
+-- turn a stroke into either a horizontal or vertical line
+function convert_horvert(drawing, i, shape)
+  local x1,y1 = shape[1].x, shape[1].y
+  local x2,y2 = shape[#shape].x, shape[#shape].y
+  if math.abs(x1-x2) > math.abs(y1-y2) then
+    drawing.shapes[i] = {{x=x1, y=y1}, {x=x2, y=y1}}
+  else
+    drawing.shapes[i] = {{x=x1, y=y1}, {x=x1, y=y2}}
+  end
 end
 
 function love.keyreleased(key, scancode)
