@@ -21,7 +21,7 @@ function love.draw()
   love.graphics.setColor(0, 0, 0)
   local text
   local y = 0
-  for i, line in ipairs(lines) do
+  for i,line in ipairs(lines) do
     y = y+25
     text = love.graphics.newText(love.graphics.getFont(), line)
     if line == '' then
@@ -122,9 +122,12 @@ end
 
 function on_line(x,y, shape)
   if shape.x1 == shape.x2 then
+    if math.abs(shape.x1-x) > 5 then
+      return false
+    end
     local y1,y2 = shape.y1,shape.y2
     if y1 > y2 then
-      y1,y2 = y2,y2
+      y1,y2 = y2,y1
     end
     return y >= y1 and y <= y2
   end
