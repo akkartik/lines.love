@@ -81,15 +81,11 @@ function love.update(dt)
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
           lines.current = drawing
-          process_drag(drawing,love.mouse.getX(),love.mouse.getY())
+          table.insert(drawing.pending, {x=love.mouse.getX(), y=love.mouse.getY()})
         end
       end
     end
   end
-end
-
-function process_drag(drawing, x,y)
-  table.insert(drawing.pending, {x=x, y=y})
 end
 
 function love.mousereleased(x,y, button)
