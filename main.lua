@@ -4,20 +4,20 @@ require 'repl'
 local utf8 = require 'utf8'
 
 lines = {}
-width, height, flags = 0, 0, nil
+screenw, screenh, screenflags = 0, 0, nil
 exec_payload = nil
 
 function love.load()
   table.insert(lines, '')
   love.window.setMode(0, 0)  -- maximize
-  width, height, flags = love.window.getMode()
+  screenw, screenh, screenflags = love.window.getMode()
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
 end
 
 function love.draw()
   button_handlers = {}
   love.graphics.setColor(1, 1, 1)
-  love.graphics.rectangle('fill', 1, 1, width-1, height-1)
+  love.graphics.rectangle('fill', 1, 1, screenw-1, screenh-1)
   love.graphics.setColor(0, 0, 0)
   local text
   local y = 0
