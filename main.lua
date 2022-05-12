@@ -75,12 +75,11 @@ end
 
 function love.update(dt)
   if love.mouse.isDown('1') then
-    for i, line in ipairs(lines) do
-      if type(line) == 'table' then
-        local drawing = line
+    if lines.current then
+      local drawing = lines.current
+      if type(drawing) == 'table' then
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
-          lines.current = drawing
           table.insert(drawing.pending, {x=love.mouse.getX(), y=love.mouse.getY()})
         end
       end
@@ -90,6 +89,18 @@ end
 
 function love.mousepressed(x,y, button)
   propagate_to_button_handers(x,y, button)
+  propagate_to_drawings(x,y, button)
+end
+
+function propagate_to_drawings(x,y, button)
+  for i,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      local x, y = love.mouse.getX(), love.mouse.getY()
+      if y >= drawing.y and y < drawing.y + drawing.h and x >= 12 and x < 12+drawing.w then
+        lines.current = drawing
+      end
+    end
+  end
 end
 
 function love.mousereleased(x,y, button)
