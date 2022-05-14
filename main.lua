@@ -34,7 +34,7 @@ lines = {}
 
 screenw, screenh, screenflags = 0, 0, nil
 
-current_mode = 'freehand'
+current_mode = 'line'
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts. `drawingw` describes their width in pixels.
