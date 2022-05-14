@@ -75,7 +75,7 @@ function love.draw()
                  love.graphics.setColor(0, 0, 0)
                end,
         onpress1 = function()
-                     table.insert(lines, i, {y=y, h=256/2, pending={}, shapes={}})
+                     table.insert(lines, i, {y=y, h=256/2, shapes={}, pending={}})
                    end})
     elseif type(line) == 'table' then
       -- line drawing
