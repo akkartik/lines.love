@@ -3,8 +3,38 @@ require 'button'
 require 'repl'
 local utf8 = require 'utf8'
 
+-- lines is an array of lines
+-- a line is either:
+--    a string containing text
+--    or a drawing
+-- a drawing is a table with:
+--    a (y) coord in pixels,
+--    a (h)eight,
+--    an array of points, and
+--    an array of shapes
+-- a shape is a table containing:
+--    a mode
+--    an array points for mode 'freehand' (raw x,y coords; freehand drawings don't pollute the points array of a drawing)
+--    an array vertices for mode 'polygon', 'rectangle', 'square'
+--    p1, p2 for mode 'line'
+--    p1, p2, arrow-mode for mode 'arrow-line'
+--    cx,cy, r for mode 'circle'
+--    pc, r for mode 'circle'
+--    pc, r, s, e for mode 'arc'
+-- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
+-- The field names are carefully chosen so that switching modes in midstream
+-- remembers previously entered points where that makes sense.
+--
+-- Open question: how to maintain Sketchpad-style constraints? Answer for now:
+-- we don't. Constraints operate only for the duration of a drawing operation.
+-- We'll continue to persist them just to keep the option open to continue
+-- solving for them. But for now, this is a program to create static drawings
+-- once, and read them passively thereafter.
 lines = {}
+
 screenw, screenh, screenflags = 0, 0, nil
+
+current_mode = 'freehand'
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts. `drawingw` describes their width in pixels.
@@ -57,26 +87,14 @@ function love.draw()
       local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-line.y)
 
       for _,shape in ipairs(line.shapes) do
-        if on_freehand(mx,my, shape) then
+        if on_shape(mx,my, shape) then
           love.graphics.setColor(1,0,0)
         else
           love.graphics.setColor(0,0,0)
         end
-        prev = nil
-        for _,point in ipairs(shape) do
-          if prev then
-            love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
-          end
-          prev = point
-        end
+        draw_shape(12,line.y, shape)
       end
-      prev = nil
-      for _,point in ipairs(line.pending) do
-        if prev then
-          love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
-        end
-        prev = point
-      end
+      draw_pending_shape(12,line.y, line.pending)
     else
       love.graphics.draw(text, 25,y, 0, 1.5)
     end
@@ -97,7 +115,9 @@ function love.update(dt)
       if type(drawing) == 'table' then
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
-          table.insert(drawing.pending, {x=coord(love.mouse.getX()-12), y=coord(love.mouse.getY()-drawing.y)})
+          if drawing.pending.mode == 'freehand' then
+            table.insert(drawing.pending.points, {x=coord(love.mouse.getX()-12), y=coord(love.mouse.getY()-drawing.y)})
+          end
         end
       end
     end
@@ -109,20 +129,73 @@ function love.mousepressed(x,y, button)
   propagate_to_drawings(x,y, button)
 end
 
+function love.mousereleased(x,y, button)
+  if lines.current then
+    if lines.current.pending then
+      if lines.current.pending.mode == 'freehand' then
+        -- the last point added during update is good enough
+      elseif lines.current.pending.mode == 'line' then
+        lines.current.pending.x2 = coord(x-12)
+        lines.current.pending.y2 = coord(y-lines.current.y)
+      end
+      table.insert(lines.current.shapes, lines.current.pending)
+      lines.current.pending = {}
+      lines.current = nil
+    end
+  end
+end
+
 function propagate_to_drawings(x,y, button)
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        if current_mode == 'freehand' then
+          drawing.pending = {mode='freehand', points={x=coord(x-12), y=coord(y-drawing.y)}}
+        elseif current_mode == 'line' then
+          drawing.pending = {mode='line', x1=coord(x-12), y1=coord(y-drawing.y)}
+        end
         lines.current = drawing
       end
     end
   end
 end
 
+function draw_shape(left,top, shape)
+  if shape.mode == 'freehand' then
+    local prev = nil
+    for _,point in ipairs(shape.points) do
+      if prev then
+        love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, pixels(point.x)+left,pixels(point.y)+top)
+      end
+      prev = point
+    end
+  elseif shape.mode == 'line' then
+    love.graphics.line(pixels(shape.x1)+left,pixels(shape.y1)+top, pixels(shape.x2)+left,pixels(shape.y2)+top)
+  end
+end
+
+function draw_pending_shape(left,top, shape)
+  if shape.mode == 'freehand' then
+    draw_shape(left,top, shape)
+  elseif shape.mode == 'line' then
+    love.graphics.line(pixels(line.pending.x1)+left,pixels(line.pending.y1)+top, love.mouse.getX(),love.mouse.getY())
+  end
+end
+
+function on_shape(x,y, shape)
+  if shape.mode == 'freehand' then
+    return on_freehand(x,y, shape)
+  elseif shape.mode == 'line' then
+    return on_line(x,y, shape)
+  else
+    assert(false)
+  end
+end
+
 function on_freehand(x,y, shape)
   local prev
-  for _,p in ipairs(shape) do
+  for _,p in ipairs(shape.points) do
     if prev then
       if on_line(x,y, {x1=prev.x,y1=prev.y, x2=p.x,y2=p.y}) then
         return true
@@ -155,16 +228,6 @@ function on_line(x,y, shape)
   return k > -0.05 and k < 1.05
 end
 
-function love.mousereleased(x,y, button)
-  if lines.current then
-    if lines.current.pending then
-      table.insert(lines.current.shapes, lines.current.pending)
-      lines.current.pending = {}
-      lines.current = nil
-    end
-  end
-end
-
 function love.textinput(t)
   lines[#lines] = lines[#lines]..t
 end
@@ -190,12 +253,12 @@ function keychord_pressed(chord)
   elseif chord == 'C-l' then
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
-      convert_line(drawing,i,shape)
+      convert_line(shape)
     end
   elseif chord == 'C-m' then
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
-      convert_horvert(drawing,i,shape)
+      convert_horvert(shape)
     end
   elseif chord == 'C-s' then
     local drawing,i,shape = select_shape_at_mouse()
@@ -212,7 +275,7 @@ function select_shape_at_mouse()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
         local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
-          if on_freehand(mx,my, shape) then
+          if on_shape(mx,my, shape) then
             return drawing,i,shape
           end
         end
@@ -221,31 +284,39 @@ function select_shape_at_mouse()
   end
 end
 
-function convert_line(drawing, i, shape)
+function convert_line(shape)
   -- Perhaps we should do a more sophisticated "simple linear regression"
   -- here:
   --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
   -- But this works well enough for close-to-linear strokes.
-  drawing.shapes[i] = {shape[1], shape[#shape]}
+  assert(shape.mode == 'freehand')
+  shape.mode = 'line'
+  shape.x1 = shape.points[1].x
+  shape.y1 = shape.points[1].y
+  shape.x2 = shape.points[#shape.points].x
+  shape.y2 = shape.points[#shape.points].y
 end
 
--- turn a stroke into either a horizontal or vertical line
-function convert_horvert(drawing, i, shape)
-  local x1,y1 = shape[1].x, shape[1].y
-  local x2,y2 = shape[#shape].x, shape[#shape].y
-  if math.abs(x1-x2) > math.abs(y1-y2) then
-    drawing.shapes[i] = {{x=x1, y=y1}, {x=x2, y=y1}}
+-- turn a line either horizontal or vertical
+function convert_horvert(shape)
+  if shape.mode == 'freehand' then
+    convert_line(shape)
+  end
+  assert(shape.mode == 'line')
+  if math.abs(shape.x1-shape.x2) > math.abs(shape.y1-shape.y2) then
+    shape.y2 = shape.y1
   else
-    drawing.shapes[i] = {{x=x1, y=y1}, {x=x1, y=y2}}
+    shape.x2 = shape.x1
   end
 end
 
 function smoothen(shape)
+  assert(shape.mode == 'freehand')
   for _=1,7 do
-    for i=2,#shape-1 do
-      local a = shape[i-1]
-      local b = shape[i]
-      local c = shape[i+1]
+    for i=2,#shape.points-1 do
+      local a = shape.points[i-1]
+      local b = shape.points[i]
+      local c = shape.points[i+1]
       b.x = (a.x + b.x + c.x)/3
       b.y = (a.y + b.y + c.y)/3
     end
