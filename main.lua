@@ -197,6 +197,11 @@ function keychord_pressed(chord)
     if drawing then
       convert_horvert(drawing,i,shape)
     end
+  elseif chord == 'C-s' then
+    local drawing,i,shape = select_shape_at_mouse()
+    if drawing then
+      smoothen(shape)
+    end
   end
 end
 
@@ -232,6 +237,18 @@ function convert_horvert(drawing, i, shape)
     drawing.shapes[i] = {{x=x1, y=y1}, {x=x2, y=y1}}
   else
     drawing.shapes[i] = {{x=x1, y=y1}, {x=x1, y=y2}}
+  end
+end
+
+function smoothen(shape)
+  for _=1,7 do
+    for i=2,#shape-1 do
+      local a = shape[i-1]
+      local b = shape[i]
+      local c = shape[i+1]
+      b.x = (a.x + b.x + c.x)/3
+      b.y = (a.y + b.y + c.y)/3
+    end
   end
 end
 
