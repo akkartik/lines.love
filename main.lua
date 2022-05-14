@@ -95,7 +95,7 @@ function love.draw()
         draw_shape(16,line.y, line, shape)
       end
       for _,p in ipairs(line.points) do
-        if p.x == mx and p.y == my then
+        if near(p, mx,my) then
           love.graphics.setColor(1,0,0)
           love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
         else
@@ -173,15 +173,19 @@ function propagate_to_drawings(x,y, button)
 end
 
 function insert_point(points, x,y)
-  local px,py = pixels(x),pixels(y)
   for i,point in ipairs(points) do
-    local cx,cy = pixels(point.x), pixels(point.y)
-    if (cx-px)*(cx-px) + (cy-py)*(cy-py) < 16 then
+    if near(point, x,y) then
       return i
     end
   end
   table.insert(points, {x=x, y=y})
   return #points
+end
+
+function near(point, x,y)
+  local px,py = pixels(x),pixels(y)
+  local cx,cy = pixels(point.x), pixels(point.y)
+  return (cx-px)*(cx-px) + (cy-py)*(cy-py) < 16
 end
 
 function draw_shape(left,top, drawing, shape)
