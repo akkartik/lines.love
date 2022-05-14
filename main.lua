@@ -147,6 +147,18 @@ function love.mousereleased(x,y, button)
       elseif lines.current.pending.mode == 'line' then
         local j = insert_point(lines.current.points, coord(x-16), coord(y-lines.current.y))
         lines.current.pending.p2 = j
+      elseif lines.current.pending.mode == 'manhattan' then
+        local p1 = lines.current.points[lines.current.pending.p1]
+        local mx,my = coord(x-16), coord(y-lines.current.y)
+        if math.abs(mx-p1.x) > math.abs(my-p1.y) then
+          local j = insert_point(lines.current.points, mx, p1.y)
+          lines.current.pending.p2 = j
+        else
+          local j = insert_point(lines.current.points, p1.x, my)
+          lines.current.pending.p2 = j
+        end
+        local p2 = lines.current.points[lines.current.pending.p2]
+        love.mouse.setPosition(16+pixels(p2.x), lines.current.y+pixels(p2.y))
       end
       table.insert(lines.current.shapes, lines.current.pending)
       lines.current.pending = {}
@@ -162,7 +174,7 @@ function propagate_to_drawings(x,y, button)
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
           drawing.pending = {mode=current_mode, points={x=coord(x-16), y=coord(y-drawing.y)}}
-        elseif current_mode == 'line' then
+        elseif current_mode == 'line' or current_mode == 'manhattan' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
           drawing.pending = {mode=current_mode, p1=j}
         end
@@ -197,7 +209,7 @@ function draw_shape(left,top, drawing, shape)
       end
       prev = point
     end
-  elseif shape.mode == 'line' then
+  elseif shape.mode == 'line' or shape.mode == 'manhattan' then
     local p1 = drawing.points[shape.p1]
     local p2 = drawing.points[shape.p2]
     love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(p2.x)+left,pixels(p2.y)+top)
@@ -211,6 +223,14 @@ function draw_pending_shape(left,top, drawing)
   elseif shape.mode == 'line' then
     local p1 = drawing.points[shape.p1]
     love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, love.mouse.getX(),love.mouse.getY())
+  elseif shape.mode == 'manhattan' then
+    local p1 = drawing.points[shape.p1]
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    if math.abs(mx-p1.x) > math.abs(my-p1.y) then
+      love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(mx)+left,pixels(p1.y)+top)
+    else
+      love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(p1.x)+left,pixels(my)+top)
+    end
   end
 end
 
@@ -219,7 +239,10 @@ function on_shape(x,y, drawing, shape)
     return on_freehand(x,y, drawing, shape)
   elseif shape.mode == 'line' then
     return on_line(x,y, drawing, shape)
+  elseif shape.mode == 'manhattan' then
+    return x == drawing.points[shape.p1].x or y == drawing.points[shape.p1].y
   else
+    print(shape.mode)
     assert(false)
   end
 end
@@ -305,7 +328,12 @@ function keychord_pressed(chord)
     if drawing then
       convert_line(drawing, shape)
     end
+  elseif love.mouse.isDown('1') and chord == 'm' then
+    current_mode = 'manhattan'
+    local drawing = select_drawing_at_mouse()
+    drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' then
+    current_mode = 'manhattan'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       convert_horvert(drawing, shape)
@@ -353,6 +381,17 @@ function select_shape_at_mouse()
             return drawing,i,shape
           end
         end
+      end
+    end
+  end
+end
+
+function select_drawing_at_mouse()
+  for _,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      local x, y = love.mouse.getX(), love.mouse.getY()
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+        return drawing
       end
     end
   end
