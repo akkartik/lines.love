@@ -49,9 +49,9 @@ function love.draw()
                    end})
     elseif type(line) == 'table' then
       -- line drawing
-      love.graphics.setColor(0.75,0.75,0.75)
       line.y = y
       y = y+pixels(line.h)
+      love.graphics.setColor(0.75,0.75,0.75)
       love.graphics.rectangle('line', 12,line.y, drawingw,pixels(line.h))
 
       local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-line.y)
