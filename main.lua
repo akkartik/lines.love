@@ -97,11 +97,13 @@ function love.draw()
       for _,p in ipairs(line.points) do
         if p.x == mx and p.y == my then
           love.graphics.setColor(1,0,0)
+          love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
         else
           love.graphics.setColor(0,0,0)
+          love.graphics.circle('fill', pixels(p.x)+16,pixels(p.y)+line.y, 2)
         end
-        love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
       end
+--?       print(#line.points)
       draw_pending_shape(16,line.y, line)
     else
       love.graphics.draw(text, 25,y, 0, 1.5)
