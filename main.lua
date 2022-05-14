@@ -82,9 +82,9 @@ function love.draw()
       line.y = y
       y = y+pixels(line.h)
       love.graphics.setColor(0.75,0.75,0.75)
-      love.graphics.rectangle('line', 12,line.y, drawingw,pixels(line.h))
+      love.graphics.rectangle('line', 16,line.y, drawingw,pixels(line.h))
 
-      local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-line.y)
+      local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-line.y)
 
       for _,shape in ipairs(line.shapes) do
         if on_shape(mx,my, shape) then
@@ -92,9 +92,9 @@ function love.draw()
         else
           love.graphics.setColor(0,0,0)
         end
-        draw_shape(12,line.y, shape)
+        draw_shape(16,line.y, shape)
       end
-      draw_pending_shape(12,line.y, line.pending)
+      draw_pending_shape(16,line.y, line.pending)
     else
       love.graphics.draw(text, 25,y, 0, 1.5)
     end
@@ -114,9 +114,9 @@ function love.update(dt)
       local drawing = lines.current
       if type(drawing) == 'table' then
         local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
           if drawing.pending.mode == 'freehand' then
-            table.insert(drawing.pending.points, {x=coord(love.mouse.getX()-12), y=coord(love.mouse.getY()-drawing.y)})
+            table.insert(drawing.pending.points, {x=coord(love.mouse.getX()-16), y=coord(love.mouse.getY()-drawing.y)})
           end
         end
       end
@@ -135,7 +135,7 @@ function love.mousereleased(x,y, button)
       if lines.current.pending.mode == 'freehand' then
         -- the last point added during update is good enough
       elseif lines.current.pending.mode == 'line' then
-        lines.current.pending.x2 = coord(x-12)
+        lines.current.pending.x2 = coord(x-16)
         lines.current.pending.y2 = coord(y-lines.current.y)
       end
       table.insert(lines.current.shapes, lines.current.pending)
@@ -149,11 +149,11 @@ function propagate_to_drawings(x,y, button)
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
-          drawing.pending = {mode='freehand', points={x=coord(x-12), y=coord(y-drawing.y)}}
+          drawing.pending = {mode='freehand', points={x=coord(x-16), y=coord(y-drawing.y)}}
         elseif current_mode == 'line' then
-          drawing.pending = {mode='line', x1=coord(x-12), y1=coord(y-drawing.y)}
+          drawing.pending = {mode='line', x1=coord(x-16), y1=coord(y-drawing.y)}
         end
         lines.current = drawing
       end
@@ -284,7 +284,7 @@ function in_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return true
       end
     end
@@ -296,7 +296,7 @@ function current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return drawing
       end
     end
@@ -308,8 +308,8 @@ function select_shape_at_mouse()
   for _,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
-        local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-drawing.y)
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+        local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
           if on_shape(mx,my, shape) then
             return drawing,i,shape
