@@ -171,8 +171,10 @@ function propagate_to_drawings(x,y, button)
 end
 
 function insert_point(points, x,y)
+  local px,py = pixels(x),pixels(y)
   for i,point in ipairs(points) do
-    if point.x == x and point.y == y then
+    local cx,cy = pixels(point.x), pixels(point.y)
+    if (cx-px)*(cx-px) + (cy-py)*(cy-py) < 16 then
       return i
     end
   end
