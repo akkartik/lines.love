@@ -179,7 +179,7 @@ function draw_pending_shape(left,top, shape)
   if shape.mode == 'freehand' then
     draw_shape(left,top, shape)
   elseif shape.mode == 'line' then
-    love.graphics.line(pixels(line.pending.x1)+left,pixels(line.pending.y1)+top, love.mouse.getX(),love.mouse.getY())
+    love.graphics.line(pixels(shape.x1)+left,pixels(shape.y1)+top, love.mouse.getX(),love.mouse.getY())
   end
 end
 
