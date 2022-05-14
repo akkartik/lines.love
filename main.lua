@@ -229,6 +229,8 @@ function on_line(x,y, shape)
 end
 
 function love.textinput(t)
+  if love.mouse.isDown('1') then return end
+  if in_drawing() then return end
   lines[#lines] = lines[#lines]..t
 end
 
@@ -250,7 +252,17 @@ function keychord_pressed(chord)
     lines[#lines+1] = ''
   elseif chord == 'C-d' then
     parse_into_exec_payload(lines[#lines])
+  elseif chord == 'C-f' then
+    current_mode = 'freehand'
+  elseif love.mouse.isDown('1') and chord == 'l' then
+    current_mode = 'line'
+    local drawing = current_drawing()
+    assert(drawing.pending.mode == 'freehand')
+    drawing.pending.mode = 'line'
+    drawing.pending.x1 = drawing.pending.points[1].x
+    drawing.pending.y1 = drawing.pending.points[1].y
   elseif chord == 'C-l' then
+    current_mode = 'line'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       convert_line(shape)
@@ -266,6 +278,30 @@ function keychord_pressed(chord)
       smoothen(shape)
     end
   end
+end
+
+function in_drawing()
+  local x, y = love.mouse.getX(), love.mouse.getY()
+  for _,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function current_drawing()
+  local x, y = love.mouse.getX(), love.mouse.getY()
+  for _,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        return drawing
+      end
+    end
+  end
+  return nil
 end
 
 function select_shape_at_mouse()
