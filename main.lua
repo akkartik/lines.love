@@ -75,7 +75,7 @@ function love.draw()
                  love.graphics.setColor(0, 0, 0)
                end,
         onpress1 = function()
-                     table.insert(lines, i, {y=y, h=256/2, shapes={}, pending={}})
+                     table.insert(lines, i, {y=y, h=256/2, points={}, shapes={}, pending={}})
                    end})
     elseif type(line) == 'table' then
       -- line drawing
@@ -87,14 +87,22 @@ function love.draw()
       local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-line.y)
 
       for _,shape in ipairs(line.shapes) do
-        if on_shape(mx,my, shape) then
+        if on_shape(mx,my, line, shape) then
           love.graphics.setColor(1,0,0)
         else
           love.graphics.setColor(0,0,0)
         end
-        draw_shape(16,line.y, shape)
+        draw_shape(16,line.y, line, shape)
       end
-      draw_pending_shape(16,line.y, line.pending)
+      for _,p in ipairs(line.points) do
+        if p.x == mx and p.y == my then
+          love.graphics.setColor(1,0,0)
+        else
+          love.graphics.setColor(0,0,0)
+        end
+        love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
+      end
+      draw_pending_shape(16,line.y, line)
     else
       love.graphics.draw(text, 25,y, 0, 1.5)
     end
@@ -135,8 +143,8 @@ function love.mousereleased(x,y, button)
       if lines.current.pending.mode == 'freehand' then
         -- the last point added during update is good enough
       elseif lines.current.pending.mode == 'line' then
-        lines.current.pending.x2 = coord(x-16)
-        lines.current.pending.y2 = coord(y-lines.current.y)
+        local j = insert_point(lines.current.points, coord(x-16), coord(y-lines.current.y))
+        lines.current.pending.p2 = j
       end
       table.insert(lines.current.shapes, lines.current.pending)
       lines.current.pending = {}
@@ -153,7 +161,8 @@ function propagate_to_drawings(x,y, button)
         if current_mode == 'freehand' then
           drawing.pending = {mode='freehand', points={x=coord(x-16), y=coord(y-drawing.y)}}
         elseif current_mode == 'line' then
-          drawing.pending = {mode='line', x1=coord(x-16), y1=coord(y-drawing.y)}
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode='line', p1=j}
         end
         lines.current = drawing
       end
@@ -161,7 +170,17 @@ function propagate_to_drawings(x,y, button)
   end
 end
 
-function draw_shape(left,top, shape)
+function insert_point(points, x,y)
+  for i,point in ipairs(points) do
+    if point.x == x and point.y == y then
+      return i
+    end
+  end
+  table.insert(points, {x=x, y=y})
+  return #points
+end
+
+function draw_shape(left,top, drawing, shape)
   if shape.mode == 'freehand' then
     local prev = nil
     for _,point in ipairs(shape.points) do
@@ -171,33 +190,37 @@ function draw_shape(left,top, shape)
       prev = point
     end
   elseif shape.mode == 'line' then
-    love.graphics.line(pixels(shape.x1)+left,pixels(shape.y1)+top, pixels(shape.x2)+left,pixels(shape.y2)+top)
+    local p1 = drawing.points[shape.p1]
+    local p2 = drawing.points[shape.p2]
+    love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(p2.x)+left,pixels(p2.y)+top)
   end
 end
 
-function draw_pending_shape(left,top, shape)
+function draw_pending_shape(left,top, drawing)
+  local shape = drawing.pending
   if shape.mode == 'freehand' then
-    draw_shape(left,top, shape)
+    draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
-    love.graphics.line(pixels(shape.x1)+left,pixels(shape.y1)+top, love.mouse.getX(),love.mouse.getY())
+    local p1 = drawing.points[shape.p1]
+    love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, love.mouse.getX(),love.mouse.getY())
   end
 end
 
-function on_shape(x,y, shape)
+function on_shape(x,y, drawing, shape)
   if shape.mode == 'freehand' then
-    return on_freehand(x,y, shape)
+    return on_freehand(x,y, drawing, shape)
   elseif shape.mode == 'line' then
-    return on_line(x,y, shape)
+    return on_line(x,y, drawing, shape)
   else
     assert(false)
   end
 end
 
-function on_freehand(x,y, shape)
+function on_freehand(x,y, drawing, shape)
   local prev
   for _,p in ipairs(shape.points) do
     if prev then
-      if on_line(x,y, {x1=prev.x,y1=prev.y, x2=p.x,y2=p.y}) then
+      if on_line(x,y, drawing, {p1=prev, p2=p}) then
         return true
       end
     end
@@ -206,25 +229,33 @@ function on_freehand(x,y, shape)
   return false
 end
 
-function on_line(x,y, shape)
-  if shape.x1 == shape.x2 then
-    if math.abs(shape.x1-x) > 5 then
+function on_line(x,y, drawing, shape)
+  local p1,p2
+  if type(shape.p1) == 'number' then
+    p1 = drawing.points[shape.p1]
+    p2 = drawing.points[shape.p2]
+  else
+    p1 = shape.p1
+    p2 = shape.p2
+  end
+  if p1.x == p2.x then
+    if math.abs(p1.x-x) > 5 then
       return false
     end
-    local y1,y2 = shape.y1,shape.y2
+    local y1,y2 = p1.y,p2.y
     if y1 > y2 then
       y1,y2 = y2,y1
     end
     return y >= y1 and y <= y2
   end
   -- has the right slope and intercept
-  local m = (shape.y2 - shape.y1) / (shape.x2 - shape.x1)
-  local yp = shape.y1 + m*(x-shape.x1)
+  local m = (p2.y - p1.y) / (p2.x - p1.x)
+  local yp = p1.y + m*(x-p1.x)
   if yp < 0.95*y or yp > 1.05*y then
     return false
   end
   -- between endpoints
-  local k = (x-shape.x1) / (shape.x2-shape.x1)
+  local k = (x-p1.x) / (p2.x-p1.x)
   return k > -0.05 and k < 1.05
 end
 
@@ -259,18 +290,17 @@ function keychord_pressed(chord)
     local drawing = current_drawing()
     assert(drawing.pending.mode == 'freehand')
     drawing.pending.mode = 'line'
-    drawing.pending.x1 = drawing.pending.points[1].x
-    drawing.pending.y1 = drawing.pending.points[1].y
+    drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
   elseif chord == 'C-l' then
     current_mode = 'line'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
-      convert_line(shape)
+      convert_line(drawing, shape)
     end
   elseif chord == 'C-m' then
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
-      convert_horvert(shape)
+      convert_horvert(drawing, shape)
     end
   elseif chord == 'C-s' then
     local drawing,i,shape = select_shape_at_mouse()
@@ -320,29 +350,30 @@ function select_shape_at_mouse()
   end
 end
 
-function convert_line(shape)
+function convert_line(drawing, shape)
   -- Perhaps we should do a more sophisticated "simple linear regression"
   -- here:
   --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
   -- But this works well enough for close-to-linear strokes.
   assert(shape.mode == 'freehand')
   shape.mode = 'line'
-  shape.x1 = shape.points[1].x
-  shape.y1 = shape.points[1].y
-  shape.x2 = shape.points[#shape.points].x
-  shape.y2 = shape.points[#shape.points].y
+  shape.p1 = insert_point(drawing.points, shape.points[1].x, shape.points[1].y)
+  local n = #shape.points
+  shape.p2 = insert_point(drawing.points, shape.points[n].x, shape.points[n].y)
 end
 
 -- turn a line either horizontal or vertical
-function convert_horvert(shape)
+function convert_horvert(drawing, shape)
   if shape.mode == 'freehand' then
     convert_line(shape)
   end
   assert(shape.mode == 'line')
-  if math.abs(shape.x1-shape.x2) > math.abs(shape.y1-shape.y2) then
-    shape.y2 = shape.y1
+  local p1 = drawing.points[shape.p1]
+  local p2 = drawing.points[shape.p2]
+  if math.abs(p1.x-p2.x) > math.abs(p1.y-p2.y) then
+    p2.y = p1.y
   else
-    shape.x2 = shape.x1
+    p2.x = p1.x
   end
 end
 
