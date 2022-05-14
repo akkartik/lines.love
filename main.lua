@@ -57,25 +57,15 @@ function love.draw()
       local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-line.y)
 
       for _,shape in ipairs(line.shapes) do
-        if on_freehand(mx,my, shape) then
+        if on_line(mx,my, shape) then
           love.graphics.setColor(1,0,0)
         else
           love.graphics.setColor(0,0,0)
         end
-        prev = nil
-        for _,point in ipairs(shape) do
-          if prev then
-            love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
-          end
-          prev = point
-        end
+        love.graphics.line(pixels(shape.x1)+12,pixels(shape.y1)+line.y, pixels(shape.x2)+12,pixels(shape.y2)+line.y)
       end
-      prev = nil
-      for _,point in ipairs(line.pending) do
-        if prev then
-          love.graphics.line(pixels(prev.x)+12,pixels(prev.y)+line.y, pixels(point.x)+12,pixels(point.y)+line.y)
-        end
-        prev = point
+      if line.pending.x1 then
+        love.graphics.line(pixels(line.pending.x1)+12,pixels(line.pending.y1)+line.y, love.mouse.getX(),love.mouse.getY())
       end
     else
       love.graphics.draw(text, 25,y, 0, 1.5)
@@ -97,7 +87,6 @@ function love.update(dt)
       if type(drawing) == 'table' then
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
-          table.insert(drawing.pending, {x=coord(love.mouse.getX()-12), y=coord(love.mouse.getY()-drawing.y)})
         end
       end
     end
@@ -109,11 +98,24 @@ function love.mousepressed(x,y, button)
   propagate_to_drawings(x,y, button)
 end
 
+function love.mousereleased(x,y, button)
+  if lines.current then
+    if lines.current.pending then
+      lines.current.pending.x2 = coord(x-12)
+      lines.current.pending.y2 = coord(y-lines.current.y)
+      table.insert(lines.current.shapes, lines.current.pending)
+      lines.current.pending = {}
+      lines.current = nil
+    end
+  end
+end
+
 function propagate_to_drawings(x,y, button)
   for i,drawing in ipairs(lines) do
     if type(drawing) == 'table' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
+        drawing.pending = {x1=coord(x-12), y1=coord(y-drawing.y)}
         lines.current = drawing
       end
     end
@@ -155,16 +157,6 @@ function on_line(x,y, shape)
   return k > -0.05 and k < 1.05
 end
 
-function love.mousereleased(x,y, button)
-  if lines.current then
-    if lines.current.pending then
-      table.insert(lines.current.shapes, lines.current.pending)
-      lines.current.pending = {}
-      lines.current = nil
-    end
-  end
-end
-
 function love.textinput(t)
   lines[#lines] = lines[#lines]..t
 end
@@ -187,11 +179,6 @@ function keychord_pressed(chord)
     lines[#lines+1] = ''
   elseif chord == 'C-d' then
     parse_into_exec_payload(lines[#lines])
-  elseif chord == 'C-l' then
-    local drawing,i,shape = select_shape_at_mouse()
-    if drawing then
-      convert_line(drawing,i,shape)
-    end
   elseif chord == 'C-m' then
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
@@ -207,7 +194,7 @@ function select_shape_at_mouse()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 12 and x < 12+drawingw then
         local mx,my = coord(love.mouse.getX()-12), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
-          if on_freehand(mx,my, shape) then
+          if on_line(mx,my, shape) then
             return drawing,i,shape
           end
         end
@@ -216,22 +203,12 @@ function select_shape_at_mouse()
   end
 end
 
-function convert_line(drawing, i, shape)
-  -- Perhaps we should do a more sophisticated "simple linear regression"
-  -- here:
-  --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
-  -- But this works well enough for close-to-linear strokes.
-  drawing.shapes[i] = {shape[1], shape[#shape]}
-end
-
 -- turn a stroke into either a horizontal or vertical line
 function convert_horvert(drawing, i, shape)
-  local x1,y1 = shape[1].x, shape[1].y
-  local x2,y2 = shape[#shape].x, shape[#shape].y
-  if math.abs(x1-x2) > math.abs(y1-y2) then
-    drawing.shapes[i] = {{x=x1, y=y1}, {x=x2, y=y1}}
+  if math.abs(shape.x1-shape.x2) > math.abs(shape.y1-shape.y2) then
+    shape.y2 = shape.y1
   else
-    drawing.shapes[i] = {{x=x1, y=y1}, {x=x1, y=y2}}
+    shape.x2 = shape.x1
   end
 end
 
