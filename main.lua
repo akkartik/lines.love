@@ -161,10 +161,10 @@ function propagate_to_drawings(x,y, button)
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
-          drawing.pending = {mode='freehand', points={x=coord(x-16), y=coord(y-drawing.y)}}
+          drawing.pending = {mode=current_mode, points={x=coord(x-16), y=coord(y-drawing.y)}}
         elseif current_mode == 'line' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode='line', p1=j}
+          drawing.pending = {mode=current_mode, p1=j}
         end
         lines.current = drawing
       end
