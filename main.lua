@@ -471,6 +471,8 @@ function keychord_pressed(chord)
   elseif chord == 'backspace' then
     if #lines > 1 and lines[#lines] == '' then
       table.remove(lines)
+    elseif type(lines[#lines]) == 'table' then
+      table.remove(lines)  -- we'll add undo soon
     else
       local byteoffset = utf8.offset(lines[#lines], -1)
       if byteoffset then
