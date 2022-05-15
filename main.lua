@@ -116,10 +116,12 @@ function love.draw()
 --?       print(#line.points)
       draw_pending_shape(16,line.y, line)
     else
+      love.graphics.setColor(0,0,0)
       love.graphics.draw(text, 25,y, 0, 1.5)
     end
   end
   -- cursor
+  love.graphics.setColor(0,0,0)
   love.graphics.print('_', 25+text:getWidth()*1.5, y)
 
   -- display side effect
