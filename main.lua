@@ -227,7 +227,7 @@ function propagate_to_drawings(x,y, button)
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
-          drawing.pending = {mode=current_mode, points={x=coord(x-16), y=coord(y-drawing.y)}}
+          drawing.pending = {mode=current_mode, points={{x=coord(x-16), y=coord(y-drawing.y)}}}
         elseif current_mode == 'line' or current_mode == 'manhattan' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
           drawing.pending = {mode=current_mode, p1=j}
@@ -784,6 +784,7 @@ function save_to_disk(lines, filename)
       outfile:write(line..'\n')
     end
   end
+  outfile:close()
 end
 
 json = require 'json'
@@ -806,9 +807,24 @@ end
 function store_drawing(outfile, drawing)
   outfile:write('```lines\n')
   for _,shape in ipairs(drawing.shapes) do
-    if shape.mode == 'line' then
+    if shape.mode == 'freehand' then
+      outfile:write(json.encode({mode='freehand', points={{x=40,y=47}}})..'\n')
+      for k,v in pairs(shape) do
+        print(k, v)
+      end
+      for k,v in pairs(shape.points) do
+        print(k,v)
+        if type(v) == 'table' then
+          for k,v in pairs(v) do
+            print('', k,v)
+          end
+        end
+      end
+      outfile:write(json.encode(shape)..'\n')
+    elseif shape.mode == 'line' then
       local line = json.encode({mode=shape.mode, p1=drawing.points[shape.p1], p2=drawing.points[shape.p2]})
       outfile:write(line..'\n')
+    elseif shape.mode == 'circle' then
     end
   end
   outfile:write('```\n')
