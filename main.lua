@@ -453,6 +453,15 @@ function keychord_pressed(chord)
     current_mode = 'freehand'
   elseif chord == 'C-g' then
     current_mode = 'polygon'
+  elseif love.mouse.isDown('1') and chord == 'g' then
+    current_mode = 'polygon'
+    local drawing = current_drawing()
+    if drawing.pending.mode == 'line' then
+      drawing.pending.vertices = {drawing.pending.p1}
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
+    end
+    drawing.pending.mode = 'polygon'
   elseif love.mouse.isDown('1') and chord == 'p' and current_mode == 'polygon' then
     local drawing = current_drawing()
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
@@ -468,12 +477,24 @@ function keychord_pressed(chord)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = math.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = math.angle(center.x,center.y, mx,my)
+  elseif love.mouse.isDown('1') and chord == 'c' then
+    current_mode = 'circle'
+    local drawing = current_drawing()
+    if drawing.pending.mode == 'line' then
+      drawing.pending.center = drawing.pending.p1
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.center = drawing.pending.vertices[1]
+    end
+    drawing.pending.mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'l' then
     current_mode = 'line'
     local drawing = current_drawing()
-    assert(drawing.pending.mode == 'freehand')
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    end
     drawing.pending.mode = 'line'
-    drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
   elseif chord == 'C-l' then
     current_mode = 'line'
     local drawing,i,shape = select_shape_at_mouse()
@@ -483,6 +504,13 @@ function keychord_pressed(chord)
   elseif love.mouse.isDown('1') and chord == 'm' then
     current_mode = 'manhattan'
     local drawing = select_drawing_at_mouse()
+    if drawing.pending.mode == 'line' then
+      -- do nothing
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    end
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' then
     current_mode = 'manhattan'
