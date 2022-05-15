@@ -795,9 +795,15 @@ function load_drawing(infile)
     assert(line)
     if line == '```' then break end
     local shape = json.decode(line)
-    if shape.mode == 'line' then
+    if shape.mode == 'line' or shape.mode == 'manhattan' then
       shape.p1 = insert_point(drawing.points, shape.p1.x, shape.p1.y)
       shape.p2 = insert_point(drawing.points, shape.p2.x, shape.p2.y)
+    elseif shape.mode == 'polygon' then
+      for i,p in ipairs(shape.vertices) do
+        shape.vertices[i] = insert_point(drawing.points, p.x,p.y)
+      end
+    elseif shape.mode == 'circle' or shape.mode == 'arc' then
+      shape.center = insert_point(drawing.points, shape.center.x,shape.center.y)
     end
     table.insert(drawing.shapes, shape)
   end
@@ -808,23 +814,21 @@ function store_drawing(outfile, drawing)
   outfile:write('```lines\n')
   for _,shape in ipairs(drawing.shapes) do
     if shape.mode == 'freehand' then
-      outfile:write(json.encode({mode='freehand', points={{x=40,y=47}}})..'\n')
-      for k,v in pairs(shape) do
-        print(k, v)
-      end
-      for k,v in pairs(shape.points) do
-        print(k,v)
-        if type(v) == 'table' then
-          for k,v in pairs(v) do
-            print('', k,v)
-          end
-        end
-      end
       outfile:write(json.encode(shape)..'\n')
-    elseif shape.mode == 'line' then
+    elseif shape.mode == 'line' or shape.mode == 'manhattan' then
       local line = json.encode({mode=shape.mode, p1=drawing.points[shape.p1], p2=drawing.points[shape.p2]})
       outfile:write(line..'\n')
+    elseif shape.mode == 'polygon' then
+      local obj = {mode=shape.mode, vertices={}}
+      for _,p in ipairs(shape.vertices) do
+        table.insert(obj.vertices, drawing.points[p])
+      end
+      local line = json.encode(obj)
+      outfile:write(line..'\n')
     elseif shape.mode == 'circle' then
+      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius})..'\n')
+    elseif shape.mode == 'arc' then
+      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius, start_angle=shape.start_angle, end_angle=shape.end_angle})..'\n')
     end
   end
   outfile:write('```\n')
