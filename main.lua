@@ -168,6 +168,13 @@ function love.mousereleased(x,y, button)
           love.mouse.setPosition(16+pixels(p2.x), lines.current.y+pixels(p2.y))
           table.insert(lines.current.shapes, lines.current.pending)
         end
+      elseif lines.current.pending.mode == 'polygon' then
+        local mx,my = coord(x-16), coord(y-lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+          local j = insert_point(lines.current.points, mx,my)
+          table.insert(lines.current.shapes, lines.current.pending)
+        end
+        table.insert(lines.current.shapes, lines.current.pending)
       end
       lines.current.pending = {}
       lines.current = nil
@@ -185,6 +192,9 @@ function propagate_to_drawings(x,y, button)
         elseif current_mode == 'line' or current_mode == 'manhattan' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
           drawing.pending = {mode=current_mode, p1=j}
+        elseif current_mode == 'polygon' then
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode=current_mode, vertices={j}}
         end
         lines.current = drawing
       end
@@ -221,6 +231,18 @@ function draw_shape(left,top, drawing, shape)
     local p1 = drawing.points[shape.p1]
     local p2 = drawing.points[shape.p2]
     love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(p2.x)+left,pixels(p2.y)+top)
+  elseif shape.mode == 'polygon' then
+    local prev = nil
+    for _,point in ipairs(shape.vertices) do
+      local curr = drawing.points[point]
+      if prev then
+        love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, pixels(curr.x)+left,pixels(curr.y)+top)
+      end
+      prev = curr
+    end
+    -- close the loop
+    local curr = drawing.points[shape.vertices[1]]
+    love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, pixels(curr.x)+left,pixels(curr.y)+top)
   end
 end
 
@@ -246,6 +268,17 @@ function draw_pending_shape(left,top, drawing)
     else
       love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(p1.x)+left,pixels(my)+top)
     end
+  elseif shape.mode == 'polygon' then
+    -- don't close the loop on a pending polygon
+    local prev = nil
+    for _,point in ipairs(shape.vertices) do
+      local curr = drawing.points[point]
+      if prev then
+        love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, pixels(curr.x)+left,pixels(curr.y)+top)
+      end
+      prev = curr
+    end
+    love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
   end
 end
 
@@ -256,6 +289,8 @@ function on_shape(x,y, drawing, shape)
     return on_line(x,y, drawing, shape)
   elseif shape.mode == 'manhattan' then
     return x == drawing.points[shape.p1].x or y == drawing.points[shape.p1].y
+  elseif shape.mode == 'polygon' then
+    return on_polygon(x,y, drawing, shape)
   else
     print(shape.mode)
     assert(false)
@@ -305,6 +340,19 @@ function on_line(x,y, drawing, shape)
   return k > -0.05 and k < 1.05
 end
 
+function on_polygon(x,y, drawing, shape)
+  local prev
+  for _,p in ipairs(shape.vertices) do
+    if prev then
+      if on_line(x,y, drawing, {p1=prev, p2=p}) then
+        return true
+      end
+    end
+    prev = p
+  end
+  return on_line(x,y, drawing, {p1=shape.vertices[1], p2=shape.vertices[#shape.vertices]})
+end
+
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if in_drawing() then return end
@@ -331,6 +379,13 @@ function keychord_pressed(chord)
     parse_into_exec_payload(lines[#lines])
   elseif chord == 'C-f' then
     current_mode = 'freehand'
+  elseif chord == 'C-g' then
+    current_mode = 'polygon'
+  elseif love.mouse.isDown('1') and chord == 'p' and current_mode == 'polygon' then
+    local drawing = current_drawing()
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    local j = insert_point(drawing.points, mx,my)
+    table.insert(drawing.pending.vertices, j)
   elseif love.mouse.isDown('1') and chord == 'l' then
     current_mode = 'line'
     local drawing = current_drawing()
