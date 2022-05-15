@@ -35,6 +35,7 @@ lines = {}
 screenw, screenh, screenflags = 0, 0, nil
 
 current_mode = 'line'
+previous_mode = nil
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts. `drawingw` describes their width in pixels.
@@ -132,10 +133,23 @@ function love.update(dt)
         end
       end
     end
+  elseif current_mode == 'move' then
+    local drawing = lines.current
+    local x, y = love.mouse.getX(), love.mouse.getY()
+    if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+      local mx,my = coord(x-16), coord(y-drawing.y)
+      drawing.pending.target_point.x = mx
+      drawing.pending.target_point.y = my
+    end
   end
 end
 
 function love.mousepressed(x,y, button)
+  if current_mode == 'move' then
+    current_mode = previous_mode
+    previous_mode = nil
+    return
+  end
   propagate_to_button_handlers(x,y, button)
   propagate_to_drawings(x,y, button)
 end
@@ -449,9 +463,9 @@ function keychord_pressed(chord)
     lines[#lines+1] = ''
   elseif chord == 'C-d' then
     parse_into_exec_payload(lines[#lines])
-  elseif chord == 'C-f' then
+  elseif chord == 'C-f' and not love.mouse.isDown('1') then
     current_mode = 'freehand'
-  elseif chord == 'C-g' then
+  elseif chord == 'C-g' and not love.mouse.isDown('1') then
     current_mode = 'polygon'
   elseif love.mouse.isDown('1') and chord == 'g' then
     current_mode = 'polygon'
@@ -467,7 +481,7 @@ function keychord_pressed(chord)
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
     local j = insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
-  elseif chord == 'C-c' then
+  elseif chord == 'C-c' and not love.mouse.isDown('1') then
     current_mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'a' and current_mode == 'circle' then
     local drawing = current_drawing()
@@ -512,16 +526,24 @@ function keychord_pressed(chord)
       drawing.pending.p1 = drawing.pending.center
     end
     drawing.pending.mode = 'manhattan'
-  elseif chord == 'C-m' then
+  elseif chord == 'C-m' and not love.mouse.isDown('1') then
     current_mode = 'manhattan'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       convert_horvert(drawing, shape)
     end
-  elseif chord == 'C-s' then
+  elseif chord == 'C-s' and not love.mouse.isDown('1') then
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       smoothen(shape)
+    end
+  elseif chord == 'C-v' and not love.mouse.isDown('1') then
+    local drawing,p = select_point_at_mouse()
+    if drawing then
+      previous_mode = current_mode
+      current_mode = 'move'
+      drawing.pending = {target_point=p}
+      lines.current = drawing
     end
   end
 end
@@ -560,6 +582,23 @@ function select_shape_at_mouse()
           assert(shape)
           if on_shape(mx,my, shape) then
             return drawing,i,shape
+          end
+        end
+      end
+    end
+  end
+end
+
+function select_point_at_mouse()
+  for _,drawing in ipairs(lines) do
+    if type(drawing) == 'table' then
+      local x, y = love.mouse.getX(), love.mouse.getY()
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+        local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+        for _,point in ipairs(drawing.points) do
+          assert(point)
+          if near(point, mx,my) then
+            return drawing,point
           end
         end
       end
