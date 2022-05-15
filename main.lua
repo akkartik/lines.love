@@ -97,12 +97,14 @@ function love.draw()
         draw_shape(16,line.y, line, shape)
       end
       for _,p in ipairs(line.points) do
-        if near(p, mx,my) then
-          love.graphics.setColor(1,0,0)
-          love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
-        else
-          love.graphics.setColor(0,0,0)
-          love.graphics.circle('fill', pixels(p.x)+16,pixels(p.y)+line.y, 2)
+        if p.deleted == nil then
+          if near(p, mx,my) then
+            love.graphics.setColor(1,0,0)
+            love.graphics.circle('line', pixels(p.x)+16,pixels(p.y)+line.y, 4)
+          else
+            love.graphics.setColor(0,0,0)
+            love.graphics.circle('fill', pixels(p.x)+16,pixels(p.y)+line.y, 2)
+          end
         end
       end
 --?       print(#line.points)
@@ -284,6 +286,7 @@ function draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
     love.graphics.arc('line', 'open', pixels(center.x)+left,pixels(center.y)+top, pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  elseif shape.mode == 'deleted' then
   else
     print(shape.mode)
     assert(false)
@@ -362,6 +365,7 @@ function on_shape(x,y, drawing, shape)
       return false
     end
     return angle_between(center.x,center.y, x,y, shape.start_angle,shape.end_angle)
+  elseif shape.mode == 'deleted' then
   else
     print(shape.mode)
     assert(false)
@@ -465,7 +469,7 @@ function keychord_pressed(chord)
   elseif chord == 'C-r' then
     lines[#lines+1] = eval(lines[#lines])[1]
     lines[#lines+1] = ''
-  elseif chord == 'C-d' then
+  elseif chord == 'C-x' then
     parse_into_exec_payload(lines[#lines])
   elseif chord == 'C-f' and not love.mouse.isDown('1') then
     current_mode = 'freehand'
@@ -542,7 +546,7 @@ function keychord_pressed(chord)
       smoothen(shape)
     end
   elseif chord == 'C-v' and not love.mouse.isDown('1') then
-    local drawing,p = select_point_at_mouse()
+    local drawing,_,p = select_point_at_mouse()
     if drawing then
       previous_mode = current_mode
       current_mode = 'move'
@@ -550,12 +554,26 @@ function keychord_pressed(chord)
       lines.current = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
-    local drawing,p = select_point_at_mouse()
+    local drawing,_,p = select_point_at_mouse()
     if drawing then
       previous_mode = current_mode
       current_mode = 'move'
       drawing.pending = {mode=current_mode, target_point=p}
       lines.current = drawing
+    end
+  elseif chord == 'C-d' and not love.mouse.isDown('1') then
+    local drawing,i,p = select_point_at_mouse()
+    if drawing then
+      for _,shape in ipairs(drawing.shapes) do
+        if contains_point(shape, i) then
+          shape.mode = 'deleted'
+        end
+      end
+      drawing.points[i].deleted = true
+    end
+    local drawing,i,shape = select_shape_at_mouse()
+    if drawing then
+      shape.mode = 'deleted'
     end
   end
 end
@@ -592,7 +610,7 @@ function select_shape_at_mouse()
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
           assert(shape)
-          if on_shape(mx,my, shape) then
+          if on_shape(mx,my, drawing, shape) then
             return drawing,i,shape
           end
         end
@@ -607,10 +625,10 @@ function select_point_at_mouse()
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
-        for _,point in ipairs(drawing.points) do
+        for i,point in ipairs(drawing.points) do
           assert(point)
           if near(point, mx,my) then
-            return drawing,point
+            return drawing,i,point
           end
         end
       end
@@ -626,6 +644,26 @@ function select_drawing_at_mouse()
         return drawing
       end
     end
+  end
+end
+
+function contains_point(shape, p)
+  if shape.mode == 'freehand' then
+    -- not supported
+  elseif shape.mode == 'line' then
+    print(p, shape.p1, shape.p2)
+    return shape.p1 == p or shape.p2 == p
+  elseif shape.mode == 'polygon' then
+    return table.find(shape.vertices, p)
+  elseif shape.mode == 'circle' then
+    return shape.center == p
+  elseif shape.mode == 'arc' then
+    return shape.center == p
+    -- ugh, how to support angles
+  elseif shape.mode == 'deleted' then
+    -- already done
+  else
+    assert(false)
   end
 end
 
