@@ -182,6 +182,13 @@ function love.mousereleased(x,y, button)
           lines.current.pending.radius = math.dist(center.x,center.y, mx,my)
           table.insert(lines.current.shapes, lines.current.pending)
         end
+      elseif lines.current.pending.mode == 'arc' then
+        local mx,my = coord(x-16), coord(y-lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+          local center = lines.current.points[lines.current.pending.center]
+          lines.current.pending.end_angle = angle_with_hint(center.x,center.y, mx,my, lines.current.pending.end_angle)
+          table.insert(lines.current.shapes, lines.current.pending)
+        end
       end
       lines.current.pending = {}
       lines.current = nil
@@ -256,6 +263,12 @@ function draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
     love.graphics.circle('line', pixels(center.x)+left,pixels(center.y)+top, pixels(shape.radius))
+  elseif shape.mode == 'arc' then
+    local center = drawing.points[shape.center]
+    love.graphics.arc('line', 'open', pixels(center.x)+left,pixels(center.y)+top, pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  else
+    print(shape.mode)
+    assert(false)
   end
 end
 
@@ -300,6 +313,15 @@ function draw_pending_shape(left,top, drawing)
     end
     local cx,cy = pixels(center.x)+left, pixels(center.y)+top
     love.graphics.circle('line', cx,cy, math.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
+  elseif shape.mode == 'arc' then
+    local center = drawing.points[shape.center]
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    shape.end_angle = angle_with_hint(center.x,center.y, mx,my, shape.end_angle)
+    local cx,cy = pixels(center.x)+left, pixels(center.y)+top
+    love.graphics.arc('line', 'open', cx,cy, pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
   end
 end
 
@@ -315,6 +337,13 @@ function on_shape(x,y, drawing, shape)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
     return math.dist(center.x,center.y, x,y) == shape.radius
+  elseif shape.mode == 'arc' then
+    local center = drawing.points[shape.center]
+    local dist = math.dist(center.x,center.y, x,y)
+    if dist < shape.radius*0.95 or dist > shape.radius*1.05 then
+      return false
+    end
+    return angle_between(center.x,center.y, x,y, shape.start_angle,shape.end_angle)
   else
     print(shape.mode)
     assert(false)
@@ -377,6 +406,25 @@ function on_polygon(x,y, drawing, shape)
   return on_line(x,y, drawing, {p1=shape.vertices[1], p2=shape.vertices[#shape.vertices]})
 end
 
+function angle_between(x1,y1, x2,y2, s,e)
+  local angle = math.angle(x1,y1, x2,y2)
+--?   print(s,e, angle-math.pi*2, angle, angle+math.pi*2)
+  if s > e then
+    s,e = e,s
+  end
+  -- I'm not sure this is right or ideal..
+  angle = angle-math.pi*2
+  if s <= angle and angle <= e then
+    return true
+  end
+  angle = angle+math.pi*2
+  if s <= angle and angle <= e then
+    return true
+  end
+  angle = angle+math.pi*2
+  return s <= angle and angle <= e
+end
+
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if in_drawing() then return end
@@ -412,6 +460,14 @@ function keychord_pressed(chord)
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-c' then
     current_mode = 'circle'
+  elseif love.mouse.isDown('1') and chord == 'a' and current_mode == 'circle' then
+    local drawing = current_drawing()
+    drawing.pending.mode = 'arc'
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    local j = insert_point(drawing.points, mx,my)
+    local center = drawing.points[drawing.pending.center]
+    drawing.pending.radius = math.dist(center.x,center.y, mx,my)
+    drawing.pending.start_angle = math.angle(center.x,center.y, mx,my)
   elseif love.mouse.isDown('1') and chord == 'l' then
     current_mode = 'line'
     local drawing = current_drawing()
@@ -535,6 +591,31 @@ function smoothen(shape)
 end
 
 function love.keyreleased(key, scancode)
+end
+
+function angle_with_hint(x1, y1, x2, y2, hint)
+  local result = math.angle(x1,y1, x2,y2)
+  if hint then
+    -- Smooth the discontinuity where angle goes from positive to negative.
+    -- The hint is a memory of which way we drew it last time.
+    while result > hint+math.pi/10 do
+      result = result-math.pi*2
+    end
+    while result < hint-math.pi/10 do
+      result = result+math.pi*2
+    end
+  end
+  return result
+end
+
+-- result is from -π/2 to 3π/2, approximately adding math.atan2 from Lua 5.3
+-- (LÖVE is Lua 5.1)
+function math.angle(x1,y1, x2,y2)
+  local result = math.atan((y2-y1)/(x2-x1))
+  if x2 < x1 then
+    result = result+math.pi
+  end
+  return result
 end
 
 function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
