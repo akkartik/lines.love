@@ -86,7 +86,7 @@ function love.draw()
 
       local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-line.y)
 
-      for i,shape in ipairs(line.shapes) do
+      for _,shape in ipairs(line.shapes) do
         assert(shape)
         if on_shape(mx,my, line, shape) then
           love.graphics.setColor(1,0,0)
