@@ -175,6 +175,13 @@ function love.mousereleased(x,y, button)
           table.insert(lines.current.shapes, lines.current.pending)
         end
         table.insert(lines.current.shapes, lines.current.pending)
+      elseif lines.current.pending.mode == 'circle' then
+        local mx,my = coord(x-16), coord(y-lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+          local center = lines.current.points[lines.current.pending.center]
+          lines.current.pending.radius = math.dist(center.x,center.y, mx,my)
+          table.insert(lines.current.shapes, lines.current.pending)
+        end
       end
       lines.current.pending = {}
       lines.current = nil
@@ -195,6 +202,9 @@ function propagate_to_drawings(x,y, button)
         elseif current_mode == 'polygon' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
           drawing.pending = {mode=current_mode, vertices={j}}
+        elseif current_mode == 'circle' then
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode=current_mode, center=j}
         end
         lines.current = drawing
       end
@@ -243,6 +253,9 @@ function draw_shape(left,top, drawing, shape)
     -- close the loop
     local curr = drawing.points[shape.vertices[1]]
     love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, pixels(curr.x)+left,pixels(curr.y)+top)
+  elseif shape.mode == 'circle' then
+    local center = drawing.points[shape.center]
+    love.graphics.circle('line', pixels(center.x)+left,pixels(center.y)+top, pixels(shape.radius))
   end
 end
 
@@ -279,6 +292,14 @@ function draw_pending_shape(left,top, drawing)
       prev = curr
     end
     love.graphics.line(pixels(prev.x)+left,pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
+  elseif shape.mode == 'circle' then
+    local center = drawing.points[shape.center]
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    local cx,cy = pixels(center.x)+left, pixels(center.y)+top
+    love.graphics.circle('line', cx,cy, math.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
   end
 end
 
@@ -291,6 +312,9 @@ function on_shape(x,y, drawing, shape)
     return x == drawing.points[shape.p1].x or y == drawing.points[shape.p1].y
   elseif shape.mode == 'polygon' then
     return on_polygon(x,y, drawing, shape)
+  elseif shape.mode == 'circle' then
+    local center = drawing.points[shape.center]
+    return math.dist(center.x,center.y, x,y) == shape.radius
   else
     print(shape.mode)
     assert(false)
@@ -386,6 +410,8 @@ function keychord_pressed(chord)
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
     local j = insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
+  elseif chord == 'C-c' then
+    current_mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'l' then
     current_mode = 'line'
     local drawing = current_drawing()
@@ -510,3 +536,5 @@ end
 
 function love.keyreleased(key, scancode)
 end
+
+function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
