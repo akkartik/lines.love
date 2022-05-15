@@ -566,7 +566,16 @@ function keychord_pressed(chord)
     if drawing then
       for _,shape in ipairs(drawing.shapes) do
         if contains_point(shape, i) then
-          shape.mode = 'deleted'
+          if shape.mode == 'polygon' then
+            local idx = table.find(shape.vertices, i)
+            assert(idx)
+            table.remove(shape.vertices, idx)
+            if #shape.vertices < 3 then
+              shape.mode = 'deleted'
+            end
+          else
+            shape.mode = 'deleted'
+          end
         end
       end
       drawing.points[i].deleted = true
@@ -651,7 +660,6 @@ function contains_point(shape, p)
   if shape.mode == 'freehand' then
     -- not supported
   elseif shape.mode == 'line' then
-    print(p, shape.p1, shape.p2)
     return shape.p1 == p or shape.p2 == p
   elseif shape.mode == 'polygon' then
     return table.find(shape.vertices, p)
@@ -708,6 +716,14 @@ function smoothen(shape)
 end
 
 function love.keyreleased(key, scancode)
+end
+
+function table.find(h, x)
+  for k,v in pairs(h) do
+    if v == x then
+      return k
+    end
+  end
 end
 
 function angle_with_hint(x1, y1, x2, y2, hint)
