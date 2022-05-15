@@ -86,7 +86,8 @@ function love.draw()
 
       local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-line.y)
 
-      for _,shape in ipairs(line.shapes) do
+      for i,shape in ipairs(line.shapes) do
+        assert(shape)
         if on_shape(mx,my, line, shape) then
           love.graphics.setColor(1,0,0)
         else
@@ -144,23 +145,30 @@ function love.mousereleased(x,y, button)
     if lines.current.pending then
       if lines.current.pending.mode == 'freehand' then
         -- the last point added during update is good enough
+        table.insert(lines.current.shapes, lines.current.pending)
       elseif lines.current.pending.mode == 'line' then
-        local j = insert_point(lines.current.points, coord(x-16), coord(y-lines.current.y))
-        lines.current.pending.p2 = j
+        local mx,my = coord(x-16), coord(y-lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+          local j = insert_point(lines.current.points, mx,my)
+          lines.current.pending.p2 = j
+          table.insert(lines.current.shapes, lines.current.pending)
+        end
       elseif lines.current.pending.mode == 'manhattan' then
         local p1 = lines.current.points[lines.current.pending.p1]
         local mx,my = coord(x-16), coord(y-lines.current.y)
-        if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-          local j = insert_point(lines.current.points, mx, p1.y)
-          lines.current.pending.p2 = j
-        else
-          local j = insert_point(lines.current.points, p1.x, my)
-          lines.current.pending.p2 = j
+        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+          if math.abs(mx-p1.x) > math.abs(my-p1.y) then
+            local j = insert_point(lines.current.points, mx, p1.y)
+            lines.current.pending.p2 = j
+          else
+            local j = insert_point(lines.current.points, p1.x, my)
+            lines.current.pending.p2 = j
+          end
+          local p2 = lines.current.points[lines.current.pending.p2]
+          love.mouse.setPosition(16+pixels(p2.x), lines.current.y+pixels(p2.y))
+          table.insert(lines.current.shapes, lines.current.pending)
         end
-        local p2 = lines.current.points[lines.current.pending.p2]
-        love.mouse.setPosition(16+pixels(p2.x), lines.current.y+pixels(p2.y))
       end
-      table.insert(lines.current.shapes, lines.current.pending)
       lines.current.pending = {}
       lines.current = nil
     end
@@ -222,10 +230,17 @@ function draw_pending_shape(left,top, drawing)
     draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
     local p1 = drawing.points[shape.p1]
-    love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, love.mouse.getX(),love.mouse.getY())
+    local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(mx)+left,pixels(my)+top)
   elseif shape.mode == 'manhattan' then
     local p1 = drawing.points[shape.p1]
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
     if math.abs(mx-p1.x) > math.abs(my-p1.y) then
       love.graphics.line(pixels(p1.x)+left,pixels(p1.y)+top, pixels(mx)+left,pixels(p1.y)+top)
     else
@@ -377,6 +392,7 @@ function select_shape_at_mouse()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
+          assert(shape)
           if on_shape(mx,my, shape) then
             return drawing,i,shape
           end
