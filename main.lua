@@ -129,6 +129,10 @@ function love.update(dt)
         if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
           if drawing.pending.mode == 'freehand' then
             table.insert(drawing.pending.points, {x=coord(love.mouse.getX()-16), y=coord(love.mouse.getY()-drawing.y)})
+          elseif drawing.pending.mode == 'move' then
+            local mx,my = coord(x-16), coord(y-drawing.y)
+            drawing.pending.target_point.x = mx
+            drawing.pending.target_point.y = my
           end
         end
       end
@@ -145,16 +149,16 @@ function love.update(dt)
 end
 
 function love.mousepressed(x,y, button)
-  if current_mode == 'move' then
-    current_mode = previous_mode
-    previous_mode = nil
-    return
-  end
   propagate_to_button_handlers(x,y, button)
   propagate_to_drawings(x,y, button)
 end
 
 function love.mousereleased(x,y, button)
+  if current_mode == 'move' then
+    current_mode = previous_mode
+    previous_mode = nil
+    return
+  end
   if lines.current then
     if lines.current.pending then
       if lines.current.pending.mode == 'freehand' then
@@ -542,7 +546,15 @@ function keychord_pressed(chord)
     if drawing then
       previous_mode = current_mode
       current_mode = 'move'
-      drawing.pending = {target_point=p}
+      drawing.pending = {mode=current_mode, target_point=p}
+      lines.current = drawing
+    end
+  elseif love.mouse.isDown('1') and chord == 'v' then
+    local drawing,p = select_point_at_mouse()
+    if drawing then
+      previous_mode = current_mode
+      current_mode = 'move'
+      drawing.pending = {mode=current_mode, target_point=p}
       lines.current = drawing
     end
   end
