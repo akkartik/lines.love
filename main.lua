@@ -18,9 +18,8 @@ local utf8 = require 'utf8'
 --    an array vertices for mode 'polygon', 'rectangle', 'square'
 --    p1, p2 for mode 'line'
 --    p1, p2, arrow-mode for mode 'arrow-line'
---    cx,cy, r for mode 'circle'
---    pc, r for mode 'circle'
---    pc, r, s, e for mode 'arc'
+--    center, radius for mode 'circle'
+--    center, radius, start_angle, end_angle for mode 'arc'
 -- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
 -- The field names are carefully chosen so that switching modes in midstream
 -- remembers previously entered points where that makes sense.
