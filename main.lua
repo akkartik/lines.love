@@ -93,7 +93,11 @@ function love.draw()
       if pmx > 16 and pmx < 16+drawingw and pmy > line.y and pmy < line.y+pixels(line.h) then
         love.graphics.setColor(0.75,0.75,0.75)
         love.graphics.rectangle('line', 16,line.y, drawingw,pixels(line.h))
-        icon[current_mode](16+drawingw-20, line.y+4)
+        if icon[current_mode] then
+          icon[current_mode](16+drawingw-20, line.y+4)
+        else
+          icon[previous_mode](16+drawingw-20, line.y+4)
+        end
 
         if love.mouse.isDown('1') and love.keyboard.isDown('h') then
           draw_help_with_mouse_pressed(line)
