@@ -503,6 +503,9 @@ function keychord_pressed(chord)
     lines[#lines+1] = ''
   elseif chord == 'C-x' then
     parse_into_exec_payload(lines[#lines])
+  elseif chord == 'escape' and love.mouse.isDown('1') then
+    local drawing = current_drawing()
+    drawing.pending = {}
   elseif chord == 'C-f' and not love.mouse.isDown('1') then
     current_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then
@@ -975,6 +978,8 @@ function draw_help_with_mouse_pressed(drawing)
     love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y)
     y = y+15
   end
+  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y)
+  y = y+15
   y = y+15
   if current_mode ~= 'line' then
     love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y)
