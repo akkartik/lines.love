@@ -239,7 +239,9 @@ function love.mousereleased(x,y, button)
       lines.current = nil
     end
   end
-  save_to_disk(lines, filename)
+  if filename then
+    save_to_disk(lines, filename)
+  end
 end
 
 function propagate_to_drawings(x,y, button)
@@ -477,6 +479,9 @@ function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if in_drawing() then return end
   lines[#lines] = lines[#lines]..t
+  if filename then
+    save_to_disk(lines, filename)
+  end
 end
 
 function keychord_pressed(chord)
