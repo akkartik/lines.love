@@ -78,7 +78,7 @@ end
 function love.draw()
   button_handlers = {}
   love.graphics.setColor(1, 1, 1)
-  love.graphics.rectangle('fill', 1, 1, screenw-1, screenh-1)
+  love.graphics.rectangle('fill', 0, 0, screenw-1, screenh-1)
   love.graphics.setColor(0, 0, 0)
   local text
   local y = 0
