@@ -721,7 +721,7 @@ end
 function contains_point(shape, p)
   if shape.mode == 'freehand' then
     -- not supported
-  elseif shape.mode == 'line' then
+  elseif shape.mode == 'line' or shape.mode == 'manhattan' then
     return shape.p1 == p or shape.p2 == p
   elseif shape.mode == 'polygon' then
     return table.find(shape.vertices, p)
@@ -733,6 +733,7 @@ function contains_point(shape, p)
   elseif shape.mode == 'deleted' then
     -- already done
   else
+    print(shape.mode)
     assert(false)
   end
 end
