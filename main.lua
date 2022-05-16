@@ -513,8 +513,12 @@ function keychord_pressed(chord)
   elseif love.mouse.isDown('1') and chord == 'g' then
     current_mode = 'polygon'
     local drawing = current_drawing()
-    if drawing.pending.mode == 'line' then
-      drawing.pending.vertices = {drawing.pending.p1}
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.vertices = {insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
+      if drawing.pending.vertices == nil then
+        drawing.pending.vertices = {drawing.pending.p1}
+      end
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.vertices = {drawing.pending.center}
     end
@@ -537,7 +541,9 @@ function keychord_pressed(chord)
   elseif love.mouse.isDown('1') and chord == 'c' then
     current_mode = 'circle'
     local drawing = current_drawing()
-    if drawing.pending.mode == 'line' then
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.center = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       drawing.pending.center = drawing.pending.p1
     elseif drawing.pending.mode == 'polygon' then
       drawing.pending.center = drawing.pending.vertices[1]
@@ -550,6 +556,8 @@ function keychord_pressed(chord)
       drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.p1 = drawing.pending.center
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' then
@@ -561,7 +569,9 @@ function keychord_pressed(chord)
   elseif love.mouse.isDown('1') and chord == 'm' then
     current_mode = 'manhattan'
     local drawing = select_drawing_at_mouse()
-    if drawing.pending.mode == 'line' then
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'line' then
       -- do nothing
     elseif drawing.pending.mode == 'polygon' then
       drawing.pending.p1 = drawing.pending.vertices[1]
