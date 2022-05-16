@@ -38,7 +38,7 @@ previous_mode = nil
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts. `drawingw` describes their width in pixels.
-drawingw = 400  -- pixels
+drawingw = nil  -- pixels
 function pixels(n)  -- parts to pixels
   return n*drawingw/256
 end
@@ -65,6 +65,7 @@ function love.load(arg)
   love.window.setMode(screenw, screenh)
   love.window.setTitle("Text with Lines")
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  drawingw = math.floor(screenh/2/40)*40
 end
 
 function love.draw()
