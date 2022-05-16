@@ -51,11 +51,6 @@ exec_payload = nil
 filename = nil
 
 function love.load(arg)
-  if #arg > 0 then
-    filename = arg[1]
-    lines = load_from_disk(filename)
-  end
-  table.insert(lines, '')
   -- maximize window
   love.window.setMode(0, 0)  -- maximize
   screenw, screenh, screenflags = love.window.getMode()
@@ -64,8 +59,14 @@ function love.load(arg)
   screenh = screenh-100
   love.window.setMode(screenw, screenh)
   love.window.setTitle("Text with Lines")
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   drawingw = math.floor(screenh/2/40)*40
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  if #arg > 0 then
+    filename = arg[1]
+    lines = load_from_disk(filename)
+  else
+    table.insert(lines, '')
+  end
 end
 
 function love.draw()
