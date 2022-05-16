@@ -56,8 +56,14 @@ function love.load(arg)
     lines = load_from_disk(filename)
   end
   table.insert(lines, '')
+  -- maximize window
   love.window.setMode(0, 0)  -- maximize
   screenw, screenh, screenflags = love.window.getMode()
+  -- shrink slightly to account for window decoration
+  screenw = screenw-100
+  screenh = screenh-100
+  love.window.setMode(screenw, screenh)
+  love.window.setTitle("Text with Lines")
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
 end
 
