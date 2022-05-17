@@ -28,7 +28,14 @@ local utf8 = require 'utf8'
 -- We'll continue to persist them just to keep the option open to continue
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
-lines = {}
+lines = {''}
+cursor_line = 1
+-- this is a line
+-- ^cursor_pos = 1
+--  ^cursor_pos = 2
+--   ...
+--               ^cursor_pos past end of line is 15
+cursor_pos = #lines[cursor_line]+1
 
 screenw, screenh, screenflags = 0, 0, nil
 
@@ -152,7 +159,9 @@ function love.draw()
   end
   -- cursor
   love.graphics.setColor(0,0,0)
-  love.graphics.print('_', 25+text:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
+  local line_before_cursor = lines[cursor_line]:sub(1, cursor_pos-1)
+  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
+  love.graphics.print('_', 25+text_before_cursor:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
 end
 
 function love.update(dt)
@@ -484,7 +493,14 @@ end
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if in_drawing() then return end
-  lines[#lines] = lines[#lines]..t
+  local byteoffset
+  if cursor_pos > 1 then
+    byteoffset = utf8.offset(lines[cursor_line], cursor_pos-1)
+  else
+    byteoffset = 0
+  end
+  lines[cursor_line] = string.sub(lines[cursor_line], 1, byteoffset)..t..string.sub(lines[cursor_line], byteoffset+1)
+  cursor_pos = cursor_pos+1
   if filename then
     save_to_disk(lines, filename)
   end
@@ -500,9 +516,38 @@ function keychord_pressed(chord)
     elseif type(lines[#lines]) == 'table' then
       table.remove(lines)  -- we'll add undo soon
     else
-      local byteoffset = utf8.offset(lines[#lines], -1)
-      if byteoffset then
-        lines[#lines] = string.sub(lines[#lines], 1, byteoffset-1)
+      if cursor_pos > 1 then
+        local byte_start = utf8.offset(lines[cursor_line], cursor_pos-1)
+        local byte_end = utf8.offset(lines[cursor_line], cursor_pos)
+        if byte_start then
+          if byte_end then
+            lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)..string.sub(lines[cursor_line], byte_end)
+          else
+            lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)
+          end
+          cursor_pos = cursor_pos-1
+        end
+      end
+    end
+  elseif chord == 'left' then
+    if cursor_pos > 1 then
+      cursor_pos = cursor_pos - 1
+    end
+  elseif chord == 'right' then
+    if cursor_pos <= #lines[cursor_line] then
+      cursor_pos = cursor_pos + 1
+    end
+  elseif chord == 'delete' then
+    if cursor_pos <= #lines[cursor_line] then
+      local byte_start = utf8.offset(lines[cursor_line], cursor_pos)
+      local byte_end = utf8.offset(lines[cursor_line], cursor_pos+1)
+      if byte_start then
+        if byte_end then
+          lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)..string.sub(lines[cursor_line], byte_end)
+        else
+          lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)
+        end
+        -- no change to cursor_pos
       end
     end
   elseif chord == 'escape' and love.mouse.isDown('1') then
