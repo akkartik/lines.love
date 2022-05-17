@@ -1,6 +1,5 @@
 require 'keychord'
 require 'button'
-require 'repl'
 local utf8 = require 'utf8'
 
 -- lines is an array of lines
@@ -45,8 +44,6 @@ end
 function coord(n)  -- pixels to parts
   return math.floor(n*256/drawingw)
 end
-
-exec_payload = nil
 
 filename = nil
 
@@ -155,11 +152,6 @@ function love.draw()
   -- cursor
   love.graphics.setColor(0,0,0)
   love.graphics.print('_', 25+text:getWidth()*1.5, y)
-
-  -- display side effect
-  if exec_payload then
-    run(exec_payload)
-  end
 end
 
 function love.update(dt)
@@ -512,11 +504,6 @@ function keychord_pressed(chord)
         lines[#lines] = string.sub(lines[#lines], 1, byteoffset-1)
       end
     end
-  elseif chord == 'C-r' then
-    lines[#lines+1] = eval(lines[#lines])[1]
-    lines[#lines+1] = ''
-  elseif chord == 'C-x' then
-    parse_into_exec_payload(lines[#lines])
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
     drawing.pending = {}
