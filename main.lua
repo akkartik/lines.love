@@ -85,11 +85,9 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, screenw-1, screenh-1)
   love.graphics.setColor(0, 0, 0)
-  local text = love.graphics.newText(love.graphics.getFont(), '')
   local y = 0
   for i,line in ipairs(lines) do
     y = y+25
-    text = love.graphics.newText(love.graphics.getFont(), line)
     if line == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = function(x,y)
@@ -157,6 +155,7 @@ function love.draw()
       draw_pending_shape(16,line.y, line)
     else
       love.graphics.setColor(0,0,0)
+      local text = love.graphics.newText(love.graphics.getFont(), line)
       love.graphics.draw(text, 25,y, 0, 1.5)
       if i == cursor_line then
         -- cursor
