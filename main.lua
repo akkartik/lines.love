@@ -78,7 +78,7 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, screenw-1, screenh-1)
   love.graphics.setColor(0, 0, 0)
-  local text
+  local text = love.graphics.newText(love.graphics.getFont(), '')
   local y = 0
   for i,line in ipairs(lines) do
     y = y+25
@@ -814,7 +814,7 @@ function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 function load_from_disk(filename)
   local infile = io.open(filename)
   local result = load_from_file(infile)
-  infile:close()
+  if infile then infile:close() end
   return result
 end
 
@@ -831,6 +831,9 @@ function load_from_file(infile)
         table.insert(result, line)
       end
     end
+  end
+  if #result == 0 then
+    table.insert(result, '')
   end
   return result
 end
