@@ -490,7 +490,6 @@ end
 
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
-  if mouse_in_drawing() then return end
   if lines[cursor_line].mode == 'drawing' then return end
   local byteoffset
   if cursor_pos > 1 then
@@ -763,18 +762,6 @@ function nearest_cursor_pos(line, x, hint)
     end
   end
   return right
-end
-
-function mouse_in_drawing()
-  local x, y = love.mouse.getX(), love.mouse.getY()
-  for _,drawing in ipairs(lines) do
-    if drawing.mode == 'drawing' then
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
-        return true
-      end
-    end
-  end
-  return false
 end
 
 function current_drawing()
