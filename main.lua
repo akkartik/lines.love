@@ -598,9 +598,13 @@ function keychord_pressed(chord)
       end
     end
   elseif chord == 'C-=' then
+    drawingw = drawingw/zoom
     zoom = zoom+0.5
+    drawingw = drawingw*zoom
   elseif chord == 'C--' then
+    drawingw = drawingw/zoom
     zoom = zoom-0.5
+    drawingw = drawingw*zoom
   -- shortcuts for drawings
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
