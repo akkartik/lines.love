@@ -150,18 +150,19 @@ function love.draw()
           end
         end
       end
---?       print(#line.points)
       draw_pending_shape(16,line.y, line)
     else
       love.graphics.setColor(0,0,0)
       love.graphics.draw(text, 25,y, 0, 1.5)
+      if i == cursor_line then
+        -- cursor
+        love.graphics.setColor(0,0,0)
+        local line_before_cursor = lines[cursor_line]:sub(1, cursor_pos-1)
+        local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
+        love.graphics.print('_', 25+text_before_cursor:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
+      end
     end
   end
-  -- cursor
-  love.graphics.setColor(0,0,0)
-  local line_before_cursor = lines[cursor_line]:sub(1, cursor_pos-1)
-  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  love.graphics.print('_', 25+text_before_cursor:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
 end
 
 function love.update(dt)
@@ -509,7 +510,9 @@ end
 function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   if chord == 'return' then
-    table.insert(lines, '')
+    table.insert(lines, cursor_line+1, '')
+    cursor_line = cursor_line+1
+    cursor_pos = 1
   elseif chord == 'backspace' then
     if #lines > 1 and lines[#lines] == '' then
       table.remove(lines)
@@ -536,6 +539,20 @@ function keychord_pressed(chord)
   elseif chord == 'right' then
     if cursor_pos <= #lines[cursor_line] then
       cursor_pos = cursor_pos + 1
+    end
+  elseif chord == 'up' then
+    if cursor_line > 1 then
+      cursor_line = cursor_line-1
+      if cursor_pos > #lines[cursor_line] then
+        cursor_pos = #lines[cursor_line]+1
+      end
+    end
+  elseif chord == 'down' then
+    if cursor_line < #lines then
+      cursor_line = cursor_line+1
+      if cursor_pos > #lines[cursor_line] then
+        cursor_pos = #lines[cursor_line]+1
+      end
     end
   elseif chord == 'delete' then
     if cursor_pos <= #lines[cursor_line] then
