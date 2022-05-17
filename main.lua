@@ -70,6 +70,7 @@ function love.filedropped(file)
   filename = file:getFilename()
   file:open('r')
   lines = load_from_file(file)
+  file:close()
 end
 
 function love.draw()
@@ -812,7 +813,7 @@ function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
 
 function load_from_disk(filename)
   local infile = io.open(filename)
-  local result = load_from_file(io.open(filename))
+  local result = load_from_file(infile)
   infile:close()
   return result
 end
