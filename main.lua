@@ -494,6 +494,7 @@ end
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if mouse_in_drawing() then return end
+  if type(lines[cursor_line]) == 'table' then return end
   local byteoffset
   if cursor_pos > 1 then
     byteoffset = utf8.offset(lines[cursor_line], cursor_pos-1)
