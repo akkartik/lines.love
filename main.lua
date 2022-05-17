@@ -513,6 +513,7 @@ end
 
 function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
+  -- shortcuts for text
   if chord == 'return' then
     table.insert(lines, cursor_line+1, {mode='text', data=''})
     cursor_line = cursor_line+1
@@ -560,6 +561,20 @@ function keychord_pressed(chord)
     cursor_pos = 1
   elseif chord == 'end' then
     cursor_pos = #lines[cursor_line].data+1
+  elseif chord == 'delete' then
+    if cursor_pos <= #lines[cursor_line].data then
+      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos)
+      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos+1)
+      if byte_start then
+        if byte_end then
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
+        else
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
+        end
+        -- no change to cursor_pos
+      end
+    end
+  -- transitioning between drawings and text
   elseif chord == 'up' then
     if cursor_line > 1 then
       if lines[cursor_line].mode == 'text' and lines[cursor_line-1].mode == 'text' then
@@ -580,19 +595,7 @@ function keychord_pressed(chord)
         cursor_line = cursor_line+1
       end
     end
-  elseif chord == 'delete' then
-    if cursor_pos <= #lines[cursor_line].data then
-      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos)
-      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos+1)
-      if byte_start then
-        if byte_end then
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
-        else
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
-        end
-        -- no change to cursor_pos
-      end
-    end
+  -- shortcuts for drawings
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
     drawing.pending = {}
