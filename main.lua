@@ -157,9 +157,7 @@ function love.draw()
       if i == cursor_line then
         -- cursor
         love.graphics.setColor(0,0,0)
-        local line_before_cursor = lines[cursor_line]:sub(1, cursor_pos-1)
-        local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-        love.graphics.print('_', 25+text_before_cursor:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
+        love.graphics.print('_', 25+cursor_x(lines[cursor_line], cursor_pos)*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
       end
     end
   end
@@ -540,19 +538,21 @@ function keychord_pressed(chord)
     if cursor_pos <= #lines[cursor_line] then
       cursor_pos = cursor_pos + 1
     end
+  elseif chord == 'home' then
+    cursor_pos = 1
+  elseif chord == 'end' then
+    cursor_pos = #lines[cursor_line]+1
   elseif chord == 'up' then
     if cursor_line > 1 then
+      local old_x = cursor_x(lines[cursor_line], cursor_pos)
       cursor_line = cursor_line-1
-      if cursor_pos > #lines[cursor_line] then
-        cursor_pos = #lines[cursor_line]+1
-      end
+      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x)
     end
   elseif chord == 'down' then
     if cursor_line < #lines then
+      local old_x = cursor_x(lines[cursor_line], cursor_pos)
       cursor_line = cursor_line+1
-      if cursor_pos > #lines[cursor_line] then
-        cursor_pos = #lines[cursor_line]+1
-      end
+      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x)
     end
   elseif chord == 'delete' then
     if cursor_pos <= #lines[cursor_line] then
@@ -704,6 +704,32 @@ function keychord_pressed(chord)
       drawing.show_help = false
     end
   end
+end
+
+function cursor_x(line, cursor_pos)
+  local line_before_cursor = line:sub(1, cursor_pos-1)
+  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
+  return text_before_cursor:getWidth()
+end
+
+function nearest_cursor_pos(line, x)
+  if x == 0 then
+    return 1
+  end
+  local left, right = 1, #line+1
+  while left < right-1 do
+    local curr = math.floor((left+right)/2)
+    local currx = cursor_x(line, curr)
+    if currx > x-2 and currx < x+2 then
+      return curr
+    end
+    if currx > x then
+      right = curr
+    else
+      left = curr
+    end
+  end
+  return right
 end
 
 function in_drawing()
