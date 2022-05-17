@@ -605,6 +605,10 @@ function keychord_pressed(chord)
     drawingw = drawingw/zoom
     zoom = zoom-0.5
     drawingw = drawingw*zoom
+  elseif chord == 'C-0' then
+    drawingw = drawingw/zoom
+    zoom = 1.5
+    drawingw = drawingw*zoom
   -- shortcuts for drawings
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
@@ -1100,6 +1104,8 @@ function draw_help_without_mouse_pressed(drawing)
     y = y+15*zoom
   end
   love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print("* Press 'ctrl+0' to reset zoom", 16+30,y, 0, zoom)
   y = y+15*zoom
   y = y+15*zoom
   love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, zoom)
