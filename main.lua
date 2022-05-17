@@ -152,7 +152,7 @@ function love.draw()
   end
   -- cursor
   love.graphics.setColor(0,0,0)
-  love.graphics.print('_', 25+text:getWidth()*1.5, y)
+  love.graphics.print('_', 25+text:getWidth()*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
 end
 
 function love.update(dt)
