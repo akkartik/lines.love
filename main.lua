@@ -546,13 +546,13 @@ function keychord_pressed(chord)
     if cursor_line > 1 then
       local old_x = cursor_x(lines[cursor_line], cursor_pos)
       cursor_line = cursor_line-1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x)
+      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x, cursor_pos)
     end
   elseif chord == 'down' then
     if cursor_line < #lines then
       local old_x = cursor_x(lines[cursor_line], cursor_pos)
       cursor_line = cursor_line+1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x)
+      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x, cursor_pos)
     end
   elseif chord == 'delete' then
     if cursor_pos <= #lines[cursor_line] then
@@ -712,11 +712,24 @@ function cursor_x(line, cursor_pos)
   return text_before_cursor:getWidth()
 end
 
-function nearest_cursor_pos(line, x)
+function nearest_cursor_pos(line, x, hint)
   if x == 0 then
     return 1
   end
+  local max_x = cursor_x(line, #line+1)
+  if x > max_x then
+    return #line+1
+  end
+  local currx = cursor_x(line, hint)
+  if currx > x-2 and currx < x+2 then
+    return hint
+  end
   local left, right = 1, #line+1
+  if currx > x then
+    right = hint
+  else
+    left = hint
+  end
   while left < right-1 do
     local curr = math.floor((left+right)/2)
     local currx = cursor_x(line, curr)
