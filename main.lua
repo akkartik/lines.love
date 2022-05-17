@@ -94,13 +94,7 @@ function love.draw()
     line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
-        icon = function(x,y)
-                 love.graphics.setColor(0.7,0.7,0.7)
-                 love.graphics.rectangle('line', x,y, 12,12)
-                 love.graphics.line(4,y+6, 16,y+6)
-                 love.graphics.line(10,y, 10,y+12)
-                 love.graphics.setColor(0, 0, 0)
-               end,
+        icon = icon.insert_drawing,
         onpress1 = function()
                      table.insert(lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                    end})
@@ -1032,6 +1026,14 @@ function store_drawing(outfile, drawing)
 end
 
 icon = {}
+
+function icon.insert_drawing(x, y)
+  love.graphics.setColor(0.7,0.7,0.7)
+  love.graphics.rectangle('line', x,y, 12,12)
+  love.graphics.line(4,y+6, 16,y+6)
+  love.graphics.line(10,y, 10,y+12)
+  love.graphics.setColor(0, 0, 0)
+end
 
 function icon.freehand(x, y)
   love.graphics.line(x+4,y+7,x+5,y+5)
