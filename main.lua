@@ -112,7 +112,7 @@ function love.draw()
       y = y+pixels(line.h)
 
       local pmx,pmy = love.mouse.getX(), love.mouse.getY()
-      if pmx > 16 and pmx < 16+drawingw and pmy > line.y and pmy < line.y+pixels(line.h) then
+      if pmx < 16+drawingw and pmy > line.y and pmy < line.y+pixels(line.h) then
         love.graphics.setColor(0.75,0.75,0.75)
         love.graphics.rectangle('line', 16,line.y, drawingw,pixels(line.h))
         if icon[current_mode] then
