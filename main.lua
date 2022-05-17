@@ -559,15 +559,23 @@ function keychord_pressed(chord)
     cursor_pos = #lines[cursor_line].data+1
   elseif chord == 'up' then
     if cursor_line > 1 then
-      local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
-      cursor_line = cursor_line-1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+      if lines[cursor_line].mode == 'text' then
+        local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
+        cursor_line = cursor_line-1
+        cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+      else
+        cursor_line = cursor_line+1
+      end
     end
   elseif chord == 'down' then
     if cursor_line < #lines then
-      local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
-      cursor_line = cursor_line+1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+      if lines[cursor_line].mode == 'text' then
+        local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
+        cursor_line = cursor_line+1
+        cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+      else
+        cursor_line = cursor_line+1
+      end
     end
   elseif chord == 'delete' then
     if cursor_pos <= #lines[cursor_line].data then
@@ -722,14 +730,12 @@ function keychord_pressed(chord)
 end
 
 function cursor_x(line, cursor_pos)
-  if line.mode == 'drawing' then return 0 end
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
   return text_before_cursor:getWidth()
 end
 
 function nearest_cursor_pos(line, x, hint)
-  if line.mode == 'drawing' then return hint end
   if x == 0 then
     return 1
   end
