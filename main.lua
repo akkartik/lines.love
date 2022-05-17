@@ -758,11 +758,12 @@ function nearest_cursor_pos(line, x, hint)
   end
   while left < right-1 do
     local curr = math.floor((left+right)/2)
-    local currx = cursor_x(line, curr)
-    if currx > x-2 and currx < x+2 then
+    local currxmin = cursor_x(line, curr)
+    local currxmax = cursor_x(line, curr+1)
+    if currxmin <= x and x < currxmax then
       return curr
     end
-    if currx > x then
+    if currxmin > x then
       right = curr
     else
       left = curr
