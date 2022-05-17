@@ -2,12 +2,13 @@ require 'keychord'
 require 'button'
 local utf8 = require 'utf8'
 
--- lines is an array of lines
--- a line is either:
---    a string containing text
---    or a drawing
+-- a line is either text or a drawing
+-- a text is a table with:
+--    mode = 'text'
+--    string data
 -- a drawing is a table with:
---    a (y) coord in pixels,
+--    mode = 'drawing'
+--    a (y) coord in pixels (updated while painting screen),
 --    a (h)eight,
 --    an array of points, and
 --    an array of shapes
@@ -28,14 +29,14 @@ local utf8 = require 'utf8'
 -- We'll continue to persist them just to keep the option open to continue
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
-lines = {''}
+lines = {{mode='text', data=''}}
 cursor_line = 1
 -- this is a line
 -- ^cursor_pos = 1
 --  ^cursor_pos = 2
 --   ...
 --               ^cursor_pos past end of line is 15
-cursor_pos = #lines[cursor_line]+1
+cursor_pos = #lines[cursor_line].data+1
 
 screenw, screenh, screenflags = 0, 0, nil
 
@@ -88,7 +89,7 @@ function love.draw()
   local y = 0
   for i,line in ipairs(lines) do
     y = y+25
-    if line == '' then
+    if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = function(x,y)
                  love.graphics.setColor(0.7,0.7,0.7)
@@ -98,13 +99,13 @@ function love.draw()
                  love.graphics.setColor(0, 0, 0)
                end,
         onpress1 = function()
-                     table.insert(lines, i, {y=y, h=256/2, points={}, shapes={}, pending={}})
+                     table.insert(lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                    end})
         if i == cursor_line then
           love.graphics.setColor(0,0,0)
           love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
         end
-    elseif type(line) == 'table' then
+    elseif line.mode == 'drawing' then
       -- line drawing
       line.y = y
       y = y+pixels(line.h)
@@ -155,11 +156,11 @@ function love.draw()
       draw_pending_shape(16,line.y, line)
     else
       love.graphics.setColor(0,0,0)
-      local text = love.graphics.newText(love.graphics.getFont(), line)
+      local text = love.graphics.newText(love.graphics.getFont(), line.data)
       love.graphics.draw(text, 25,y, 0, 1.5)
       if i == cursor_line then
         -- cursor
-        love.graphics.print('_', 25+cursor_x(lines[cursor_line], cursor_pos)*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
+        love.graphics.print('_', 25+cursor_x(line.data, cursor_pos)*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
       end
     end
   end
@@ -168,8 +169,8 @@ end
 function love.update(dt)
   if love.mouse.isDown('1') then
     if lines.current then
-      local drawing = lines.current
-      if type(drawing) == 'table' then
+      if lines.current.mode == 'drawing' then
+        local drawing = lines.current
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
           if drawing.pending.mode == 'freehand' then
@@ -262,7 +263,7 @@ end
 
 function propagate_to_drawings(x,y, button)
   for i,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
@@ -474,7 +475,6 @@ end
 
 function angle_between(x1,y1, x2,y2, s,e)
   local angle = math.angle(x1,y1, x2,y2)
---?   print(s,e, angle-math.pi*2, angle, angle+math.pi*2)
   if s > e then
     s,e = e,s
   end
@@ -494,14 +494,14 @@ end
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if mouse_in_drawing() then return end
-  if type(lines[cursor_line]) == 'table' then return end
+  if lines[cursor_line].mode == 'drawing' then return end
   local byteoffset
   if cursor_pos > 1 then
-    byteoffset = utf8.offset(lines[cursor_line], cursor_pos-1)
+    byteoffset = utf8.offset(lines[cursor_line].data, cursor_pos-1)
   else
     byteoffset = 0
   end
-  lines[cursor_line] = string.sub(lines[cursor_line], 1, byteoffset)..t..string.sub(lines[cursor_line], byteoffset+1)
+  lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byteoffset)..t..string.sub(lines[cursor_line].data, byteoffset+1)
   cursor_pos = cursor_pos+1
   if filename then
     save_to_disk(lines, filename)
@@ -511,23 +511,35 @@ end
 function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   if chord == 'return' then
-    table.insert(lines, cursor_line+1, '')
+    table.insert(lines, cursor_line+1, {mode='text', data=''})
     cursor_line = cursor_line+1
     cursor_pos = 1
   elseif chord == 'backspace' then
-    if #lines > 1 and lines[#lines] == '' then
-      table.remove(lines)
-    elseif type(lines[#lines]) == 'table' then
-      table.remove(lines)  -- we'll add undo soon
+    if cursor_line > 1 and lines[cursor_line].data == '' then
+      table.remove(lines, cursor_line)
+      cursor_line = cursor_line-1
+      if lines[cursor_line].mode == 'text' then
+        cursor_pos = #lines[cursor_line].data+1
+      else
+        cursor_pos = 1
+      end
+    elseif lines[cursor_line].mode == 'drawing' then
+      table.remove(lines, cursor_line)  -- we'll add undo soon
+      cursor_line = cursor_line-1
+      if lines[cursor_line].mode == 'text' then
+        cursor_pos = #lines[cursor_line].data+1
+      else
+        cursor_pos = 1
+      end
     else
       if cursor_pos > 1 then
-        local byte_start = utf8.offset(lines[cursor_line], cursor_pos-1)
-        local byte_end = utf8.offset(lines[cursor_line], cursor_pos)
+        local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos-1)
+        local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos)
         if byte_start then
           if byte_end then
-            lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)..string.sub(lines[cursor_line], byte_end)
+            lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
           else
-            lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)
+            lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
           end
           cursor_pos = cursor_pos-1
         end
@@ -538,34 +550,34 @@ function keychord_pressed(chord)
       cursor_pos = cursor_pos - 1
     end
   elseif chord == 'right' then
-    if cursor_pos <= #lines[cursor_line] then
+    if cursor_pos <= #lines[cursor_line].data then
       cursor_pos = cursor_pos + 1
     end
   elseif chord == 'home' then
     cursor_pos = 1
   elseif chord == 'end' then
-    cursor_pos = #lines[cursor_line]+1
+    cursor_pos = #lines[cursor_line].data+1
   elseif chord == 'up' then
     if cursor_line > 1 then
-      local old_x = cursor_x(lines[cursor_line], cursor_pos)
+      local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
       cursor_line = cursor_line-1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x, cursor_pos)
+      cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
     end
   elseif chord == 'down' then
     if cursor_line < #lines then
-      local old_x = cursor_x(lines[cursor_line], cursor_pos)
+      local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
       cursor_line = cursor_line+1
-      cursor_pos = nearest_cursor_pos(lines[cursor_line], old_x, cursor_pos)
+      cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
     end
   elseif chord == 'delete' then
-    if cursor_pos <= #lines[cursor_line] then
-      local byte_start = utf8.offset(lines[cursor_line], cursor_pos)
-      local byte_end = utf8.offset(lines[cursor_line], cursor_pos+1)
+    if cursor_pos <= #lines[cursor_line].data then
+      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos)
+      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos+1)
       if byte_start then
         if byte_end then
-          lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)..string.sub(lines[cursor_line], byte_end)
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
         else
-          lines[cursor_line] = string.sub(lines[cursor_line], 1, byte_start-1)
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
         end
         -- no change to cursor_pos
       end
@@ -710,14 +722,14 @@ function keychord_pressed(chord)
 end
 
 function cursor_x(line, cursor_pos)
-  if type(line) == 'table' then return 0 end
+  if line.mode == 'drawing' then return 0 end
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
   return text_before_cursor:getWidth()
 end
 
 function nearest_cursor_pos(line, x, hint)
-  if type(line) == 'table' then return hint end
+  if line.mode == 'drawing' then return hint end
   if x == 0 then
     return 1
   end
@@ -753,7 +765,7 @@ end
 function mouse_in_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return true
       end
@@ -765,7 +777,7 @@ end
 function current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return drawing
       end
@@ -776,7 +788,7 @@ end
 
 function select_shape_at_mouse()
   for _,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
@@ -793,7 +805,7 @@ end
 
 function select_point_at_mouse()
   for _,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
@@ -810,7 +822,7 @@ end
 
 function select_drawing_at_mouse()
   for _,drawing in ipairs(lines) do
-    if type(drawing) == 'table' then
+    if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return drawing
@@ -934,12 +946,12 @@ function load_from_file(infile)
       if line == '```lines' then  -- inflexible with whitespace since these files are always autogenerated
         table.insert(result, load_drawing(infile_next_line))
       else
-        table.insert(result, line)
+        table.insert(result, {mode='text', data=line})
       end
     end
   end
   if #result == 0 then
-    table.insert(result, '')
+    table.insert(result, {mode='text', data=''})
   end
   return result
 end
@@ -947,10 +959,10 @@ end
 function save_to_disk(lines, filename)
   local outfile = io.open(filename, 'w')
   for _,line in ipairs(lines) do
-    if type(line) == 'table' then
+    if line.mode == 'drawing' then
       store_drawing(outfile, line)
     else
-      outfile:write(line..'\n')
+      outfile:write(line.data..'\n')
     end
   end
   outfile:close()
@@ -958,7 +970,7 @@ end
 
 json = require 'json'
 function load_drawing(infile_next_line)
-  local drawing = {h=256/2, points={}, shapes={}, pending={}}
+  local drawing = {mode='drawing', h=256/2, points={}, shapes={}, pending={}}
   while true do
     local line = infile_next_line()
     assert(line)
