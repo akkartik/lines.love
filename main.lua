@@ -89,6 +89,7 @@ function love.draw()
   local y = 0
   for i,line in ipairs(lines) do
     y = y+25
+    line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = function(x,y)
@@ -107,7 +108,6 @@ function love.draw()
         end
     elseif line.mode == 'drawing' then
       -- line drawing
-      line.y = y
       y = y+pixels(line.h)
 
       local pmx,pmy = love.mouse.getX(), love.mouse.getY()
