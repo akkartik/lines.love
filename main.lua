@@ -196,7 +196,27 @@ end
 
 function love.mousepressed(x,y, button)
   propagate_to_button_handlers(x,y, button)
-  propagate_to_drawings(x,y, button)
+
+  for i,drawing in ipairs(lines) do
+    if drawing.mode == 'drawing' then
+      local x, y = love.mouse.getX(), love.mouse.getY()
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+        if current_mode == 'freehand' then
+          drawing.pending = {mode=current_mode, points={{x=coord(x-16), y=coord(y-drawing.y)}}}
+        elseif current_mode == 'line' or current_mode == 'manhattan' then
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode=current_mode, p1=j}
+        elseif current_mode == 'polygon' then
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode=current_mode, vertices={j}}
+        elseif current_mode == 'circle' then
+          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
+          drawing.pending = {mode=current_mode, center=j}
+        end
+        lines.current = drawing
+      end
+    end
+  end
 end
 
 function love.mousereleased(x,y, button)
@@ -258,29 +278,6 @@ function love.mousereleased(x,y, button)
   end
   if filename then
     save_to_disk(lines, filename)
-  end
-end
-
-function propagate_to_drawings(x,y, button)
-  for i,drawing in ipairs(lines) do
-    if drawing.mode == 'drawing' then
-      local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
-        if current_mode == 'freehand' then
-          drawing.pending = {mode=current_mode, points={{x=coord(x-16), y=coord(y-drawing.y)}}}
-        elseif current_mode == 'line' or current_mode == 'manhattan' then
-          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, p1=j}
-        elseif current_mode == 'polygon' then
-          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, vertices={j}}
-        elseif current_mode == 'circle' then
-          local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, center=j}
-        end
-        lines.current = drawing
-      end
-    end
   end
 end
 
