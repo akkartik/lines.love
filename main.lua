@@ -66,7 +66,7 @@ function love.load(arg)
   screenh = screenh-100
   love.window.setMode(screenw, screenh)
   love.window.setTitle('Text with Lines')
-  drawingw = math.floor(screenh/2/40)*40
+  drawingw = math.floor(screenw/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   if #arg > 0 then
     filename = arg[1]
@@ -742,9 +742,10 @@ function keychord_pressed(chord)
       drawing.show_help = true
     end
   elseif chord == 'escape' and not love.mouse.isDown('1') then
-    local drawing = select_drawing_at_mouse()
-    if drawing then
-      drawing.show_help = false
+    for _,line in ipairs(lines) do
+      if line.mode == 'drawing' then
+        line.show_help = false
+      end
     end
   end
 end
@@ -1070,7 +1071,6 @@ end
 
 function draw_help_without_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
-  love.graphics.rectangle('line', 16,drawing.y, drawingw,pixels(drawing.h))
   local y = drawing.y+10
   love.graphics.print("Things you can do:", 16+30,y, 0, zoom)
   y = y+15*zoom
@@ -1110,6 +1110,7 @@ function draw_help_without_mouse_pressed(drawing)
   y = y+15*zoom
   love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, zoom)
   y = y+15*zoom
+  love.graphics.rectangle('line', 16,drawing.y, drawingw, math.max(pixels(drawing.h),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(drawing)
