@@ -45,7 +45,7 @@ function coord(n)  -- pixels to parts
   return math.floor(n*256/drawingw)
 end
 
-filename = nil
+filename = 'lines.txt'
 
 function love.load(arg)
   -- maximize window
@@ -60,10 +60,8 @@ function love.load(arg)
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   if #arg > 0 then
     filename = arg[1]
-    lines = load_from_disk(filename)
-  else
-    table.insert(lines, '')
   end
+  lines = load_from_disk(filename)
 end
 
 function love.filedropped(file)
