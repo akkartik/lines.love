@@ -160,7 +160,7 @@ function love.draw()
       love.graphics.draw(text, 25,y, 0, 1.5)
       if i == cursor_line then
         -- cursor
-        love.graphics.print('_', 25+cursor_x(line.data, cursor_pos)*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
+        love.graphics.print('_', cursor_x(line.data, cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
       end
     end
   end
@@ -197,8 +197,15 @@ end
 function love.mousepressed(x,y, button)
   propagate_to_button_handlers(x,y, button)
 
-  for i,drawing in ipairs(lines) do
-    if drawing.mode == 'drawing' then
+  for i,line in ipairs(lines) do
+    if line.mode == 'text' then
+      -- move cursor
+      if x >= 16 and y >= line.y and y < y+25 then
+        cursor_line = i
+        cursor_pos = nearest_cursor_pos(line.data, x, 1)
+      end
+    elseif line.mode == 'drawing' then
+      local drawing = line
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         if current_mode == 'freehand' then
@@ -555,7 +562,7 @@ function keychord_pressed(chord)
     cursor_pos = #lines[cursor_line].data+1
   elseif chord == 'up' then
     if cursor_line > 1 then
-      if lines[cursor_line].mode == 'text' then
+      if lines[cursor_line].mode == 'text' and lines[cursor_line-1].mode == 'text' then
         local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
         cursor_line = cursor_line-1
         cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
@@ -565,7 +572,7 @@ function keychord_pressed(chord)
     end
   elseif chord == 'down' then
     if cursor_line < #lines then
-      if lines[cursor_line].mode == 'text' then
+      if lines[cursor_line].mode == 'text' and lines[cursor_line+1].mode == 'text' then
         local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
         cursor_line = cursor_line+1
         cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
@@ -728,7 +735,7 @@ end
 function cursor_x(line, cursor_pos)
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  return text_before_cursor:getWidth()
+  return 25+text_before_cursor:getWidth()*1.5
 end
 
 function nearest_cursor_pos(line, x, hint)
