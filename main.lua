@@ -55,13 +55,14 @@ function love.load(arg)
   screenw = screenw-100
   screenh = screenh-100
   love.window.setMode(screenw, screenh)
-  love.window.setTitle("Text with Lines")
+  love.window.setTitle('Text with Lines')
   drawingw = math.floor(screenh/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   if #arg > 0 then
     filename = arg[1]
   end
   lines = load_from_disk(filename)
+  love.window.setTitle('Text with Lines - '..filename)
 end
 
 function love.filedropped(file)
@@ -69,6 +70,7 @@ function love.filedropped(file)
   file:open('r')
   lines = load_from_file(file)
   file:close()
+  love.window.setTitle('Text with Lines - '..filename)
 end
 
 function love.draw()
