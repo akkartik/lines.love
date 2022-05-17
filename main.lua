@@ -1064,88 +1064,91 @@ function draw_help_without_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   love.graphics.rectangle('line', 16,drawing.y, drawingw,pixels(drawing.h))
   local y = drawing.y+10
-  love.graphics.print("Things you can do:", 16+30,y)
-  y = y+15
-  love.graphics.print("* Press the mouse button to start drawing a "..current_shape_singular(), 16+30,y)
-  y = y+15
-  love.graphics.print("* Hover on a point and press 'ctrl+v' to start moving it,", 16+30,y)
-  y = y+15
-  love.graphics.print("then press the mouse button to finish", 16+30+bullet_indent(),y)
-  y = y+15
-  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y)
-  y = y+15
-  y = y+15
+  love.graphics.print("Things you can do:", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print("* Press the mouse button to start drawing a "..current_shape_singular(), 16+30,y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print("* Hover on a point and press 'ctrl+v' to start moving it,", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print("then press the mouse button to finish", 16+30+bullet_indent(),y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  y = y+15*zoom
   if current_mode ~= 'freehand' then
-    love.graphics.print("* Press 'ctrl+f' to switch to drawing freehand strokes", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'ctrl+f' to switch to drawing freehand strokes", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'line' then
-    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'circle' then
-    love.graphics.print("* Press 'ctrl+c' to switch to drawing circles/arcs", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'ctrl+c' to switch to drawing circles/arcs", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'polygon' then
-    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
-  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y)
-  y = y+15
+  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  y = y+15*zoom
+  love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, zoom)
+  y = y+15*zoom
 end
 
 function draw_help_with_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   love.graphics.rectangle('line', 16,drawing.y, drawingw,pixels(drawing.h))
   local y = drawing.y+10
-  love.graphics.print("You're currently drawing "..current_shape_pluralized(), 16+30,y)
-  y = y+15
-  love.graphics.print('Things you can do now:', 16+30,y)
-  y = y+15
+  love.graphics.print("You're currently drawing "..current_shape_pluralized(), 16+30,y, 0, zoom)
+  y = y+15*zoom
+  love.graphics.print('Things you can do now:', 16+30,y, 0, zoom)
+  y = y+15*zoom
   if current_mode == 'freehand' then
-    love.graphics.print('* Release the mouse button to finish drawing a freehand stroke', 16+30,y)
-    y = y+15
+    love.graphics.print('* Release the mouse button to finish drawing a freehand stroke', 16+30,y, 0, zoom)
+    y = y+15*zoom
   elseif current_mode == 'line' or current_mode == 'manhattan' then
-    love.graphics.print('* Release the mouse button to finish drawing a line', 16+30,y)
-    y = y+15
+    love.graphics.print('* Release the mouse button to finish drawing a line', 16+30,y, 0, zoom)
+    y = y+15*zoom
   elseif current_mode == 'circle' then
     if drawing.pending.mode == 'circle' then
-      love.graphics.print('* Release the mouse button to finish drawing a full circle', 16+30,y)
-      y = y+15
-      love.graphics.print("* Press 'a' to draw just an arc of a circle", 16+30,y)
+      love.graphics.print('* Release the mouse button to finish drawing a full circle', 16+30,y, 0, zoom)
+      y = y+15*zoom
+      love.graphics.print("* Press 'a' to draw just an arc of a circle", 16+30,y, 0, zoom)
     else
-      love.graphics.print('* Release the mouse button to finish drawing an arc', 16+30,y)
+      love.graphics.print('* Release the mouse button to finish drawing an arc', 16+30,y, 0, zoom)
     end
-    y = y+15
+    y = y+15*zoom
   elseif current_mode == 'polygon' then
-    love.graphics.print('* Release the mouse button to finish drawing a polygon', 16+30,y)
-    y = y+15
-    love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y)
-    y = y+15
+    love.graphics.print('* Release the mouse button to finish drawing a polygon', 16+30,y, 0, zoom)
+    y = y+15*zoom
+    love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
-  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y)
-  y = y+15
-  y = y+15
+  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y, 0, zoom)
+  y = y+15*zoom
+  y = y+15*zoom
   if current_mode ~= 'line' then
-    love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'circle' then
-    love.graphics.print("* Press 'c' to switch to drawing circles/arcs", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'c' to switch to drawing circles/arcs", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
   if current_mode ~= 'polygon' then
-    love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y)
-    y = y+15
+    love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y, 0, zoom)
+    y = y+15*zoom
   end
 end
 
