@@ -710,12 +710,14 @@ function keychord_pressed(chord)
 end
 
 function cursor_x(line, cursor_pos)
+  if type(line) == 'table' then return 0 end
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
   return text_before_cursor:getWidth()
 end
 
 function nearest_cursor_pos(line, x, hint)
+  if type(line) == 'table' then return hint end
   if x == 0 then
     return 1
   end
