@@ -102,6 +102,10 @@ function love.draw()
         onpress1 = function()
                      table.insert(lines, i, {y=y, h=256/2, points={}, shapes={}, pending={}})
                    end})
+        if i == cursor_line then
+          love.graphics.setColor(0,0,0)
+          love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
+        end
     elseif type(line) == 'table' then
       -- line drawing
       line.y = y
@@ -156,7 +160,6 @@ function love.draw()
       love.graphics.draw(text, 25,y, 0, 1.5)
       if i == cursor_line then
         -- cursor
-        love.graphics.setColor(0,0,0)
         love.graphics.print('_', 25+cursor_x(lines[cursor_line], cursor_pos)*1.5, y+6)  -- drop the cursor down a bit to account for the increased font size
       end
     end
