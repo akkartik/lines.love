@@ -53,6 +53,8 @@ function coord(n)  -- pixels to parts
   return math.floor(n*256/drawingw)
 end
 
+zoom = 1.5
+
 filename = 'lines.txt'
 
 function love.load(arg)
@@ -88,7 +90,7 @@ function love.draw()
   love.graphics.setColor(0, 0, 0)
   local y = 0
   for i,line in ipairs(lines) do
-    y = y+25
+    y = y+15*zoom
     line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
@@ -157,7 +159,7 @@ function love.draw()
     else
       love.graphics.setColor(0,0,0)
       local text = love.graphics.newText(love.graphics.getFont(), line.data)
-      love.graphics.draw(text, 25,y, 0, 1.5)
+      love.graphics.draw(text, 25,y, 0, zoom)
       if i == cursor_line then
         -- cursor
         love.graphics.print('_', cursor_x(line.data, cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
@@ -200,7 +202,7 @@ function love.mousepressed(x,y, button)
   for i,line in ipairs(lines) do
     if line.mode == 'text' then
       -- move cursor
-      if x >= 16 and y >= line.y and y < y+25 then
+      if x >= 16 and y >= line.y and y < y+15*zoom then
         cursor_line = i
         cursor_pos = nearest_cursor_pos(line.data, x, 1)
       end
@@ -595,6 +597,10 @@ function keychord_pressed(chord)
         cursor_line = cursor_line+1
       end
     end
+  elseif chord == 'C-=' then
+    zoom = zoom+0.5
+  elseif chord == 'C--' then
+    zoom = zoom-0.5
   -- shortcuts for drawings
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
@@ -738,7 +744,7 @@ end
 function cursor_x(line, cursor_pos)
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  return 25+text_before_cursor:getWidth()*1.5
+  return 25+text_before_cursor:getWidth()*zoom
 end
 
 function nearest_cursor_pos(line, x, hint)
@@ -1089,6 +1095,8 @@ function draw_help_without_mouse_pressed(drawing)
     love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y)
     y = y+15
   end
+  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y)
+  y = y+15
 end
 
 function draw_help_with_mouse_pressed(drawing)
