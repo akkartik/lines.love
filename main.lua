@@ -68,6 +68,7 @@ function love.load(arg)
   love.window.setTitle('Text with Lines')
   Drawing_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  love.keyboard.setKeyRepeat(true)
   if #arg > 0 then
     Filename = arg[1]
   end
