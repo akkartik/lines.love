@@ -126,26 +126,22 @@ function love.draw()
 end
 
 function love.update(dt)
+  if Lines.current == nil then return end
+  local drawing = Lines.current
+  assert(drawing.mode == 'drawing')
+  local x, y = love.mouse.getX(), love.mouse.getY()
   if love.mouse.isDown('1') then
-    if Lines.current then
-      if Lines.current.mode == 'drawing' then
-        local drawing = Lines.current
-        local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
-          if drawing.pending.mode == 'freehand' then
-            table.insert(drawing.pending.points, {x=Drawing.coord(love.mouse.getX()-16), y=Drawing.coord(love.mouse.getY()-drawing.y)})
-          elseif drawing.pending.mode == 'move' then
-            local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
-            drawing.pending.target_point.x = mx
-            drawing.pending.target_point.y = my
-          end
-        end
+    if Drawing.in_drawing(drawing, x,y) then
+      if drawing.pending.mode == 'freehand' then
+        table.insert(drawing.pending.points, {x=Drawing.coord(love.mouse.getX()-16), y=Drawing.coord(love.mouse.getY()-drawing.y)})
+      elseif drawing.pending.mode == 'move' then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        drawing.pending.target_point.x = mx
+        drawing.pending.target_point.y = my
       end
     end
   elseif Current_drawing_mode == 'move' then
-    local drawing = Lines.current
-    local x, y = love.mouse.getX(), love.mouse.getY()
-    if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
+    if Drawing.in_drawing(drawing, x, y) then
       local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my

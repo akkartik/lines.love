@@ -286,7 +286,7 @@ function Drawing.current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
-      if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
+      if Drawing.in_drawing(drawing, x,y) then
         return drawing
       end
     end
@@ -298,8 +298,8 @@ function Drawing.select_shape_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
-        local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+      if Drawing.in_drawing(drawing, x,y) then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
           assert(shape)
           if geom.on_shape(mx,my, drawing, shape) then
@@ -315,8 +315,8 @@ function Drawing.select_point_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
-        local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+      if Drawing.in_drawing(drawing, x,y) then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
         for i,point in ipairs(drawing.points) do
           assert(point)
           if Drawing.near(point, mx,my) then
@@ -332,7 +332,7 @@ function Drawing.select_drawing_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
+      if Drawing.in_drawing(drawing, x,y) then
         return drawing
       end
     end
