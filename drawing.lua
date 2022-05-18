@@ -49,6 +49,98 @@ function Drawing.draw(line, y)
   Drawing.draw_pending_shape(16,line.y, line)
 end
 
+function Drawing.draw_shape(left,top, drawing, shape)
+  if shape.mode == 'freehand' then
+    local prev = nil
+    for _,point in ipairs(shape.points) do
+      if prev then
+        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(point.x)+left,Drawing.pixels(point.y)+top)
+      end
+      prev = point
+    end
+  elseif shape.mode == 'line' or shape.mode == 'manhattan' then
+    local p1 = drawing.points[shape.p1]
+    local p2 = drawing.points[shape.p2]
+    love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(p2.x)+left,Drawing.pixels(p2.y)+top)
+  elseif shape.mode == 'polygon' then
+    local prev = nil
+    for _,point in ipairs(shape.vertices) do
+      local curr = drawing.points[point]
+      if prev then
+        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
+      end
+      prev = curr
+    end
+    -- close the loop
+    local curr = drawing.points[shape.vertices[1]]
+    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
+  elseif shape.mode == 'circle' then
+    local center = drawing.points[shape.center]
+    love.graphics.circle('line', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius))
+  elseif shape.mode == 'arc' then
+    local center = drawing.points[shape.center]
+    love.graphics.arc('line', 'open', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  elseif shape.mode == 'deleted' then
+  else
+    print(shape.mode)
+    assert(false)
+  end
+end
+
+function Drawing.draw_pending_shape(left,top, drawing)
+  local shape = drawing.pending
+  if shape.mode == 'freehand' then
+    Drawing.draw_shape(left,top, drawing, shape)
+  elseif shape.mode == 'line' then
+    local p1 = drawing.points[shape.p1]
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(my)+top)
+  elseif shape.mode == 'manhattan' then
+    local p1 = drawing.points[shape.p1]
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    if math.abs(mx-p1.x) > math.abs(my-p1.y) then
+      love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(p1.y)+top)
+    else
+      love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(p1.x)+left,Drawing.pixels(my)+top)
+    end
+  elseif shape.mode == 'polygon' then
+    -- don't close the loop on a pending polygon
+    local prev = nil
+    for _,point in ipairs(shape.vertices) do
+      local curr = drawing.points[point]
+      if prev then
+        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
+      end
+      prev = curr
+    end
+    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
+  elseif shape.mode == 'circle' then
+    local center = drawing.points[shape.center]
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
+    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
+  elseif shape.mode == 'arc' then
+    local center = drawing.points[shape.center]
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
+      return
+    end
+    shape.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, shape.end_angle)
+    local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
+    love.graphics.arc('line', 'open', cx,cy, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  end
+end
+
+
 function Drawing.in_drawing(drawing, x,y)
   return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width
 end
@@ -435,97 +527,6 @@ function Drawing.near(point, x,y)
   local px,py = Drawing.pixels(x),Drawing.pixels(y)
   local cx,cy = Drawing.pixels(point.x), Drawing.pixels(point.y)
   return (cx-px)*(cx-px) + (cy-py)*(cy-py) < 16
-end
-
-function Drawing.draw_shape(left,top, drawing, shape)
-  if shape.mode == 'freehand' then
-    local prev = nil
-    for _,point in ipairs(shape.points) do
-      if prev then
-        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(point.x)+left,Drawing.pixels(point.y)+top)
-      end
-      prev = point
-    end
-  elseif shape.mode == 'line' or shape.mode == 'manhattan' then
-    local p1 = drawing.points[shape.p1]
-    local p2 = drawing.points[shape.p2]
-    love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(p2.x)+left,Drawing.pixels(p2.y)+top)
-  elseif shape.mode == 'polygon' then
-    local prev = nil
-    for _,point in ipairs(shape.vertices) do
-      local curr = drawing.points[point]
-      if prev then
-        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
-      end
-      prev = curr
-    end
-    -- close the loop
-    local curr = drawing.points[shape.vertices[1]]
-    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
-  elseif shape.mode == 'circle' then
-    local center = drawing.points[shape.center]
-    love.graphics.circle('line', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius))
-  elseif shape.mode == 'arc' then
-    local center = drawing.points[shape.center]
-    love.graphics.arc('line', 'open', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
-  elseif shape.mode == 'deleted' then
-  else
-    print(shape.mode)
-    assert(false)
-  end
-end
-
-function Drawing.draw_pending_shape(left,top, drawing)
-  local shape = drawing.pending
-  if shape.mode == 'freehand' then
-    Drawing.draw_shape(left,top, drawing, shape)
-  elseif shape.mode == 'line' then
-    local p1 = drawing.points[shape.p1]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
-    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
-      return
-    end
-    love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(my)+top)
-  elseif shape.mode == 'manhattan' then
-    local p1 = drawing.points[shape.p1]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
-    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
-      return
-    end
-    if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-      love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(p1.y)+top)
-    else
-      love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(p1.x)+left,Drawing.pixels(my)+top)
-    end
-  elseif shape.mode == 'polygon' then
-    -- don't close the loop on a pending polygon
-    local prev = nil
-    for _,point in ipairs(shape.vertices) do
-      local curr = drawing.points[point]
-      if prev then
-        love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
-      end
-      prev = curr
-    end
-    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
-  elseif shape.mode == 'circle' then
-    local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
-    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
-      return
-    end
-    local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
-    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
-  elseif shape.mode == 'arc' then
-    local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
-    if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
-      return
-    end
-    shape.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, shape.end_angle)
-    local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
-    love.graphics.arc('line', 'open', cx,cy, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
-  end
 end
 
 function Drawing.pixels(n)  -- parts to pixels
