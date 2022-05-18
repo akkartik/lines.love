@@ -92,14 +92,14 @@ function Drawing.draw_pending_shape(left,top, drawing)
   if shape.mode == 'freehand' then
     Drawing.draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
     local p1 = drawing.points[shape.p1]
     love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(my)+top)
   elseif shape.mode == 'manhattan' then
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
@@ -122,7 +122,7 @@ function Drawing.draw_pending_shape(left,top, drawing)
     love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
@@ -130,7 +130,7 @@ function Drawing.draw_pending_shape(left,top, drawing)
     love.graphics.circle('line', cx,cy, geom.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
