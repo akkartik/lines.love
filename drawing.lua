@@ -49,6 +49,159 @@ function Drawing.draw(line, y)
   Drawing.draw_pending_shape(16,line.y, line)
 end
 
+function Drawing.keychord_pressed(chord)
+  if chord == 'C-=' then
+    Drawing_width = Drawing_width/Zoom
+    Zoom = Zoom+0.5
+    Drawing_width = Drawing_width*Zoom
+  elseif chord == 'C--' then
+    Drawing_width = Drawing_width/Zoom
+    Zoom = Zoom-0.5
+    Drawing_width = Drawing_width*Zoom
+  elseif chord == 'C-0' then
+    Drawing_width = Drawing_width/Zoom
+    Zoom = 1.5
+    Drawing_width = Drawing_width*Zoom
+  elseif chord == 'escape' and love.mouse.isDown('1') then
+    local drawing = Drawing.current_drawing()
+    drawing.pending = {}
+  elseif chord == 'C-f' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'freehand'
+  elseif chord == 'C-g' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'polygon'
+  elseif love.mouse.isDown('1') and chord == 'g' then
+    Current_drawing_mode = 'polygon'
+    local drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
+      if drawing.pending.vertices == nil then
+        drawing.pending.vertices = {drawing.pending.p1}
+      end
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
+    end
+    drawing.pending.mode = 'polygon'
+  elseif love.mouse.isDown('1') and chord == 'p' and Current_drawing_mode == 'polygon' then
+    local drawing = Drawing.current_drawing()
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local j = Drawing.insert_point(drawing.points, mx,my)
+    table.insert(drawing.pending.vertices, j)
+  elseif chord == 'C-c' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'circle'
+  elseif love.mouse.isDown('1') and chord == 'a' and Current_drawing_mode == 'circle' then
+    local drawing = Drawing.current_drawing()
+    drawing.pending.mode = 'arc'
+    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local j = Drawing.insert_point(drawing.points, mx,my)
+    local center = drawing.points[drawing.pending.center]
+    drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
+    drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
+  elseif love.mouse.isDown('1') and chord == 'c' then
+    Current_drawing_mode = 'circle'
+    local drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
+      drawing.pending.center = drawing.pending.p1
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.center = drawing.pending.vertices[1]
+    end
+    drawing.pending.mode = 'circle'
+  elseif love.mouse.isDown('1') and chord == 'l' then
+    Current_drawing_mode = 'line'
+    local drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
+    end
+    drawing.pending.mode = 'line'
+  elseif chord == 'C-l' then
+    Current_drawing_mode = 'line'
+    local drawing,_,shape = Drawing.select_shape_at_mouse()
+    if drawing then
+      convert_line(drawing, shape)
+    end
+  elseif love.mouse.isDown('1') and chord == 'm' then
+    Current_drawing_mode = 'manhattan'
+    local drawing = Drawing.select_drawing_at_mouse()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'line' then
+      -- do nothing
+    elseif drawing.pending.mode == 'polygon' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    end
+    drawing.pending.mode = 'manhattan'
+  elseif chord == 'C-m' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'manhattan'
+    local drawing,_,shape = Drawing.select_shape_at_mouse()
+    if drawing then
+      convert_horvert(drawing, shape)
+    end
+  elseif chord == 'C-s' and not love.mouse.isDown('1') then
+    local drawing,_,shape = Drawing.select_shape_at_mouse()
+    if drawing then
+      smoothen(shape)
+    end
+  elseif chord == 'C-v' and not love.mouse.isDown('1') then
+    local drawing,_,p = Drawing.select_point_at_mouse()
+    if drawing then
+      Previous_drawing_mode = Current_drawing_mode
+      Current_drawing_mode = 'move'
+      drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      Lines.current = drawing
+    end
+  elseif love.mouse.isDown('1') and chord == 'v' then
+    local drawing,_,p = Drawing.select_point_at_mouse()
+    if drawing then
+      Previous_drawing_mode = Current_drawing_mode
+      Current_drawing_mode = 'move'
+      drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      Lines.current = drawing
+    end
+  elseif chord == 'C-d' and not love.mouse.isDown('1') then
+    local drawing,i,p = Drawing.select_point_at_mouse()
+    if drawing then
+      for _,shape in ipairs(drawing.shapes) do
+        if Drawing.contains_point(shape, i) then
+          if shape.mode == 'polygon' then
+            local idx = table.find(shape.vertices, i)
+            assert(idx)
+            table.remove(shape.vertices, idx)
+            if #shape.vertices < 3 then
+              shape.mode = 'deleted'
+            end
+          else
+            shape.mode = 'deleted'
+          end
+        end
+      end
+      drawing.points[i].deleted = true
+    end
+    local drawing,_,shape = Drawing.select_shape_at_mouse()
+    if drawing then
+      shape.mode = 'deleted'
+    end
+  elseif chord == 'C-h' and not love.mouse.isDown('1') then
+    local drawing = Drawing.select_drawing_at_mouse()
+    if drawing then
+      drawing.show_help = true
+    end
+  elseif chord == 'escape' and not love.mouse.isDown('1') then
+    for _,line in ipairs(Lines) do
+      if line.mode == 'drawing' then
+        line.show_help = false
+      end
+    end
+  end
+end
+
 function Drawing.current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(Lines) do
@@ -223,7 +376,7 @@ end
 function Drawing.draw_pending_shape(left,top, drawing)
   local shape = drawing.pending
   if shape.mode == 'freehand' then
-    draw_shape(left,top, drawing, shape)
+    Drawing.draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
     local p1 = drawing.points[shape.p1]
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
@@ -260,7 +413,7 @@ function Drawing.draw_pending_shape(left,top, drawing)
       return
     end
     local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
-    love.graphics.circle('line', cx,cy, math.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
+    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
@@ -278,6 +431,14 @@ function Drawing.pixels(n)  -- parts to pixels
 end
 function Drawing.coord(n)  -- pixels to parts
   return math.floor(n*256/Drawing_width)
+end
+
+function table.find(h, x)
+  for k,v in pairs(h) do
+    if v == x then
+      return k
+    end
+  end
 end
 
 return Drawing

@@ -1,6 +1,8 @@
 -- primitives for editing text
 Text = {}
 
+local utf8 = require 'utf8'
+
 function Text.draw(line, line_index, cursor_line, y, cursor_pos)
   love.graphics.setColor(0,0,0)
   local love_text = love.graphics.newText(love.graphics.getFont(), line.data)
@@ -8,6 +10,136 @@ function Text.draw(line, line_index, cursor_line, y, cursor_pos)
   if line_index == cursor_line then
     -- cursor
     love.graphics.print('_', Text.cursor_x(line.data, cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
+  end
+end
+
+function love.textinput(t)
+  if love.mouse.isDown('1') then return end
+  if Lines[Cursor_line].mode == 'drawing' then return end
+  local byte_offset
+  if Cursor_pos > 1 then
+    byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
+  else
+    byte_offset = 0
+  end
+  Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
+  Cursor_pos = Cursor_pos+1
+  save_to_disk(Lines, Filename)
+end
+
+-- Don't handle any keys here that would trigger love.textinput above.
+function Text.keychord_pressed(chord)
+  if chord == 'return' then
+    local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+    table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
+    Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
+    Cursor_line = Cursor_line+1
+    Cursor_pos = 1
+    save_to_disk(Lines, Filename)
+  elseif chord == 'left' then
+    assert(Lines[Cursor_line].mode == 'text')
+    if Cursor_pos > 1 then
+      Cursor_pos = Cursor_pos-1
+    else
+      local new_cursor_line = Cursor_line
+      while new_cursor_line > 1 do
+        new_cursor_line = new_cursor_line-1
+        if Lines[new_cursor_line].mode == 'text' then
+          Cursor_line = new_cursor_line
+          Cursor_pos = #Lines[Cursor_line].data+1
+          break
+        end
+      end
+    end
+  elseif chord == 'right' then
+    assert(Lines[Cursor_line].mode == 'text')
+    if Cursor_pos <= #Lines[Cursor_line].data then
+      Cursor_pos = Cursor_pos+1
+    else
+      local new_cursor_line = Cursor_line
+      while new_cursor_line <= #Lines-1 do
+        new_cursor_line = new_cursor_line+1
+        if Lines[new_cursor_line].mode == 'text' then
+          Cursor_line = new_cursor_line
+          Cursor_pos = 1
+          break
+        end
+      end
+    end
+  elseif chord == 'home' then
+    Cursor_pos = 1
+  elseif chord == 'end' then
+    Cursor_pos = #Lines[Cursor_line].data+1
+  elseif chord == 'backspace' then
+    if Cursor_pos > 1 then
+      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
+      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+      if byte_start then
+        if byte_end then
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
+        else
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
+        end
+        Cursor_pos = Cursor_pos-1
+      end
+    elseif Cursor_line > 1 then
+      if Lines[Cursor_line-1].mode == 'drawing' then
+        table.remove(Lines, Cursor_line-1)
+      else
+        -- join lines
+        Cursor_pos = utf8.len(Lines[Cursor_line-1].data)+1
+        Lines[Cursor_line-1].data = Lines[Cursor_line-1].data..Lines[Cursor_line].data
+        table.remove(Lines, Cursor_line)
+      end
+      Cursor_line = Cursor_line-1
+    end
+    save_to_disk(Lines, Filename)
+  elseif chord == 'delete' then
+    if Cursor_pos <= #Lines[Cursor_line].data then
+      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos+1)
+      if byte_start then
+        if byte_end then
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
+        else
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
+        end
+        -- no change to Cursor_pos
+      end
+    elseif Cursor_line < #Lines then
+      if Lines[Cursor_line+1].mode == 'drawing' then
+        table.remove(Lines, Cursor_line+1)
+      else
+        -- join lines
+        Lines[Cursor_line].data = Lines[Cursor_line].data..Lines[Cursor_line+1].data
+        table.remove(Lines, Cursor_line+1)
+      end
+    end
+    save_to_disk(Lines, Filename)
+  elseif chord == 'up' then
+    assert(Lines[Cursor_line].mode == 'text')
+    local new_cursor_line = Cursor_line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if Lines[new_cursor_line].mode == 'text' then
+        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        Cursor_line = new_cursor_line
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        break
+      end
+    end
+  elseif chord == 'down' then
+    assert(Lines[Cursor_line].mode == 'text')
+    local new_cursor_line = Cursor_line
+    while new_cursor_line < #Lines do
+      new_cursor_line = new_cursor_line+1
+      if Lines[new_cursor_line].mode == 'text' then
+        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        Cursor_line = new_cursor_line
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        break
+      end
+    end
   end
 end
 

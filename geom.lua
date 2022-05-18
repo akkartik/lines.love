@@ -11,10 +11,10 @@ function geom.on_shape(x,y, drawing, shape)
     return geom.on_polygon(x,y, drawing, shape)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
-    return math.dist(center.x,center.y, x,y) == shape.radius
+    return geom.dist(center.x,center.y, x,y) == shape.radius
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
-    local dist = math.dist(center.x,center.y, x,y)
+    local dist = geom.dist(center.x,center.y, x,y)
     if dist < shape.radius*0.95 or dist > shape.radius*1.05 then
       return false
     end
@@ -109,7 +109,7 @@ end
 
 -- is the line between x,y and cx,cy at an angle between s and e?
 function geom.angle_between(ox,oy, x,y, s,e)
-  local angle = math.angle(ox,oy, x,y)
+  local angle = geom.angle(ox,oy, x,y)
   if s > e then
     s,e = e,s
   end
