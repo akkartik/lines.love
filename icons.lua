@@ -40,6 +40,20 @@ function icon.polygon(x, y)
   love.graphics.line(x+4,y+12, x+8,y+2)
 end
 
+function icon.rectangle(x, y)
+  love.graphics.line(x+4,y+8, x+4,y+16)
+  love.graphics.line(x+4,y+16, x+16,y+16)
+  love.graphics.line(x+16,y+16, x+16,y+8)
+  love.graphics.line(x+16,y+8, x+4,y+8)
+end
+
+function icon.square(x, y)
+  love.graphics.line(x+6,y+6, x+6,y+16)
+  love.graphics.line(x+6,y+16, x+16,y+16)
+  love.graphics.line(x+16,y+16, x+16,y+6)
+  love.graphics.line(x+16,y+6, x+6,y+6)
+end
+
 function icon.circle(x, y)
   love.graphics.circle('line', x+10,y+10, 8)
 end

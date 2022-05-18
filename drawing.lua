@@ -63,7 +63,7 @@ function Drawing.draw_shape(left,top, drawing, shape)
     local p1 = drawing.points[shape.p1]
     local p2 = drawing.points[shape.p2]
     love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(p2.x)+left,Drawing.pixels(p2.y)+top)
-  elseif shape.mode == 'polygon' then
+  elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
     local prev = nil
     for _,point in ipairs(shape.vertices) do
       local curr = drawing.points[point]
@@ -82,6 +82,7 @@ function Drawing.draw_shape(left,top, drawing, shape)
     local center = drawing.points[shape.center]
     love.graphics.arc('line', 'open', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
   elseif shape.mode == 'deleted' then
+    -- ignore
   else
     print(shape.mode)
     assert(false)
@@ -90,7 +91,9 @@ end
 
 function Drawing.draw_pending_shape(left,top, drawing)
   local shape = drawing.pending
-  if shape.mode == 'freehand' then
+  if shape.mode == nil then
+    -- nothing pending
+  elseif shape.mode == 'freehand' then
     Drawing.draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
     local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
@@ -121,6 +124,34 @@ function Drawing.draw_pending_shape(left,top, drawing)
       prev = curr
     end
     love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
+  elseif shape.mode == 'rectangle' then
+    local pmx,pmy = love.mouse.getX(), love.mouse.getY()
+    local first = drawing.points[shape.vertices[1]]
+    if #shape.vertices == 1 then
+      love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, pmx,pmy)
+      return
+    end
+    local second = drawing.points[shape.vertices[2]]
+    local mx,my = Drawing.coord(pmx-left), Drawing.coord(pmy-top)
+    local thirdx,thirdy, fourthx,fourthy = Drawing.complete_rectangle(first.x,first.y, second.x,second.y, mx,my)
+    love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, Drawing.pixels(second.x)+left,Drawing.pixels(second.y)+top)
+    love.graphics.line(Drawing.pixels(second.x)+left,Drawing.pixels(second.y)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
+    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top)
+    love.graphics.line(Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top, Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top)
+  elseif shape.mode == 'square' then
+    local pmx,pmy = love.mouse.getX(), love.mouse.getY()
+    local first = drawing.points[shape.vertices[1]]
+    if #shape.vertices == 1 then
+      love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, pmx,pmy)
+      return
+    end
+    local second = drawing.points[shape.vertices[2]]
+    local mx,my = Drawing.coord(pmx-left), Drawing.coord(pmy-top)
+    local thirdx,thirdy, fourthx,fourthy = Drawing.complete_square(first.x,first.y, second.x,second.y, mx,my)
+    love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, Drawing.pixels(second.x)+left,Drawing.pixels(second.y)+top)
+    love.graphics.line(Drawing.pixels(second.x)+left,Drawing.pixels(second.y)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
+    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top)
+    love.graphics.line(Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top, Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
     local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
@@ -138,6 +169,9 @@ function Drawing.draw_pending_shape(left,top, drawing)
     shape.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, shape.end_angle)
     local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
     love.graphics.arc('line', 'open', cx,cy, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  else
+    print(shape.mode)
+    assert(false)
   end
 end
 
@@ -152,12 +186,15 @@ function Drawing.mouse_pressed(drawing, x,y, button)
   elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
     local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=Current_drawing_mode, p1=j}
-  elseif Current_drawing_mode == 'polygon' then
+  elseif Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square' then
     local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=Current_drawing_mode, vertices={j}}
   elseif Current_drawing_mode == 'circle' then
     local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=Current_drawing_mode, center=j}
+  else
+    print(Current_drawing_mode)
+    assert(false)
   end
   Lines.current = drawing
 end
@@ -184,6 +221,9 @@ function Drawing.update()
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
     end
+  else
+    print(Current_drawing_mode)
+    assert(false)
   end
 end
 
@@ -221,10 +261,37 @@ function Drawing.mouse_released(x,y, button)
       elseif Lines.current.pending.mode == 'polygon' then
         local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local j = Drawing.insert_point(Lines.current.points, mx,my)
+          table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, mx,my))
           table.insert(Lines.current.shapes, Lines.current.pending)
         end
-        table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif Lines.current.pending.mode == 'rectangle' then
+        assert(#Lines.current.pending.vertices <= 2)
+        if #Lines.current.pending.vertices == 2 then
+          local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
+          if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+            local first = Lines.current.points[Lines.current.pending.vertices[1]]
+            local second = Lines.current.points[Lines.current.pending.vertices[2]]
+            local thirdx,thirdy, fourthx,fourthy = Drawing.complete_rectangle(first.x,first.y, second.x,second.y, mx,my)
+            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, thirdx,thirdy))
+            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, fourthx,fourthy))
+            table.insert(Lines.current.shapes, Lines.current.pending)
+          end
+        else
+          -- too few points; draw nothing
+        end
+      elseif Lines.current.pending.mode == 'square' then
+        assert(#Lines.current.pending.vertices <= 2)
+        if #Lines.current.pending.vertices == 2 then
+          local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
+          if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+            local first = Lines.current.points[Lines.current.pending.vertices[1]]
+            local second = Lines.current.points[Lines.current.pending.vertices[2]]
+            local thirdx,thirdy, fourthx,fourthy = Drawing.complete_square(first.x,first.y, second.x,second.y, mx,my)
+            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, thirdx,thirdy))
+            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, fourthx,fourthy))
+            table.insert(Lines.current.shapes, Lines.current.pending)
+          end
+        end
       elseif Lines.current.pending.mode == 'circle' then
         local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
@@ -239,6 +306,9 @@ function Drawing.mouse_released(x,y, button)
           Lines.current.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, Lines.current.pending.end_angle)
           table.insert(Lines.current.shapes, Lines.current.pending)
         end
+      else
+        print(Lines.current.pending.mode)
+        assert(false)
       end
       Lines.current.pending = {}
       Lines.current = nil
@@ -277,7 +347,37 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'polygon'
-  elseif love.mouse.isDown('1') and chord == 'p' and Current_drawing_mode == 'polygon' then
+  elseif chord == 'C-r' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'rectangle'
+  elseif love.mouse.isDown('1') and chord == 'r' then
+    Current_drawing_mode = 'rectangle'
+    local drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
+      if drawing.pending.vertices == nil then
+        drawing.pending.vertices = {drawing.pending.p1}
+      end
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
+    end
+    drawing.pending.mode = 'rectangle'
+  elseif chord == 'C-s' and not love.mouse.isDown('1') then
+    Current_drawing_mode = 'square'
+  elseif love.mouse.isDown('1') and chord == 's' then
+    Current_drawing_mode = 'square'
+    local drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+    elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
+      if drawing.pending.vertices == nil then
+        drawing.pending.vertices = {drawing.pending.p1}
+      end
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
+    end
+    drawing.pending.mode = 'square'
+  elseif love.mouse.isDown('1') and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
     local drawing = Drawing.current_drawing()
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
@@ -395,6 +495,62 @@ function Drawing.keychord_pressed(chord)
       end
     end
   end
+end
+
+function Drawing.complete_rectangle(firstx,firsty, secondx,secondy, x,y)
+  if firstx == secondx then
+    local thirdx = y
+    local thirdy = secondy
+    love.graphics.line(Drawing.pixels(secondx)+left,Drawing.pixels(secondy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
+    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(firsty)+top)
+    return thirdx,thirdy, thirdx,firsty
+  end
+  if firsty == secondy then
+    local thirdx = secondx
+    local thirdy = y
+    love.graphics.line(Drawing.pixels(secondx)+left,Drawing.pixels(secondy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
+    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(firstx)+left,Drawing.pixels(thirdy)+top)
+    return
+  end
+  local first_slope = (secondy-firsty)/(secondx-firstx)
+  -- slope of second edge:
+  --    -1/first_slope
+  -- equation of line containing the second edge:
+  --    y-secondy = -1/first_slope*(x-secondx)
+  -- => 1/first_slope*x + y + (- secondy - secondx/first_slope) = 0
+  -- now we want to find the point on this line that's closest to the mouse pointer.
+  -- https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_an_equation
+  local a = 1/first_slope
+  local c = -secondy - secondx/first_slope
+  local thirdx = ((x-a*y) - a*c) / (a*a + 1)
+  local thirdy = (a*(-x + a*y) - c) / (a*a + 1)
+  -- slope of third edge = first_slope
+  -- equation of line containing third edge:
+  --     y - thirdy = first_slope*(x-thirdx)
+  --  => -first_slope*x + y + (-thirdy + thirdx*first_slope) = 0
+  -- now we want to find the point on this line that's closest to the first point
+  local a = -first_slope
+  local c = -thirdy + thirdx*first_slope
+  local fourthx = ((firstx-a*firsty) - a*c) / (a*a + 1)
+  local fourthy = (a*(-firstx + a*firsty) - c) / (a*a + 1)
+  return thirdx,thirdy, fourthx,fourthy
+end
+
+function Drawing.complete_square(firstx,firsty, secondx,secondy, x,y)
+  -- use x,y only to decide which side of the first edge to complete the square on
+  local deltax = secondx-firstx
+  local deltay = secondy-firsty
+  local thirdx = secondx+deltay
+  local thirdy = secondy-deltax
+  if not geom.same_side(firstx,firsty, secondx,secondy, thirdx,thirdy, x,y) then
+    deltax = -deltax
+    deltay = -deltay
+    thirdx = secondx+deltay
+    thirdy = secondy-deltax
+  end
+  local fourthx = firstx+deltay
+  local fourthy = firsty-deltax
+  return thirdx,thirdy, fourthx,fourthy
 end
 
 function Drawing.current_drawing()

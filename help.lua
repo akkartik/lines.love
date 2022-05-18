@@ -32,6 +32,14 @@ function draw_help_without_mouse_pressed(drawing)
     love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y, 0, Zoom)
     y = y+15*Zoom
   end
+  if Current_drawing_mode ~= 'rectangle' then
+    love.graphics.print("* Press 'ctrl+r' to switch to drawing rectangles", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  end
+  if Current_drawing_mode ~= 'square' then
+    love.graphics.print("* Press 'ctrl+s' to switch to drawing squares", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  end
   love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to Zoom in or out", 16+30,y, 0, Zoom)
   y = y+15*Zoom
   love.graphics.print("* Press 'ctrl+0' to reset Zoom", 16+30,y, 0, Zoom)
@@ -88,6 +96,14 @@ function draw_help_with_mouse_pressed(drawing)
   end
   if Current_drawing_mode ~= 'polygon' then
     love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  end
+  if Current_drawing_mode ~= 'rectangle' then
+    love.graphics.print("* Press 'g' to switch to drawing rectangles", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  end
+  if Current_drawing_mode ~= 'square' then
+    love.graphics.print("* Press 'g' to switch to drawing squares", 16+30,y, 0, Zoom)
     y = y+15*Zoom
   end
   love.graphics.setColor(0,0.5,0, 0.1)

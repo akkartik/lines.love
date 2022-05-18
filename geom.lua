@@ -7,7 +7,7 @@ function geom.on_shape(x,y, drawing, shape)
     return geom.on_line(x,y, drawing, shape)
   elseif shape.mode == 'manhattan' then
     return x == drawing.points[shape.p1].x or y == drawing.points[shape.p1].y
-  elseif shape.mode == 'polygon' then
+  elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
     return geom.on_polygon(x,y, drawing, shape)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
@@ -80,6 +80,28 @@ function geom.on_polygon(x,y, drawing, shape)
     prev = p
   end
   return geom.on_line(x,y, drawing, {p1=shape.vertices[1], p2=shape.vertices[#shape.vertices]})
+end
+
+-- are (x3,y3) and (x4,y4) on the same side of the line between (x1,y1) and (x2,y2)
+function geom.same_side(x1,y1, x2,y2, x3,y3, x4,y4)
+  if x1 == x2 then
+    return math.sign(x3-x1) == math.sign(x4-x1)
+  end
+  if y1 == y2 then
+    return math.sign(y3-y1) == math.sign(y4-y1)
+  end
+  local m = (y2-y1)/(x2-x1)
+  return math.sign(m*(x3-x1) + y1-y3) == math.sign(m*(x4-x1) + y1-y4)
+end
+
+function math.sign(x)
+  if x > 0 then
+    return 1
+  elseif x == 0 then
+    return 0
+  elseif x < 0 then
+    return -1
+  end
 end
 
 function geom.angle_with_hint(x1, y1, x2, y2, hint)
