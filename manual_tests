@@ -1,6 +1,8 @@
 file load:
   cursor_line = 1
   first line is a drawing -> cursor_line = 2
+click on text -> cursor moves
+click on drawing -> cursor doesn't move
 create drawing -> cursor bumps down below drawing
 backspace
   cursor_pos == 0, previous line is a drawing -> delete drawing, cursor still visible at start of line

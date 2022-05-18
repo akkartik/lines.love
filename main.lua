@@ -160,7 +160,7 @@ function love.mousepressed(x,y, button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       -- move cursor
-      if x >= 16 and y >= line.y and y < y+15*Zoom then
+      if x >= 16 and y >= line.y and y < line.y+15*Zoom then
         Cursor_line = line_index
         Cursor_pos = Text.nearest_cursor_pos(line.data, x, 1)
       end
