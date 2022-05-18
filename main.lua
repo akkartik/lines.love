@@ -95,7 +95,7 @@ function love.filedropped(file)
 end
 
 function love.draw()
-  button_handlers = {}
+  Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
   love.graphics.setColor(0, 0, 0)
