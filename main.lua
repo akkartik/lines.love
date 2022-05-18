@@ -275,12 +275,34 @@ function keychord_pressed(chord)
       Cursor_pos = 1
     end
   elseif chord == 'left' then
+    assert(Lines[Cursor_line].mode == 'text')
     if Cursor_pos > 1 then
       Cursor_pos = Cursor_pos-1
+    else
+      local new_cursor_line = Cursor_line
+      while new_cursor_line > 1 do
+        new_cursor_line = new_cursor_line-1
+        if Lines[new_cursor_line].mode == 'text' then
+          Cursor_line = new_cursor_line
+          Cursor_pos = #Lines[Cursor_line].data+1
+          break
+        end
+      end
     end
   elseif chord == 'right' then
+    assert(Lines[Cursor_line].mode == 'text')
     if Cursor_pos <= #Lines[Cursor_line].data then
       Cursor_pos = Cursor_pos+1
+    else
+      local new_cursor_line = Cursor_line
+      while new_cursor_line <= #Lines-1 do
+        new_cursor_line = new_cursor_line+1
+        if Lines[new_cursor_line].mode == 'text' then
+          Cursor_line = new_cursor_line
+          Cursor_pos = 1
+          break
+        end
+      end
     end
   elseif chord == 'home' then
     Cursor_pos = 1
