@@ -170,63 +170,7 @@ function love.mousepressed(x,y, button)
 end
 
 function love.mousereleased(x,y, button)
-  if Current_drawing_mode == 'move' then
-    Current_drawing_mode = Previous_drawing_mode
-    Previous_drawing_mode = nil
-  elseif Lines.current then
-    if Lines.current.pending then
-      if Lines.current.pending.mode == 'freehand' then
-        -- the last point added during update is good enough
-        table.insert(Lines.current.shapes, Lines.current.pending)
-      elseif Lines.current.pending.mode == 'line' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local j = Drawing.insert_point(Lines.current.points, mx,my)
-          Lines.current.pending.p2 = j
-          table.insert(Lines.current.shapes, Lines.current.pending)
-        end
-      elseif Lines.current.pending.mode == 'manhattan' then
-        local p1 = Lines.current.points[Lines.current.pending.p1]
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-            local j = Drawing.insert_point(Lines.current.points, mx, p1.y)
-            Lines.current.pending.p2 = j
-          else
-            local j = Drawing.insert_point(Lines.current.points, p1.x, my)
-            Lines.current.pending.p2 = j
-          end
-          local p2 = Lines.current.points[Lines.current.pending.p2]
-          love.mouse.setPosition(16+Drawing.pixels(p2.x), Lines.current.y+Drawing.pixels(p2.y))
-          table.insert(Lines.current.shapes, Lines.current.pending)
-        end
-      elseif Lines.current.pending.mode == 'polygon' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local j = Drawing.insert_point(Lines.current.points, mx,my)
-          table.insert(Lines.current.shapes, Lines.current.pending)
-        end
-        table.insert(Lines.current.shapes, Lines.current.pending)
-      elseif Lines.current.pending.mode == 'circle' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local center = Lines.current.points[Lines.current.pending.center]
-          Lines.current.pending.radius = math.dist(center.x,center.y, mx,my)
-          table.insert(Lines.current.shapes, Lines.current.pending)
-        end
-      elseif Lines.current.pending.mode == 'arc' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local center = Lines.current.points[Lines.current.pending.center]
-          Lines.current.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, Lines.current.pending.end_angle)
-          table.insert(Lines.current.shapes, Lines.current.pending)
-        end
-      end
-      Lines.current.pending = {}
-      Lines.current = nil
-    end
-  end
-  save_to_disk(Lines, Filename)
+  Drawing.mouse_released(x,y, button)
 end
 
 function keychord_pressed(chord)
