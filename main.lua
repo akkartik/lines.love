@@ -578,7 +578,7 @@ function keychord_pressed(chord)
         cursor_line = cursor_line-1
         cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
       else
-        cursor_line = cursor_line+1
+        cursor_line = cursor_line-1
       end
     end
   elseif chord == 'down' then
