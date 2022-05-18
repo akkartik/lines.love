@@ -268,6 +268,7 @@ function keychord_pressed(chord)
     Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
     Cursor_line = Cursor_line+1
     Cursor_pos = 1
+    save_to_disk(Lines, Filename)
   elseif chord == 'left' then
     assert(Lines[Cursor_line].mode == 'text')
     if Cursor_pos > 1 then
@@ -326,6 +327,7 @@ function keychord_pressed(chord)
       end
       Cursor_line = Cursor_line-1
     end
+    save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
     if Cursor_pos <= #Lines[Cursor_line].data then
       local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
@@ -347,6 +349,7 @@ function keychord_pressed(chord)
         table.remove(Lines, Cursor_line+1)
       end
     end
+    save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
     local new_cursor_line = Cursor_line
