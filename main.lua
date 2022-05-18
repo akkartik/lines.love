@@ -42,7 +42,7 @@ Cursor_line = 1
 --  ^cursor_pos = 2
 --   ...
 --               ^cursor_pos past end of line is 15
-Cursor_pos = #Lines[Cursor_line].data+1
+Cursor_pos = #Lines[Cursor_line].data+1  -- in Unicode codepoints
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
