@@ -268,12 +268,10 @@ function keychord_pressed(chord)
   -- shortcuts for text
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
-    if byte_offset then
-      table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
-      Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
-      Cursor_line = Cursor_line+1
-      Cursor_pos = 1
-    end
+    table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
+    Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
+    Cursor_line = Cursor_line+1
+    Cursor_pos = 1
   elseif chord == 'left' then
     assert(Lines[Cursor_line].mode == 'text')
     if Cursor_pos > 1 then
