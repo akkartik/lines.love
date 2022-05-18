@@ -242,9 +242,7 @@ function love.mousereleased(x,y, button)
       Lines.current = nil
     end
   end
-  if Filename then
-    save_to_disk(Lines, Filename)
-  end
+  save_to_disk(Lines, Filename)
 end
 
 function love.textinput(t)
@@ -258,9 +256,7 @@ function love.textinput(t)
   end
   Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
   Cursor_pos = Cursor_pos+1
-  if Filename then
-    save_to_disk(Lines, Filename)
-  end
+  save_to_disk(Lines, Filename)
 end
 
 function keychord_pressed(chord)
