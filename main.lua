@@ -29,14 +29,14 @@ local utf8 = require 'utf8'
 -- We'll continue to persist them just to keep the option open to continue
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
-lines = {{mode='text', data=''}}
+Lines = {{mode='text', data=''}}
 cursor_line = 1
 -- this is a line
 -- ^cursor_pos = 1
 --  ^cursor_pos = 2
 --   ...
 --               ^cursor_pos past end of line is 15
-cursor_pos = #lines[cursor_line].data+1
+cursor_pos = #Lines[cursor_line].data+1
 
 screenw, screenh, screenflags = 0, 0, nil
 
@@ -71,8 +71,8 @@ function love.load(arg)
   if #arg > 0 then
     filename = arg[1]
   end
-  lines = load_from_disk(filename)
-  for i,line in ipairs(lines) do
+  Lines = load_from_disk(filename)
+  for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       cursor_line = i
     end
@@ -83,9 +83,9 @@ end
 function love.filedropped(file)
   filename = file:getFilename()
   file:open('r')
-  lines = load_from_file(file)
+  Lines = load_from_file(file)
   file:close()
-  for i,line in ipairs(lines) do
+  for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       cursor_line = i
     end
@@ -99,14 +99,14 @@ function love.draw()
   love.graphics.rectangle('fill', 0, 0, screenw-1, screenh-1)
   love.graphics.setColor(0, 0, 0)
   local y = 0
-  for i,line in ipairs(lines) do
+  for i,line in ipairs(Lines) do
     y = y+15*zoom
     line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = icon.insert_drawing,
         onpress1 = function()
-                     table.insert(lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                     table.insert(Lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                      if cursor_line >= i then
                        cursor_line = cursor_line+1
                      end
@@ -177,9 +177,9 @@ end
 
 function love.update(dt)
   if love.mouse.isDown('1') then
-    if lines.current then
-      if lines.current.mode == 'drawing' then
-        local drawing = lines.current
+    if Lines.current then
+      if Lines.current.mode == 'drawing' then
+        local drawing = Lines.current
         local x, y = love.mouse.getX(), love.mouse.getY()
         if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
           if drawing.pending.mode == 'freehand' then
@@ -193,7 +193,7 @@ function love.update(dt)
       end
     end
   elseif current_mode == 'move' then
-    local drawing = lines.current
+    local drawing = Lines.current
     local x, y = love.mouse.getX(), love.mouse.getY()
     if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
       local mx,my = coord(x-16), coord(y-drawing.y)
@@ -206,7 +206,7 @@ end
 function love.mousepressed(x,y, button)
   propagate_to_button_handlers(x,y, button)
 
-  for i,line in ipairs(lines) do
+  for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       -- move cursor
       if x >= 16 and y >= line.y and y < y+15*zoom then
@@ -229,7 +229,7 @@ function love.mousepressed(x,y, button)
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
           drawing.pending = {mode=current_mode, center=j}
         end
-        lines.current = drawing
+        Lines.current = drawing
       end
     end
   end
@@ -239,61 +239,61 @@ function love.mousereleased(x,y, button)
   if current_mode == 'move' then
     current_mode = previous_mode
     previous_mode = nil
-  elseif lines.current then
-    if lines.current.pending then
-      if lines.current.pending.mode == 'freehand' then
+  elseif Lines.current then
+    if Lines.current.pending then
+      if Lines.current.pending.mode == 'freehand' then
         -- the last point added during update is good enough
-        table.insert(lines.current.shapes, lines.current.pending)
-      elseif lines.current.pending.mode == 'line' then
-        local mx,my = coord(x-16), coord(y-lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
-          local j = insert_point(lines.current.points, mx,my)
-          lines.current.pending.p2 = j
-          table.insert(lines.current.shapes, lines.current.pending)
+        table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif Lines.current.pending.mode == 'line' then
+        local mx,my = coord(x-16), coord(y-Lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+          local j = insert_point(Lines.current.points, mx,my)
+          Lines.current.pending.p2 = j
+          table.insert(Lines.current.shapes, Lines.current.pending)
         end
-      elseif lines.current.pending.mode == 'manhattan' then
-        local p1 = lines.current.points[lines.current.pending.p1]
-        local mx,my = coord(x-16), coord(y-lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
+      elseif Lines.current.pending.mode == 'manhattan' then
+        local p1 = Lines.current.points[Lines.current.pending.p1]
+        local mx,my = coord(x-16), coord(y-Lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-            local j = insert_point(lines.current.points, mx, p1.y)
-            lines.current.pending.p2 = j
+            local j = insert_point(Lines.current.points, mx, p1.y)
+            Lines.current.pending.p2 = j
           else
-            local j = insert_point(lines.current.points, p1.x, my)
-            lines.current.pending.p2 = j
+            local j = insert_point(Lines.current.points, p1.x, my)
+            Lines.current.pending.p2 = j
           end
-          local p2 = lines.current.points[lines.current.pending.p2]
-          love.mouse.setPosition(16+pixels(p2.x), lines.current.y+pixels(p2.y))
-          table.insert(lines.current.shapes, lines.current.pending)
+          local p2 = Lines.current.points[Lines.current.pending.p2]
+          love.mouse.setPosition(16+pixels(p2.x), Lines.current.y+pixels(p2.y))
+          table.insert(Lines.current.shapes, Lines.current.pending)
         end
-      elseif lines.current.pending.mode == 'polygon' then
-        local mx,my = coord(x-16), coord(y-lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
-          local j = insert_point(lines.current.points, mx,my)
-          table.insert(lines.current.shapes, lines.current.pending)
+      elseif Lines.current.pending.mode == 'polygon' then
+        local mx,my = coord(x-16), coord(y-Lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+          local j = insert_point(Lines.current.points, mx,my)
+          table.insert(Lines.current.shapes, Lines.current.pending)
         end
-        table.insert(lines.current.shapes, lines.current.pending)
-      elseif lines.current.pending.mode == 'circle' then
-        local mx,my = coord(x-16), coord(y-lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
-          local center = lines.current.points[lines.current.pending.center]
-          lines.current.pending.radius = math.dist(center.x,center.y, mx,my)
-          table.insert(lines.current.shapes, lines.current.pending)
+        table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif Lines.current.pending.mode == 'circle' then
+        local mx,my = coord(x-16), coord(y-Lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+          local center = Lines.current.points[Lines.current.pending.center]
+          Lines.current.pending.radius = math.dist(center.x,center.y, mx,my)
+          table.insert(Lines.current.shapes, Lines.current.pending)
         end
-      elseif lines.current.pending.mode == 'arc' then
-        local mx,my = coord(x-16), coord(y-lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < lines.current.h then
-          local center = lines.current.points[lines.current.pending.center]
-          lines.current.pending.end_angle = angle_with_hint(center.x,center.y, mx,my, lines.current.pending.end_angle)
-          table.insert(lines.current.shapes, lines.current.pending)
+      elseif Lines.current.pending.mode == 'arc' then
+        local mx,my = coord(x-16), coord(y-Lines.current.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+          local center = Lines.current.points[Lines.current.pending.center]
+          Lines.current.pending.end_angle = angle_with_hint(center.x,center.y, mx,my, Lines.current.pending.end_angle)
+          table.insert(Lines.current.shapes, Lines.current.pending)
         end
       end
-      lines.current.pending = {}
-      lines.current = nil
+      Lines.current.pending = {}
+      Lines.current = nil
     end
   end
   if filename then
-    save_to_disk(lines, filename)
+    save_to_disk(Lines, filename)
   end
 end
 
@@ -506,17 +506,17 @@ end
 
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
-  if lines[cursor_line].mode == 'drawing' then return end
+  if Lines[cursor_line].mode == 'drawing' then return end
   local byteoffset
   if cursor_pos > 1 then
-    byteoffset = utf8.offset(lines[cursor_line].data, cursor_pos-1)
+    byteoffset = utf8.offset(Lines[cursor_line].data, cursor_pos-1)
   else
     byteoffset = 0
   end
-  lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byteoffset)..t..string.sub(lines[cursor_line].data, byteoffset+1)
+  Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byteoffset)..t..string.sub(Lines[cursor_line].data, byteoffset+1)
   cursor_pos = cursor_pos+1
   if filename then
-    save_to_disk(lines, filename)
+    save_to_disk(Lines, filename)
   end
 end
 
@@ -524,29 +524,29 @@ function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   -- shortcuts for text
   if chord == 'return' then
-    table.insert(lines, cursor_line+1, {mode='text', data=''})
+    table.insert(Lines, cursor_line+1, {mode='text', data=''})
     cursor_line = cursor_line+1
     cursor_pos = 1
   elseif chord == 'backspace' then
     if cursor_pos > 1 then
-      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos-1)
-      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos)
+      local byte_start = utf8.offset(Lines[cursor_line].data, cursor_pos-1)
+      local byte_end = utf8.offset(Lines[cursor_line].data, cursor_pos)
       if byte_start then
         if byte_end then
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
+          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)..string.sub(Lines[cursor_line].data, byte_end)
         else
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
+          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)
         end
         cursor_pos = cursor_pos-1
       end
     elseif cursor_line > 1 then
-      if lines[cursor_line-1].mode == 'drawing' then
-        table.remove(lines, cursor_line-1)
+      if Lines[cursor_line-1].mode == 'drawing' then
+        table.remove(Lines, cursor_line-1)
       else
-        -- join lines
-        cursor_pos = utf8.len(lines[cursor_line-1].data)+1
-        lines[cursor_line-1].data = lines[cursor_line-1].data..lines[cursor_line].data
-        table.remove(lines, cursor_line)
+        -- join Lines
+        cursor_pos = utf8.len(Lines[cursor_line-1].data)+1
+        Lines[cursor_line-1].data = Lines[cursor_line-1].data..Lines[cursor_line].data
+        table.remove(Lines, cursor_line)
       end
       cursor_line = cursor_line-1
     end
@@ -555,48 +555,48 @@ function keychord_pressed(chord)
       cursor_pos = cursor_pos - 1
     end
   elseif chord == 'right' then
-    if cursor_pos <= #lines[cursor_line].data then
+    if cursor_pos <= #Lines[cursor_line].data then
       cursor_pos = cursor_pos + 1
     end
   elseif chord == 'home' then
     cursor_pos = 1
   elseif chord == 'end' then
-    cursor_pos = #lines[cursor_line].data+1
+    cursor_pos = #Lines[cursor_line].data+1
   elseif chord == 'delete' then
-    if cursor_pos <= #lines[cursor_line].data then
-      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos)
-      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos+1)
+    if cursor_pos <= #Lines[cursor_line].data then
+      local byte_start = utf8.offset(Lines[cursor_line].data, cursor_pos)
+      local byte_end = utf8.offset(Lines[cursor_line].data, cursor_pos+1)
       if byte_start then
         if byte_end then
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
+          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)..string.sub(Lines[cursor_line].data, byte_end)
         else
-          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
+          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)
         end
         -- no change to cursor_pos
       end
     end
   -- transitioning between drawings and text
   elseif chord == 'up' then
-    assert(lines[cursor_line].mode == 'text')
+    assert(Lines[cursor_line].mode == 'text')
     local new_cursor_line = cursor_line
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
-      if lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(lines[new_cursor_line].data, cursor_pos)
+      if Lines[new_cursor_line].mode == 'text' then
+        local old_x = cursor_x(Lines[new_cursor_line].data, cursor_pos)
         cursor_line = new_cursor_line
-        cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+        cursor_pos = nearest_cursor_pos(Lines[cursor_line].data, old_x, cursor_pos)
         break
       end
     end
   elseif chord == 'down' then
-    assert(lines[cursor_line].mode == 'text')
+    assert(Lines[cursor_line].mode == 'text')
     local new_cursor_line = cursor_line
-    while new_cursor_line < #lines do
+    while new_cursor_line < #Lines do
       new_cursor_line = new_cursor_line+1
-      if lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(lines[new_cursor_line].data, cursor_pos)
+      if Lines[new_cursor_line].mode == 'text' then
+        local old_x = cursor_x(Lines[new_cursor_line].data, cursor_pos)
         cursor_line = new_cursor_line
-        cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
+        cursor_pos = nearest_cursor_pos(Lines[cursor_line].data, old_x, cursor_pos)
         break
       end
     end
@@ -706,7 +706,7 @@ function keychord_pressed(chord)
       previous_mode = current_mode
       current_mode = 'move'
       drawing.pending = {mode=current_mode, target_point=p}
-      lines.current = drawing
+      Lines.current = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
     local drawing,_,p = select_point_at_mouse()
@@ -714,7 +714,7 @@ function keychord_pressed(chord)
       previous_mode = current_mode
       current_mode = 'move'
       drawing.pending = {mode=current_mode, target_point=p}
-      lines.current = drawing
+      Lines.current = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then
     local drawing,i,p = select_point_at_mouse()
@@ -745,7 +745,7 @@ function keychord_pressed(chord)
       drawing.show_help = true
     end
   elseif chord == 'escape' and not love.mouse.isDown('1') then
-    for _,line in ipairs(lines) do
+    for _,line in ipairs(Lines) do
       if line.mode == 'drawing' then
         line.show_help = false
       end
@@ -795,7 +795,7 @@ end
 
 function current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
-  for _,drawing in ipairs(lines) do
+  for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
         return drawing
@@ -806,7 +806,7 @@ function current_drawing()
 end
 
 function select_shape_at_mouse()
-  for _,drawing in ipairs(lines) do
+  for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
@@ -823,7 +823,7 @@ function select_shape_at_mouse()
 end
 
 function select_point_at_mouse()
-  for _,drawing in ipairs(lines) do
+  for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
@@ -840,7 +840,7 @@ function select_point_at_mouse()
 end
 
 function select_drawing_at_mouse()
-  for _,drawing in ipairs(lines) do
+  for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
