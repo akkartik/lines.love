@@ -270,6 +270,19 @@ function keychord_pressed(chord)
     table.insert(Lines, Cursor_line+1, {mode='text', data=''})
     Cursor_line = Cursor_line+1
     Cursor_pos = 1
+  elseif chord == 'left' then
+    if Cursor_pos > 1 then
+      Cursor_pos = Cursor_pos-1
+    end
+  elseif chord == 'right' then
+    if Cursor_pos <= #Lines[Cursor_line].data then
+      Cursor_pos = Cursor_pos+1
+    end
+  elseif chord == 'home' then
+    Cursor_pos = 1
+  elseif chord == 'end' then
+    Cursor_pos = #Lines[Cursor_line].data+1
+  -- transitioning between drawings and text
   elseif chord == 'backspace' then
     if Cursor_pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
@@ -293,18 +306,6 @@ function keychord_pressed(chord)
       end
       Cursor_line = Cursor_line-1
     end
-  elseif chord == 'left' then
-    if Cursor_pos > 1 then
-      Cursor_pos = Cursor_pos-1
-    end
-  elseif chord == 'right' then
-    if Cursor_pos <= #Lines[Cursor_line].data then
-      Cursor_pos = Cursor_pos+1
-    end
-  elseif chord == 'home' then
-    Cursor_pos = 1
-  elseif chord == 'end' then
-    Cursor_pos = #Lines[Cursor_line].data+1
   elseif chord == 'delete' then
     if Cursor_pos <= #Lines[Cursor_line].data then
       local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
@@ -318,7 +319,6 @@ function keychord_pressed(chord)
         -- no change to Cursor_pos
       end
     end
-  -- transitioning between drawings and text
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
     local new_cursor_line = Cursor_line
