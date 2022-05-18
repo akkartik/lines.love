@@ -299,7 +299,7 @@ function keychord_pressed(chord)
       if Lines[Cursor_line-1].mode == 'drawing' then
         table.remove(Lines, Cursor_line-1)
       else
-        -- join Lines
+        -- join lines
         Cursor_pos = utf8.len(Lines[Cursor_line-1].data)+1
         Lines[Cursor_line-1].data = Lines[Cursor_line-1].data..Lines[Cursor_line].data
         table.remove(Lines, Cursor_line)
@@ -317,6 +317,14 @@ function keychord_pressed(chord)
           Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
         end
         -- no change to Cursor_pos
+      end
+    elseif Cursor_line < #Lines then
+      if Lines[Cursor_line+1].mode == 'drawing' then
+        table.remove(Lines, Cursor_line+1)
+      else
+        -- join lines
+        Lines[Cursor_line].data = Lines[Cursor_line].data..Lines[Cursor_line+1].data
+        table.remove(Lines, Cursor_line+1)
       end
     end
   elseif chord == 'up' then
