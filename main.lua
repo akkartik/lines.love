@@ -1,6 +1,7 @@
 local utf8 = require 'utf8'
 require 'keychord'
 require 'button'
+local Text = require 'text'
 local Drawing = require 'drawing'
 
 -- a line is either text or a drawing
@@ -120,13 +121,7 @@ function love.draw()
       y = y+pixels(line.h)
       Drawing.draw(line, y)
     else
-      love.graphics.setColor(0,0,0)
-      local text = love.graphics.newText(love.graphics.getFont(), line.data)
-      love.graphics.draw(text, 25,y, 0, Zoom)
-      if line_index == Cursor_line then
-        -- cursor
-        love.graphics.print('_', cursor_x(line.data, Cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
-      end
+      Text.draw(line, line_index, Cursor_line, y, Cursor_pos)
     end
   end
 end
@@ -167,7 +162,7 @@ function love.mousepressed(x,y, button)
       -- move cursor
       if x >= 16 and y >= line.y and y < y+15*Zoom then
         Cursor_line = line_index
-        Cursor_pos = nearest_cursor_pos(line.data, x, 1)
+        Cursor_pos = Text.nearest_cursor_pos(line.data, x, 1)
       end
     elseif line.mode == 'drawing' then
       local drawing = line
@@ -538,9 +533,9 @@ function keychord_pressed(chord)
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
       if Lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
         Cursor_line = new_cursor_line
-        Cursor_pos = nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
         break
       end
     end
@@ -550,9 +545,9 @@ function keychord_pressed(chord)
     while new_cursor_line < #Lines do
       new_cursor_line = new_cursor_line+1
       if Lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
         Cursor_line = new_cursor_line
-        Cursor_pos = nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
         break
       end
     end
@@ -707,46 +702,6 @@ function keychord_pressed(chord)
       end
     end
   end
-end
-
-function cursor_x(line, cursor_pos)
-  local line_before_cursor = line:sub(1, cursor_pos-1)
-  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  return 25+text_before_cursor:getWidth()*Zoom
-end
-
-function nearest_cursor_pos(line, x, hint)
-  if x == 0 then
-    return 1
-  end
-  local max_x = cursor_x(line, #line+1)
-  if x > max_x then
-    return #line+1
-  end
-  local currx = cursor_x(line, hint)
-  if currx > x-2 and currx < x+2 then
-    return hint
-  end
-  local left, right = 1, #line+1
-  if currx > x then
-    right = hint
-  else
-    left = hint
-  end
-  while left < right-1 do
-    local curr = math.floor((left+right)/2)
-    local currxmin = cursor_x(line, curr)
-    local currxmax = cursor_x(line, curr+1)
-    if currxmin <= x and x < currxmax then
-      return curr
-    end
-    if currxmin > x then
-      right = curr
-    else
-      left = curr
-    end
-  end
-  return right
 end
 
 function current_drawing()
