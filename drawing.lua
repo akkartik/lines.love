@@ -46,6 +46,7 @@ function Drawing.draw(line, y)
       end
     end
   end
+  love.graphics.setColor(0.75,0.75,0.75)
   Drawing.draw_pending_shape(16,line.y, line)
 end
 
