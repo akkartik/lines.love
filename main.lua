@@ -30,88 +30,88 @@ local utf8 = require 'utf8'
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
-cursor_line = 1
+Cursor_line = 1
 -- this is a line
 -- ^cursor_pos = 1
 --  ^cursor_pos = 2
 --   ...
 --               ^cursor_pos past end of line is 15
-cursor_pos = #Lines[cursor_line].data+1
+Cursor_pos = #Lines[Cursor_line].data+1
 
-screenw, screenh, screenflags = 0, 0, nil
+Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
-current_mode = 'line'
-previous_mode = nil
+Current_mode = 'line'
+Previous_mode = nil
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
--- into 256 parts. `drawingw` describes their width in pixels.
-drawingw = nil  -- pixels
+-- into 256 parts. `Drawing_width` describes their width in pixels.
+Drawing_width = nil  -- pixels
 function pixels(n)  -- parts to pixels
-  return n*drawingw/256
+  return n*Drawing_width/256
 end
 function coord(n)  -- pixels to parts
-  return math.floor(n*256/drawingw)
+  return math.floor(n*256/Drawing_width)
 end
 
-zoom = 1.5
+Zoom = 1.5
 
-filename = 'lines.txt'
+Filename = 'lines.txt'
 
 function love.load(arg)
   -- maximize window
   love.window.setMode(0, 0)  -- maximize
-  screenw, screenh, screenflags = love.window.getMode()
+  Screen_width, Screen_height, Screen_flags = love.window.getMode()
   -- shrink slightly to account for window decoration
-  screenw = screenw-100
-  screenh = screenh-100
-  love.window.setMode(screenw, screenh)
+  Screen_width = Screen_width-100
+  Screen_height = Screen_height-100
+  love.window.setMode(Screen_width, Screen_height)
   love.window.setTitle('Text with Lines')
-  drawingw = math.floor(screenw/2/40)*40
+  Drawing_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   if #arg > 0 then
-    filename = arg[1]
+    Filename = arg[1]
   end
-  Lines = load_from_disk(filename)
+  Lines = load_from_disk(Filename)
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
-      cursor_line = i
+      Cursor_line = i
     end
   end
-  love.window.setTitle('Text with Lines - '..filename)
+  love.window.setTitle('Text with Lines - '..Filename)
 end
 
 function love.filedropped(file)
-  filename = file:getFilename()
+  Filename = file:getFilename()
   file:open('r')
   Lines = load_from_file(file)
   file:close()
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
-      cursor_line = i
+      Cursor_line = i
     end
   end
-  love.window.setTitle('Text with Lines - '..filename)
+  love.window.setTitle('Text with Lines - '..Filename)
 end
 
 function love.draw()
   button_handlers = {}
   love.graphics.setColor(1, 1, 1)
-  love.graphics.rectangle('fill', 0, 0, screenw-1, screenh-1)
+  love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
   love.graphics.setColor(0, 0, 0)
   local y = 0
   for i,line in ipairs(Lines) do
-    y = y+15*zoom
+    y = y+15*Zoom
     line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = icon.insert_drawing,
         onpress1 = function()
                      table.insert(Lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                     if cursor_line >= i then
-                       cursor_line = cursor_line+1
+                     if Cursor_line >= i then
+                       Cursor_line = Cursor_line+1
                      end
                    end})
-        if i == cursor_line then
+        if i == Cursor_line then
           love.graphics.setColor(0,0,0)
           love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
         end
@@ -120,13 +120,13 @@ function love.draw()
       y = y+pixels(line.h)
 
       local pmx,pmy = love.mouse.getX(), love.mouse.getY()
-      if pmx < 16+drawingw and pmy > line.y and pmy < line.y+pixels(line.h) then
+      if pmx < 16+Drawing_width and pmy > line.y and pmy < line.y+pixels(line.h) then
         love.graphics.setColor(0.75,0.75,0.75)
-        love.graphics.rectangle('line', 16,line.y, drawingw,pixels(line.h))
-        if icon[current_mode] then
-          icon[current_mode](16+drawingw-20, line.y+4)
+        love.graphics.rectangle('line', 16,line.y, Drawing_width,pixels(line.h))
+        if icon[Current_mode] then
+          icon[Current_mode](16+Drawing_width-20, line.y+4)
         else
-          icon[previous_mode](16+drawingw-20, line.y+4)
+          icon[Previous_mode](16+Drawing_width-20, line.y+4)
         end
 
         if love.mouse.isDown('1') and love.keyboard.isDown('h') then
@@ -166,10 +166,10 @@ function love.draw()
     else
       love.graphics.setColor(0,0,0)
       local text = love.graphics.newText(love.graphics.getFont(), line.data)
-      love.graphics.draw(text, 25,y, 0, zoom)
-      if i == cursor_line then
+      love.graphics.draw(text, 25,y, 0, Zoom)
+      if i == Cursor_line then
         -- cursor
-        love.graphics.print('_', cursor_x(line.data, cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
+        love.graphics.print('_', cursor_x(line.data, Cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
       end
     end
   end
@@ -181,7 +181,7 @@ function love.update(dt)
       if Lines.current.mode == 'drawing' then
         local drawing = Lines.current
         local x, y = love.mouse.getX(), love.mouse.getY()
-        if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+        if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
           if drawing.pending.mode == 'freehand' then
             table.insert(drawing.pending.points, {x=coord(love.mouse.getX()-16), y=coord(love.mouse.getY()-drawing.y)})
           elseif drawing.pending.mode == 'move' then
@@ -192,10 +192,10 @@ function love.update(dt)
         end
       end
     end
-  elseif current_mode == 'move' then
+  elseif Current_mode == 'move' then
     local drawing = Lines.current
     local x, y = love.mouse.getX(), love.mouse.getY()
-    if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+    if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
       local mx,my = coord(x-16), coord(y-drawing.y)
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
@@ -209,25 +209,25 @@ function love.mousepressed(x,y, button)
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       -- move cursor
-      if x >= 16 and y >= line.y and y < y+15*zoom then
-        cursor_line = i
-        cursor_pos = nearest_cursor_pos(line.data, x, 1)
+      if x >= 16 and y >= line.y and y < y+15*Zoom then
+        Cursor_line = i
+        Cursor_pos = nearest_cursor_pos(line.data, x, 1)
       end
     elseif line.mode == 'drawing' then
       local drawing = line
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
-        if current_mode == 'freehand' then
-          drawing.pending = {mode=current_mode, points={{x=coord(x-16), y=coord(y-drawing.y)}}}
-        elseif current_mode == 'line' or current_mode == 'manhattan' then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
+        if Current_mode == 'freehand' then
+          drawing.pending = {mode=Current_mode, points={{x=coord(x-16), y=coord(y-drawing.y)}}}
+        elseif Current_mode == 'line' or Current_mode == 'manhattan' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, p1=j}
-        elseif current_mode == 'polygon' then
+          drawing.pending = {mode=Current_mode, p1=j}
+        elseif Current_mode == 'polygon' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, vertices={j}}
-        elseif current_mode == 'circle' then
+          drawing.pending = {mode=Current_mode, vertices={j}}
+        elseif Current_mode == 'circle' then
           local j = insert_point(drawing.points, coord(x-16), coord(y-drawing.y))
-          drawing.pending = {mode=current_mode, center=j}
+          drawing.pending = {mode=Current_mode, center=j}
         end
         Lines.current = drawing
       end
@@ -236,9 +236,9 @@ function love.mousepressed(x,y, button)
 end
 
 function love.mousereleased(x,y, button)
-  if current_mode == 'move' then
-    current_mode = previous_mode
-    previous_mode = nil
+  if Current_mode == 'move' then
+    Current_mode = Previous_mode
+    Previous_mode = nil
   elseif Lines.current then
     if Lines.current.pending then
       if Lines.current.pending.mode == 'freehand' then
@@ -292,8 +292,8 @@ function love.mousereleased(x,y, button)
       Lines.current = nil
     end
   end
-  if filename then
-    save_to_disk(Lines, filename)
+  if Filename then
+    save_to_disk(Lines, Filename)
   end
 end
 
@@ -506,17 +506,17 @@ end
 
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
-  if Lines[cursor_line].mode == 'drawing' then return end
+  if Lines[Cursor_line].mode == 'drawing' then return end
   local byteoffset
-  if cursor_pos > 1 then
-    byteoffset = utf8.offset(Lines[cursor_line].data, cursor_pos-1)
+  if Cursor_pos > 1 then
+    byteoffset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
   else
     byteoffset = 0
   end
-  Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byteoffset)..t..string.sub(Lines[cursor_line].data, byteoffset+1)
-  cursor_pos = cursor_pos+1
-  if filename then
-    save_to_disk(Lines, filename)
+  Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byteoffset)..t..string.sub(Lines[Cursor_line].data, byteoffset+1)
+  Cursor_pos = Cursor_pos+1
+  if Filename then
+    save_to_disk(Lines, Filename)
   end
 end
 
@@ -524,104 +524,104 @@ function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   -- shortcuts for text
   if chord == 'return' then
-    table.insert(Lines, cursor_line+1, {mode='text', data=''})
-    cursor_line = cursor_line+1
-    cursor_pos = 1
+    table.insert(Lines, Cursor_line+1, {mode='text', data=''})
+    Cursor_line = Cursor_line+1
+    Cursor_pos = 1
   elseif chord == 'backspace' then
-    if cursor_pos > 1 then
-      local byte_start = utf8.offset(Lines[cursor_line].data, cursor_pos-1)
-      local byte_end = utf8.offset(Lines[cursor_line].data, cursor_pos)
+    if Cursor_pos > 1 then
+      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
+      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
       if byte_start then
         if byte_end then
-          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)..string.sub(Lines[cursor_line].data, byte_end)
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
         else
-          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
         end
-        cursor_pos = cursor_pos-1
+        Cursor_pos = Cursor_pos-1
       end
-    elseif cursor_line > 1 then
-      if Lines[cursor_line-1].mode == 'drawing' then
-        table.remove(Lines, cursor_line-1)
+    elseif Cursor_line > 1 then
+      if Lines[Cursor_line-1].mode == 'drawing' then
+        table.remove(Lines, Cursor_line-1)
       else
         -- join Lines
-        cursor_pos = utf8.len(Lines[cursor_line-1].data)+1
-        Lines[cursor_line-1].data = Lines[cursor_line-1].data..Lines[cursor_line].data
-        table.remove(Lines, cursor_line)
+        Cursor_pos = utf8.len(Lines[Cursor_line-1].data)+1
+        Lines[Cursor_line-1].data = Lines[Cursor_line-1].data..Lines[Cursor_line].data
+        table.remove(Lines, Cursor_line)
       end
-      cursor_line = cursor_line-1
+      Cursor_line = Cursor_line-1
     end
   elseif chord == 'left' then
-    if cursor_pos > 1 then
-      cursor_pos = cursor_pos - 1
+    if Cursor_pos > 1 then
+      Cursor_pos = Cursor_pos-1
     end
   elseif chord == 'right' then
-    if cursor_pos <= #Lines[cursor_line].data then
-      cursor_pos = cursor_pos + 1
+    if Cursor_pos <= #Lines[Cursor_line].data then
+      Cursor_pos = Cursor_pos+1
     end
   elseif chord == 'home' then
-    cursor_pos = 1
+    Cursor_pos = 1
   elseif chord == 'end' then
-    cursor_pos = #Lines[cursor_line].data+1
+    Cursor_pos = #Lines[Cursor_line].data+1
   elseif chord == 'delete' then
-    if cursor_pos <= #Lines[cursor_line].data then
-      local byte_start = utf8.offset(Lines[cursor_line].data, cursor_pos)
-      local byte_end = utf8.offset(Lines[cursor_line].data, cursor_pos+1)
+    if Cursor_pos <= #Lines[Cursor_line].data then
+      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos+1)
       if byte_start then
         if byte_end then
-          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)..string.sub(Lines[cursor_line].data, byte_end)
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
         else
-          Lines[cursor_line].data = string.sub(Lines[cursor_line].data, 1, byte_start-1)
+          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
         end
-        -- no change to cursor_pos
+        -- no change to Cursor_pos
       end
     end
   -- transitioning between drawings and text
   elseif chord == 'up' then
-    assert(Lines[cursor_line].mode == 'text')
-    local new_cursor_line = cursor_line
+    assert(Lines[Cursor_line].mode == 'text')
+    local new_cursor_line = Cursor_line
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
       if Lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(Lines[new_cursor_line].data, cursor_pos)
-        cursor_line = new_cursor_line
-        cursor_pos = nearest_cursor_pos(Lines[cursor_line].data, old_x, cursor_pos)
+        local old_x = cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        Cursor_line = new_cursor_line
+        Cursor_pos = nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
         break
       end
     end
   elseif chord == 'down' then
-    assert(Lines[cursor_line].mode == 'text')
-    local new_cursor_line = cursor_line
+    assert(Lines[Cursor_line].mode == 'text')
+    local new_cursor_line = Cursor_line
     while new_cursor_line < #Lines do
       new_cursor_line = new_cursor_line+1
       if Lines[new_cursor_line].mode == 'text' then
-        local old_x = cursor_x(Lines[new_cursor_line].data, cursor_pos)
-        cursor_line = new_cursor_line
-        cursor_pos = nearest_cursor_pos(Lines[cursor_line].data, old_x, cursor_pos)
+        local old_x = cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+        Cursor_line = new_cursor_line
+        Cursor_pos = nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
         break
       end
     end
   elseif chord == 'C-=' then
-    drawingw = drawingw/zoom
-    zoom = zoom+0.5
-    drawingw = drawingw*zoom
+    Drawing_width = Drawing_width/Zoom
+    Zoom = Zoom+0.5
+    Drawing_width = Drawing_width*Zoom
   elseif chord == 'C--' then
-    drawingw = drawingw/zoom
-    zoom = zoom-0.5
-    drawingw = drawingw*zoom
+    Drawing_width = Drawing_width/Zoom
+    Zoom = Zoom-0.5
+    Drawing_width = Drawing_width*Zoom
   elseif chord == 'C-0' then
-    drawingw = drawingw/zoom
-    zoom = 1.5
-    drawingw = drawingw*zoom
+    Drawing_width = Drawing_width/Zoom
+    Zoom = 1.5
+    Drawing_width = Drawing_width*Zoom
   -- shortcuts for drawings
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = current_drawing()
     drawing.pending = {}
   elseif chord == 'C-f' and not love.mouse.isDown('1') then
-    current_mode = 'freehand'
+    Current_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then
-    current_mode = 'polygon'
+    Current_mode = 'polygon'
   elseif love.mouse.isDown('1') and chord == 'g' then
-    current_mode = 'polygon'
+    Current_mode = 'polygon'
     local drawing = current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -633,14 +633,14 @@ function keychord_pressed(chord)
       drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'polygon'
-  elseif love.mouse.isDown('1') and chord == 'p' and current_mode == 'polygon' then
+  elseif love.mouse.isDown('1') and chord == 'p' and Current_mode == 'polygon' then
     local drawing = current_drawing()
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
     local j = insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-c' and not love.mouse.isDown('1') then
-    current_mode = 'circle'
-  elseif love.mouse.isDown('1') and chord == 'a' and current_mode == 'circle' then
+    Current_mode = 'circle'
+  elseif love.mouse.isDown('1') and chord == 'a' and Current_mode == 'circle' then
     local drawing = current_drawing()
     drawing.pending.mode = 'arc'
     local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
@@ -649,7 +649,7 @@ function keychord_pressed(chord)
     drawing.pending.radius = math.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = math.angle(center.x,center.y, mx,my)
   elseif love.mouse.isDown('1') and chord == 'c' then
-    current_mode = 'circle'
+    Current_mode = 'circle'
     local drawing = current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.center = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -660,7 +660,7 @@ function keychord_pressed(chord)
     end
     drawing.pending.mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'l' then
-    current_mode = 'line'
+    Current_mode = 'line'
     local drawing = current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -671,13 +671,13 @@ function keychord_pressed(chord)
     end
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' then
-    current_mode = 'line'
+    Current_mode = 'line'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       convert_line(drawing, shape)
     end
   elseif love.mouse.isDown('1') and chord == 'm' then
-    current_mode = 'manhattan'
+    Current_mode = 'manhattan'
     local drawing = select_drawing_at_mouse()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -690,7 +690,7 @@ function keychord_pressed(chord)
     end
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' and not love.mouse.isDown('1') then
-    current_mode = 'manhattan'
+    Current_mode = 'manhattan'
     local drawing,i,shape = select_shape_at_mouse()
     if drawing then
       convert_horvert(drawing, shape)
@@ -703,17 +703,17 @@ function keychord_pressed(chord)
   elseif chord == 'C-v' and not love.mouse.isDown('1') then
     local drawing,_,p = select_point_at_mouse()
     if drawing then
-      previous_mode = current_mode
-      current_mode = 'move'
-      drawing.pending = {mode=current_mode, target_point=p}
+      Previous_mode = Current_mode
+      Current_mode = 'move'
+      drawing.pending = {mode=Current_mode, target_point=p}
       Lines.current = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
     local drawing,_,p = select_point_at_mouse()
     if drawing then
-      previous_mode = current_mode
-      current_mode = 'move'
-      drawing.pending = {mode=current_mode, target_point=p}
+      Previous_mode = Current_mode
+      Current_mode = 'move'
+      drawing.pending = {mode=Current_mode, target_point=p}
       Lines.current = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then
@@ -756,7 +756,7 @@ end
 function cursor_x(line, cursor_pos)
   local line_before_cursor = line:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  return 25+text_before_cursor:getWidth()*zoom
+  return 25+text_before_cursor:getWidth()*Zoom
 end
 
 function nearest_cursor_pos(line, x, hint)
@@ -797,7 +797,7 @@ function current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
         return drawing
       end
     end
@@ -809,7 +809,7 @@ function select_shape_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
           assert(shape)
@@ -826,7 +826,7 @@ function select_point_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
         local mx,my = coord(love.mouse.getX()-16), coord(love.mouse.getY()-drawing.y)
         for i,point in ipairs(drawing.points) do
           assert(point)
@@ -843,7 +843,7 @@ function select_drawing_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+drawingw then
+      if y >= drawing.y and y < drawing.y + pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
         return drawing
       end
     end
@@ -1083,110 +1083,110 @@ end
 function draw_help_without_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   local y = drawing.y+10
-  love.graphics.print("Things you can do:", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print("* Press the mouse button to start drawing a "..current_shape(), 16+30,y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print("* Hover on a point and press 'ctrl+v' to start moving it,", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print("then press the mouse button to finish", 16+30+bullet_indent(),y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  y = y+15*zoom
-  if current_mode ~= 'freehand' then
-    love.graphics.print("* Press 'ctrl+f' to switch to drawing freehand strokes", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  love.graphics.print("Things you can do:", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print("* Press the mouse button to start drawing a "..current_shape(), 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print("* Hover on a point and press 'ctrl+v' to start moving it,", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print("then press the mouse button to finish", 16+30+bullet_indent(),y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  y = y+15*Zoom
+  if Current_mode ~= 'freehand' then
+    love.graphics.print("* Press 'ctrl+f' to switch to drawing freehand strokes", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'line' then
-    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'line' then
+    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'manhattan' then
+    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'circle' then
-    love.graphics.print("* Press 'ctrl+c' to switch to drawing circles/arcs", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'circle' then
+    love.graphics.print("* Press 'ctrl+c' to switch to drawing circles/arcs", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'polygon' then
-    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'polygon' then
+    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print("* Press 'ctrl+0' to reset zoom", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  y = y+15*zoom
-  love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, zoom)
-  y = y+15*zoom
+  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to Zoom in or out", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print("* Press 'ctrl+0' to reset Zoom", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  y = y+15*Zoom
+  love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, drawingw, math.max(pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', 16,drawing.y, Drawing_width, math.max(pixels(drawing.h),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   local y = drawing.y+10
-  love.graphics.print("You're currently drawing a "..current_shape(drawing.pending), 16+30,y, 0, zoom)
-  y = y+15*zoom
-  love.graphics.print('Things you can do now:', 16+30,y, 0, zoom)
-  y = y+15*zoom
-  if current_mode == 'freehand' then
-    love.graphics.print('* Release the mouse button to finish drawing the stroke', 16+30,y, 0, zoom)
-    y = y+15*zoom
-  elseif current_mode == 'line' or current_mode == 'manhattan' then
-    love.graphics.print('* Release the mouse button to finish drawing the line', 16+30,y, 0, zoom)
-    y = y+15*zoom
-  elseif current_mode == 'circle' then
+  love.graphics.print("You're currently drawing a "..current_shape(drawing.pending), 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  love.graphics.print('Things you can do now:', 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  if Current_mode == 'freehand' then
+    love.graphics.print('* Release the mouse button to finish drawing the stroke', 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  elseif Current_mode == 'line' or Current_mode == 'manhattan' then
+    love.graphics.print('* Release the mouse button to finish drawing the line', 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+  elseif Current_mode == 'circle' then
     if drawing.pending.mode == 'circle' then
-      love.graphics.print('* Release the mouse button to finish drawing the circle', 16+30,y, 0, zoom)
-      y = y+15*zoom
-      love.graphics.print("* Press 'a' to draw just an arc of a circle", 16+30,y, 0, zoom)
+      love.graphics.print('* Release the mouse button to finish drawing the circle', 16+30,y, 0, Zoom)
+      y = y+15*Zoom
+      love.graphics.print("* Press 'a' to draw just an arc of a circle", 16+30,y, 0, Zoom)
     else
-      love.graphics.print('* Release the mouse button to finish drawing the arc', 16+30,y, 0, zoom)
+      love.graphics.print('* Release the mouse button to finish drawing the arc', 16+30,y, 0, Zoom)
     end
-    y = y+15*zoom
-  elseif current_mode == 'polygon' then
-    love.graphics.print('* Release the mouse button to finish drawing the polygon', 16+30,y, 0, zoom)
-    y = y+15*zoom
-    love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y, 0, zoom)
-    y = y+15*zoom
+    y = y+15*Zoom
+  elseif Current_mode == 'polygon' then
+    love.graphics.print('* Release the mouse button to finish drawing the polygon', 16+30,y, 0, Zoom)
+    y = y+15*Zoom
+    love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y, 0, zoom)
-  y = y+15*zoom
-  y = y+15*zoom
-  if current_mode ~= 'line' then
-    love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y, 0, Zoom)
+  y = y+15*Zoom
+  y = y+15*Zoom
+  if Current_mode ~= 'line' then
+    love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'manhattan' then
+    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'circle' then
-    love.graphics.print("* Press 'c' to switch to drawing circles/arcs", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'circle' then
+    love.graphics.print("* Press 'c' to switch to drawing circles/arcs", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
-  if current_mode ~= 'polygon' then
-    love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y, 0, zoom)
-    y = y+15*zoom
+  if Current_mode ~= 'polygon' then
+    love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y, 0, Zoom)
+    y = y+15*Zoom
   end
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, drawingw, math.max(pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', 16,drawing.y, Drawing_width, math.max(pixels(drawing.h),y-drawing.y))
 end
 
 function current_shape(shape)
-  if current_mode == 'freehand' then
+  if Current_mode == 'freehand' then
     return 'freehand stroke'
-  elseif current_mode == 'line' then
+  elseif Current_mode == 'line' then
     return 'straight line'
-  elseif current_mode == 'manhattan' then
+  elseif Current_mode == 'manhattan' then
     return 'horizontal/vertical line'
-  elseif current_mode == 'circle' and shape and shape.start_angle then
+  elseif Current_mode == 'circle' and shape and shape.start_angle then
     return 'arc'
   else
-    return current_mode
+    return Current_mode
   end
 end
 
