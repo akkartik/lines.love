@@ -167,9 +167,6 @@ function Drawing.keychord_pressed(chord)
     Drawing_width = Drawing_width/Zoom
     Zoom = 1.5
     Drawing_width = Drawing_width*Zoom
-  elseif chord == 'escape' and love.mouse.isDown('1') then
-    local drawing = Drawing.current_drawing()
-    drawing.pending = {}
   elseif chord == 'C-f' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then

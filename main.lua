@@ -152,6 +152,11 @@ end
 function keychord_pressed(chord)
   if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
+  elseif chord == 'escape' and love.mouse.isDown('1') then
+    local drawing = Drawing.current_drawing()
+    if drawing then
+      drawing.pending = {}
+    end
   else
     Text.keychord_pressed(chord)
   end
