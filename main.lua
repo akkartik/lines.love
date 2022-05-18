@@ -126,27 +126,7 @@ function love.draw()
 end
 
 function love.update(dt)
-  if Lines.current == nil then return end
-  local drawing = Lines.current
-  assert(drawing.mode == 'drawing')
-  local x, y = love.mouse.getX(), love.mouse.getY()
-  if love.mouse.isDown('1') then
-    if Drawing.in_drawing(drawing, x,y) then
-      if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(love.mouse.getX()-16), y=Drawing.coord(love.mouse.getY()-drawing.y)})
-      elseif drawing.pending.mode == 'move' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
-        drawing.pending.target_point.x = mx
-        drawing.pending.target_point.y = my
-      end
-    end
-  elseif Current_drawing_mode == 'move' then
-    if Drawing.in_drawing(drawing, x, y) then
-      local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
-      drawing.pending.target_point.x = mx
-      drawing.pending.target_point.y = my
-    end
-  end
+  Drawing.update(dt)
 end
 
 function love.mousepressed(x,y, button)
