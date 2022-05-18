@@ -129,8 +129,8 @@ function love.update(dt)
   Drawing.update(dt)
 end
 
-function love.mousepressed(x,y, button)
-  propagate_to_button_handlers(x,y, button)
+function love.mousepressed(x,y, mouse_button)
+  propagate_to_button_handlers(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
