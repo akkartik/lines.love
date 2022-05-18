@@ -143,6 +143,15 @@ function Text.keychord_pressed(chord)
   end
 end
 
+function Text.in_line(line, x,y)
+  return x >= 16 and y >= line.y and y < line.y+15*Zoom
+end
+
+function Text.move_cursor(line_index, line, x, hint)
+  Cursor_line = line_index
+  Cursor_pos = Text.nearest_cursor_pos(line.data, x)
+end
+
 function Text.nearest_cursor_pos(line, x, hint)
   if x == 0 then
     return 1
@@ -151,15 +160,19 @@ function Text.nearest_cursor_pos(line, x, hint)
   if x > max_x then
     return #line+1
   end
-  local currx = Text.cursor_x(line, hint)
-  if currx > x-2 and currx < x+2 then
-    return hint
+  if hint then
+    local currx = Text.cursor_x(line, hint)
+    if currx > x-2 and currx < x+2 then
+      return hint
+    end
   end
   local left, right = 1, #line+1
-  if currx > x then
-    right = hint
-  else
-    left = hint
+  if hint then
+    if currx > x then
+      right = hint
+    else
+      left = hint
+    end
   end
   while left < right-1 do
     local curr = math.floor((left+right)/2)

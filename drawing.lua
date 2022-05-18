@@ -49,6 +49,26 @@ function Drawing.draw(line, y)
   Drawing.draw_pending_shape(16,line.y, line)
 end
 
+function Drawing.in_drawing(drawing, x,y)
+  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width
+end
+
+function Drawing.mouse_pressed(drawing, x,y, button)
+  if Current_drawing_mode == 'freehand' then
+    drawing.pending = {mode=Current_drawing_mode, points={{x=Drawing.coord(x-16), y=Drawing.coord(y-drawing.y)}}}
+  elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Current_drawing_mode, p1=j}
+  elseif Current_drawing_mode == 'polygon' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Current_drawing_mode, vertices={j}}
+  elseif Current_drawing_mode == 'circle' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Current_drawing_mode, center=j}
+  end
+  Lines.current = drawing
+end
+
 function Drawing.keychord_pressed(chord)
   if chord == 'C-=' then
     Drawing_width = Drawing_width/Zoom

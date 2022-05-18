@@ -158,28 +158,12 @@ function love.mousepressed(x,y, button)
 
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
-      -- move cursor
-      if x >= 16 and y >= line.y and y < line.y+15*Zoom then
-        Cursor_line = line_index
-        Cursor_pos = Text.nearest_cursor_pos(line.data, x, 1)
+      if Text.in_line(line, x,y) then
+        Text.move_cursor(line_index, line, x)
       end
     elseif line.mode == 'drawing' then
-      local drawing = line
-      local x, y = love.mouse.getX(), love.mouse.getY()
-      if y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width then
-        if Current_drawing_mode == 'freehand' then
-          drawing.pending = {mode=Current_drawing_mode, points={{x=Drawing.coord(x-16), y=Drawing.coord(y-drawing.y)}}}
-        elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
-          local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
-          drawing.pending = {mode=Current_drawing_mode, p1=j}
-        elseif Current_drawing_mode == 'polygon' then
-          local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
-          drawing.pending = {mode=Current_drawing_mode, vertices={j}}
-        elseif Current_drawing_mode == 'circle' then
-          local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
-          drawing.pending = {mode=Current_drawing_mode, center=j}
-        end
-        Lines.current = drawing
+      if Drawing.in_drawing(line, x, y) then
+        Drawing.mouse_pressed(line, x,y, button)
       end
     end
   end
