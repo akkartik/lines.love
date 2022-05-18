@@ -267,9 +267,13 @@ function keychord_pressed(chord)
   -- Don't handle any keys here that would trigger love.textinput above.
   -- shortcuts for text
   if chord == 'return' then
-    table.insert(Lines, Cursor_line+1, {mode='text', data=''})
-    Cursor_line = Cursor_line+1
-    Cursor_pos = 1
+    local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+    if byte_offset then
+      table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
+      Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)
+      Cursor_line = Cursor_line+1
+      Cursor_pos = 1
+    end
   elseif chord == 'left' then
     if Cursor_pos > 1 then
       Cursor_pos = Cursor_pos-1
