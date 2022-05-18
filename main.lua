@@ -72,6 +72,11 @@ function love.load(arg)
     filename = arg[1]
   end
   lines = load_from_disk(filename)
+  for i,line in ipairs(lines) do
+    if line.mode == 'text' then
+      cursor_line = i
+    end
+  end
   love.window.setTitle('Text with Lines - '..filename)
 end
 
@@ -80,6 +85,11 @@ function love.filedropped(file)
   file:open('r')
   lines = load_from_file(file)
   file:close()
+  for i,line in ipairs(lines) do
+    if line.mode == 'text' then
+      cursor_line = i
+    end
+  end
   love.window.setTitle('Text with Lines - '..filename)
 end
 
@@ -97,6 +107,9 @@ function love.draw()
         icon = icon.insert_drawing,
         onpress1 = function()
                      table.insert(lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                     if cursor_line >= i then
+                       cursor_line = cursor_line+1
+                     end
                    end})
         if i == cursor_line then
           love.graphics.setColor(0,0,0)
@@ -515,35 +528,27 @@ function keychord_pressed(chord)
     cursor_line = cursor_line+1
     cursor_pos = 1
   elseif chord == 'backspace' then
-    if cursor_line > 1 and lines[cursor_line].data == '' then
-      table.remove(lines, cursor_line)
-      cursor_line = cursor_line-1
-      if lines[cursor_line].mode == 'text' then
-        cursor_pos = #lines[cursor_line].data+1
-      else
-        cursor_pos = 1
-      end
-    elseif lines[cursor_line].mode == 'drawing' then
-      table.remove(lines, cursor_line)  -- we'll add undo soon
-      cursor_line = cursor_line-1
-      if lines[cursor_line].mode == 'text' then
-        cursor_pos = #lines[cursor_line].data+1
-      else
-        cursor_pos = 1
-      end
-    else
-      if cursor_pos > 1 then
-        local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos-1)
-        local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos)
-        if byte_start then
-          if byte_end then
-            lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
-          else
-            lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
-          end
-          cursor_pos = cursor_pos-1
+    if cursor_pos > 1 then
+      local byte_start = utf8.offset(lines[cursor_line].data, cursor_pos-1)
+      local byte_end = utf8.offset(lines[cursor_line].data, cursor_pos)
+      if byte_start then
+        if byte_end then
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)..string.sub(lines[cursor_line].data, byte_end)
+        else
+          lines[cursor_line].data = string.sub(lines[cursor_line].data, 1, byte_start-1)
         end
+        cursor_pos = cursor_pos-1
       end
+    elseif cursor_line > 1 then
+      if lines[cursor_line-1].mode == 'drawing' then
+        table.remove(lines, cursor_line-1)
+      else
+        -- join lines
+        cursor_pos = utf8.len(lines[cursor_line-1].data)+1
+        lines[cursor_line-1].data = lines[cursor_line-1].data..lines[cursor_line].data
+        table.remove(lines, cursor_line)
+      end
+      cursor_line = cursor_line-1
     end
   elseif chord == 'left' then
     if cursor_pos > 1 then
@@ -572,23 +577,27 @@ function keychord_pressed(chord)
     end
   -- transitioning between drawings and text
   elseif chord == 'up' then
-    if cursor_line > 1 then
-      if lines[cursor_line].mode == 'text' and lines[cursor_line-1].mode == 'text' then
-        local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
-        cursor_line = cursor_line-1
+    assert(lines[cursor_line].mode == 'text')
+    local new_cursor_line = cursor_line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if lines[new_cursor_line].mode == 'text' then
+        local old_x = cursor_x(lines[new_cursor_line].data, cursor_pos)
+        cursor_line = new_cursor_line
         cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
-      else
-        cursor_line = cursor_line-1
+        break
       end
     end
   elseif chord == 'down' then
-    if cursor_line < #lines then
-      if lines[cursor_line].mode == 'text' and lines[cursor_line+1].mode == 'text' then
-        local old_x = cursor_x(lines[cursor_line].data, cursor_pos)
-        cursor_line = cursor_line+1
+    assert(lines[cursor_line].mode == 'text')
+    local new_cursor_line = cursor_line
+    while new_cursor_line < #lines do
+      new_cursor_line = new_cursor_line+1
+      if lines[new_cursor_line].mode == 'text' then
+        local old_x = cursor_x(lines[new_cursor_line].data, cursor_pos)
+        cursor_line = new_cursor_line
         cursor_pos = nearest_cursor_pos(lines[cursor_line].data, old_x, cursor_pos)
-      else
-        cursor_line = cursor_line+1
+        break
       end
     end
   elseif chord == 'C-=' then

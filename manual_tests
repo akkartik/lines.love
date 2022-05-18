@@ -1,0 +1,7 @@
+file load:
+  cursor_line = 1
+  first line is a drawing -> cursor_line = 2
+create drawing -> cursor bumps down below drawing
+backspace
+  cursor_pos == 0, previous line is a drawing -> delete drawing, cursor still visible at start of line
+  cursor_pos == 0, previous line is text -> join lines, cursor still at same character
