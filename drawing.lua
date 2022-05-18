@@ -24,7 +24,7 @@ function Drawing.draw(line, y)
     return
   end
 
-  local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-line.y)
+  local mx,my = Drawing.coord(pmx-16), Drawing.coord(pmy-line.y)
 
   for _,shape in ipairs(line.shapes) do
     assert(shape)
@@ -92,18 +92,18 @@ function Drawing.draw_pending_shape(left,top, drawing)
   if shape.mode == 'freehand' then
     Drawing.draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
-    local p1 = drawing.points[shape.p1]
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
+    local p1 = drawing.points[shape.p1]
     love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(my)+top)
   elseif shape.mode == 'manhattan' then
-    local p1 = drawing.points[shape.p1]
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
+    local p1 = drawing.points[shape.p1]
     if math.abs(mx-p1.x) > math.abs(my-p1.y) then
       love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(p1.y)+top)
     else
