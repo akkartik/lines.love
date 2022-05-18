@@ -250,13 +250,13 @@ end
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if Lines[Cursor_line].mode == 'drawing' then return end
-  local byteoffset
+  local byte_offset
   if Cursor_pos > 1 then
-    byteoffset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
+    byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
   else
-    byteoffset = 0
+    byte_offset = 0
   end
-  Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byteoffset)..t..string.sub(Lines[Cursor_line].data, byteoffset+1)
+  Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
   Cursor_pos = Cursor_pos+1
   if Filename then
     save_to_disk(Lines, Filename)
