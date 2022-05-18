@@ -100,19 +100,19 @@ function love.draw()
   love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
   love.graphics.setColor(0, 0, 0)
   local y = 0
-  for i,line in ipairs(Lines) do
+  for line_index,line in ipairs(Lines) do
     y = y+15*Zoom
     line.y = y
     if line.mode == 'text' and line.data == '' then
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = icon.insert_drawing,
         onpress1 = function()
-                     table.insert(Lines, i, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                     if Cursor_line >= i then
+                     table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                     if Cursor_line >= line_index then
                        Cursor_line = Cursor_line+1
                      end
                    end})
-        if i == Cursor_line then
+        if line_index == Cursor_line then
           love.graphics.setColor(0,0,0)
           love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
         end
@@ -123,7 +123,7 @@ function love.draw()
       love.graphics.setColor(0,0,0)
       local text = love.graphics.newText(love.graphics.getFont(), line.data)
       love.graphics.draw(text, 25,y, 0, Zoom)
-      if i == Cursor_line then
+      if line_index == Cursor_line then
         -- cursor
         love.graphics.print('_', cursor_x(line.data, Cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
       end
@@ -162,11 +162,11 @@ end
 function love.mousepressed(x,y, button)
   propagate_to_button_handlers(x,y, button)
 
-  for i,line in ipairs(Lines) do
+  for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       -- move cursor
       if x >= 16 and y >= line.y and y < y+15*Zoom then
-        Cursor_line = i
+        Cursor_line = line_index
         Cursor_pos = nearest_cursor_pos(line.data, x, 1)
       end
     elseif line.mode == 'drawing' then
@@ -628,7 +628,7 @@ function keychord_pressed(chord)
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' then
     Current_mode = 'line'
-    local drawing,i,shape = select_shape_at_mouse()
+    local drawing,_,shape = select_shape_at_mouse()
     if drawing then
       convert_line(drawing, shape)
     end
@@ -647,12 +647,12 @@ function keychord_pressed(chord)
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' and not love.mouse.isDown('1') then
     Current_mode = 'manhattan'
-    local drawing,i,shape = select_shape_at_mouse()
+    local drawing,_,shape = select_shape_at_mouse()
     if drawing then
       convert_horvert(drawing, shape)
     end
   elseif chord == 'C-s' and not love.mouse.isDown('1') then
-    local drawing,i,shape = select_shape_at_mouse()
+    local drawing,_,shape = select_shape_at_mouse()
     if drawing then
       smoothen(shape)
     end
@@ -691,7 +691,7 @@ function keychord_pressed(chord)
       end
       drawing.points[i].deleted = true
     end
-    local drawing,i,shape = select_shape_at_mouse()
+    local drawing,_,shape = select_shape_at_mouse()
     if drawing then
       shape.mode = 'deleted'
     end
