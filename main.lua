@@ -125,7 +125,7 @@ function love.draw()
             love.graphics.setColor(0,0,0)
             love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
           end
-        y = math.floor(y+15*Zoom)  -- text height
+        y = y + math.floor(15*Zoom)  -- text height
       elseif line.mode == 'drawing' then
         y = y+10 -- padding
         line.y = y
@@ -134,7 +134,7 @@ function love.draw()
       else
         line.y = y
         Text.draw(line, line_index, Cursor_line, Cursor_pos)
-        y = math.floor(y+15*Zoom)  -- text height
+        y = y + math.floor(15*Zoom)  -- text height
       end
     end
   end
