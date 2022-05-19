@@ -106,14 +106,13 @@ function love.draw()
   for line_index,line in ipairs(Lines) do
     line.y = nil
   end
-  local y = 0
+  local y = 15
   for line_index,line in ipairs(Lines) do
     if y > Screen_height then break end
     if line_index >= Screen_top_line then
-      y = math.floor(y+15*Zoom)
       Screen_bottom_line = line_index
-      line.y = y
       if line.mode == 'text' and line.data == '' then
+        line.y = y
         button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
@@ -126,11 +125,16 @@ function love.draw()
             love.graphics.setColor(0,0,0)
             love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
           end
+        y = math.floor(y+15*Zoom)  -- text height
       elseif line.mode == 'drawing' then
-        y = y+Drawing.pixels(line.h)
+        y = y+10 -- padding
+        line.y = y
         Drawing.draw(line)
+        y = y + Drawing.pixels(line.h) + 10 -- padding
       else
+        line.y = y
         Text.draw(line, line_index, Cursor_line, Cursor_pos)
+        y = math.floor(y+15*Zoom)  -- text height
       end
     end
   end
