@@ -36,6 +36,8 @@ require 'icons'
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
+Screen_top_line = 1
+Screen_bottom_line = 1
 Cursor_line = 1
 -- this is a line
 -- ^cursor_pos = 1
@@ -99,28 +101,35 @@ function love.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
   love.graphics.setColor(0, 0, 0)
+  for line_index,line in ipairs(Lines) do
+    line.y = nil
+  end
   local y = 0
   for line_index,line in ipairs(Lines) do
-    y = y+15*Zoom
-    line.y = y
-    if line.mode == 'text' and line.data == '' then
-      button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
-        icon = icon.insert_drawing,
-        onpress1 = function()
-                     table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                     if Cursor_line >= line_index then
-                       Cursor_line = Cursor_line+1
-                     end
-                   end})
-        if line_index == Cursor_line then
-          love.graphics.setColor(0,0,0)
-          love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
-        end
-    elseif line.mode == 'drawing' then
-      y = y+Drawing.pixels(line.h)
-      Drawing.draw(line, y)
-    else
-      Text.draw(line, line_index, Cursor_line, y, Cursor_pos)
+    if line_index >= Screen_top_line then
+      y = y+15*Zoom
+      if y > Screen_height then break end
+      Screen_bottom_line = line_index
+      line.y = y
+      if line.mode == 'text' and line.data == '' then
+        button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
+          icon = icon.insert_drawing,
+          onpress1 = function()
+                       table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                       if Cursor_line >= line_index then
+                         Cursor_line = Cursor_line+1
+                       end
+                     end})
+          if line_index == Cursor_line then
+            love.graphics.setColor(0,0,0)
+            love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
+          end
+      elseif line.mode == 'drawing' then
+        y = y+Drawing.pixels(line.h)
+        Drawing.draw(line, y)
+      else
+        Text.draw(line, line_index, Cursor_line, y, Cursor_pos)
+      end
     end
   end
 end
@@ -157,6 +166,26 @@ function keychord_pressed(chord)
     if drawing then
       drawing.pending = {}
     end
+  elseif chord == 'pagedown' then
+    Screen_top_line = Screen_bottom_line
+    Cursor_line = Screen_top_line
+    Cursor_pos = 1
+  elseif chord == 'pageup' then
+    -- duplicate some logic from love.draw
+    local y = Screen_height
+    while y >= 0 do
+      if Screen_top_line == 1 then break end
+      if Lines[Screen_top_line].mode == 'text' then
+        y = y - 15*Zoom
+      else
+        y = y - Drawing.pixels(Lines[Screen_top_line].h)
+      end
+      Screen_top_line = Screen_top_line - 1
+    end
+    if Cursor_line ~= Screen_top_line then
+      Cursor_pos = 1
+    end
+    Cursor_line = Screen_top_line
   else
     Text.keychord_pressed(chord)
   end

@@ -177,6 +177,7 @@ end
 
 
 function Drawing.in_drawing(drawing, x,y)
+  if drawing.y == nil then return false end  -- outside current page
   return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width
 end
 

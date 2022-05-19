@@ -50,6 +50,9 @@ function Text.keychord_pressed(chord)
           break
         end
       end
+      if Cursor_line < Screen_top_line then
+        Screen_top_line = Cursor_line
+      end
     end
   elseif chord == 'right' then
     assert(Lines[Cursor_line].mode == 'text')
@@ -64,6 +67,9 @@ function Text.keychord_pressed(chord)
           Cursor_pos = 1
           break
         end
+      end
+      if Cursor_line > Screen_bottom_line then
+        Screen_top_line = Cursor_line
       end
     end
   elseif chord == 'home' then
@@ -128,6 +134,9 @@ function Text.keychord_pressed(chord)
         break
       end
     end
+    if Cursor_line < Screen_top_line then
+      Screen_top_line = Cursor_line
+    end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
     local new_cursor_line = Cursor_line
@@ -140,10 +149,14 @@ function Text.keychord_pressed(chord)
         break
       end
     end
+    if Cursor_line > Screen_bottom_line then
+      Screen_top_line = Cursor_line
+    end
   end
 end
 
 function Text.in_line(line, x,y)
+  if line.y == nil then return false end  -- outside current page
   return x >= 16 and y >= line.y and y < line.y+15*Zoom
 end
 
