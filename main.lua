@@ -78,6 +78,7 @@ function love.load(arg)
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       Cursor_line = i
+      break
     end
   end
   love.window.setTitle('Text with Lines - '..Filename)
@@ -91,6 +92,7 @@ function love.filedropped(file)
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       Cursor_line = i
+      break
     end
   end
   love.window.setTitle('Text with Lines - '..Filename)
