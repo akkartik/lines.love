@@ -130,7 +130,7 @@ function love.draw()
         y = y+Drawing.pixels(line.h)
         Drawing.draw(line)
       else
-        Text.draw(line, line_index, Cursor_line, y, Cursor_pos)
+        Text.draw(line, line_index, Cursor_line, Cursor_pos)
       end
     end
   end

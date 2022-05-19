@@ -3,13 +3,13 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-function Text.draw(line, line_index, cursor_line, y, cursor_pos)
+function Text.draw(line, line_index, cursor_line, cursor_pos)
   love.graphics.setColor(0,0,0)
   local love_text = love.graphics.newText(love.graphics.getFont(), line.data)
-  love.graphics.draw(love_text, 25,y, 0, Zoom)
+  love.graphics.draw(love_text, 25,line.y, 0, Zoom)
   if line_index == cursor_line then
     -- cursor
-    love.graphics.print('_', Text.cursor_x(line.data, cursor_pos), y+6)  -- drop the cursor down a bit to account for the increased font size
+    love.graphics.print('_', Text.cursor_x(line.data, cursor_pos), line.y+6)  -- drop the cursor down a bit to account for the increased font size
   end
 end
 
