@@ -182,7 +182,7 @@ function keychord_pressed(chord)
     local y = Screen_height
     while y >= 0 do
       if Screen_top_line == 1 then break end
-      y = y - 15*Zoom
+      y = y - math.floor(15*Zoom)
       if Lines[Screen_top_line].mode == 'drawing' then
         y = y - Drawing.pixels(Lines[Screen_top_line].h)
       end
