@@ -109,7 +109,7 @@ function love.draw()
   local y = 0
   for line_index,line in ipairs(Lines) do
     if line_index >= Screen_top_line then
-      y = y+15*Zoom
+      y = math.floor(y+15*Zoom)
       if y > Screen_height then break end
       Screen_bottom_line = line_index
       line.y = y
