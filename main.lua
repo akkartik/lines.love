@@ -172,14 +172,14 @@ function keychord_pressed(chord)
     Screen_top_line = Screen_bottom_line
     Cursor_line = Screen_top_line
     Cursor_pos = 1
+    Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
     local y = Screen_height
     while y >= 0 do
       if Screen_top_line == 1 then break end
-      if Lines[Screen_top_line].mode == 'text' then
-        y = y - 15*Zoom
-      else
+      y = y - 15*Zoom
+      if Lines[Screen_top_line].mode == 'drawing' then
         y = y - Drawing.pixels(Lines[Screen_top_line].h)
       end
       Screen_top_line = Screen_top_line - 1
@@ -188,6 +188,7 @@ function keychord_pressed(chord)
       Cursor_pos = 1
     end
     Cursor_line = Screen_top_line
+    Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
   else
     Text.keychord_pressed(chord)
   end

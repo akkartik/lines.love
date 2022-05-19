@@ -155,6 +155,39 @@ function Text.keychord_pressed(chord)
   end
 end
 
+function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+  while Cursor_line <= #Lines do
+    if Lines[Cursor_line].mode == 'text' then
+      break
+    end
+    Cursor_line = Cursor_line + 1
+  end
+  -- hack: insert a text line at bottom of file if necessary
+  if Cursor_line > #Lines then
+    assert(Cursor_line == #Lines+1)
+    table.insert(Lines, {mode='text', data=''})
+  end
+  if Cursor_line > Screen_bottom_line then
+    Screen_top_line = Cursor_line
+    Text.scroll_up_while_cursor_on_screen()
+  end
+end
+
+function Text.scroll_up_while_cursor_on_screen()
+  local y = Screen_height - 15*Zoom -- for Cursor_line
+  while true do
+    if Screen_top_line == 1 then break end
+    y = y - 15*Zoom
+    if Lines[Screen_top_line].mode == 'drawing' then
+      y = y - Drawing.pixels(Lines[Screen_top_line].h)
+    end
+    if y < 15*Zoom then
+      break
+    end
+    Screen_top_line = Screen_top_line - 1
+  end
+end
+
 function Text.in_line(line, x,y)
   if line.y == nil then return false end  -- outside current page
   return x >= 16 and y >= line.y and y < line.y+15*Zoom
