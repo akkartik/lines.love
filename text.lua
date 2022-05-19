@@ -200,7 +200,7 @@ function Text.in_line(line, x,y)
   return x >= 16 and y >= line.y and y < line.y+15*Zoom
 end
 
-function Text.move_cursor(line_index, line, x, hint)
+function Text.move_cursor(line_index, line, x)
   Cursor_line = line_index
   Cursor_pos = Text.nearest_cursor_pos(line.data, x)
 end
