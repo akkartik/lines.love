@@ -688,7 +688,7 @@ function Drawing.near(point, x,y)
 end
 
 function Drawing.pixels(n)  -- parts to pixels
-  return n*Drawing_width/256
+  return math.floor(n*Drawing_width/256)
 end
 function Drawing.coord(n)  -- pixels to parts
   return math.floor(n*256/Drawing_width)
