@@ -16,6 +16,11 @@ end
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
   if Lines[Cursor_line].mode == 'drawing' then return end
+  Text.insert_at_cursor(t)
+  save_to_disk(Lines, Filename)
+end
+
+function Text.insert_at_cursor(t)
   local byte_offset
   if Cursor_pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
@@ -24,7 +29,6 @@ function love.textinput(t)
   end
   Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
   Cursor_pos = Cursor_pos+1
-  save_to_disk(Lines, Filename)
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
@@ -35,6 +39,9 @@ function Text.keychord_pressed(chord)
     Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
     Cursor_line = Cursor_line+1
     Cursor_pos = 1
+    save_to_disk(Lines, Filename)
+  elseif chord == 'tab' then
+    Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
   elseif chord == 'left' then
     assert(Lines[Cursor_line].mode == 'text')
