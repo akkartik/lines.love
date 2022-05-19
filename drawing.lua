@@ -2,7 +2,7 @@
 Drawing = {}
 geom = require 'geom'
 
-function Drawing.draw(line, y)
+function Drawing.draw(line)
   local pmx,pmy = love.mouse.getX(), love.mouse.getY()
   if pmx < 16+Drawing_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     love.graphics.setColor(0.75,0.75,0.75)

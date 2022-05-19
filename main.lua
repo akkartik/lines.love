@@ -128,7 +128,7 @@ function love.draw()
           end
       elseif line.mode == 'drawing' then
         y = y+Drawing.pixels(line.h)
-        Drawing.draw(line, y)
+        Drawing.draw(line)
       else
         Text.draw(line, line_index, Cursor_line, y, Cursor_pos)
       end
