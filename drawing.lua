@@ -2,15 +2,17 @@
 Drawing = {}
 geom = require 'geom'
 
+-- All drawings span 100% of some conceptual 'page width' and divide it up
+-- into 256 parts.
 function Drawing.draw(line)
   local pmx,pmy = love.mouse.getX(), love.mouse.getY()
-  if pmx < 16+Drawing_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
+  if pmx < 16+Line_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     love.graphics.setColor(0.75,0.75,0.75)
-    love.graphics.rectangle('line', 16,line.y, Drawing_width,Drawing.pixels(line.h))
+    love.graphics.rectangle('line', 16,line.y, Line_width,Drawing.pixels(line.h))
     if icon[Current_drawing_mode] then
-      icon[Current_drawing_mode](16+Drawing_width-20, line.y+4)
+      icon[Current_drawing_mode](16+Line_width-20, line.y+4)
     else
-      icon[Previous_drawing_mode](16+Drawing_width-20, line.y+4)
+      icon[Previous_drawing_mode](16+Line_width-20, line.y+4)
     end
 
     if love.mouse.isDown('1') and love.keyboard.isDown('h') then
@@ -178,7 +180,7 @@ end
 
 function Drawing.in_drawing(drawing, x,y)
   if drawing.y == nil then return false end  -- outside current page
-  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Drawing_width
+  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Line_width
 end
 
 function Drawing.mouse_pressed(drawing, x,y, button)
@@ -320,17 +322,17 @@ end
 
 function Drawing.keychord_pressed(chord)
   if chord == 'C-=' then
-    Drawing_width = Drawing_width/Zoom
+    Line_width = Line_width/Zoom
     Zoom = Zoom+0.5
-    Drawing_width = Drawing_width*Zoom
+    Line_width = Line_width*Zoom
   elseif chord == 'C--' then
-    Drawing_width = Drawing_width/Zoom
+    Line_width = Line_width/Zoom
     Zoom = Zoom-0.5
-    Drawing_width = Drawing_width*Zoom
+    Line_width = Line_width*Zoom
   elseif chord == 'C-0' then
-    Drawing_width = Drawing_width/Zoom
+    Line_width = Line_width/Zoom
     Zoom = 1.5
-    Drawing_width = Drawing_width*Zoom
+    Line_width = Line_width*Zoom
   elseif chord == 'C-f' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then
@@ -688,10 +690,10 @@ function Drawing.near(point, x,y)
 end
 
 function Drawing.pixels(n)  -- parts to pixels
-  return math.floor(n*Drawing_width/256)
+  return math.floor(n*Line_width/256)
 end
 function Drawing.coord(n)  -- pixels to parts
-  return math.floor(n*256/Drawing_width)
+  return math.floor(n*256/Line_width)
 end
 
 function table.find(h, x)

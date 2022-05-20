@@ -46,9 +46,7 @@ Screen_width, Screen_height, Screen_flags = 0, 0, nil
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
--- All drawings span 100% of some conceptual 'page width' and divide it up
--- into 256 parts. `Drawing_width` describes their width in pixels.
-Drawing_width = nil  -- pixels
+Line_width = nil  -- maximum width available to either text or drawings, in pixels
 
 Zoom = 1.5
 
@@ -63,7 +61,7 @@ function love.load(arg)
   Screen_height = Screen_height-100
   love.window.setMode(Screen_width, Screen_height)
   love.window.setTitle('Text with Lines')
-  Drawing_width = math.floor(Screen_width/2/40)*40
+  Line_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
   if #arg > 0 then
@@ -129,7 +127,7 @@ function love.draw()
       else
         line.y = y
 --?         y = Text.draw(line, 100, line_index, Cursor_line, Cursor_pos)
-        y = Text.draw(line, Drawing_width, line_index, Cursor_line, Cursor_pos)
+        y = Text.draw(line, Line_width, line_index, Cursor_line, Cursor_pos)
         y = y + math.floor(15*Zoom)  -- text height
       end
     end
