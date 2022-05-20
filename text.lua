@@ -270,9 +270,9 @@ function Text.in_line(line, x,y)
   return x >= 16 and y >= line.y and y < line.y + math.floor(15*Zoom)
 end
 
-function Text.move_cursor(line_index, line, x)
+function Text.move_cursor(line_index, line, mx)
   Cursor_line = line_index
-  Cursor_pos = Text.nearest_cursor_pos(line.data, x)
+  Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
 end
 
 function Text.nearest_cursor_pos(line, x, hint)
