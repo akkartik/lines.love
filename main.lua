@@ -37,14 +37,16 @@ require 'icons'
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
-Screen_top_line = 1
-Screen_bottom_line = 1
 Cursor_line = 1
 Cursor_pos = 1  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
+
+-- scrolling support
+Screen_top_line = 1
+Screen_bottom_line = 1
 
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
