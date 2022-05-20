@@ -3,41 +3,6 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-function Text.compute_fragments(line, line_width)
-  line.fragments = {}
-  local x = 25
-  -- try to wrap at word boundaries
-  for frag in line.data:gmatch('%S*%s*') do
-    local frag_text = love.graphics.newText(love.graphics.getFont(), frag)
-    local frag_width = math.floor(frag_text:getWidth()*Zoom)
---?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
---?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
-    if x + frag_width > line_width then
-      while x + frag_width > line_width do
-        if x < 0.8*line_width then
-          -- long word; chop it at some letter
-          -- We're not going to reimplement TeX here.
-          local b = Text.nearest_cursor_pos(frag, line_width - x)
---?           print('space for '..tostring(b)..' graphemes')
-          local frag1 = string.sub(frag, 1, b)
-          local frag1_text = love.graphics.newText(love.graphics.getFont(), frag1)
-          local frag1_width = math.floor(frag1_text:getWidth()*Zoom)
---?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
-          table.insert(line.fragments, {data=frag1, text=frag1_text})
-          frag = string.sub(frag, b+1)
-          frag_text = love.graphics.newText(love.graphics.getFont(), frag)
-          frag_width = math.floor(frag_text:getWidth()*Zoom)
-        end
-        x = 25  -- new line
-      end
-    end
-    if #frag > 0 then
---?       print('inserting '..frag..' of width '..tostring(frag_width)..'px')
-      table.insert(line.fragments, {data=frag, text=frag_text})
-    end
-  end
-end
-
 function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
@@ -88,6 +53,41 @@ end
 --  draw with small line_width of 100
 --  short words break on spaces
 --  long words break when they must
+
+function Text.compute_fragments(line, line_width)
+  line.fragments = {}
+  local x = 25
+  -- try to wrap at word boundaries
+  for frag in line.data:gmatch('%S*%s*') do
+    local frag_text = love.graphics.newText(love.graphics.getFont(), frag)
+    local frag_width = math.floor(frag_text:getWidth()*Zoom)
+--?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
+--?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
+    if x + frag_width > line_width then
+      while x + frag_width > line_width do
+        if x < 0.8*line_width then
+          -- long word; chop it at some letter
+          -- We're not going to reimplement TeX here.
+          local b = Text.nearest_cursor_pos(frag, line_width - x)
+--?           print('space for '..tostring(b)..' graphemes')
+          local frag1 = string.sub(frag, 1, b)
+          local frag1_text = love.graphics.newText(love.graphics.getFont(), frag1)
+          local frag1_width = math.floor(frag1_text:getWidth()*Zoom)
+--?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
+          table.insert(line.fragments, {data=frag1, text=frag1_text})
+          frag = string.sub(frag, b+1)
+          frag_text = love.graphics.newText(love.graphics.getFont(), frag)
+          frag_width = math.floor(frag_text:getWidth()*Zoom)
+        end
+        x = 25  -- new line
+      end
+    end
+    if #frag > 0 then
+--?       print('inserting '..frag..' of width '..tostring(frag_width)..'px')
+      table.insert(line.fragments, {data=frag, text=frag_text})
+    end
+  end
+end
 
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
