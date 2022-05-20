@@ -226,7 +226,7 @@ function Text.keychord_pressed(chord)
       if Lines[new_cursor_line].mode == 'text' then
         local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
         Cursor_line = new_cursor_line
-        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
         break
       end
     end
@@ -242,7 +242,7 @@ function Text.keychord_pressed(chord)
       if Lines[new_cursor_line].mode == 'text' then
         local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
         Cursor_line = new_cursor_line
-        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x, Cursor_pos)
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
         break
       end
     end
@@ -336,7 +336,7 @@ end
 --  nearest_cursor_pos('gh', mx) = 2
 --  Cursor_pos = 7 + 2 - 1 = 8
 
-function Text.nearest_cursor_pos(line, x, hint)
+function Text.nearest_cursor_pos(line, x)
   if x == 0 then
     return 1
   end
@@ -345,20 +345,7 @@ function Text.nearest_cursor_pos(line, x, hint)
   if x > max_x then
     return len+1
   end
-  if hint then
-    local currx = Text.cursor_x(line, hint)
-    if currx > x-2 and currx < x+2 then
-      return hint
-    end
-  end
   local left, right = 1, len+1
-  if hint then
-    if currx > x then
-      right = hint
-    else
-      left = hint
-    end
-  end
 --?   print('--')
   while true do
     local curr = math.floor((left+right)/2)
