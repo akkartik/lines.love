@@ -119,6 +119,7 @@ function love.draw()
             -- cursor
             love.graphics.setColor(1,0,0)
             love.graphics.circle('fill', 25,y+math.floor(15*Zoom), 2)
+            love.graphics.setColor(0,0,0)
           end
         y = y + math.floor(15*Zoom)  -- text height
       elseif line.mode == 'drawing' then

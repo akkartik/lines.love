@@ -70,6 +70,7 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
         -- cursor
         love.graphics.setColor(1,0,0)
         love.graphics.circle('fill', x+Text.cursor_x2(frag, cursor_pos-pos+1),y+math.floor(15*Zoom), 2)
+        love.graphics.setColor(0,0,0)
       end
     end
     x = x + frag_width
@@ -79,6 +80,7 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     -- cursor
     love.graphics.setColor(1,0,0)
     love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
+    love.graphics.setColor(0,0,0)
   end
   return y
 end
