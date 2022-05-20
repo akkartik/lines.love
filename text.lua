@@ -227,7 +227,15 @@ function Text.keychord_pressed(chord)
         if Lines[new_cursor_line].mode == 'text' then
           local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
           Cursor_line = new_cursor_line
-          Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
+          if Lines[Cursor_line].screen_line_starting_pos == nil then
+            Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
+            break
+          end
+          local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
+          screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
+          Top_screen_line_starting_pos = screen_line_starting_pos
+          local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
+          Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, old_x) - 1
           break
         end
       end
