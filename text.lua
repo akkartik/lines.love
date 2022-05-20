@@ -3,7 +3,7 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
+function Text.draw(line, line_width, line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -30,15 +30,15 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     love.graphics.draw(frag_text, x,y, 0, Zoom)
     -- render cursor if necessary
     local frag_len = utf8.len(frag)
-    if line_index == cursor_line then
-      if pos <= cursor_pos and pos + frag_len > cursor_pos then
-        Text.draw_cursor(x+Text.cursor_x2(frag, cursor_pos-pos+1), y)
+    if line_index == Cursor_line then
+      if pos <= Cursor_pos and pos + frag_len > Cursor_pos then
+        Text.draw_cursor(x+Text.cursor_x2(frag, Cursor_pos-pos+1), y)
       end
     end
     x = x + frag_width
     pos = pos + frag_len
   end
-  if line_index == cursor_line and cursor_pos == pos then
+  if line_index == Cursor_line and Cursor_pos == pos then
     Text.draw_cursor(x, y)
   end
   return y

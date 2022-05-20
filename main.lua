@@ -130,7 +130,7 @@ function love.draw()
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
         line.y = y
-        y = Text.draw(line, Line_width, line_index, Cursor_line, Cursor_pos)
+        y = Text.draw(line, Line_width, line_index)
         y = y + math.floor(15*Zoom)  -- text height
       end
     end
