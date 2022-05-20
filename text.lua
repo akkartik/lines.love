@@ -47,6 +47,7 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
   if line.fragments == nil then
     Text.compute_fragments(line, line_width)
   end
+  line.screen_line_starting_pos = nil
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
@@ -279,24 +280,23 @@ end
 function Text.move_cursor(line_index, line, mx, my)
   Cursor_line = line_index
   if line.screen_line_starting_pos == nil then
---?     print('single screen line')
     Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
     return
   end
   assert(line.fragments)
   assert(my >= line.y)
---?   print('move_cursor', mx, my)
-  if my < line.y + math.floor(15*Zoom) then
---?     print('first screen line')
-    Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
-    return
-  end
   -- duplicate some logic from Text.draw
   local y = line.y
-  for _,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
---?     print('screen line:', screen_line_starting_pos)
+  for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
     local nexty = y + math.floor(15*Zoom)
     if my < nexty then
+      -- On all wrapped screen lines but the final one, clicks past end of
+      -- line position cursor on final character of screen line.
+      -- (The final screen line positions past end of screen line as always.)
+      if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
+        Cursor_pos = line.screen_line_starting_pos[screen_line_index+1] - 1
+        return
+      end
       local s = string.sub(line.data, screen_line_starting_pos)
       Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
       return

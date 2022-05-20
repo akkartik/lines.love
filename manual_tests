@@ -3,6 +3,8 @@ file load:
   first line is a drawing -> cursor_line = 2
 click on text -> cursor moves
 click on first character of text -> cursor on first character of text
+click to right of text -> cursor past end of line
+click to right of wrapped text -> cursor on final character of line
 click on drawing -> cursor doesn't move
 create drawing -> cursor bumps down below drawing
 backspace
