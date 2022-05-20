@@ -44,7 +44,7 @@ Cursor_line = 1
 --  ^cursor_pos = 2
 --   ...
 --               ^cursor_pos past end of line is 15
-Cursor_pos = #Lines[Cursor_line].data+1  -- in Unicode codepoints
+Cursor_pos = 1  -- in Unicode codepoints
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
@@ -133,8 +133,8 @@ function love.draw()
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
         line.y = y
-        y = Text.draw(line, 100, line_index, Cursor_line, Cursor_pos)
---?         y = Text.draw(line, Drawing_width, line_index, Cursor_line, Cursor_pos)
+--?         y = Text.draw(line, 100, line_index, Cursor_line, Cursor_pos)
+        y = Text.draw(line, Drawing_width, line_index, Cursor_line, Cursor_pos)
         y = y + math.floor(15*Zoom)  -- text height
       end
     end

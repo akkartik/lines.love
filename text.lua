@@ -39,8 +39,8 @@ function Text.compute_fragments(line, line_width)
 end
 
 function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
-  love.graphics.setColor(0.75,0.75,0.75)
-  love.graphics.line(line_width, 0, line_width, Screen_height)
+--?   love.graphics.setColor(0.75,0.75,0.75)
+--?   love.graphics.line(line_width, 0, line_width, Screen_height)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -119,7 +119,7 @@ function Text.keychord_pressed(chord)
         new_cursor_line = new_cursor_line-1
         if Lines[new_cursor_line].mode == 'text' then
           Cursor_line = new_cursor_line
-          Cursor_pos = #Lines[Cursor_line].data+1
+          Cursor_pos = utf8.len(Lines[Cursor_line].data) + 1
           break
         end
       end
@@ -129,7 +129,7 @@ function Text.keychord_pressed(chord)
     end
   elseif chord == 'right' then
     assert(Lines[Cursor_line].mode == 'text')
-    if Cursor_pos <= #Lines[Cursor_line].data then
+    if Cursor_pos <= utf8.len(Lines[Cursor_line].data) then
       Cursor_pos = Cursor_pos+1
     else
       local new_cursor_line = Cursor_line
@@ -148,7 +148,7 @@ function Text.keychord_pressed(chord)
   elseif chord == 'home' then
     Cursor_pos = 1
   elseif chord == 'end' then
-    Cursor_pos = #Lines[Cursor_line].data+1
+    Cursor_pos = utf8.len(Lines[Cursor_line].data) + 1
   elseif chord == 'backspace' then
     if Cursor_pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
@@ -176,7 +176,7 @@ function Text.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
-    if Cursor_pos <= #Lines[Cursor_line].data then
+    if Cursor_pos <= utf8.len(Lines[Cursor_line].data) then
       local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
       local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos+1)
       if byte_start then
@@ -279,9 +279,10 @@ function Text.nearest_cursor_pos(line, x, hint)
   if x == 0 then
     return 1
   end
-  local max_x = Text.cursor_x(line, #line+1)
+  local len = utf8.len(line)
+  local max_x = Text.cursor_x(line, len+1)
   if x > max_x then
-    return #line+1
+    return len+1
   end
   if hint then
     local currx = Text.cursor_x(line, hint)
@@ -289,7 +290,7 @@ function Text.nearest_cursor_pos(line, x, hint)
       return hint
     end
   end
-  local left, right = 1, #line+1
+  local left, right = 1, len+1
   if hint then
     if currx > x then
       right = hint
