@@ -213,6 +213,7 @@ function Text.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
+    -- previous text line
     local new_cursor_line = Cursor_line
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
@@ -228,6 +229,7 @@ function Text.keychord_pressed(chord)
     end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
+    -- next text line
     local new_cursor_line = Cursor_line
     while new_cursor_line < #Lines do
       new_cursor_line = new_cursor_line+1

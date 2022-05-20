@@ -7,7 +7,7 @@ Known issues:
   implications:
     * A long series of drawings will get silently skipped when you hit
       page-down, until a line of text can be showed on screen.
-    * If there's no line of text at the bottom of the file, one will be
-      created.
-  So far this app isn't really designed for all-drawing files. I'm really just
+    * If there's no line of text at the top of the file, you may not be able
+      to scroll back up to the top with page-up.
+  So far this app isn't really designed for drawing-heavy files. For now I'm
   targeting mostly-text files with a few drawings mixed in.
