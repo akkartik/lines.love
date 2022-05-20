@@ -75,6 +75,11 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     x = x + frag_width
     pos = pos + frag_len
   end
+  if cursor_pos == pos then
+    -- cursor
+    love.graphics.setColor(1,0,0)
+    love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
+  end
   return y
 end
 -- manual tests:
