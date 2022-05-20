@@ -44,6 +44,8 @@ Cursor_pos = 1  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
+Cursor_x, Cursor_y = 0, 0  -- in pixels
+
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
