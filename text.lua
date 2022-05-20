@@ -38,7 +38,7 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     x = x + frag_width
     pos = pos + frag_len
   end
-  if cursor_pos == pos then
+  if line_index == cursor_line and cursor_pos == pos then
     Text.draw_cursor(x, y)
   end
   return y
