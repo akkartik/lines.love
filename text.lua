@@ -68,7 +68,8 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     if line_index == cursor_line then
       if pos <= cursor_pos and pos + frag_len > cursor_pos then
         -- cursor
-        love.graphics.print('_', x+Text.cursor_x2(frag, cursor_pos-pos+1), y+6)  -- drop the cursor down a bit to account for the increased font size
+        love.graphics.setColor(1,0,0)
+        love.graphics.circle('fill', x+Text.cursor_x2(frag, cursor_pos-pos+1),y+math.floor(15*Zoom), 2)
       end
     end
     x = x + frag_width

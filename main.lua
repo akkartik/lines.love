@@ -116,8 +116,9 @@ function love.draw()
                        end
                      end})
           if line_index == Cursor_line then
-            love.graphics.setColor(0,0,0)
-            love.graphics.print('_', 25, y+6)  -- drop the cursor down a bit to account for the increased font size
+            -- cursor
+            love.graphics.setColor(1,0,0)
+            love.graphics.circle('fill', 25,y+math.floor(15*Zoom), 2)
           end
         y = y + math.floor(15*Zoom)  -- text height
       elseif line.mode == 'drawing' then
