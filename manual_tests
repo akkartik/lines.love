@@ -22,7 +22,7 @@ scrolling:
   cursor remains on screen
   cursor remains on text line
   'up' arrow with cursor at top of screen scrolls up one line (drawings still fully in or out)
-    if top line wrapped before, it scrolls up by only one screen line
+    if cursor line wrapped before, it scrolls up by only one screen line
     if previous line (above top of screen) wrapped, it scrolls up by only one screen line
   'down' arrow with cursor at bottom of screen scrolls down one line (drawings still fully in or out)
-    if top line wrapped before, it scrolls down by only one screen line
+    if cursor line wrapped before, it scrolls down by only one screen line

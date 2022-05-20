@@ -38,7 +38,7 @@ require 'icons'
 -- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
 Cursor_line = 1
-Cursor_pos = 1  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
+Cursor_pos = 15  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
@@ -47,7 +47,7 @@ Cursor_x, Cursor_y = 0, 0  -- in pixels
 -- scrolling support
 Screen_top_line = 1
 Screen_bottom_line = 1
-Top_screen_line_starting_pos = 1  -- when top of screen starts in between a wrapped line
+Top_screen_line_starting_pos = 6  -- when top of screen starts in between a wrapped line
 Bottom_screen_line_starting_pos = 1  -- when bottom of screen starts in between a wrapped line
 
 Current_drawing_mode = 'line'
@@ -61,15 +61,17 @@ Filename = 'lines.txt'
 
 function love.load(arg)
   -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  Screen_width, Screen_height, Screen_flags = love.window.getMode()
-  -- shrink slightly to account for window decoration
-  Screen_width = Screen_width-100
-  Screen_height = Screen_height-100
+--?   love.window.setMode(0, 0)  -- maximize
+--?   Screen_width, Screen_height, Screen_flags = love.window.getMode()
+--?   -- shrink slightly to account for window decoration
+--?   Screen_width = Screen_width-100
+--?   Screen_height = Screen_height-100
+  Screen_width = 120
+  Screen_height = 200
   love.window.setMode(Screen_width, Screen_height)
   love.window.setTitle('Text with Lines')
---?   Line_width = 100
-  Line_width = math.floor(Screen_width/2/40)*40
+  Line_width = 100
+--?   Line_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
   if #arg > 0 then

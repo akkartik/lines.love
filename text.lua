@@ -219,7 +219,9 @@ function Text.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
-    if Top_screen_line_starting_pos == 1 then
+    local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
+    if screen_line_starting_pos == 1 then
+      print('cursor is at first screen line of its line')
       -- top line is done; skip to previous text line
       local new_cursor_line = Cursor_line
       while new_cursor_line > 1 do
@@ -233,7 +235,10 @@ function Text.keychord_pressed(chord)
           end
           local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
-          Top_screen_line_starting_pos = screen_line_starting_pos
+          print('previous screen line starts at '..tostring(screen_line_starting_pos)..' of its line')
+          if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
+            Top_screen_line_starting_pos = screen_line_starting_pos
+          end
           local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
           Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, old_x) - 1
           break
@@ -244,11 +249,17 @@ function Text.keychord_pressed(chord)
       end
     else
       -- scroll up just one screen line in current line
-      local screen_line_index = table.find(Lines[Cursor_line].screen_line_starting_pos, Top_screen_line_starting_pos)
+      print('cursor is NOT at first screen line of its line')
       assert(screen_line_index > 1)
-      Top_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
-      local s = string.sub(Lines[Cursor_line].data, Top_screen_line_starting_pos)
-      Cursor_pos = Text.nearest_cursor_pos(s, Cursor_x)
+      new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
+      print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
+      if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
+        Top_screen_line_starting_pos = new_screen_line_starting_pos
+        print('also setting pos of top of screen to '..tostring(Top_screen_line_starting_pos))
+      end
+      local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
+      Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+      print('cursor pos is now '..tostring(Cursor_pos))
     end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
@@ -267,6 +278,19 @@ function Text.keychord_pressed(chord)
       Screen_top_line = Cursor_line
     end
   end
+end
+
+function Text.pos_at_start_of_cursor_screen_line()
+  if Lines[Cursor_line].screen_line_starting_pos == nil then
+    return 1,1
+  end
+  for i=#Lines[Cursor_line].screen_line_starting_pos,1,-1 do
+    local spos = Lines[Cursor_line].screen_line_starting_pos[i]
+    if spos <= Cursor_pos then
+      return i,spos
+    end
+  end
+  assert(false)
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
