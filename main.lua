@@ -39,12 +39,7 @@ Lines = {{mode='text', data=''}}
 Screen_top_line = 1
 Screen_bottom_line = 1
 Cursor_line = 1
--- this is a line
--- ^cursor_pos = 1
---  ^cursor_pos = 2
---   ...
---               ^cursor_pos past end of line is 15
-Cursor_pos = 1  -- in Unicode codepoints
+Cursor_pos = 1  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
