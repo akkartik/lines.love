@@ -302,7 +302,7 @@ function Text.move_cursor(line_index, line, mx, my)
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
       if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
-        Cursor_pos = line.screen_line_starting_pos[screen_line_index+1] - 1
+        Cursor_pos = line.screen_line_starting_pos[screen_line_index+1]
         return
       end
       local s = string.sub(line.data, screen_line_starting_pos)
