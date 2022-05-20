@@ -3,15 +3,79 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-function Text.draw(line, line_index, cursor_line, cursor_pos)
-  love.graphics.setColor(0,0,0)
-  local love_text = love.graphics.newText(love.graphics.getFont(), line.data)
-  love.graphics.draw(love_text, 25,line.y, 0, Zoom)
-  if line_index == cursor_line then
-    -- cursor
-    love.graphics.print('_', Text.cursor_x(line.data, cursor_pos), line.y+6)  -- drop the cursor down a bit to account for the increased font size
+function Text.compute_fragments(line, line_width)
+  line.fragments = {}
+  local x = 25
+  -- try to wrap at word boundaries
+  for frag in line.data:gmatch('%S*%s*') do
+    local frag_text = love.graphics.newText(love.graphics.getFont(), frag)
+    local frag_width = math.floor(frag_text:getWidth()*Zoom)
+--?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
+--?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
+    if x + frag_width > line_width then
+      while x + frag_width > line_width do
+        if x < 0.8*line_width then
+          -- long word; chop it at some letter
+          -- We're not going to reimplement TeX here.
+          local b = Text.nearest_cursor_pos(frag, line_width - x)
+--?           print('space for '..tostring(b)..' graphemes')
+          local frag1 = string.sub(frag, 1, b)
+          local frag1_text = love.graphics.newText(love.graphics.getFont(), frag1)
+          local frag1_width = math.floor(frag1_text:getWidth()*Zoom)
+--?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
+          table.insert(line.fragments, {data=frag1, text=frag1_text})
+          frag = string.sub(frag, b+1)
+          frag_text = love.graphics.newText(love.graphics.getFont(), frag)
+          frag_width = math.floor(frag_text:getWidth()*Zoom)
+        end
+        x = 25  -- new line
+      end
+    end
+    if #frag > 0 then
+--?       print('inserting '..frag..' of width '..tostring(frag_width)..'px')
+      table.insert(line.fragments, {data=frag, text=frag_text})
+    end
   end
 end
+
+function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
+  love.graphics.setColor(0.75,0.75,0.75)
+  love.graphics.line(line_width, 0, line_width, Screen_height)
+  love.graphics.setColor(0,0,0)
+  -- wrap long lines
+  local x = 25
+  local y = line.y
+  local pos = 1
+  if line.fragments == nil then
+    Text.compute_fragments(line, line_width)
+  end
+  for _, f in ipairs(line.fragments) do
+    local frag, frag_text = f.data, f.text
+    -- render fragment
+    local frag_width = math.floor(frag_text:getWidth()*Zoom)
+    if x + frag_width > line_width then
+      assert(x > 25)  -- no overfull lines
+      y = y + math.floor(15*Zoom)
+      x = 25
+    end
+    love.graphics.draw(frag_text, x,y, 0, Zoom)
+    -- render cursor if necessary
+    local frag_len = utf8.len(frag)
+    if line_index == cursor_line then
+      if pos <= cursor_pos and pos + frag_len > cursor_pos then
+        -- cursor
+        love.graphics.print('_', x+Text.cursor_x2(frag, cursor_pos-pos+1), y+6)  -- drop the cursor down a bit to account for the increased font size
+      end
+    end
+    x = x + frag_width
+    pos = pos + frag_len
+  end
+  return y
+end
+-- manual tests:
+--  draw with small line_width of 100
+--  short words break on spaces
+--  long words break when they must
 
 function love.textinput(t)
   if love.mouse.isDown('1') then return end
@@ -28,6 +92,7 @@ function Text.insert_at_cursor(t)
     byte_offset = 0
   end
   Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
+  Lines[Cursor_line].fragments = nil
   Cursor_pos = Cursor_pos+1
 end
 
@@ -37,6 +102,7 @@ function Text.keychord_pressed(chord)
     local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
     table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
     Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
+    Lines[Cursor_line].fragments = nil
     Cursor_line = Cursor_line+1
     Cursor_pos = 1
     save_to_disk(Lines, Filename)
@@ -93,6 +159,7 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
         end
+        Lines[Cursor_line].fragments = nil
         Cursor_pos = Cursor_pos-1
       end
     elseif Cursor_line > 1 then
@@ -102,6 +169,7 @@ function Text.keychord_pressed(chord)
         -- join lines
         Cursor_pos = utf8.len(Lines[Cursor_line-1].data)+1
         Lines[Cursor_line-1].data = Lines[Cursor_line-1].data..Lines[Cursor_line].data
+        Lines[Cursor_line-1].fragments = nil
         table.remove(Lines, Cursor_line)
       end
       Cursor_line = Cursor_line-1
@@ -117,6 +185,7 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
         end
+        Lines[Cursor_line].fragments = nil
         -- no change to Cursor_pos
       end
     elseif Cursor_line < #Lines then
@@ -125,6 +194,7 @@ function Text.keychord_pressed(chord)
       else
         -- join lines
         Lines[Cursor_line].data = Lines[Cursor_line].data..Lines[Cursor_line+1].data
+        Lines[Cursor_line].fragments = nil
         table.remove(Lines, Cursor_line+1)
       end
     end
@@ -247,6 +317,12 @@ function Text.cursor_x(line_data, cursor_pos)
   local line_before_cursor = line_data:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
   return 25 + math.floor(text_before_cursor:getWidth()*Zoom)
+end
+
+function Text.cursor_x2(s, cursor_pos)
+  local s_before_cursor = s:sub(1, cursor_pos-1)
+  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), s_before_cursor)
+  return math.floor(text_before_cursor:getWidth()*Zoom)
 end
 
 return Text

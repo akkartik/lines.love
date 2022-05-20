@@ -133,11 +133,13 @@ function love.draw()
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
         line.y = y
-        Text.draw(line, line_index, Cursor_line, Cursor_pos)
+        y = Text.draw(line, 100, line_index, Cursor_line, Cursor_pos)
+--?         y = Text.draw(line, Drawing_width, line_index, Cursor_line, Cursor_pos)
         y = y + math.floor(15*Zoom)  -- text height
       end
     end
   end
+--?   os.exit(1)
 end
 
 function love.update(dt)
