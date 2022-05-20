@@ -298,12 +298,17 @@ function Text.nearest_cursor_pos(line, x, hint)
       left = hint
     end
   end
-  while left < right-1 do
+--?   print('--')
+  while true do
     local curr = math.floor((left+right)/2)
     local currxmin = Text.cursor_x(line, curr)
     local currxmax = Text.cursor_x(line, curr+1)
+--?     print(x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
+    end
+    if left >= right-1 then
+      return right
     end
     if currxmin > x then
       right = curr
@@ -311,7 +316,7 @@ function Text.nearest_cursor_pos(line, x, hint)
       left = curr
     end
   end
-  return right
+  assert(false)
 end
 
 function Text.cursor_x(line_data, cursor_pos)

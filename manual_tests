@@ -2,6 +2,7 @@ file load:
   cursor_line = 1
   first line is a drawing -> cursor_line = 2
 click on text -> cursor moves
+click on first character of text -> cursor on first character of text
 click on drawing -> cursor doesn't move
 create drawing -> cursor bumps down below drawing
 backspace
