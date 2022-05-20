@@ -32,20 +32,14 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
     local frag_len = utf8.len(frag)
     if line_index == cursor_line then
       if pos <= cursor_pos and pos + frag_len > cursor_pos then
-        -- cursor
-        love.graphics.setColor(1,0,0)
-        love.graphics.circle('fill', x+Text.cursor_x2(frag, cursor_pos-pos+1),y+math.floor(15*Zoom), 2)
-        love.graphics.setColor(0,0,0)
+        Text.draw_cursor(x+Text.cursor_x2(frag, cursor_pos-pos+1), y)
       end
     end
     x = x + frag_width
     pos = pos + frag_len
   end
   if cursor_pos == pos then
-    -- cursor
-    love.graphics.setColor(1,0,0)
-    love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
-    love.graphics.setColor(0,0,0)
+    Text.draw_cursor(x, y)
   end
   return y
 end
@@ -53,6 +47,12 @@ end
 --  draw with small line_width of 100
 --  short words break on spaces
 --  long words break when they must
+
+function Text.draw_cursor(x, y)
+  love.graphics.setColor(1,0,0)
+  love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
+  love.graphics.setColor(0,0,0)
+end
 
 function Text.compute_fragments(line, line_width)
   line.fragments = {}

@@ -116,10 +116,7 @@ function love.draw()
                        end
                      end})
           if line_index == Cursor_line then
-            -- cursor
-            love.graphics.setColor(1,0,0)
-            love.graphics.circle('fill', 25,y+math.floor(15*Zoom), 2)
-            love.graphics.setColor(0,0,0)
+            Text.draw_cursor(25, y)
           end
         y = y + math.floor(15*Zoom)  -- text height
       elseif line.mode == 'drawing' then
