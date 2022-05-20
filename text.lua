@@ -19,7 +19,7 @@ function Text.draw(line, line_width, line_index)
     local frag_width = math.floor(frag_text:getWidth()*Zoom)
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
-      if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
+      if line_index > Screen_top_line or pos > Top_screen_line_starting_pos then
         y = y + math.floor(15*Zoom)
       end
       x = 25
@@ -219,19 +219,28 @@ function Text.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
-    -- previous text line
-    local new_cursor_line = Cursor_line
-    while new_cursor_line > 1 do
-      new_cursor_line = new_cursor_line-1
-      if Lines[new_cursor_line].mode == 'text' then
-        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
-        Cursor_line = new_cursor_line
-        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
-        break
+    if Top_screen_line_starting_pos == 1 then
+      -- top line is done; skip to previous text line
+      local new_cursor_line = Cursor_line
+      while new_cursor_line > 1 do
+        new_cursor_line = new_cursor_line-1
+        if Lines[new_cursor_line].mode == 'text' then
+          local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
+          Cursor_line = new_cursor_line
+          Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
+          break
+        end
       end
-    end
-    if Cursor_line < Screen_top_line then
-      Screen_top_line = Cursor_line
+      if Cursor_line < Screen_top_line then
+        Screen_top_line = Cursor_line
+      end
+    else
+      -- scroll up just one screen line in current line
+      local screen_line_index = table.find(Lines[Cursor_line].screen_line_starting_pos, Top_screen_line_starting_pos)
+      assert(screen_line_index > 1)
+      Top_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
+      local s = string.sub(Lines[Cursor_line].data, Top_screen_line_starting_pos)
+      Cursor_pos = Text.nearest_cursor_pos(s, Cursor_x)
     end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
