@@ -39,8 +39,6 @@ function Text.compute_fragments(line, line_width)
 end
 
 function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
---?   love.graphics.setColor(0.75,0.75,0.75)
---?   love.graphics.line(line_width, 0, line_width, Screen_height)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -57,6 +55,11 @@ function Text.draw(line, line_width, line_index, cursor_line, cursor_pos)
       assert(x > 25)  -- no overfull lines
       y = y + math.floor(15*Zoom)
       x = 25
+      if line.screen_line_starting_pos == nil then
+        line.screen_line_starting_pos = {1, pos}
+      else
+        table.insert(line.screen_line_starting_pos, pos)
+      end
     end
     love.graphics.draw(frag_text, x,y, 0, Zoom)
     -- render cursor if necessary
@@ -267,13 +270,55 @@ end
 
 function Text.in_line(line, x,y)
   if line.y == nil then return false end  -- outside current page
-  return x >= 16 and y >= line.y and y < line.y + math.floor(15*Zoom)
+  if x < 16 then return false end
+  if y < line.y then return false end
+  if line.screen_line_starting_pos == nil then return y < line.y + math.floor(15*Zoom) end
+  return y < line.y + #line.screen_line_starting_pos * math.floor(15*Zoom)
 end
 
-function Text.move_cursor(line_index, line, mx)
+function Text.move_cursor(line_index, line, mx, my)
   Cursor_line = line_index
-  Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
+  if line.screen_line_starting_pos == nil then
+--?     print('single screen line')
+    Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
+    return
+  end
+  assert(line.fragments)
+  assert(my >= line.y)
+--?   print('move_cursor', mx, my)
+  if my < line.y + math.floor(15*Zoom) then
+--?     print('first screen line')
+    Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
+    return
+  end
+  -- duplicate some logic from Text.draw
+  local y = line.y
+  for _,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
+--?     print('screen line:', screen_line_starting_pos)
+    local nexty = y + math.floor(15*Zoom)
+    if my < nexty then
+      local s = string.sub(line.data, screen_line_starting_pos)
+      Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
+      return
+    end
+    y = nexty
+  end
+  assert(false)
 end
+-- manual test:
+--  line: abc
+--        def
+--        gh
+--  fragments: abc, def, gh
+--  click inside e
+--  line_starting_pos = 1 + 3 = 4
+--  nearest_cursor_pos('defgh', mx) = 2
+--  Cursor_pos = 4 + 2 - 1 = 5
+-- manual test:
+--  click inside h
+--  line_starting_pos = 1 + 3 + 3 = 7
+--  nearest_cursor_pos('gh', mx) = 2
+--  Cursor_pos = 7 + 2 - 1 = 8
 
 function Text.nearest_cursor_pos(line, x, hint)
   if x == 0 then

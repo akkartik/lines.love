@@ -12,6 +12,7 @@ require 'icons'
 -- a text is a table with:
 --    mode = 'text'
 --    string data
+--    screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
 -- a drawing is a table with:
 --    mode = 'drawing'
 --    a (y) coord in pixels (updated while painting screen),
@@ -126,7 +127,6 @@ function love.draw()
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
         line.y = y
---?         y = Text.draw(line, 100, line_index, Cursor_line, Cursor_pos)
         y = Text.draw(line, Line_width, line_index, Cursor_line, Cursor_pos)
         y = y + math.floor(15*Zoom)  -- text height
       end
@@ -145,7 +145,7 @@ function love.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
-        Text.move_cursor(line_index, line, x)
+        Text.move_cursor(line_index, line, x, y)
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
