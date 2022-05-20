@@ -19,7 +19,9 @@ function Text.draw(line, line_width, line_index)
     local frag_width = math.floor(frag_text:getWidth()*Zoom)
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
-      y = y + math.floor(15*Zoom)
+      if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
+        y = y + math.floor(15*Zoom)
+      end
       x = 25
       if line.screen_line_starting_pos == nil then
         line.screen_line_starting_pos = {1, pos}
@@ -27,7 +29,9 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
     end
-    love.graphics.draw(frag_text, x,y, 0, Zoom)
+    if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
+      love.graphics.draw(frag_text, x,y, 0, Zoom)
+    end
     -- render cursor if necessary
     local frag_len = utf8.len(frag)
     if line_index == Cursor_line then

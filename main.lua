@@ -47,6 +47,8 @@ Cursor_x, Cursor_y = 0, 0  -- in pixels
 -- scrolling support
 Screen_top_line = 1
 Screen_bottom_line = 1
+Top_screen_line_starting_pos = 1  -- when top of screen starts in between a wrapped line
+Bottom_screen_line_starting_pos = 1  -- when bottom of screen starts in between a wrapped line
 
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
@@ -66,6 +68,7 @@ function love.load(arg)
   Screen_height = Screen_height-100
   love.window.setMode(Screen_width, Screen_height)
   love.window.setTitle('Text with Lines')
+--?   Line_width = 100
   Line_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
