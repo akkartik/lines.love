@@ -236,10 +236,9 @@ function Text.keychord_pressed(chord)
       while new_cursor_line > 1 do
         new_cursor_line = new_cursor_line-1
         if Lines[new_cursor_line].mode == 'text' then
-          local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
           Cursor_line = new_cursor_line
           if Lines[Cursor_line].screen_line_starting_pos == nil then
-            Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
+            Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
             break
           end
           -- previous text line found, pick its final screen line
@@ -251,7 +250,7 @@ function Text.keychord_pressed(chord)
             print('pos of top of screen is also '..tostring(Top_screen_line_starting_pos)..' of the same line')
           end
           local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
-          Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, old_x) - 1
+          Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
           break
         end
       end
@@ -279,9 +278,8 @@ function Text.keychord_pressed(chord)
     while new_cursor_line < #Lines do
       new_cursor_line = new_cursor_line+1
       if Lines[new_cursor_line].mode == 'text' then
-        local old_x = Text.cursor_x(Lines[new_cursor_line].data, Cursor_pos)
         Cursor_line = new_cursor_line
-        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
+        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
         break
       end
     end
