@@ -3,6 +3,8 @@ Text = {}
 
 local utf8 = require 'utf8'
 
+local New_render = true
+
 function Text.draw(line, line_width, line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
@@ -13,6 +15,7 @@ function Text.draw(line, line_width, line_index)
     Text.compute_fragments(line, line_width)
   end
   line.screen_line_starting_pos = nil
+  if New_render then print('--') end
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
@@ -21,6 +24,7 @@ function Text.draw(line, line_width, line_index)
       assert(x > 25)  -- no overfull lines
       if line_index > Screen_top_line or pos > Top_screen_line_starting_pos then
         y = y + math.floor(15*Zoom)
+        if New_render then print('y', y) end
       end
       x = 25
       if line.screen_line_starting_pos == nil then
@@ -29,7 +33,9 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
     end
+    if New_render then print('checking to draw', pos, Top_screen_line_starting_pos) end
     if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
+      if New_render then print('drawing '..frag) end
       love.graphics.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
@@ -45,6 +51,7 @@ function Text.draw(line, line_width, line_index)
   if line_index == Cursor_line and Cursor_pos == pos then
     Text.draw_cursor(x, y)
   end
+  New_render = false
   return y
 end
 -- manual tests:
@@ -116,6 +123,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
+  New_render = true
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
     table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
@@ -219,6 +227,7 @@ function Text.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
+    print('up', Cursor_pos, Top_screen_line_starting_pos)
     local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     if screen_line_starting_pos == 1 then
       print('cursor is at first screen line of its line')
@@ -235,9 +244,10 @@ function Text.keychord_pressed(chord)
           end
           local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
-          print('previous screen line starts at '..tostring(screen_line_starting_pos)..' of its line')
+          print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
           if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
             Top_screen_line_starting_pos = screen_line_starting_pos
+            print('pos of top of screen is also '..tostring(Top_screen_line_starting_pos)..' of the same line')
           end
           local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
           Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, old_x) - 1
