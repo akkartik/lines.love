@@ -26,13 +26,6 @@ function Text.draw(line, line_width, line_index)
         y = y + math.floor(15*Zoom)
         if New_render then print('y', y) end
       end
-      if y > Screen_height then
-        if line.screen_line_starting_pos then
-          Bottom_screen_line_starting_pos = line.screen_line_starting_pos[#line.screen_line_starting_pos]
-        else
-          Bottom_screen_line_starting_pos = 1
-        end
-      end
       x = 25
       if line.screen_line_starting_pos == nil then
         line.screen_line_starting_pos = {1, pos}
@@ -294,8 +287,11 @@ function Text.keychord_pressed(chord)
         end
       end
       if Cursor_line > Screen_bottom_line then
+        print('screen top before:', Screen_top_line, Top_screen_line_starting_pos)
         Screen_top_line = Cursor_line
+        print('scroll up preserving cursor')
         Text.scroll_up_while_cursor_on_screen()
+        print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
       end
     else
       -- move down one screen line in current line
