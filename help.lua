@@ -48,7 +48,7 @@ function draw_help_without_mouse_pressed(drawing)
   love.graphics.print("Hit 'esc' now to hide this message", 16+30,y, 0, Zoom)
   y = y + math.floor(15*Zoom)
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, Drawing_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', 16,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(drawing)
@@ -107,7 +107,7 @@ function draw_help_with_mouse_pressed(drawing)
     y = y + math.floor(15*Zoom)
   end
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, Drawing_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', 16,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
 function current_shape(shape)
