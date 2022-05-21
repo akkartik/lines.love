@@ -3,7 +3,7 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-local New_render = true
+local Debug_new_render = true
 
 function Text.draw(line, line_width, line_index)
   love.graphics.setColor(0,0,0)
@@ -15,7 +15,7 @@ function Text.draw(line, line_width, line_index)
     Text.compute_fragments(line, line_width)
   end
   line.screen_line_starting_pos = nil
-  if New_render then print('--') end
+  if Debug_new_render then print('--') end
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
@@ -24,7 +24,7 @@ function Text.draw(line, line_width, line_index)
       assert(x > 25)  -- no overfull lines
       if line_index > Screen_top_line or pos > Top_screen_line_starting_pos then
         y = y + math.floor(15*Zoom)
-        if New_render then print('y', y) end
+        if Debug_new_render then print('y', y) end
       end
       x = 25
       if line.screen_line_starting_pos == nil then
@@ -33,9 +33,9 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
     end
-    if New_render then print('checking to draw', pos, Top_screen_line_starting_pos) end
+    if Debug_new_render then print('checking to draw', pos, Top_screen_line_starting_pos) end
     if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
-      if New_render then print('drawing '..frag) end
+      if Debug_new_render then print('drawing '..frag) end
       love.graphics.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
@@ -51,7 +51,7 @@ function Text.draw(line, line_width, line_index)
   if line_index == Cursor_line and Cursor_pos == pos then
     Text.draw_cursor(x, y)
   end
-  New_render = false
+  Debug_new_render = false
   return y
 end
 -- manual tests:
@@ -123,7 +123,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
-  New_render = true
+  Debug_new_render = true
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
     table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
