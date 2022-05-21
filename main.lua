@@ -186,6 +186,12 @@ function keychord_pressed(chord)
     if drawing then
       drawing.pending = {}
     end
+  elseif chord == 'escape' and not love.mouse.isDown('1') then
+    for _,line in ipairs(Lines) do
+      if line.mode == 'drawing' then
+        line.show_help = false
+      end
+    end
   elseif Current_drawing_mode == 'name' then
     if chord == 'return' then
       Current_drawing_mode = Previous_drawing_mode
