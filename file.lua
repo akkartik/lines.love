@@ -51,12 +51,15 @@ function load_drawing(infile_next_line)
     if shape.mode == 'line' or shape.mode == 'manhattan' then
       shape.p1 = Drawing.insert_point(drawing.points, shape.p1.x, shape.p1.y)
       shape.p2 = Drawing.insert_point(drawing.points, shape.p2.x, shape.p2.y)
-    elseif shape.mode == 'polygon' then
+    elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       for i,p in ipairs(shape.vertices) do
         shape.vertices[i] = Drawing.insert_point(drawing.points, p.x,p.y)
       end
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
+    else
+      print(shape.mode)
+      assert(false)
     end
     table.insert(drawing.shapes, shape)
   end
@@ -71,7 +74,7 @@ function store_drawing(outfile, drawing)
     elseif shape.mode == 'line' or shape.mode == 'manhattan' then
       local line = json.encode({mode=shape.mode, p1=drawing.points[shape.p1], p2=drawing.points[shape.p2]})
       outfile:write(line..'\n')
-    elseif shape.mode == 'polygon' then
+    elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       local obj = {mode=shape.mode, vertices={}}
       for _,p in ipairs(shape.vertices) do
         table.insert(obj.vertices, drawing.points[p])
@@ -82,6 +85,9 @@ function store_drawing(outfile, drawing)
       outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius})..'\n')
     elseif shape.mode == 'arc' then
       outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius, start_angle=shape.start_angle, end_angle=shape.end_angle})..'\n')
+    else
+      print(shape.mode)
+      assert(false)
     end
   end
   outfile:write('```\n')
