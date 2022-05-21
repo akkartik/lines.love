@@ -502,18 +502,10 @@ end
 
 function Drawing.complete_rectangle(firstx,firsty, secondx,secondy, x,y)
   if firstx == secondx then
-    local thirdx = y
-    local thirdy = secondy
-    love.graphics.line(Drawing.pixels(secondx)+left,Drawing.pixels(secondy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
-    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(firsty)+top)
-    return thirdx,thirdy, thirdx,firsty
+    return x,secondy, x,firsty
   end
   if firsty == secondy then
-    local thirdx = secondx
-    local thirdy = y
-    love.graphics.line(Drawing.pixels(secondx)+left,Drawing.pixels(secondy)+top, Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top)
-    love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(firstx)+left,Drawing.pixels(thirdy)+top)
-    return
+    return secondx,y, firstx,y
   end
   local first_slope = (secondy-firsty)/(secondx-firstx)
   -- slope of second edge:
