@@ -231,7 +231,7 @@ function Text.keychord_pressed(chord)
     local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     if screen_line_starting_pos == 1 then
       print('cursor is at first screen line of its line')
-      -- top line is done; skip to previous text line
+      -- line is done; skip to previous text line
       local new_cursor_line = Cursor_line
       while new_cursor_line > 1 do
         new_cursor_line = new_cursor_line-1
@@ -242,6 +242,7 @@ function Text.keychord_pressed(chord)
             Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, old_x)
             break
           end
+          -- previous text line found, pick its final screen line
           local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
           print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
@@ -258,7 +259,7 @@ function Text.keychord_pressed(chord)
         Screen_top_line = Cursor_line
       end
     else
-      -- scroll up just one screen line in current line
+      -- move up one screen line in current line
       print('cursor is NOT at first screen line of its line')
       assert(screen_line_index > 1)
       new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
