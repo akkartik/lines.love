@@ -294,6 +294,7 @@ function Text.keychord_pressed(chord)
         Text.scroll_up_while_cursor_on_screen()
         print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
       end
+      print('=>', Cursor_line, Cursor_pos, Screen_bottom_line)
     else
       -- move down one screen line in current line
       print('cursor is NOT at final screen line of its line')
@@ -304,7 +305,9 @@ function Text.keychord_pressed(chord)
       Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
       print('cursor pos is now '..tostring(Cursor_pos))
       Screen_top_line = Cursor_line
+      print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
+      print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
     end
   end
 end
@@ -350,13 +353,27 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 end
 
 function Text.scroll_up_while_cursor_on_screen()
-  local y = Screen_height - math.floor(15*Zoom) -- for Cursor_line
+  local cursor_pos_screen_lines = Text.pos_at_start_of_cursor_screen_line()
+  print('cursor pos '..tostring(Cursor_pos)..' is on the #'..tostring(cursor_pos_screen_lines)..' screen line down')
+  local y = Screen_height - cursor_pos_screen_lines*math.floor(15*Zoom)
+  -- duplicate some logic from love.draw
   while true do
     if Screen_top_line == 1 then break end
-    y = y - math.floor(15*Zoom)
-    if Lines[Screen_top_line].mode == 'drawing' then
-      y = y - Drawing.pixels(Lines[Screen_top_line].h)
+    print('y', y)
+    local h = 0
+    if Lines[Screen_top_line-1].mode == 'drawing' then
+      h = 20 + Drawing.pixels(Lines[Screen_top_line-1].h)
+    elseif Lines[Screen_top_line-1].screen_line_starting_pos == nil then
+      h = h + math.floor(15*Zoom)  -- text height
+    else
+      local n = #Lines[Screen_top_line-1].screen_line_starting_pos
+      h = h + n*math.floor(15*Zoom)  -- text height
     end
+    print('height:', h)
+    if y - h < 0 then
+      break
+    end
+    y = y - h
     if y < math.floor(15*Zoom) then
       break
     end
