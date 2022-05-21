@@ -349,6 +349,8 @@ function Drawing.keychord_pressed(chord)
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
       end
+    elseif drawing.pending.mode == 'square' or drawing.pending.mode == 'rectangle' then
+      -- reuse existing vertices
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.vertices = {drawing.pending.center}
     end
@@ -416,7 +418,7 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.p1 = drawing.pending.center
-    elseif drawing.pending.mode == 'polygon' then
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       drawing.pending.p1 = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'line'
