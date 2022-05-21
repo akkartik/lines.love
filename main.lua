@@ -57,7 +57,7 @@ Line_width = nil  -- maximum width available to either text or drawings, in pixe
 
 Zoom = 1.5
 
-Filename = 'lines.txt'
+Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
 function love.load(arg)
   -- maximize window
