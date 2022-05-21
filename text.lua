@@ -102,11 +102,9 @@ function Text.compute_fragments(line, line_width)
   end
 end
 
-function love.textinput(t)
+function Text.textinput(t)
   if love.mouse.isDown('1') then return end
-  if Lines[Cursor_line].mode == 'drawing' then return end
   Text.insert_at_cursor(t)
-  save_to_disk(Lines, Filename)
 end
 
 function Text.insert_at_cursor(t)

@@ -15,6 +15,7 @@ backspace
 drawing
   draw a line, circle, rectangle, square, polygon
   select a point and move it
+  select a point and name it
 
 enter
   cursor_pos == 0 -> insert empty line above current line
@@ -33,3 +34,4 @@ scrolling:
 
 persistence:
   draw a line, circle, rectangle, square, polygon, quit, restart. All the shapes you drew should still be visible.
+  select a point and name it, quit, restart. Name is still visible.

@@ -16,6 +16,9 @@ Known issues:
   So far this app isn't really designed for drawing-heavy files. For now I'm
   targeting mostly-text files with a few drawings mixed in.
 
+* No clipping yet for drawings. In particular, circles and point labels can
+  overflow a drawing.
+
 * Insufficient handling of constraints when moving points. For example, if you
   draw a manhattan line and then move one of the points, you may not be able
   to hover on it anymore.

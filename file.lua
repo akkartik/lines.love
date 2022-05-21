@@ -48,15 +48,25 @@ function load_drawing(infile_next_line)
     assert(line)
     if line == '```' then break end
     local shape = json.decode(line)
-    if shape.mode == 'line' or shape.mode == 'manhattan' then
+    if shape.mode == 'freehand' then
+      -- no changes needed
+    elseif shape.mode == 'line' or shape.mode == 'manhattan' then
+      local name = shape.p1.name
       shape.p1 = Drawing.insert_point(drawing.points, shape.p1.x, shape.p1.y)
+      drawing.points[shape.p1].name = name
+      name = shape.p2.name
       shape.p2 = Drawing.insert_point(drawing.points, shape.p2.x, shape.p2.y)
+      drawing.points[shape.p2].name = name
     elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       for i,p in ipairs(shape.vertices) do
+        local name = p.name
         shape.vertices[i] = Drawing.insert_point(drawing.points, p.x,p.y)
+        drawing.points[shape.vertices[i]].name = name
       end
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
+      local name = shape.center.name
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
+      drawing.point[shape.center].name = name
     else
       print(shape.mode)
       assert(false)

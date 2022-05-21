@@ -46,6 +46,10 @@ function Drawing.draw(line)
         love.graphics.setColor(0,0,0)
         love.graphics.circle('fill', Drawing.pixels(p.x)+16,Drawing.pixels(p.y)+line.y, 2)
       end
+      if p.name then
+        -- todo: clip
+        love.graphics.print(p.name, Drawing.pixels(p.x)+16+5,Drawing.pixels(p.y)+line.y+5, 0, Zoom)
+      end
     end
   end
   love.graphics.setColor(0.75,0.75,0.75)
@@ -78,6 +82,7 @@ function Drawing.draw_shape(left,top, drawing, shape)
     local curr = drawing.points[shape.vertices[1]]
     love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
   elseif shape.mode == 'circle' then
+    -- todo: clip
     local center = drawing.points[shape.center]
     love.graphics.circle('line', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius))
   elseif shape.mode == 'arc' then
@@ -172,6 +177,8 @@ function Drawing.draw_pending_shape(left,top, drawing)
     local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
     love.graphics.arc('line', 'open', cx,cy, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
   elseif shape.mode == 'move' then
+    -- nothing pending; changes are immediately committed
+  elseif shape.mode == 'name' then
     -- nothing pending; changes are immediately committed
   else
     print(shape.mode)
@@ -466,6 +473,15 @@ function Drawing.keychord_pressed(chord)
       Previous_drawing_mode = Current_drawing_mode
       Current_drawing_mode = 'move'
       drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      Lines.current = drawing
+    end
+  elseif chord == 'C-n' and not love.mouse.isDown('1') then
+    local drawing,point_index,p = Drawing.select_point_at_mouse()
+    if drawing then
+      Previous_drawing_mode = Current_drawing_mode
+      Current_drawing_mode = 'name'
+      p.name = ''
+      drawing.pending = {mode=Current_drawing_mode, target_point=point_index}
       Lines.current = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then

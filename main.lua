@@ -167,6 +167,17 @@ function love.mousereleased(x,y, button)
   Drawing.mouse_released(x,y, button)
 end
 
+function love.textinput(t)
+  if Current_drawing_mode == 'name' then
+    local drawing = Lines.current
+    local p = drawing.points[drawing.pending.target_point]
+    p.name = p.name..t
+  else
+    Text.textinput(t)
+  end
+  save_to_disk(Lines, Filename)
+end
+
 function keychord_pressed(chord)
   if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
@@ -175,6 +186,22 @@ function keychord_pressed(chord)
     if drawing then
       drawing.pending = {}
     end
+  elseif Current_drawing_mode == 'name' then
+    if chord == 'return' then
+      Current_drawing_mode = Previous_drawing_mode
+      Previous_drawing_mode = nil
+    else
+      local drawing = Lines.current
+      local p = drawing.points[drawing.pending.target_point]
+      if chord == 'escape' then
+        p.name = nil
+      elseif chord == 'backspace' then
+        local len = utf8.len(p.name)
+        local byte_offset = utf8.offset(p.name, len-1)
+        p.name = string.sub(p.name, 1, byte_offset)
+      end
+    end
+    save_to_disk(Lines, Filename)
   elseif chord == 'pagedown' then
     Screen_top_line = Screen_bottom_line
     Cursor_line = Screen_top_line
