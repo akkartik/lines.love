@@ -171,6 +171,8 @@ function Drawing.draw_pending_shape(left,top, drawing)
     shape.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, shape.end_angle)
     local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
     love.graphics.arc('line', 'open', cx,cy, Drawing.pixels(shape.radius), shape.start_angle, shape.end_angle, 360)
+  elseif shape.mode == 'move' then
+    -- nothing pending; changes are immediately committed
   else
     print(shape.mode)
     assert(false)
@@ -195,6 +197,8 @@ function Drawing.mouse_pressed(drawing, x,y, button)
   elseif Current_drawing_mode == 'circle' then
     local j = Drawing.insert_point(drawing.points, Drawing.coord(x-16), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=Current_drawing_mode, center=j}
+  elseif Current_drawing_mode == 'move' then
+    -- all the action is in mouse_released
   else
     print(Current_drawing_mode)
     assert(false)
@@ -225,8 +229,7 @@ function Drawing.update()
       drawing.pending.target_point.y = my
     end
   else
-    print(Current_drawing_mode)
-    assert(false)
+    -- do nothing
   end
 end
 

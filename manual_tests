@@ -12,6 +12,10 @@ backspace
   cursor_pos == 0, previous line is a drawing -> delete drawing, cursor still visible at start of line
   cursor_pos == 0, previous line is text -> join lines, cursor still at same character
 
+drawing
+  draw a line, circle, rectangle, square, polygon
+  select a point and move it
+
 enter
   cursor_pos == 0 -> insert empty line above current line
 
