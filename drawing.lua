@@ -54,6 +54,7 @@ function Drawing.draw(line)
           -- create a faint red box for the name
           love.graphics.setColor(1,0,0,0.1)
           local name_text
+          -- TODO: avoid computing name width on every repaint
           if p.name == '' then
             name_text = love.graphics.newText(love.graphics.getFont(), 'm')  -- 1em
           else

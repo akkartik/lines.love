@@ -14,7 +14,7 @@ function Text.draw(line, line_width, line_index)
   if line.fragments == nil then
     Text.compute_fragments(line, line_width)
   end
-  line.screen_line_starting_pos = nil
+  line.screen_line_starting_pos = nil  -- TODO: avoid recomputing on every repaint
   if Debug_new_render then print('--') end
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
