@@ -111,7 +111,7 @@ function love.draw()
   end
   local y = 15
   for line_index,line in ipairs(Lines) do
-    if y > Screen_height then break end
+    if y + math.floor(15*Zoom) > Screen_height then break end
     if line_index >= Screen_top_line then
       Screen_bottom_line = line_index
       if line.mode == 'text' and line.data == '' then

@@ -3,7 +3,7 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-local Debug_new_render = true
+local Debug_new_render = false
 
 function Text.draw(line, line_width, line_index)
   love.graphics.setColor(0,0,0)
@@ -123,7 +123,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
-  Debug_new_render = true
+--?   Debug_new_render = true
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
     table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
@@ -286,6 +286,7 @@ function Text.keychord_pressed(chord)
           break
         end
       end
+      print(Cursor_line, Cursor_pos, Screen_bottom_line)
       if Cursor_line > Screen_bottom_line then
         print('screen top before:', Screen_top_line, Top_screen_line_starting_pos)
         Screen_top_line = Cursor_line
@@ -302,6 +303,7 @@ function Text.keychord_pressed(chord)
       local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
       Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
       print('cursor pos is now '..tostring(Cursor_pos))
+      Screen_top_line = Cursor_line
       Text.scroll_up_while_cursor_on_screen()
     end
   end
