@@ -37,17 +37,23 @@ require 'icons'
 -- solving for them. But for now, this is a program to create static drawings
 -- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
-Cursor_line = 1
-Cursor_pos = 1  -- in Unicode codepoints, from 1 to utf8.len(line) + 1
+
+-- Lines can be too long to fit on screen, in which case they _wrap_ into
+-- multiple _screen lines_.
+--
+-- Therefore, any potential location for the cursor can be described in two ways:
+-- * schema 1: As a combination of line index and position within a line (in utf8 codepoint units)
+-- * schema 2: As a combination of line index, screen line index within the line, and a position within the screen line.
+--
+-- Most of the time we'll only persist positions in schema 1, translating to
+-- schema 2 when that's convenient.
+Cursor1 = {line=1, pos=1}  -- position of cursor
+Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of screen
+Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
 Screen_width, Screen_height, Screen_flags = 0, 0, nil
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
-
--- scrolling support
-Screen_top_line = 1
-Screen_bottom_line = 1
-Top_screen_line_starting_pos = 1  -- when top of screen starts in between a wrapped line
 
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
@@ -80,7 +86,7 @@ function love.load(arg)
   Lines = load_from_disk(Filename)
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
-      Cursor_line = i
+      Cursor1.line = i
       break
     end
   end
@@ -94,7 +100,7 @@ function love.filedropped(file)
   file:close()
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
-      Cursor_line = i
+      Cursor1.line = i
       break
     end
   end
@@ -112,19 +118,19 @@ function love.draw()
   local y = 15
   for line_index,line in ipairs(Lines) do
     if y + math.floor(15*Zoom) > Screen_height then break end
-    if line_index >= Screen_top_line then
-      Screen_bottom_line = line_index
+    if line_index >= Screen_top1.line then
+      Screen_bottom1.line = line_index
       if line.mode == 'text' and line.data == '' then
         line.y = y
         button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                       if Cursor_line >= line_index then
-                         Cursor_line = Cursor_line+1
+                       if Cursor1.line >= line_index then
+                         Cursor1.line = Cursor1.line+1
                        end
                      end})
-          if line_index == Cursor_line then
+          if line_index == Cursor1.line then
             Text.draw_cursor(25, y)
           end
         y = y + math.floor(15*Zoom)  -- text height
@@ -209,26 +215,26 @@ function keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'pagedown' then
-    Screen_top_line = Screen_bottom_line
-    Cursor_line = Screen_top_line
-    Top_screen_line_starting_pos = 1
-    Cursor_pos = Top_screen_line_starting_pos
+    Screen_top1.line = Screen_bottom1.line
+    Screen_top1.pos = 1
+    Cursor1.line = Screen_top1.line
+    Cursor1.pos = Screen_top1.pos
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
     local y = Screen_height
     while y >= 0 do
-      if Screen_top_line == 1 then break end
+      if Screen_top1.line == 1 then break end
       y = y - math.floor(15*Zoom)
-      if Lines[Screen_top_line].mode == 'drawing' then
-        y = y - Drawing.pixels(Lines[Screen_top_line].h)
+      if Lines[Screen_top1.line].mode == 'drawing' then
+        y = y - Drawing.pixels(Lines[Screen_top1.line].h)
       end
-      Screen_top_line = Screen_top_line - 1
+      Screen_top1.line = Screen_top1.line - 1
     end
-    if Cursor_line ~= Screen_top_line then
-      Cursor_pos = 1
+    if Cursor1.line ~= Screen_top1.line then
+      Cursor1.pos = 1
     end
-    Cursor_line = Screen_top_line
+    Cursor1.line = Screen_top1.line
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
   else
     Text.keychord_pressed(chord)

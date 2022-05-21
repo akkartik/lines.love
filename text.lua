@@ -22,7 +22,7 @@ function Text.draw(line, line_width, line_index)
     local frag_width = math.floor(frag_text:getWidth()*Zoom)
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
-      if line_index > Screen_top_line or pos > Top_screen_line_starting_pos then
+      if line_index > Screen_top1.line or pos > Screen_top1.pos then
         y = y + math.floor(15*Zoom)
         if Debug_new_render then print('y', y) end
       end
@@ -33,22 +33,22 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
     end
-    if Debug_new_render then print('checking to draw', pos, Top_screen_line_starting_pos) end
-    if line_index > Screen_top_line or pos >= Top_screen_line_starting_pos then
+    if Debug_new_render then print('checking to draw', pos, Screen_top1.pos) end
+    if line_index > Screen_top1.line or pos >= Screen_top1.pos then
       if Debug_new_render then print('drawing '..frag) end
       love.graphics.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
     local frag_len = utf8.len(frag)
-    if line_index == Cursor_line then
-      if pos <= Cursor_pos and pos + frag_len > Cursor_pos then
-        Text.draw_cursor(x+Text.cursor_x2(frag, Cursor_pos-pos+1), y)
+    if line_index == Cursor1.line then
+      if pos <= Cursor1.pos and pos + frag_len > Cursor1.pos then
+        Text.draw_cursor(x+Text.cursor_x2(frag, Cursor1.pos-pos+1), y)
       end
     end
     x = x + frag_width
     pos = pos + frag_len
   end
-  if line_index == Cursor_line and Cursor_pos == pos then
+  if line_index == Cursor1.line and Cursor1.pos == pos then
     Text.draw_cursor(x, y)
   end
   Debug_new_render = false
@@ -109,214 +109,214 @@ end
 
 function Text.insert_at_cursor(t)
   local byte_offset
-  if Cursor_pos > 1 then
-    byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
+  if Cursor1.pos > 1 then
+    byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
   else
     byte_offset = 0
   end
-  Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset)..t..string.sub(Lines[Cursor_line].data, byte_offset+1)
-  Lines[Cursor_line].fragments = nil
-  Cursor_pos = Cursor_pos+1
+  Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset)..t..string.sub(Lines[Cursor1.line].data, byte_offset+1)
+  Lines[Cursor1.line].fragments = nil
+  Cursor1.pos = Cursor1.pos+1
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
 --?   Debug_new_render = true
   if chord == 'return' then
-    local byte_offset = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
-    table.insert(Lines, Cursor_line+1, {mode='text', data=string.sub(Lines[Cursor_line].data, byte_offset)})
-    Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_offset-1)
-    Lines[Cursor_line].fragments = nil
-    Cursor_line = Cursor_line+1
-    Cursor_pos = 1
+    local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+    table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
+    Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
+    Lines[Cursor1.line].fragments = nil
+    Cursor1.line = Cursor1.line+1
+    Cursor1.pos = 1
     save_to_disk(Lines, Filename)
   elseif chord == 'tab' then
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
   elseif chord == 'left' then
-    assert(Lines[Cursor_line].mode == 'text')
-    if Cursor_pos > 1 then
-      Cursor_pos = Cursor_pos-1
+    assert(Lines[Cursor1.line].mode == 'text')
+    if Cursor1.pos > 1 then
+      Cursor1.pos = Cursor1.pos-1
     else
-      local new_cursor_line = Cursor_line
+      local new_cursor_line = Cursor1.line
       while new_cursor_line > 1 do
         new_cursor_line = new_cursor_line-1
         if Lines[new_cursor_line].mode == 'text' then
-          Cursor_line = new_cursor_line
-          Cursor_pos = utf8.len(Lines[Cursor_line].data) + 1
+          Cursor1.line = new_cursor_line
+          Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
           break
         end
       end
-      if Cursor_line < Screen_top_line then
-        Screen_top_line = Cursor_line
+      if Cursor1.line < Screen_top1.line then
+        Screen_top1.line = Cursor1.line
       end
     end
   elseif chord == 'right' then
-    assert(Lines[Cursor_line].mode == 'text')
-    if Cursor_pos <= utf8.len(Lines[Cursor_line].data) then
-      Cursor_pos = Cursor_pos+1
+    assert(Lines[Cursor1.line].mode == 'text')
+    if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
+      Cursor1.pos = Cursor1.pos+1
     else
-      local new_cursor_line = Cursor_line
+      local new_cursor_line = Cursor1.line
       while new_cursor_line <= #Lines-1 do
         new_cursor_line = new_cursor_line+1
         if Lines[new_cursor_line].mode == 'text' then
-          Cursor_line = new_cursor_line
-          Cursor_pos = 1
+          Cursor1.line = new_cursor_line
+          Cursor1.pos = 1
           break
         end
       end
-      if Cursor_line > Screen_bottom_line then
-        Screen_top_line = Cursor_line
+      if Cursor1.line > Screen_bottom1.line then
+        Screen_top1.line = Cursor1.line
       end
     end
   elseif chord == 'home' then
-    Cursor_pos = 1
+    Cursor1.pos = 1
   elseif chord == 'end' then
-    Cursor_pos = utf8.len(Lines[Cursor_line].data) + 1
+    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'backspace' then
-    if Cursor_pos > 1 then
-      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos-1)
-      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
+    if Cursor1.pos > 1 then
+      local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
+      local byte_end = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
       if byte_start then
         if byte_end then
-          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
+          Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)..string.sub(Lines[Cursor1.line].data, byte_end)
         else
-          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
+          Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Lines[Cursor_line].fragments = nil
-        Cursor_pos = Cursor_pos-1
+        Lines[Cursor1.line].fragments = nil
+        Cursor1.pos = Cursor1.pos-1
       end
-    elseif Cursor_line > 1 then
-      if Lines[Cursor_line-1].mode == 'drawing' then
-        table.remove(Lines, Cursor_line-1)
+    elseif Cursor1.line > 1 then
+      if Lines[Cursor1.line-1].mode == 'drawing' then
+        table.remove(Lines, Cursor1.line-1)
       else
         -- join lines
-        Cursor_pos = utf8.len(Lines[Cursor_line-1].data)+1
-        Lines[Cursor_line-1].data = Lines[Cursor_line-1].data..Lines[Cursor_line].data
-        Lines[Cursor_line-1].fragments = nil
-        table.remove(Lines, Cursor_line)
+        Cursor1.pos = utf8.len(Lines[Cursor1.line-1].data)+1
+        Lines[Cursor1.line-1].data = Lines[Cursor1.line-1].data..Lines[Cursor1.line].data
+        Lines[Cursor1.line-1].fragments = nil
+        table.remove(Lines, Cursor1.line)
       end
-      Cursor_line = Cursor_line-1
+      Cursor1.line = Cursor1.line-1
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
-    if Cursor_pos <= utf8.len(Lines[Cursor_line].data) then
-      local byte_start = utf8.offset(Lines[Cursor_line].data, Cursor_pos)
-      local byte_end = utf8.offset(Lines[Cursor_line].data, Cursor_pos+1)
+    if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
+      local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+      local byte_end = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos+1)
       if byte_start then
         if byte_end then
-          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)..string.sub(Lines[Cursor_line].data, byte_end)
+          Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)..string.sub(Lines[Cursor1.line].data, byte_end)
         else
-          Lines[Cursor_line].data = string.sub(Lines[Cursor_line].data, 1, byte_start-1)
+          Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Lines[Cursor_line].fragments = nil
-        -- no change to Cursor_pos
+        Lines[Cursor1.line].fragments = nil
+        -- no change to Cursor1.pos
       end
-    elseif Cursor_line < #Lines then
-      if Lines[Cursor_line+1].mode == 'drawing' then
-        table.remove(Lines, Cursor_line+1)
+    elseif Cursor1.line < #Lines then
+      if Lines[Cursor1.line+1].mode == 'drawing' then
+        table.remove(Lines, Cursor1.line+1)
       else
         -- join lines
-        Lines[Cursor_line].data = Lines[Cursor_line].data..Lines[Cursor_line+1].data
-        Lines[Cursor_line].fragments = nil
-        table.remove(Lines, Cursor_line+1)
+        Lines[Cursor1.line].data = Lines[Cursor1.line].data..Lines[Cursor1.line+1].data
+        Lines[Cursor1.line].fragments = nil
+        table.remove(Lines, Cursor1.line+1)
       end
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
-    assert(Lines[Cursor_line].mode == 'text')
---?     print('up', Cursor_pos, Top_screen_line_starting_pos)
+    assert(Lines[Cursor1.line].mode == 'text')
+--?     print('up', Cursor1.pos, Screen_top1.pos)
     local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     if screen_line_starting_pos == 1 then
 --?       print('cursor is at first screen line of its line')
       -- line is done; skip to previous text line
-      local new_cursor_line = Cursor_line
+      local new_cursor_line = Cursor1.line
       while new_cursor_line > 1 do
         new_cursor_line = new_cursor_line-1
         if Lines[new_cursor_line].mode == 'text' then
-          Cursor_line = new_cursor_line
-          if Lines[Cursor_line].screen_line_starting_pos == nil then
-            Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
+          Cursor1.line = new_cursor_line
+          if Lines[Cursor1.line].screen_line_starting_pos == nil then
+            Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x)
             break
           end
           -- previous text line found, pick its final screen line
-          local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
+          local screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
 --?           print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
-          if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
-            Top_screen_line_starting_pos = screen_line_starting_pos
---?             print('pos of top of screen is also '..tostring(Top_screen_line_starting_pos)..' of the same line')
+          if Screen_top1.line == Cursor1.line and Screen_top1.pos == screen_line_starting_pos then
+            Screen_top1.pos = screen_line_starting_pos
+--?             print('pos of top of screen is also '..tostring(Screen_top1.pos)..' of the same line')
           end
-          local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
-          Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+          local s = string.sub(Lines[Cursor1.line].data, screen_line_starting_pos)
+          Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
           break
         end
       end
-      if Cursor_line < Screen_top_line then
-        Screen_top_line = Cursor_line
+      if Cursor1.line < Screen_top1.line then
+        Screen_top1.line = Cursor1.line
       end
     else
       -- move up one screen line in current line
 --?       print('cursor is NOT at first screen line of its line')
       assert(screen_line_index > 1)
-      new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
+      new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index-1]
 --?       print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
-      if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
-        Top_screen_line_starting_pos = new_screen_line_starting_pos
---?         print('also setting pos of top of screen to '..tostring(Top_screen_line_starting_pos))
+      if Screen_top1.line == Cursor1.line and Screen_top1.pos == screen_line_starting_pos then
+        Screen_top1.pos = new_screen_line_starting_pos
+--?         print('also setting pos of top of screen to '..tostring(Screen_top1.pos))
       end
-      local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
-      Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
---?       print('cursor pos is now '..tostring(Cursor_pos))
+      local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+      Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+--?       print('cursor pos is now '..tostring(Cursor1.pos))
     end
   elseif chord == 'down' then
-    assert(Lines[Cursor_line].mode == 'text')
+    assert(Lines[Cursor1.line].mode == 'text')
     if Text.cursor_at_final_screen_line() then
       -- line is done, skip to next text line
 --?       print('down: cursor at final screen line of its line')
-      local new_cursor_line = Cursor_line
+      local new_cursor_line = Cursor1.line
       while new_cursor_line < #Lines do
         new_cursor_line = new_cursor_line+1
         if Lines[new_cursor_line].mode == 'text' then
-          Cursor_line = new_cursor_line
-          Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
---?           print(Cursor_pos)
+          Cursor1.line = new_cursor_line
+          Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x)
+--?           print(Cursor1.pos)
           break
         end
       end
---?       print(Cursor_line, Cursor_pos, Screen_bottom_line)
-      if Cursor_line > Screen_bottom_line then
---?         print('screen top before:', Screen_top_line, Top_screen_line_starting_pos)
-        Screen_top_line = Cursor_line
+--?       print(Cursor1.line, Cursor1.pos, Screen_bottom1.line)
+      if Cursor1.line > Screen_bottom1.line then
+--?         print('screen top before:', Screen_top1.line, Screen_top1.pos)
+        Screen_top1.line = Cursor1.line
 --?         print('scroll up preserving cursor')
         Text.scroll_up_while_cursor_on_screen()
---?         print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
+--?         print('screen top after:', Screen_top1.line, Screen_top1.pos)
       end
---?       print('=>', Cursor_line, Cursor_pos, Screen_bottom_line)
+--?       print('=>', Cursor1.line, Cursor1.pos, Screen_bottom1.line)
     else
       -- move down one screen line in current line
 --?       print('cursor is NOT at final screen line of its line')
       local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
-      new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index+1]
+      new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index+1]
 --?       print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
-      local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
-      Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
---?       print('cursor pos is now '..tostring(Cursor_pos))
-      Screen_top_line = Cursor_line
+      local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+      Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+--?       print('cursor pos is now '..tostring(Cursor1.pos))
+      Screen_top1.line = Cursor1.line
 --?       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
---?       print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
+--?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
     end
   end
 end
 
 function Text.pos_at_start_of_cursor_screen_line()
-  if Lines[Cursor_line].screen_line_starting_pos == nil then
+  if Lines[Cursor1.line].screen_line_starting_pos == nil then
     return 1,1
   end
-  for i=#Lines[Cursor_line].screen_line_starting_pos,1,-1 do
-    local spos = Lines[Cursor_line].screen_line_starting_pos[i]
-    if spos <= Cursor_pos then
+  for i=#Lines[Cursor1.line].screen_line_starting_pos,1,-1 do
+    local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
+    if spos <= Cursor1.pos then
       return i,spos
     end
   end
@@ -324,47 +324,47 @@ function Text.pos_at_start_of_cursor_screen_line()
 end
 
 function Text.cursor_at_final_screen_line()
-  if Lines[Cursor_line].screen_line_starting_pos == nil then
+  if Lines[Cursor1.line].screen_line_starting_pos == nil then
     return true
   end
-  i=#Lines[Cursor_line].screen_line_starting_pos
-  local spos = Lines[Cursor_line].screen_line_starting_pos[i]
-  return spos <= Cursor_pos
+  i=#Lines[Cursor1.line].screen_line_starting_pos
+  local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
+  return spos <= Cursor1.pos
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
-  while Cursor_line <= #Lines do
-    if Lines[Cursor_line].mode == 'text' then
+  while Cursor1.line <= #Lines do
+    if Lines[Cursor1.line].mode == 'text' then
       break
     end
-    Cursor_line = Cursor_line + 1
+    Cursor1.line = Cursor1.line + 1
   end
   -- hack: insert a text line at bottom of file if necessary
-  if Cursor_line > #Lines then
-    assert(Cursor_line == #Lines+1)
+  if Cursor1.line > #Lines then
+    assert(Cursor1.line == #Lines+1)
     table.insert(Lines, {mode='text', data=''})
   end
-  if Cursor_line > Screen_bottom_line then
-    Screen_top_line = Cursor_line
+  if Cursor1.line > Screen_bottom1.line then
+    Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()
   end
 end
 
 function Text.scroll_up_while_cursor_on_screen()
   local cursor_pos_screen_lines = Text.pos_at_start_of_cursor_screen_line()
---?   print('cursor pos '..tostring(Cursor_pos)..' is on the #'..tostring(cursor_pos_screen_lines)..' screen line down')
+--?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(cursor_pos_screen_lines)..' screen line down')
   local y = Screen_height - cursor_pos_screen_lines*math.floor(15*Zoom)
   -- duplicate some logic from love.draw
   while true do
-    if Screen_top_line == 1 then break end
+    if Screen_top1.line == 1 then break end
 --?     print('y', y)
     local h = 0
-    if Lines[Screen_top_line-1].mode == 'drawing' then
-      h = 20 + Drawing.pixels(Lines[Screen_top_line-1].h)
-    elseif Lines[Screen_top_line-1].screen_line_starting_pos == nil then
+    if Lines[Screen_top1.line-1].mode == 'drawing' then
+      h = 20 + Drawing.pixels(Lines[Screen_top1.line-1].h)
+    elseif Lines[Screen_top1.line-1].screen_line_starting_pos == nil then
       h = h + math.floor(15*Zoom)  -- text height
     else
-      local n = #Lines[Screen_top_line-1].screen_line_starting_pos
+      local n = #Lines[Screen_top1.line-1].screen_line_starting_pos
       h = h + n*math.floor(15*Zoom)  -- text height
     end
 --?     print('height:', h)
@@ -375,7 +375,7 @@ function Text.scroll_up_while_cursor_on_screen()
     if y < math.floor(15*Zoom) then
       break
     end
-    Screen_top_line = Screen_top_line - 1
+    Screen_top1.line = Screen_top1.line - 1
   end
 end
 
@@ -388,9 +388,9 @@ function Text.in_line(line, x,y)
 end
 
 function Text.move_cursor(line_index, line, mx, my)
-  Cursor_line = line_index
+  Cursor1.line = line_index
   if line.screen_line_starting_pos == nil then
-    Cursor_pos = Text.nearest_cursor_pos(line.data, mx)
+    Cursor1.pos = Text.nearest_cursor_pos(line.data, mx)
     return
   end
   assert(line.fragments)
@@ -404,11 +404,11 @@ function Text.move_cursor(line_index, line, mx, my)
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
       if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
-        Cursor_pos = line.screen_line_starting_pos[screen_line_index+1]
+        Cursor1.pos = line.screen_line_starting_pos[screen_line_index+1]
         return
       end
       local s = string.sub(line.data, screen_line_starting_pos)
-      Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
+      Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
       return
     end
     y = nexty
@@ -423,12 +423,12 @@ end
 --  click inside e
 --  line_starting_pos = 1 + 3 = 4
 --  nearest_cursor_pos('defgh', mx) = 2
---  Cursor_pos = 4 + 2 - 1 = 5
+--  Cursor1.pos = 4 + 2 - 1 = 5
 -- manual test:
 --  click inside h
 --  line_starting_pos = 1 + 3 + 3 = 7
 --  nearest_cursor_pos('gh', mx) = 2
---  Cursor_pos = 7 + 2 - 1 = 8
+--  Cursor1.pos = 7 + 2 - 1 = 8
 
 function Text.nearest_cursor_pos(line, x)
   if x == 0 then
@@ -471,6 +471,32 @@ function Text.cursor_x2(s, cursor_pos)
   local s_before_cursor = s:sub(1, cursor_pos-1)
   local text_before_cursor = love.graphics.newText(love.graphics.getFont(), s_before_cursor)
   return math.floor(text_before_cursor:getWidth()*Zoom)
+end
+
+function Text.to2(pos1)
+  local result = {line=pos1.line, screen_line=1}
+  if Line[pos1.line].screen_line_starting_pos == nil then
+    result.screen_pos = pos1.pos
+  else
+    for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
+      local spos = Lines[pos1.line].screen_line_starting_pos[i]
+      if spos <= Cursor1.pos then
+        result.screen_line = i
+        result.screen_pos = spos
+        break
+      end
+    end
+  end
+  assert(result.screen_pos)
+  return result
+end
+
+function Text.to1(pos2)
+  local result = {line=pos2.line, pos=pos2.screen_pos}
+  if pos2.screen_line > 1 then
+    result.pos = Lines[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos
+  end
+  return result
 end
 
 return Text
