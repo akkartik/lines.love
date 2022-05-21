@@ -26,6 +26,13 @@ function Text.draw(line, line_width, line_index)
         y = y + math.floor(15*Zoom)
         if New_render then print('y', y) end
       end
+      if y > Screen_height then
+        if line.screen_line_starting_pos then
+          Bottom_screen_line_starting_pos = line.screen_line_starting_pos[#line.screen_line_starting_pos]
+        else
+          Bottom_screen_line_starting_pos = 1
+        end
+      end
       x = 25
       if line.screen_line_starting_pos == nil then
         line.screen_line_starting_pos = {1, pos}
@@ -273,18 +280,33 @@ function Text.keychord_pressed(chord)
     end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
-    -- next text line
-    local new_cursor_line = Cursor_line
-    while new_cursor_line < #Lines do
-      new_cursor_line = new_cursor_line+1
-      if Lines[new_cursor_line].mode == 'text' then
-        Cursor_line = new_cursor_line
-        Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
-        break
+    if Text.cursor_at_final_screen_line() then
+      -- line is done, skip to next text line
+      print('down: cursor at final screen line of its line')
+      local new_cursor_line = Cursor_line
+      while new_cursor_line < #Lines do
+        new_cursor_line = new_cursor_line+1
+        if Lines[new_cursor_line].mode == 'text' then
+          Cursor_line = new_cursor_line
+          Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
+          print(Cursor_pos)
+          break
+        end
       end
-    end
-    if Cursor_line > Screen_bottom_line then
-      Screen_top_line = Cursor_line
+      if Cursor_line > Screen_bottom_line then
+        Screen_top_line = Cursor_line
+        Text.scroll_up_while_cursor_on_screen()
+      end
+    else
+      -- move down one screen line in current line
+      print('cursor is NOT at final screen line of its line')
+      local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
+      new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index+1]
+      print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
+      local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
+      Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+      print('cursor pos is now '..tostring(Cursor_pos))
+      Text.scroll_up_while_cursor_on_screen()
     end
   end
 end
@@ -300,6 +322,15 @@ function Text.pos_at_start_of_cursor_screen_line()
     end
   end
   assert(false)
+end
+
+function Text.cursor_at_final_screen_line()
+  if Lines[Cursor_line].screen_line_starting_pos == nil then
+    return true
+  end
+  i=#Lines[Cursor_line].screen_line_starting_pos
+  local spos = Lines[Cursor_line].screen_line_starting_pos[i]
+  return spos <= Cursor_pos
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
