@@ -37,7 +37,7 @@ function Drawing.draw(line)
     end
     Drawing.draw_shape(16,line.y, line, shape)
   end
-  for _,p in ipairs(line.points) do
+  for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my) then
         love.graphics.setColor(1,0,0)
@@ -48,7 +48,19 @@ function Drawing.draw(line)
       end
       if p.name then
         -- todo: clip
-        love.graphics.print(p.name, Drawing.pixels(p.x)+16+5,Drawing.pixels(p.y)+line.y+5, 0, Zoom)
+        local x,y = Drawing.pixels(p.x)+16+5, Drawing.pixels(p.y)+line.y+5
+        love.graphics.print(p.name, x,y, 0, Zoom)
+        if Current_drawing_mode == 'name' and i == line.pending.target_point then
+          -- create a faint red box for the name
+          love.graphics.setColor(1,0,0,0.1)
+          local name_text
+          if p.name == '' then
+            name_text = love.graphics.newText(love.graphics.getFont(), 'm')  -- 1em
+          else
+            name_text = love.graphics.newText(love.graphics.getFont(), p.name)
+          end
+          love.graphics.rectangle('fill', x,y, math.floor(name_text:getWidth()*Zoom), math.floor(15*Zoom))
+        end
       end
     end
   end
