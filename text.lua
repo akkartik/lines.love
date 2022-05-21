@@ -227,10 +227,10 @@ function Text.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'up' then
     assert(Lines[Cursor_line].mode == 'text')
-    print('up', Cursor_pos, Top_screen_line_starting_pos)
+--?     print('up', Cursor_pos, Top_screen_line_starting_pos)
     local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     if screen_line_starting_pos == 1 then
-      print('cursor is at first screen line of its line')
+--?       print('cursor is at first screen line of its line')
       -- line is done; skip to previous text line
       local new_cursor_line = Cursor_line
       while new_cursor_line > 1 do
@@ -244,10 +244,10 @@ function Text.keychord_pressed(chord)
           -- previous text line found, pick its final screen line
           local screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
-          print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
+--?           print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
           if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
             Top_screen_line_starting_pos = screen_line_starting_pos
-            print('pos of top of screen is also '..tostring(Top_screen_line_starting_pos)..' of the same line')
+--?             print('pos of top of screen is also '..tostring(Top_screen_line_starting_pos)..' of the same line')
           end
           local s = string.sub(Lines[Cursor_line].data, screen_line_starting_pos)
           Cursor_pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
@@ -259,55 +259,55 @@ function Text.keychord_pressed(chord)
       end
     else
       -- move up one screen line in current line
-      print('cursor is NOT at first screen line of its line')
+--?       print('cursor is NOT at first screen line of its line')
       assert(screen_line_index > 1)
       new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index-1]
-      print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
+--?       print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
       if Screen_top_line == Cursor_line and Top_screen_line_starting_pos == screen_line_starting_pos then
         Top_screen_line_starting_pos = new_screen_line_starting_pos
-        print('also setting pos of top of screen to '..tostring(Top_screen_line_starting_pos))
+--?         print('also setting pos of top of screen to '..tostring(Top_screen_line_starting_pos))
       end
       local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
       Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
-      print('cursor pos is now '..tostring(Cursor_pos))
+--?       print('cursor pos is now '..tostring(Cursor_pos))
     end
   elseif chord == 'down' then
     assert(Lines[Cursor_line].mode == 'text')
     if Text.cursor_at_final_screen_line() then
       -- line is done, skip to next text line
-      print('down: cursor at final screen line of its line')
+--?       print('down: cursor at final screen line of its line')
       local new_cursor_line = Cursor_line
       while new_cursor_line < #Lines do
         new_cursor_line = new_cursor_line+1
         if Lines[new_cursor_line].mode == 'text' then
           Cursor_line = new_cursor_line
           Cursor_pos = Text.nearest_cursor_pos(Lines[Cursor_line].data, Cursor_x)
-          print(Cursor_pos)
+--?           print(Cursor_pos)
           break
         end
       end
-      print(Cursor_line, Cursor_pos, Screen_bottom_line)
+--?       print(Cursor_line, Cursor_pos, Screen_bottom_line)
       if Cursor_line > Screen_bottom_line then
-        print('screen top before:', Screen_top_line, Top_screen_line_starting_pos)
+--?         print('screen top before:', Screen_top_line, Top_screen_line_starting_pos)
         Screen_top_line = Cursor_line
-        print('scroll up preserving cursor')
+--?         print('scroll up preserving cursor')
         Text.scroll_up_while_cursor_on_screen()
-        print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
+--?         print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
       end
-      print('=>', Cursor_line, Cursor_pos, Screen_bottom_line)
+--?       print('=>', Cursor_line, Cursor_pos, Screen_bottom_line)
     else
       -- move down one screen line in current line
-      print('cursor is NOT at final screen line of its line')
+--?       print('cursor is NOT at final screen line of its line')
       local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
       new_screen_line_starting_pos = Lines[Cursor_line].screen_line_starting_pos[screen_line_index+1]
-      print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
+--?       print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
       local s = string.sub(Lines[Cursor_line].data, new_screen_line_starting_pos)
       Cursor_pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
-      print('cursor pos is now '..tostring(Cursor_pos))
+--?       print('cursor pos is now '..tostring(Cursor_pos))
       Screen_top_line = Cursor_line
-      print('scroll up preserving cursor')
+--?       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
-      print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
+--?       print('screen top after:', Screen_top_line, Top_screen_line_starting_pos)
     end
   end
 end
@@ -354,12 +354,12 @@ end
 
 function Text.scroll_up_while_cursor_on_screen()
   local cursor_pos_screen_lines = Text.pos_at_start_of_cursor_screen_line()
-  print('cursor pos '..tostring(Cursor_pos)..' is on the #'..tostring(cursor_pos_screen_lines)..' screen line down')
+--?   print('cursor pos '..tostring(Cursor_pos)..' is on the #'..tostring(cursor_pos_screen_lines)..' screen line down')
   local y = Screen_height - cursor_pos_screen_lines*math.floor(15*Zoom)
   -- duplicate some logic from love.draw
   while true do
     if Screen_top_line == 1 then break end
-    print('y', y)
+--?     print('y', y)
     local h = 0
     if Lines[Screen_top_line-1].mode == 'drawing' then
       h = 20 + Drawing.pixels(Lines[Screen_top_line-1].h)
@@ -369,7 +369,7 @@ function Text.scroll_up_while_cursor_on_screen()
       local n = #Lines[Screen_top_line-1].screen_line_starting_pos
       h = h + n*math.floor(15*Zoom)  -- text height
     end
-    print('height:', h)
+--?     print('height:', h)
     if y - h < 0 then
       break
     end
