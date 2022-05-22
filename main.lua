@@ -7,6 +7,7 @@ local Drawing = require 'drawing'
 local geom = require 'geom'
 require 'help'
 require 'icons'
+require 'run'
 
 -- a line is either text or a drawing
 -- a text is a table with:
