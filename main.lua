@@ -64,20 +64,22 @@ Zoom = 1.5
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
+New_foo = true
+
 function love.load(arg)
   -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  Screen_width, Screen_height, Screen_flags = love.window.getMode()
-  -- shrink slightly to account for window decoration
-  Screen_width = Screen_width-100
-  Screen_height = Screen_height-100
+--?   love.window.setMode(0, 0)  -- maximize
+--?   Screen_width, Screen_height, Screen_flags = love.window.getMode()
+--?   -- shrink slightly to account for window decoration
+--?   Screen_width = Screen_width-100
+--?   Screen_height = Screen_height-100
   -- for testing line wrap
---?   Screen_width = 120
---?   Screen_height = 200
+  Screen_width = 120
+  Screen_height = 200
   love.window.setMode(Screen_width, Screen_height)
   love.window.setTitle('Text with Lines')
---?   Line_width = 100
-  Line_width = math.floor(Screen_width/2/40)*40
+  Line_width = 100
+--?   Line_width = math.floor(Screen_width/2/40)*40
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
   if #arg > 0 then
@@ -116,7 +118,9 @@ function love.draw()
     line.y = nil
   end
   local y = 15
+  if New_foo then print('== draw') end
   for line_index,line in ipairs(Lines) do
+    if New_foo then print('draw:', line_index, y) end
     if y + math.floor(15*Zoom) > Screen_height then break end
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
@@ -140,12 +144,15 @@ function love.draw()
         Drawing.draw(line)
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
+        if New_foo then print('text') end
         line.y = y
         y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
         y = y + math.floor(15*Zoom)  -- text height
+        if New_foo then print('aa', y) end
       end
     end
   end
+  New_foo = false
 --?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
 --?   os.exit(1)
 end
@@ -186,6 +193,7 @@ function love.textinput(t)
 end
 
 function keychord_pressed(chord)
+  New_foo = true
   if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
