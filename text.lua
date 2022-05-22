@@ -381,7 +381,7 @@ function Text.scroll_up_while_cursor_on_screen()
       assert(Lines[top2.line-1].mode == 'drawing')
       -- We currently can't draw partial drawings, so either skip it entirely
       -- or not at all.
-      local h = 20 + Drawing.pixels(Lines[Screen_top1.line-1].h)
+      local h = 20 + Drawing.pixels(Lines[top2.line-1].h)
       if y - h < 15 then
         break
       end
