@@ -335,9 +335,8 @@ function Text.cursor_at_final_screen_line()
   if Lines[Cursor1.line].screen_line_starting_pos == nil then
     return true
   end
-  i=#Lines[Cursor1.line].screen_line_starting_pos
-  local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
-  return spos <= Cursor1.pos
+  screen_lines = Lines[Cursor1.line].screen_line_starting_pos
+  return screen_lines[#screen_lines] <= Cursor1.pos
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
