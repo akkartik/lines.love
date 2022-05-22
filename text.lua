@@ -5,12 +5,16 @@ local utf8 = require 'utf8'
 
 local Debug_new_render = false
 
+-- return values:
+--  y coordinate drawn until in px
+--  position of start of final screen line drawn
 function Text.draw(line, line_width, line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
   local y = line.y
   local pos = 1
+  local screen_line_starting_pos = 1
   if line.fragments == nil then
     Text.compute_fragments(line, line_width)
   end
@@ -24,6 +28,10 @@ function Text.draw(line, line_width, line_index)
       assert(x > 25)  -- no overfull lines
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
         y = y + math.floor(15*Zoom)
+        if y + math.floor(15*Zoom) > Screen_height then
+          return y, screen_line_starting_pos
+        end
+        screen_line_starting_pos = pos
         if Debug_new_render then print('y', y) end
       end
       x = 25
@@ -52,7 +60,7 @@ function Text.draw(line, line_width, line_index)
     Text.draw_cursor(x, y)
   end
   Debug_new_render = false
-  return y
+  return y, screen_line_starting_pos
 end
 -- manual tests:
 --  draw with small line_width of 100

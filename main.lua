@@ -141,11 +141,12 @@ function love.draw()
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
         line.y = y
-        y = Text.draw(line, Line_width, line_index)
+        y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
         y = y + math.floor(15*Zoom)  -- text height
       end
     end
   end
+--?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
 --?   os.exit(1)
 end
 
@@ -216,7 +217,7 @@ function keychord_pressed(chord)
     save_to_disk(Lines, Filename)
   elseif chord == 'pagedown' then
     Screen_top1.line = Screen_bottom1.line
-    Screen_top1.pos = 1
+    Screen_top1.pos = Screen_bottom1.pos
     Cursor1.line = Screen_top1.line
     Cursor1.pos = Screen_top1.pos
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
