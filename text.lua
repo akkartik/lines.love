@@ -312,7 +312,7 @@ function Text.keychord_pressed(chord)
       print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
       local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
       Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
-      print('cursor pos is now '..tostring(Cursor1.pos))
+      print('cursor pos is now', Cursor1.line, Cursor1.pos)
       Screen_top1.line = Cursor1.line
       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
@@ -363,32 +363,36 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 end
 
 function Text.scroll_up_while_cursor_on_screen()
-  local cursor2 = Text.to2(Cursor1)
-  print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(cursor2.screen_line)..' screen line down')
-  local y = Screen_height - cursor2.screen_pos*math.floor(15*Zoom)
+  local top2 = Text.to2(Cursor1)
+--?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
+  local y = Screen_height - math.floor(15*Zoom)
   -- duplicate some logic from love.draw
   while true do
-    if Screen_top1.line == 1 then break end
-    print('y', y)
-    local h = 0
-    if Lines[Screen_top1.line-1].mode == 'drawing' then
-      h = 20 + Drawing.pixels(Lines[Screen_top1.line-1].h)
-    elseif Lines[Screen_top1.line-1].screen_line_starting_pos == nil then
-      h = h + math.floor(15*Zoom)  -- text height
+--?     print(y, 'top2:', top2.line, top2.screen_line, top2.screen_pos)
+    if top2.line == 1 and top2.screen_line == 1 then break end
+    if top2.screen_line > 1 or Lines[top2.line-1].mode == 'text' then
+      local h = math.floor(15*Zoom)
+      if y - h < 15 then  -- top margin = 15
+        break
+      end
+      y = y - h
     else
-      local n = #Lines[Screen_top1.line-1].screen_line_starting_pos
-      h = h + n*math.floor(15*Zoom)  -- text height
+      assert(top2.line > 1)
+      assert(Lines[top2.line-1].mode == 'drawing')
+      -- We currently can't draw partial drawings, so either skip it entirely
+      -- or not at all.
+      local h = 20 + Drawing.pixels(Lines[Screen_top1.line-1].h)
+      if y - h < 15 then
+        break
+      end
+--?       print('skipping drawing of height', h)
+      y = y - h
     end
-    print('height:', h)
-    if y - h < 0 then
-      break
-    end
-    y = y - h
-    if y < math.floor(15*Zoom) then
-      break
-    end
-    Screen_top1.line = Screen_top1.line - 1
+    top2 = Text.previous_screen_line(top2)
   end
+--?   print('top2 finally:', top2.line, top2.screen_line, top2.screen_pos)
+  Screen_top1 = Text.to1(top2)
+--?   print('top1 finally:', Screen_top1.line, Screen_top1.pos)
 end
 
 function Text.in_line(line, x,y)
@@ -486,15 +490,16 @@ function Text.cursor_x2(s, cursor_pos)
 end
 
 function Text.to2(pos1)
+  assert(Lines[pos1.line].mode == 'text')
   local result = {line=pos1.line, screen_line=1}
   if Lines[pos1.line].screen_line_starting_pos == nil then
     result.screen_pos = pos1.pos
   else
     for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
       local spos = Lines[pos1.line].screen_line_starting_pos[i]
-      if spos <= Cursor1.pos then
+      if spos <= pos1.pos then
         result.screen_line = i
-        result.screen_pos = spos
+        result.screen_pos = pos1.pos - spos + 1
         break
       end
     end
@@ -506,9 +511,26 @@ end
 function Text.to1(pos2)
   local result = {line=pos2.line, pos=pos2.screen_pos}
   if pos2.screen_line > 1 then
-    result.pos = Lines[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos
+    result.pos = Lines[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos - 1
   end
   return result
+end
+
+function Text.previous_screen_line(pos2)
+  if pos2.screen_line > 1 then
+    return {line=pos2.line, screen_line=pos2.screen_line-1, screen_pos=1}
+  elseif pos2.line == 1 then
+    return pos2
+  elseif Lines[pos2.line-1].mode == 'drawing' then
+    return {line=pos2.line-1, screen_line=1, screen_pos=1}
+  else
+    local l = Lines[pos2.line-1]
+    if l.screen_line_starting_pos == nil then
+      return {line=pos2.line-1, screen_line=1, screen_pos=1}
+    else
+      return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
+    end
+  end
 end
 
 return Text
