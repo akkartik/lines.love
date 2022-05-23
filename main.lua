@@ -83,6 +83,7 @@ Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
 Debug_main = false
 
+  -- still in App.initialize
   if #arg > 0 then
     Filename = arg[1]
   end
@@ -95,7 +96,7 @@ Debug_main = false
   end
   love.window.setTitle('Text with Lines - '..Filename)
 
-end
+end  -- App.initialize
 
 function App.filedropped(file)
   Filename = file:getFilename()
