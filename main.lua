@@ -1,4 +1,7 @@
 local utf8 = require 'utf8'
+
+require 'app'
+
 require 'keychord'
 require 'file'
 require 'button'
@@ -7,7 +10,6 @@ local Drawing = require 'drawing'
 local geom = require 'geom'
 require 'help'
 require 'icons'
-require 'run'
 
 -- a line is either text or a drawing
 -- a text is a table with:
