@@ -1,6 +1,7 @@
 local utf8 = require 'utf8'
 
 require 'app'
+require 'test'
 
 require 'keychord'
 require 'file'
@@ -10,6 +11,12 @@ local Drawing = require 'drawing'
 local geom = require 'geom'
 require 'help'
 require 'icons'
+
+function App.initialize(arg)
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  love.keyboard.setKeyRepeat(true)
+
+-- globals
 
 -- a line is either text or a drawing
 -- a text is a table with:
@@ -54,14 +61,21 @@ Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of screen
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
-Screen_width, Screen_height, Screen_flags = 0, 0, nil
+-- maximize window
+love.window.setMode(0, 0)  -- maximize
+Screen_width, Screen_height, Screen_flags = love.window.getMode()
+-- shrink slightly to account for window decoration
+Screen_width = Screen_width-100
+Screen_height = Screen_height-100
+love.window.setMode(Screen_width, Screen_height)
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
-Line_width = nil  -- maximum width available to either text or drawings, in pixels
+-- maximum width available to either text or drawings, in pixels
+Line_width = math.floor(Screen_width/2/40)*40
 
 Zoom = 1.5
 
@@ -69,22 +83,6 @@ Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
 New_foo = true
 
-function love.load(arg)
-  -- maximize window
---?   love.window.setMode(0, 0)  -- maximize
---?   Screen_width, Screen_height, Screen_flags = love.window.getMode()
---?   -- shrink slightly to account for window decoration
---?   Screen_width = Screen_width-100
---?   Screen_height = Screen_height-100
-  -- for testing line wrap
-  Screen_width = 120
-  Screen_height = 200
-  love.window.setMode(Screen_width, Screen_height)
-  love.window.setTitle('Text with Lines')
-  Line_width = 100
---?   Line_width = math.floor(Screen_width/2/40)*40
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  love.keyboard.setKeyRepeat(true)
   if #arg > 0 then
     Filename = arg[1]
   end
@@ -96,9 +94,10 @@ function love.load(arg)
     end
   end
   love.window.setTitle('Text with Lines - '..Filename)
+
 end
 
-function love.filedropped(file)
+function App.filedropped(file)
   Filename = file:getFilename()
   file:open('r')
   Lines = load_from_file(file)
@@ -112,7 +111,7 @@ function love.filedropped(file)
   love.window.setTitle('Text with Lines - '..Filename)
 end
 
-function love.draw()
+function App.draw()
   Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
@@ -160,11 +159,11 @@ function love.draw()
 --?   os.exit(1)
 end
 
-function love.update(dt)
+function App.update(dt)
   Drawing.update(dt)
 end
 
-function love.mousepressed(x,y, mouse_button)
+function App.mousepressed(x,y, mouse_button)
   propagate_to_button_handlers(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
@@ -180,11 +179,11 @@ function love.mousepressed(x,y, mouse_button)
   end
 end
 
-function love.mousereleased(x,y, button)
+function App.mousereleased(x,y, button)
   Drawing.mouse_released(x,y, button)
 end
 
-function love.textinput(t)
+function App.textinput(t)
   if Current_drawing_mode == 'name' then
     local drawing = Lines.current
     local p = drawing.points[drawing.pending.target_point]
@@ -195,7 +194,7 @@ function love.textinput(t)
   save_to_disk(Lines, Filename)
 end
 
-function keychord_pressed(chord)
+function App.keychord_pressed(chord)
   New_foo = true
   if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
@@ -253,5 +252,5 @@ function keychord_pressed(chord)
   end
 end
 
-function love.keyreleased(key, scancode)
+function App.keyreleased(key, scancode)
 end

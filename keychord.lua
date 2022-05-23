@@ -1,14 +1,14 @@
 -- Keyboard driver
 
-function love.keypressed(key, scancode, isrepeat)
+function App.keypressed(key, scancode, isrepeat)
   if key == 'lctrl' or key == 'rctrl' or key == 'lalt' or key == 'ralt' or key == 'lshift' or key == 'rshift' or key == 'lgui' or key == 'rgui' then
     -- do nothing when the modifier is pressed
   end
   -- include the modifier(s) when the non-modifer is pressed
-  keychord_pressed(combine_modifiers(key))
+  App.keychord_pressed(App.combine_modifiers(key))
 end
 
-function combine_modifiers(key)
+function App.combine_modifiers(key)
   local result = ''
   local down = love.keyboard.isDown
   if down('lctrl') or down('rctrl') then
