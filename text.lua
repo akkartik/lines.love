@@ -9,6 +9,7 @@ local Debug_new_render = false
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
 function Text.draw(line, line_width, line_index)
+  print('text.draw')
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -126,11 +127,11 @@ end
 function test_pagedown_skip_drawings()
   print('test_pagedown_skip_drawings')
   -- some lines of text with a drawing intermixed
-  App.screen.init{width=50, height=45}
-  Lines = load_array{'abc',
-                     '```lines', '```',
-                     'def',
-                     'ghi'}
+  App.screen.init{width=50, height=80}
+  Lines = load_array{'abc',               -- height 15
+                     '```lines', '```',   -- height 25
+                     'def',               -- height 15
+                     'ghi'}               -- height 15
   check_eq(Lines[2].mode, 'drawing', 'F - test_pagedown_skip_drawings/baseline/lines')
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=1}
@@ -138,17 +139,19 @@ function test_pagedown_skip_drawings()
   Screen_bottom1 = {}
   Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local drawing_height = App.screen.width / 2  -- default
-  -- initially the screen displays the first line and part of the drawing
+  local text height = 15
+  local drawing_height = 20 + App.screen.width / 2  -- default
+  -- initially the screen displays the first line and the drawing
+  -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_pagedown_skip_drawings/baseline/screen:1')
   -- after pagedown the screen draws the screen up top
+  -- 15px margin + 10px margin + 25px drawing + 10px margin + 15px line3 = 75px < screen height 80px
   App.run_after_keychord('pagedown')
+  print('test: top:', Screen_top1.line)
   y = screen_top_margin + drawing_height
   App.screen.check(y, 'def', 'F - test_pagedown_skip_drawings/screen:1')
-  y = y + line_height
-  App.screen.check(y, 'ghi', 'F - test_pagedown_skip_drawings/screen:2')
 end
 
 function Text.compute_fragments(line, line_width)
@@ -418,10 +421,13 @@ function Text.cursor_at_final_screen_line()
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+  local y = 15  -- top margin
   while Cursor1.line <= #Lines do
     if Lines[Cursor1.line].mode == 'text' then
       break
     end
+    print('cursor skips', Cursor1.line)
+    y = y + 20 + Drawing.pixels(Lines[Cursor1.line].h)
     Cursor1.line = Cursor1.line + 1
   end
   -- hack: insert a text line at bottom of file if necessary
@@ -429,7 +435,9 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
     assert(Cursor1.line == #Lines+1)
     table.insert(Lines, {mode='text', data=''})
   end
-  if Cursor1.line > Screen_bottom1.line then
+--?   print(y, App.screen.height, App.screen.height-math.floor(15*Zoom))
+  if y > App.screen.height - math.floor(15*Zoom) then
+--?   if Cursor1.line > Screen_bottom1.line then
     print('scroll up')
     Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()

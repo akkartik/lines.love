@@ -93,7 +93,7 @@ end
 --     App.font{
 --       height=15
 --     }
---     App.run_after_keypress('pagedown')
+--     App.run_after_keychord('pagedown')
 --     App.check_screen_contents{
 --       y0='ghi'
 --       y15=''

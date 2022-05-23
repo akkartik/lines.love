@@ -122,8 +122,10 @@ function App.draw()
   local y = 15
   if Debug_main then print('== draw') end
   for line_index,line in ipairs(Lines) do
+    print(y, line_index, line)
     if Debug_main then print('draw:', line_index, y) end
     if y + math.floor(15*Zoom) > App.screen.height then break end
+    print('a')
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
       if line.mode == 'text' and line.data == '' then
@@ -226,12 +228,13 @@ function App.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'pagedown' then
-    print('setting top to', Screen_bottom1.line)
     Screen_top1.line = Screen_bottom1.line
     Screen_top1.pos = Screen_bottom1.pos
+    print('setting top to', Screen_top1.line)
     Cursor1.line = Screen_top1.line
     Cursor1.pos = Screen_top1.pos
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+    print('top now', Screen_top1.line)
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
     local y = App.screen.height
