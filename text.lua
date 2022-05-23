@@ -23,7 +23,7 @@ function Text.draw(line, line_width, line_index)
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
-    local frag_width = math.floor(frag_text:getWidth()*Zoom)
+    local frag_width = math.floor(App.width(frag_text)*Zoom)
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
@@ -47,7 +47,7 @@ function Text.draw(line, line_width, line_index)
     if Debug_new_render then print('checking to draw', pos, Screen_top1.pos) end
     if line_index > Screen_top1.line or pos >= Screen_top1.pos then
       if Debug_new_render then print('drawing '..frag) end
-      love.graphics.draw(frag_text, x,y, 0, Zoom)
+      App.screen.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
     local frag_len = utf8.len(frag)
@@ -78,13 +78,32 @@ function Text.draw_cursor(x, y)
   Cursor_y = y+math.floor(15*Zoom)
 end
 
+function test_draw_text()
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi'}
+  Line_width = 120
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_draw_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_draw_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_draw_text/screen:3')
+end
+
 function Text.compute_fragments(line, line_width)
   line.fragments = {}
   local x = 25
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
-    local frag_text = love.graphics.newText(love.graphics.getFont(), frag)
-    local frag_width = math.floor(frag_text:getWidth()*Zoom)
+    local frag_text = App.newText(love.graphics.getFont(), frag)
+    local frag_width = math.floor(App.width(frag_text)*Zoom)
 --?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
 --?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
     if x + frag_width > line_width then
@@ -95,13 +114,13 @@ function Text.compute_fragments(line, line_width)
           local b = Text.nearest_cursor_pos(frag, line_width - x)
 --?           print('space for '..tostring(b)..' graphemes')
           local frag1 = string.sub(frag, 1, b)
-          local frag1_text = love.graphics.newText(love.graphics.getFont(), frag1)
-          local frag1_width = math.floor(frag1_text:getWidth()*Zoom)
+          local frag1_text = App.newText(love.graphics.getFont(), frag1)
+          local frag1_width = math.floor(frag1App.width(_text)*Zoom)
 --?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
           table.insert(line.fragments, {data=frag1, text=frag1_text})
           frag = string.sub(frag, b+1)
-          frag_text = love.graphics.newText(love.graphics.getFont(), frag)
-          frag_width = math.floor(frag_text:getWidth()*Zoom)
+          frag_text = App.newText(love.graphics.getFont(), frag)
+          frag_width = math.floor(App.width(frag_text)*Zoom)
         end
         x = 25  -- new line
       end
@@ -479,14 +498,14 @@ end
 
 function Text.cursor_x(line_data, cursor_pos)
   local line_before_cursor = line_data:sub(1, cursor_pos-1)
-  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), line_before_cursor)
-  return 25 + math.floor(text_before_cursor:getWidth()*Zoom)
+  local text_before_cursor = App.newText(love.graphics.getFont(), line_before_cursor)
+  return 25 + math.floor(App.width(text_before_cursor)*Zoom)
 end
 
 function Text.cursor_x2(s, cursor_pos)
   local s_before_cursor = s:sub(1, cursor_pos-1)
-  local text_before_cursor = love.graphics.newText(love.graphics.getFont(), s_before_cursor)
-  return math.floor(text_before_cursor:getWidth()*Zoom)
+  local text_before_cursor = App.newText(love.graphics.getFont(), s_before_cursor)
+  return math.floor(App.width(text_before_cursor)*Zoom)
 end
 
 function Text.to2(pos1)
