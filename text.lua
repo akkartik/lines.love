@@ -29,10 +29,10 @@ function Text.draw(line, line_width, line_index)
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos))
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
-      -- don't update y above screen top
-      if line_index > Screen_top1.line or pos >= Screen_top1.pos then
+      -- update y only after drawing the first screen line of screen top
+      if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos > Screen_top1.pos) then
         y = y + math.floor(15*Zoom)
-        if New_foo then print('text: new screen line', y, App.screen.height, screen_line_starting_pos) end
+--?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
         screen_line_starting_pos = pos
         if Debug_new_render then print('y', y) end
       end
@@ -43,7 +43,7 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
       -- if we updated y, check if we're done with the screen
-      if line_index > Screen_top1.line or pos >= Screen_top1.pos then
+      if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos > Screen_top1.pos) then
 --?         print('a')
         if y + math.floor(15*Zoom) > App.screen.height then
 --?           print('b', y, App.screen.height)
@@ -53,7 +53,7 @@ function Text.draw(line, line_width, line_index)
     end
     if Debug_new_render then print('checking to draw', pos, Screen_top1.pos) end
     -- don't draw text above screen top
-    if line_index > Screen_top1.line or pos >= Screen_top1.pos then
+    if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos >= Screen_top1.pos) then
       if Debug_new_render then print('drawing '..frag) end
       App.screen.draw(frag_text, x,y, 0, Zoom)
     end
@@ -256,7 +256,6 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   y = y + line_height
   App.screen.check(y, 'ghi ', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:2')
   y = y + line_height
-  -- HERE
   App.screen.check(y, 'jkl', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:3')
 end
 
@@ -357,33 +356,33 @@ end
 
 function test_up_arrow_scrolls_up_by_one_screen_line()
   print('test_up_arrow_scrolls_up_by_one_screen_line')
-  -- display the lines 2/3/4 with the cursor on line 2
-  App.screen.init{width=120, height=60}
-  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  -- display lines starting from the second screen line of line 3
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
-  Cursor1 = {line=2, pos=1}
-  Screen_top1 = {line=2, pos=1}
+  Cursor1 = {line=3, pos=6}
+  Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
   Zoom = 1
   local screen_top_margin = 15  -- pixels
   local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
-  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:1')
+  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:1')
   y = y + line_height
-  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:2')
-  y = y + line_height
-  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:3')
+  App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:2')
   -- after hitting the up arrow the screen scrolls up by one line
   App.run_after_keychord('up')
   y = screen_top_margin
-  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:1')
+  App.screen.check(y, 'ghi ', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:1')
   y = y + line_height
-  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:2')
+  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:2')
   y = y + line_height
-  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:3')
-  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
-  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/cursor')
+  App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:3')
+  check_eq(Screen_top1.line, 3, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
+  check_eq(Screen_top1.pos, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_up_arrow_scrolls_up_by_one_screen_line/cursor')
+  check_eq(Cursor1.pos, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/cursor')
 end
 
 function Text.compute_fragments(line, line_width)
