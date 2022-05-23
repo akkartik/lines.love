@@ -25,10 +25,11 @@ function Text.draw(line, line_width, line_index)
     local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = math.floor(App.width(frag_text)*Zoom)
-    print(x, frag, frag_width, line_width)
+    local s=tostring
+    print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos))
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
-                                          -- I no longer remember why the fuck I added this
+      -- don't update y above screen top
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
         y = y + math.floor(15*Zoom)
         if New_foo then print('text: new screen line', y, App.screen.height, screen_line_starting_pos) end
@@ -41,16 +42,17 @@ function Text.draw(line, line_width, line_index)
       else
         table.insert(line.screen_line_starting_pos, pos)
       end
-      print(line_index, Screen_top1.line, pos, Screen_top1.pos)
+      -- if we updated y, check if we're done with the screen
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
-      print('a')
-        if y + math.floor(15*Zoom) >= App.screen.height then
+        print('a')
+        if y + math.floor(15*Zoom) > App.screen.height then
           print('b', y, App.screen.height)
           return y, screen_line_starting_pos
         end
       end
     end
     if Debug_new_render then print('checking to draw', pos, Screen_top1.pos) end
+    -- don't draw text above screen top
     if line_index > Screen_top1.line or pos >= Screen_top1.pos then
       if Debug_new_render then print('drawing '..frag) end
       App.screen.draw(frag_text, x,y, 0, Zoom)
