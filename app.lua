@@ -117,6 +117,9 @@ end
 -- y=101. You have to use the test harness within these limitations for your
 -- tests to faithfully model the real world.
 --
+-- One drawback of this approach: the y coordinate used depends on font size,
+-- which feels brittle.
+--
 -- In the fullness of time App will support all side-effecting primitives
 -- exposed by LÖVE, but so far it supports just a rudimentary set of things I
 -- happen to have needed so far.
