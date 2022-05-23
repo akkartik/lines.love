@@ -63,11 +63,11 @@ Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom 
 
 -- maximize window
 love.window.setMode(0, 0)  -- maximize
-Screen_width, Screen_height, Screen_flags = love.window.getMode()
+App.screen.width, App.screen.height = love.window.getMode()
 -- shrink slightly to account for window decoration
-Screen_width = Screen_width-100
-Screen_height = Screen_height-100
-love.window.setMode(Screen_width, Screen_height)
+App.screen.width = App.screen.width-100
+App.screen.height = App.screen.height-100
+love.window.setMode(App.screen.width, App.screen.height)
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
@@ -75,7 +75,7 @@ Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
 -- maximum width available to either text or drawings, in pixels
-Line_width = math.floor(Screen_width/2/40)*40
+Line_width = math.floor(App.screen.width/2/40)*40
 
 Zoom = 1.5
 
@@ -114,7 +114,7 @@ end
 function App.draw()
   Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
-  love.graphics.rectangle('fill', 0, 0, Screen_width-1, Screen_height-1)
+  love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
   love.graphics.setColor(0, 0, 0)
   for line_index,line in ipairs(Lines) do
     line.y = nil
@@ -123,7 +123,7 @@ function App.draw()
   if New_foo then print('== draw') end
   for line_index,line in ipairs(Lines) do
     if New_foo then print('draw:', line_index, y) end
-    if y + math.floor(15*Zoom) > Screen_height then break end
+    if y + math.floor(15*Zoom) > App.screen.height then break end
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
       if line.mode == 'text' and line.data == '' then
@@ -233,7 +233,7 @@ function App.keychord_pressed(chord)
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
-    local y = Screen_height
+    local y = App.screen.height
     while y >= 0 do
       if Screen_top1.line == 1 then break end
       y = y - math.floor(15*Zoom)
