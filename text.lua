@@ -9,7 +9,7 @@ local Debug_new_render = false
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
 function Text.draw(line, line_width, line_index)
-  print('text.draw')
+--?   print('text.draw')
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -182,6 +182,7 @@ function test_down_arrow_moves_cursor()
   y = y + line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/screen:3')
   -- but the cursor moves down by 1 line
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_moves_cursor/screen_top')
   check_eq(Cursor1.line, 2, 'F - test_down_arrow_moves_cursor/cursor')
 end
 
@@ -212,6 +213,71 @@ function test_down_arrow_scrolls_down_by_one_line()
   App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/screen:2')
   y = y + line_height
   App.screen.check(y, 'jkl', 'F - test_down_arrow_scrolls_down_by_one_line/screen:3')
+  check_eq(Screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_line/screen_top')
+  check_eq(Cursor1.line, 4, 'F - test_down_arrow_scrolls_down_by_one_line/cursor')
+end
+
+function test_up_arrow_moves_cursor()
+  print('test_up_arrow_moves_cursor')
+  -- display the first 3 lines with the cursor on the bottom line
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=3, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_moves_cursor/baseline/screen:3')
+  -- after hitting the up arrow the screen is unchanged
+  App.run_after_keychord('up')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_moves_cursor/screen:3')
+  -- but the cursor moves up by 1 line
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_moves_cursor/screen_top')
+  check_eq(Cursor1.line, 2, 'F - test_up_arrow_moves_cursor/cursor')
+end
+
+function test_up_arrow_scrolls_up_by_one_line()
+  print('test_up_arrow_scrolls_up_by_one_line')
+  -- display the lines 2/3/4 with the cursor on line 2
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:3')
+  -- after hitting the up arrow the screen scrolls up by one line
+  App.run_after_keychord('up')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_by_one_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_line/screen:3')
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_line/cursor')
 end
 
 function Text.compute_fragments(line, line_width)
