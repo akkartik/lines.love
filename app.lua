@@ -199,10 +199,17 @@ function App.screen.check(y, expected_contents, msg)
 end
 
 function App.run_tests()
+  local sorted_names = {}
   for name,binding in pairs(_G) do
     if name:find('test_') == 1 then
+      table.insert(sorted_names, name)
+    end
+  end
+  table.sort(sorted_names)
+  for _,name in ipairs(sorted_names) do
+    if name:find('test_') == 1 then
       App.initialize_for_test()
-      binding()
+      _G[name]()
     end
   end
   print()
