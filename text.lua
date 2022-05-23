@@ -28,7 +28,7 @@ function Text.draw(line, line_width, line_index)
       assert(x > 25)  -- no overfull lines
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
         y = y + math.floor(15*Zoom)
-        if New_foo then print('text: new screen line', y, Screen_height, screen_line_starting_pos) end
+        if New_foo then print('text: new screen line', y, App.screen.height, screen_line_starting_pos) end
         screen_line_starting_pos = pos
         if Debug_new_render then print('y', y) end
       end
@@ -39,7 +39,7 @@ function Text.draw(line, line_width, line_index)
         table.insert(line.screen_line_starting_pos, pos)
       end
       if line_index > Screen_top1.line or pos > Screen_top1.pos then
-        if y + math.floor(15*Zoom) >= Screen_height then
+        if y + math.floor(15*Zoom) >= App.screen.height then
           return y, screen_line_starting_pos
         end
       end
@@ -79,6 +79,7 @@ function Text.draw_cursor(x, y)
 end
 
 function test_draw_text()
+  print('test_draw_text')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi'}
   Line_width = 120
@@ -95,6 +96,59 @@ function test_draw_text()
   App.screen.check(y, 'def', 'F - test_draw_text/screen:2')
   y = y + line_height
   App.screen.check(y, 'ghi', 'F - test_draw_text/screen:3')
+end
+
+function test_pagedown()
+  print('test_pagedown')
+  App.screen.init{width=120, height=45}
+  Lines = load_array{'abc', 'def', 'ghi'}
+  Line_width = 120
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  -- initially the first two lines are displayed
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_pagedown/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_pagedown/baseline/screen:2')
+  -- after pagedown the bottom line becomes the top
+  App.run_after_keychord('pagedown')
+  y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_pagedown/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_pagedown/screen:2')
+end
+
+function test_pagedown_skip_drawings()
+  print('test_pagedown_skip_drawings')
+  -- some lines of text with a drawing intermixed
+  App.screen.init{width=50, height=45}
+  Lines = load_array{'abc',
+                     '```lines', '```',
+                     'def',
+                     'ghi'}
+  check_eq(Lines[2].mode, 'drawing', 'F - test_pagedown_skip_drawings/baseline/lines')
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local drawing_height = App.screen.width / 2  -- default
+  -- initially the screen displays the first line and part of the drawing
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_pagedown_skip_drawings/baseline/screen:1')
+  -- after pagedown the screen draws the screen up top
+  App.run_after_keychord('pagedown')
+  y = screen_top_margin + drawing_height
+  App.screen.check(y, 'def', 'F - test_pagedown_skip_drawings/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_pagedown_skip_drawings/screen:2')
 end
 
 function Text.compute_fragments(line, line_width)
@@ -376,6 +430,7 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
     table.insert(Lines, {mode='text', data=''})
   end
   if Cursor1.line > Screen_bottom1.line then
+    print('scroll up')
     Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()
   end
@@ -384,7 +439,7 @@ end
 function Text.scroll_up_while_cursor_on_screen()
   local top2 = Text.to2(Cursor1)
 --?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
-  local y = Screen_height - math.floor(15*Zoom)
+  local y = App.screen.height - math.floor(15*Zoom)
   -- duplicate some logic from love.draw
   while true do
 --?     print(y, 'top2:', top2.line, top2.screen_line, top2.screen_pos)

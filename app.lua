@@ -93,7 +93,7 @@ end
 --     App.font{
 --       height=15
 --     }
---     App.run_with_keypress('pagedown')
+--     App.run_after_keypress('pagedown')
 --     App.check_screen_contents{
 --       y0='ghi'
 --       y15=''
@@ -138,6 +138,7 @@ end
 
 function App.screen.print(msg, x,y)
   local screen_row = 'y'..tostring(y)
+  print('drawing "'..msg..'" at y '..tostring(y))
   local screen = App.screen
   if screen.contents[screen_row] == nil then
     screen.contents[screen_row] = {}
@@ -175,6 +176,12 @@ function App.run_after_textinput(t)
   App.draw()
 end
 
+function App.run_after_keychord(key)
+  App.keychord_pressed(key)
+  App.screen.contents = {}
+  App.draw()
+end
+
 function App.width(text)
   return text.text:getWidth()
 end
@@ -182,6 +189,9 @@ end
 function App.screen.check(y, expected_contents, msg)
   local screen_row = 'y'..tostring(y)
   local contents = ''
+  if App.screen.contents[screen_row] == nil then
+    error('no text at y '..tostring(y))
+  end
   for i,s in ipairs(App.screen.contents[screen_row]) do
     contents = contents..s
   end

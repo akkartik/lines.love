@@ -81,7 +81,7 @@ Zoom = 1.5
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
-New_foo = true
+Debug_main = false
 
   if #arg > 0 then
     Filename = arg[1]
@@ -120,9 +120,9 @@ function App.draw()
     line.y = nil
   end
   local y = 15
-  if New_foo then print('== draw') end
+  if Debug_main then print('== draw') end
   for line_index,line in ipairs(Lines) do
-    if New_foo then print('draw:', line_index, y) end
+    if Debug_main then print('draw:', line_index, y) end
     if y + math.floor(15*Zoom) > App.screen.height then break end
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
@@ -146,15 +146,15 @@ function App.draw()
         Drawing.draw(line)
         y = y + Drawing.pixels(line.h) + 10 -- padding
       else
-        if New_foo then print('text') end
+        if Debug_main then print('text') end
         line.y = y
         y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
         y = y + math.floor(15*Zoom)  -- text height
-        if New_foo then print('aa', y) end
+        if Debug_main then print('aa', y) end
       end
     end
   end
-  New_foo = false
+  Debug_main = false
 --?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
 --?   os.exit(1)
 end
@@ -195,7 +195,7 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
-  New_foo = true
+--?   Debug_main = true
   if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
@@ -226,6 +226,7 @@ function App.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   elseif chord == 'pagedown' then
+    print('setting top to', Screen_bottom1.line)
     Screen_top1.line = Screen_bottom1.line
     Screen_top1.pos = Screen_bottom1.pos
     Cursor1.line = Screen_top1.line
