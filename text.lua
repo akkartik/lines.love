@@ -124,15 +124,15 @@ function test_pagedown()
   App.screen.check(y, 'ghi', 'F - test_pagedown/screen:2')
 end
 
-function test_pagedown_skip_drawings()
-  print('test_pagedown_skip_drawings')
+function test_pagedown_skips_drawings()
+  print('test_pagedown_skips_drawings')
   -- some lines of text with a drawing intermixed
   App.screen.init{width=50, height=80}
   Lines = load_array{'abc',               -- height 15
                      '```lines', '```',   -- height 25
                      'def',               -- height 15
                      'ghi'}               -- height 15
-  check_eq(Lines[2].mode, 'drawing', 'F - test_pagedown_skip_drawings/baseline/lines')
+  check_eq(Lines[2].mode, 'drawing', 'F - test_pagedown_skips_drawings/baseline/lines')
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
@@ -145,13 +145,73 @@ function test_pagedown_skip_drawings()
   -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
   App.draw()
   local y = screen_top_margin
-  App.screen.check(y, 'abc', 'F - test_pagedown_skip_drawings/baseline/screen:1')
+  App.screen.check(y, 'abc', 'F - test_pagedown_skips_drawings/baseline/screen:1')
   -- after pagedown the screen draws the screen up top
   -- 15px margin + 10px margin + 25px drawing + 10px margin + 15px line3 = 75px < screen height 80px
   App.run_after_keychord('pagedown')
-  print('test: top:', Screen_top1.line)
+--?   print('test: top:', Screen_top1.line)
   y = screen_top_margin + drawing_height
-  App.screen.check(y, 'def', 'F - test_pagedown_skip_drawings/screen:1')
+  App.screen.check(y, 'def', 'F - test_pagedown_skips_drawings/screen:1')
+end
+
+function test_down_arrow_moves_cursor()
+  print('test_down_arrow_moves_cursor')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  -- initially the first three lines are displayed
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/baseline/screen:3')
+  -- after hitting the down arrow the screen is unchanged
+  App.run_after_keychord('down')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/screen:3')
+  -- but the cursor moves down by 1 line
+  check_eq(Cursor1.line, 2, 'F - test_down_arrow_moves_cursor/cursor')
+end
+
+function test_down_arrow_scrolls_down_by_one_line()
+  print('test_down_arrow_scrolls_down_by_one_line')
+  -- display the first three lines with the cursor on the bottom line
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=3, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:3')
+  -- after hitting the down arrow the screen scrolls down by one line
+  App.run_after_keychord('down')
+  y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_down_arrow_scrolls_down_by_one_line/screen:3')
 end
 
 function Text.compute_fragments(line, line_width)
