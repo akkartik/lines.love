@@ -138,7 +138,7 @@ end
 
 function App.screen.print(msg, x,y)
   local screen_row = 'y'..tostring(y)
-  print('drawing "'..msg..'" at y '..tostring(y))
+--?   print('drawing "'..msg..'" at y '..tostring(y))
   local screen = App.screen
   if screen.contents[screen_row] == nil then
     screen.contents[screen_row] = {}

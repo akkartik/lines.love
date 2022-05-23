@@ -231,11 +231,11 @@ function App.keychord_pressed(chord)
   elseif chord == 'pagedown' then
     Screen_top1.line = Screen_bottom1.line
     Screen_top1.pos = Screen_bottom1.pos
-    print('setting top to', Screen_top1.line)
+--?     print('setting top to', Screen_top1.line)
     Cursor1.line = Screen_top1.line
     Cursor1.pos = Screen_top1.pos
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
-    print('top now', Screen_top1.line)
+--?     print('top now', Screen_top1.line)
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
     local y = App.screen.height
