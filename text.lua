@@ -87,7 +87,7 @@ function Text.draw_cursor(x, y)
 end
 
 function test_draw_text()
-  print('test_draw_text')
+  io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi'}
   Line_width = App.screen.width
@@ -107,7 +107,7 @@ function test_draw_text()
 end
 
 function test_pagedown()
-  print('test_pagedown')
+  io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
   Lines = load_array{'abc', 'def', 'ghi'}
   Line_width = App.screen.width
@@ -134,7 +134,7 @@ function test_pagedown()
 end
 
 function test_pagedown_skips_drawings()
-  print('test_pagedown_skips_drawings')
+  io.write('\ntest_pagedown_skips_drawings')
   -- some lines of text with a drawing intermixed
   App.screen.init{width=50, height=80}
   Lines = load_array{'abc',               -- height 15
@@ -165,7 +165,7 @@ function test_pagedown_skips_drawings()
 end
 
 function test_down_arrow_moves_cursor()
-  print('test_down_arrow_moves_cursor')
+  io.write('\ntest_down_arrow_moves_cursor')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
@@ -197,7 +197,7 @@ function test_down_arrow_moves_cursor()
 end
 
 function test_down_arrow_scrolls_down_by_one_line()
-  print('test_down_arrow_scrolls_down_by_one_line')
+  io.write('\ntest_down_arrow_scrolls_down_by_one_line')
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
@@ -228,7 +228,7 @@ function test_down_arrow_scrolls_down_by_one_line()
 end
 
 function test_down_arrow_scrolls_down_by_one_screen_line()
-  print('test_down_arrow_scrolls_down_by_one_screen_line')
+  io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line')
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
@@ -260,7 +260,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
 end
 
 function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word()
-  print('test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word')
+  io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word')
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
@@ -292,7 +292,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
 end
 
 function test_up_arrow_moves_cursor()
-  print('test_up_arrow_moves_cursor')
+  io.write('\ntest_up_arrow_moves_cursor')
   -- display the first 3 lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
@@ -324,7 +324,7 @@ function test_up_arrow_moves_cursor()
 end
 
 function test_up_arrow_scrolls_up_by_one_line()
-  print('test_up_arrow_scrolls_up_by_one_line')
+  io.write('\ntest_up_arrow_scrolls_up_by_one_line')
   -- display the lines 2/3/4 with the cursor on line 2
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
@@ -355,7 +355,7 @@ function test_up_arrow_scrolls_up_by_one_line()
 end
 
 function test_up_arrow_scrolls_up_by_one_screen_line()
-  print('test_up_arrow_scrolls_up_by_one_screen_line')
+  io.write('\ntest_up_arrow_scrolls_up_by_one_screen_line')
   -- display lines starting from second screen line of a line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
@@ -386,7 +386,7 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
 end
 
 function test_up_arrow_scrolls_up_to_final_screen_line()
-  print('test_up_arrow_scrolls_up_to_final_screen_line')
+  io.write('\ntest_up_arrow_scrolls_up_to_final_screen_line')
   -- display lines starting just after a long line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
