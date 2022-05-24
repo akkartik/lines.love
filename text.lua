@@ -312,6 +312,42 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   App.screen.check(y, 'l', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:3')
 end
 
+function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
+  io.write('\ntest_page_down_followed_by_down_arrow_does_not_scroll_screen_up')
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=3, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
+  -- after hitting pagedown the screen scrolls down to start of a long line
+  App.run_after_keychord('pagedown')
+  check_eq(Screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:pos')
+  -- after hitting down arrow the screen doesn't scroll down further, and certainly doesn't scroll up
+  App.run_after_keychord('down')
+  check_eq(Screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:line')
+  check_eq(Cursor1.pos, 6, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'l', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:3')
+end
+
 function test_up_arrow_moves_cursor()
   io.write('\ntest_up_arrow_moves_cursor')
   -- display the first 3 lines with the cursor on the bottom line
@@ -796,6 +832,10 @@ function Text.keychord_pressed(chord)
       end
     else
       -- move down one screen line in current line
+      local scroll_up = false
+      if Cursor1.line > Screen_bottom1.line or (Cursor1.line == Screen_bottom1.line and Cursor1.pos >= Screen_bottom1.pos) then
+        scroll_up = true
+      end
 --?       print('cursor is NOT at final screen line of its line')
       local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
       new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index+1]
@@ -803,10 +843,12 @@ function Text.keychord_pressed(chord)
       local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
       Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?       print('cursor pos is now', Cursor1.line, Cursor1.pos)
-      Screen_top1.line = Cursor1.line
---?       print('scroll up preserving cursor')
-      Text.scroll_up_while_cursor_on_screen()
---?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
+      if scroll_up then
+        Screen_top1.line = Cursor1.line
+--?         print('scroll up preserving cursor')
+        Text.scroll_up_while_cursor_on_screen()
+--?         print('screen top after:', Screen_top1.line, Screen_top1.pos)
+      end
     end
 --?     print('=>', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   end
