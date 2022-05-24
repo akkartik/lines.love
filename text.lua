@@ -3,8 +3,6 @@ Text = {}
 
 local utf8 = require 'utf8'
 
-local Debug_new_render = false
-
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
@@ -22,7 +20,7 @@ function Text.draw(line, line_width, line_index)
   if line.screen_line_starting_pos == nil then
     Text.populate_screen_line_starting_pos(line_index)
   end
-  if Debug_new_render then print('--') end
+--?   print('--')
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
@@ -40,14 +38,13 @@ function Text.draw(line, line_width, line_index)
         end
         screen_line_starting_pos = pos
 --?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
-        if Debug_new_render then print('y', y) end
       end
       x = 25
     end
 --?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
     if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos >= Screen_top1.pos) then
-      if Debug_new_render then print('drawing '..frag) end
+--?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
@@ -63,7 +60,6 @@ function Text.draw(line, line_width, line_index)
   if line_index == Cursor1.line and Cursor1.pos == pos then
     Text.draw_cursor(x, y)
   end
-  Debug_new_render = false
   return y, screen_line_starting_pos
 end
 -- manual tests:
@@ -591,7 +587,6 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
---?   Debug_new_render = true
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
