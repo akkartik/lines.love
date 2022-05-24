@@ -68,6 +68,9 @@ App.screen.width, App.screen.height = love.window.getMode()
 App.screen.width = App.screen.width-100
 App.screen.height = App.screen.height-100
 love.window.setMode(App.screen.width, App.screen.height)
+--? App.screen.width = 120
+--? App.screen.height = 200
+--? love.window.setMode(App.screen.width, App.screen.height)
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
@@ -76,6 +79,7 @@ Previous_drawing_mode = nil
 
 -- maximum width available to either text or drawings, in pixels
 Line_width = math.floor(App.screen.width/2/40)*40
+--? Line_width = 100
 
 Zoom = 1.5
 
@@ -238,20 +242,24 @@ function App.keychord_pressed(chord)
 --?     print('top now', Screen_top1.line)
   elseif chord == 'pageup' then
     -- duplicate some logic from love.draw
-    local y = App.screen.height
-    while y >= 0 do
-      if Screen_top1.line == 1 then break end
-      y = y - math.floor(15*Zoom)
-      if Lines[Screen_top1.line].mode == 'drawing' then
-        y = y - Drawing.pixels(Lines[Screen_top1.line].h)
+    local top2 = Text.to2(Screen_top1)
+--?     print(App.screen.height)
+    local y = App.screen.height - math.floor(15*Zoom)
+    while y >= 15 do
+--?       print(y, top2.line)
+      if Screen_top1.line == 1 and Screen_top1.pos == 1 then break end
+      if Lines[Screen_top1.line].mode == 'text' then
+        y = y - math.floor(15*Zoom)
+      elseif Lines[Screen_top1.line].mode == 'drawing' then
+        y = y - 20 - Drawing.pixels(Lines[Screen_top1.line].h)
       end
-      Screen_top1.line = Screen_top1.line - 1
+      top2 = Text.previous_screen_line(top2)
     end
-    if Cursor1.line ~= Screen_top1.line then
-      Cursor1.pos = 1
-    end
+    Screen_top1 = Text.to1(top2)
     Cursor1.line = Screen_top1.line
+    Cursor1.pos = Screen_top1.pos
     Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+--?     print(Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
   else
     Text.keychord_pressed(chord)
   end

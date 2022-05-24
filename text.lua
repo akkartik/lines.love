@@ -418,6 +418,95 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   check_eq(Cursor1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/cursor')
 end
 
+function test_pageup()
+  io.write('\ntest_pageup')
+  App.screen.init{width=120, height=45}
+  Lines = load_array{'abc', 'def', 'ghi'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  -- initially the last two lines are displayed
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_pageup/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_pageup/baseline/screen:2')
+  -- after pageup the cursor goes to first line
+  App.run_after_keychord('pageup')
+  check_eq(Screen_top1.line, 1, 'F - test_pageup/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_pageup/cursor')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_pageup/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_pageup/screen:2')
+end
+
+function test_pageup_scrolls_up_by_screen_line()
+  io.write('\ntest_pageup_scrolls_up_by_screen_line')
+  -- display the first three lines with the cursor on the bottom line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'ghi', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
+  -- after hitting the page-up key the screen scrolls up to top
+  App.run_after_keychord('pageup')
+  check_eq(Screen_top1.line, 1, 'F - test_pageup_scrolls_up_by_screen_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_pageup_scrolls_up_by_screen_line/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_pageup_scrolls_up_by_screen_line/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_by_screen_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_by_screen_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_pageup_scrolls_up_by_screen_line/screen:3')
+end
+
+function test_pageup_scrolls_up_from_middle_screen_line()
+  io.write('\ntest_pageup_scrolls_up_from_middle_screen_line')
+  -- display a few lines starting from the middle of a line (Cursor1.pos > 1)
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=5}
+  Screen_top1 = {line=2, pos=5}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
+  -- after hitting the page-up key the screen scrolls up to top
+  App.run_after_keychord('pageup')
+  check_eq(Screen_top1.line, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:3')
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments')
   line.fragments = {}
