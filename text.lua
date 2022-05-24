@@ -206,7 +206,7 @@ function test_down_arrow_moves_cursor()
   App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/baseline/screen:3')
   -- after hitting the down arrow, the cursor moves down by 1 line
   App.run_after_keychord('down')
-  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_moves_cursor/screen_top')
+  check_eq(Screen_top1.line, 1, 'F - test_down_arrow_moves_cursor/screen_top')
   check_eq(Cursor1.line, 2, 'F - test_down_arrow_moves_cursor/cursor')
   -- the screen is unchanged
   y = screen_top_margin
@@ -437,6 +437,37 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   check_eq(Screen_top1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen_top')
   check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_to_final_screen_line/cursor')
   check_eq(Cursor1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/cursor')
+end
+
+function test_up_arrow_scrolls_up_to_empty_line()
+  io.write('\ntest_up_arrow_scrolls_up_from_empty_line')
+  -- display a screenful of text with an empty line just above it outside the screen
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'', 'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:3')
+  -- after hitting the up arrow the screen scrolls up by one line
+  App.run_after_keychord('up')
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_from_empty_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_from_empty_line/cursor')
+  y = screen_top_margin
+  -- empty first line
+  y = y + line_height
+  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_from_empty_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_from_empty_line/screen:3')
 end
 
 function test_pageup()
@@ -921,12 +952,16 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
     return len+1
   end
   local left, right = 1, len+1
---?   print('--')
+--?   print('-- nearest', x)
   while true do
+--?     print('nearest', x, '^'..line..'$', left, right)
+    if left == right then
+      return left
+    end
     local curr = math.floor((left+right)/2)
     local currxmin = Text.cursor_x(line, curr)
     local currxmax = Text.cursor_x(line, curr+1)
---?     print(x, left, right, curr, currxmin, currxmax)
+--?     print('nearest', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
     end
@@ -974,13 +1009,19 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
 end
 
 function Text.cursor_x(line_data, cursor_pos)
-  local line_before_cursor = line_data:sub(1, cursor_pos-1)
+--?   print(cursor_pos, #line_data, line_data)
+  local cursor_offset = utf8.offset(line_data, cursor_pos)
+--?   print(cursor_offset)
+  assert(cursor_offset)
+  local line_before_cursor = line_data:sub(1, cursor_offset-1)
   local text_before_cursor = App.newText(love.graphics.getFont(), line_before_cursor)
   return 25 + math.floor(App.width(text_before_cursor)*Zoom)
 end
 
 function Text.cursor_x2(s, cursor_pos)
-  local s_before_cursor = s:sub(1, cursor_pos-1)
+  local cursor_offset = utf8.offset(s, cursor_pos)
+  assert(cursor_offset)
+  local s_before_cursor = s:sub(1, cursor_offset-1)
   local text_before_cursor = App.newText(love.graphics.getFont(), s_before_cursor)
   return math.floor(App.width(text_before_cursor)*Zoom)
 end
