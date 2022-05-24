@@ -187,6 +187,7 @@ function App.width(text)
 end
 
 function App.screen.check(y, expected_contents, msg)
+--?   print('checking for "'..expected_contents..'" at y '..tostring(y))
   local screen_row = 'y'..tostring(y)
   local contents = ''
   if App.screen.contents[screen_row] == nil then

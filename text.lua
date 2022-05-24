@@ -356,7 +356,7 @@ end
 
 function test_up_arrow_scrolls_up_by_one_screen_line()
   print('test_up_arrow_scrolls_up_by_one_screen_line')
-  -- display lines starting from the second screen line of line 3
+  -- display lines starting from second screen line of a line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
@@ -371,7 +371,7 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:1')
   y = y + line_height
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:2')
-  -- after hitting the up arrow the screen scrolls up by one line
+  -- after hitting the up arrow the screen scrolls up to first screen line
   App.run_after_keychord('up')
   y = screen_top_margin
   App.screen.check(y, 'ghi ', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:1')
@@ -383,6 +383,39 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   check_eq(Screen_top1.pos, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
   check_eq(Cursor1.line, 3, 'F - test_up_arrow_scrolls_up_by_one_screen_line/cursor')
   check_eq(Cursor1.pos, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/cursor')
+end
+
+function test_up_arrow_scrolls_up_to_final_screen_line()
+  print('test_up_arrow_scrolls_up_to_final_screen_line')
+  -- display lines starting just after a long line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:3')
+  -- after hitting the up arrow the screen scrolls up to final screen line of previous line
+  App.run_after_keychord('up')
+  y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:3')
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen_top')
+  check_eq(Screen_top1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_to_final_screen_line/cursor')
+  check_eq(Cursor1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/cursor')
 end
 
 function Text.compute_fragments(line, line_width)
@@ -557,16 +590,21 @@ function Text.keychord_pressed(chord)
       while new_cursor_line > 1 do
         new_cursor_line = new_cursor_line-1
         if Lines[new_cursor_line].mode == 'text' then
+--?           print('found previous text line')
           Cursor1.line = new_cursor_line
+          Text.populate_screen_line_starting_pos(Cursor1.line)
           if Lines[Cursor1.line].screen_line_starting_pos == nil then
             Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x)
             break
           end
           -- previous text line found, pick its final screen line
+--?           print('has multiple screen lines')
           local screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos
+--?           print(#screen_line_starting_pos)
           screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
 --?           print('previous screen line starts at pos '..tostring(screen_line_starting_pos)..' of its line')
-          if Screen_top1.line == Cursor1.line and Screen_top1.pos == screen_line_starting_pos then
+          if Screen_top1.line > Cursor1.line then
+            Screen_top1.line = Cursor1.line
             Screen_top1.pos = screen_line_starting_pos
 --?             print('pos of top of screen is also '..tostring(Screen_top1.pos)..' of the same line')
           end
@@ -879,6 +917,33 @@ function Text.previous_screen_line(pos2)
     else
       return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
     end
+  end
+end
+
+function Text.populate_screen_line_starting_pos(line_index)
+  -- duplicate some logic from Text.draw
+  local line = Lines[line_index]
+  if line.fragments == nil then
+    Text.compute_fragments(line, Line_width)
+  end
+  local x = 25
+  local pos = 1
+  for _, f in ipairs(line.fragments) do
+    local frag, frag_text = f.data, f.text
+--?     print(x, frag)
+    -- render fragment
+    local frag_width = math.floor(App.width(frag_text)*Zoom)
+    if x + frag_width > Line_width then
+      x = 25
+      if line.screen_line_starting_pos == nil then
+        line.screen_line_starting_pos = {1, pos}
+      else
+        table.insert(line.screen_line_starting_pos, pos)
+      end
+    end
+    x = x + frag_width
+    local frag_len = utf8.len(frag)
+    pos = pos + frag_len
   end
 end
 
