@@ -19,39 +19,32 @@ function Text.draw(line, line_width, line_index)
   if line.fragments == nil then
     Text.compute_fragments(line, line_width)
   end
-  line.screen_line_starting_pos = nil  -- TODO: avoid recomputing on every repaint
+  if line.screen_line_starting_pos == nil then
+    Text.populate_screen_line_starting_pos(line_index)
+  end
   if Debug_new_render then print('--') end
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = math.floor(App.width(frag_text)*Zoom)
     local s=tostring
---?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos))
+--?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos > Screen_top1.pos) then
         y = y + math.floor(15*Zoom)
---?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
+        if y + math.floor(15*Zoom) > App.screen.height then
+--?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
+          return y, screen_line_starting_pos
+        end
         screen_line_starting_pos = pos
+--?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
         if Debug_new_render then print('y', y) end
       end
       x = 25
-      if line.screen_line_starting_pos == nil then
-        line.screen_line_starting_pos = {1, pos}
-      else
-        table.insert(line.screen_line_starting_pos, pos)
-      end
-      -- if we updated y, check if we're done with the screen
-      if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos > Screen_top1.pos) then
---?         print('a')
-        if y + math.floor(15*Zoom) > App.screen.height then
---?           print('b', y, App.screen.height)
-          return y, screen_line_starting_pos
-        end
-      end
     end
-    if Debug_new_render then print('checking to draw', pos, Screen_top1.pos) end
+--?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
     if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos >= Screen_top1.pos) then
       if Debug_new_render then print('drawing '..frag) end
@@ -148,7 +141,6 @@ function test_pagedown_skips_drawings()
   Screen_bottom1 = {}
   Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local text height = 15
   local drawing_height = 20 + App.screen.width / 2  -- default
   -- initially the screen displays the first line and the drawing
   -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
@@ -162,6 +154,39 @@ function test_pagedown_skips_drawings()
   check_eq(Cursor1.line, 3, 'F - test_pagedown_skips_drawings/cursor')
   y = screen_top_margin + drawing_height
   App.screen.check(y, 'def', 'F - test_pagedown_skips_drawings/screen:1')
+end
+
+function test_pagedown_shows_one_screen_line_in_common()
+  io.write('\ntest_pagedown_shows_one_screen_line_in_common')
+  -- some lines of text with a drawing intermixed
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'def ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:3')
+  -- after pagedown the bottom screen line becomes the top
+  App.run_after_keychord('pagedown')
+  check_eq(Screen_top1.line, 2, 'F - test_pagedown_shows_one_screen_line_in_common/screen_top:line')
+  check_eq(Screen_top1.pos, 5, 'F - test_pagedown_shows_one_screen_line_in_common/screen_top:pos')
+  check_eq(Cursor1.line, 2, 'F - test_pagedown_shows_one_screen_line_in_common/cursor:line')
+  check_eq(Cursor1.pos, 5, 'F - test_pagedown_shows_one_screen_line_in_common/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_pagedown_shows_one_screen_line_in_common/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mn', 'F - test_pagedown_shows_one_screen_line_in_common/screen:3')
 end
 
 function test_down_arrow_moves_cursor()
