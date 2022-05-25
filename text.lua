@@ -51,7 +51,7 @@ function Text.draw(line, line_width, line_index)
     local frag_len = utf8.len(frag)
     if line_index == Cursor1.line then
       if pos <= Cursor1.pos and pos + frag_len > Cursor1.pos then
-        Text.draw_cursor(x+Text.cursor_x2(frag, Cursor1.pos-pos+1), y)
+        Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
       end
     end
     x = x + frag_width
@@ -1044,6 +1044,7 @@ function Text.in_line(line, x,y)
   return y < line.y + #line.screen_line_starting_pos * math.floor(15*Zoom)
 end
 
+-- mx,my in pixels
 function Text.move_cursor(line_index, line, mx, my)
   Cursor1.line = line_index
   if line.screen_line_starting_pos == nil then
@@ -1092,7 +1093,7 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
     return 1
   end
   local len = utf8.len(line)
-  local max_x = Text.cursor_x(line, len+1)
+  local max_x = 25+Text.x(line, len+1)
   if x > max_x then
     return len+1
   end
@@ -1104,8 +1105,8 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
       return left
     end
     local curr = math.floor((left+right)/2)
-    local currxmin = Text.cursor_x(line, curr)
-    local currxmax = Text.cursor_x(line, curr+1)
+    local currxmin = 25+Text.x(line, curr)
+    local currxmax = 25+Text.x(line, curr+1)
 --?     print('nearest', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       if x-currxmin < currxmax-x then
@@ -1131,7 +1132,7 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
     return 1
   end
   local len = utf8.len(line)
-  local max_x = Text.cursor_x2(line, len+1)
+  local max_x = Text.x(line, len+1)
   if x > max_x then
     return len+1
   end
@@ -1139,8 +1140,8 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
 --?   print('--')
   while true do
     local curr = math.floor((left+right)/2)
-    local currxmin = Text.cursor_x2(line, curr+1)
-    local currxmax = Text.cursor_x2(line, curr+2)
+    local currxmin = Text.x(line, curr+1)
+    local currxmax = Text.x(line, curr+2)
 --?     print(x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
@@ -1157,22 +1158,12 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
   assert(false)
 end
 
-function Text.cursor_x(line_data, cursor_pos)
---?   print(cursor_pos, #line_data, line_data)
-  local cursor_offset = utf8.offset(line_data, cursor_pos)
---?   print(cursor_offset)
-  assert(cursor_offset)
-  local line_before_cursor = line_data:sub(1, cursor_offset-1)
-  local text_before_cursor = App.newText(love.graphics.getFont(), line_before_cursor)
-  return 25 + math.floor(App.width(text_before_cursor)*Zoom)
-end
-
-function Text.cursor_x2(s, cursor_pos)
-  local cursor_offset = utf8.offset(s, cursor_pos)
-  assert(cursor_offset)
-  local s_before_cursor = s:sub(1, cursor_offset-1)
-  local text_before_cursor = App.newText(love.graphics.getFont(), s_before_cursor)
-  return math.floor(App.width(text_before_cursor)*Zoom)
+function Text.x(s, pos)
+  local offset = utf8.offset(s, pos)
+  assert(offset)
+  local s_before = s:sub(1, offset-1)
+  local text_before = App.newText(love.graphics.getFont(), s_before)
+  return math.floor(App.width(text_before)*Zoom)
 end
 
 function Text.to2(pos1)
