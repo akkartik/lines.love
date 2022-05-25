@@ -124,6 +124,7 @@ function App.draw()
   for line_index,line in ipairs(Lines) do
     line.y = nil
   end
+  assert(Screen_top1.line < Cursor1.line or (Screen_top1.line == Cursor1.line and Screen_top1.pos <= Cursor1.pos))
   local y = 15
 --?   print('== draw')
   for line_index,line in ipairs(Lines) do
