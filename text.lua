@@ -1108,7 +1108,11 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
     local currxmax = Text.cursor_x(line, curr+1)
 --?     print('nearest', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
-      return curr
+      if x-currxmin < currxmax-x then
+        return curr
+      else
+        return curr+1
+      end
     end
     if left >= right-1 then
       return right
