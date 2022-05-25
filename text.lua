@@ -974,7 +974,7 @@ function Text.cursor_at_final_screen_line()
   if Lines[Cursor1.line].screen_line_starting_pos == nil then
     return true
   end
-  screen_lines = Lines[Cursor1.line].screen_line_starting_pos
+  local screen_lines = Lines[Cursor1.line].screen_line_starting_pos
 --?   print(screen_lines[#screen_lines], Cursor1.pos)
   return screen_lines[#screen_lines] <= Cursor1.pos
 end
@@ -1217,8 +1217,11 @@ end
 
 function Text.populate_screen_line_starting_pos(line_index)
 --?   print('Text.populate_screen_line_starting_pos')
-  -- duplicate some logic from Text.draw
   local line = Lines[line_index]
+  if line.screen_line_starting_pos then
+    return
+  end
+  -- duplicate some logic from Text.draw
   if line.fragments == nil then
     Text.compute_fragments(line, Line_width)
   end
@@ -1234,6 +1237,7 @@ function Text.populate_screen_line_starting_pos(line_index)
       if line.screen_line_starting_pos == nil then
         line.screen_line_starting_pos = {1, pos}
       else
+--?         print(' ', #line.screen_line_starting_pos, line.data)
         table.insert(line.screen_line_starting_pos, pos)
       end
     end
