@@ -657,6 +657,46 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   App.screen.check(y, 'ghi ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:3')
 end
 
+function test_position_cursor_on_recently_edited_wrapping_line()
+  -- draw a line wrapping over 2 screen lines
+  io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
+  App.screen.init{width=120, height=200}
+  Lines = load_array{'abc def ghi jkl mno pqr ', 'xyz'}
+  Line_width = 100
+  Cursor1 = {line=1, pos=25}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  -- I don't understand why 120px fits so much on a fake screen, but whatever..
+  App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'xyz', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:3')
+  -- add to the line until it's wrapping over 3 screen lines
+  App.run_after_textinput('s')
+  App.run_after_textinput('t')
+  App.run_after_textinput('u')
+  check_eq(Cursor1.pos, 28, 'F - test_move_cursor_using_mouse/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
+  -- try to move the cursor earlier in the third screen line by clicking the mouse
+  local screen_top_margin = 15  -- pixels
+  local screen_left_margin = 25  -- pixels
+  App.run_after_mousepress(screen_left_margin+8,screen_top_margin+15*2+5, '1')
+  -- cursor should move
+  check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
+  check_eq(Cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
@@ -711,6 +751,7 @@ function Text.insert_at_cursor(t)
   end
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset)..t..string.sub(Lines[Cursor1.line].data, byte_offset+1)
   Lines[Cursor1.line].fragments = nil
+  Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
 end
 
