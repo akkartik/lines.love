@@ -12,12 +12,8 @@ local geom = require 'geom'
 require 'help'
 require 'icons'
 
-function App.initialize(arg)
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  love.keyboard.setKeyRepeat(true)
-
--- globals
-
+-- run in both tests and a real run
+function App.initialize_globals()
 -- a line is either text or a drawing
 -- a text is a table with:
 --    mode = 'text'
@@ -61,17 +57,6 @@ Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of screen
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
--- maximize window
-love.window.setMode(0, 0)  -- maximize
-App.screen.width, App.screen.height = love.window.getMode()
--- shrink slightly to account for window decoration
-App.screen.width = App.screen.width-100
-App.screen.height = App.screen.height-100
-love.window.setMode(App.screen.width, App.screen.height)
---? App.screen.width = 120
---? App.screen.height = 200
---? love.window.setMode(App.screen.width, App.screen.height)
-
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
 Current_drawing_mode = 'line'
@@ -84,6 +69,23 @@ Line_width = math.floor(App.screen.width/2/40)*40
 Zoom = 1.5
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
+
+end  -- App.initialize_globals
+
+function App.initialize(arg)
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  love.keyboard.setKeyRepeat(true)
+
+  -- maximize window
+  love.window.setMode(0, 0)  -- maximize
+  App.screen.width, App.screen.height = love.window.getMode()
+  -- shrink slightly to account for window decoration
+  App.screen.width = App.screen.width-100
+  App.screen.height = App.screen.height-100
+  love.window.setMode(App.screen.width, App.screen.height)
+--?   App.screen.width = 120
+--?   App.screen.height = 200
+--?   love.window.setMode(App.screen.width, App.screen.height)
 
   -- still in App.initialize
   if #arg > 0 then

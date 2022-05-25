@@ -29,7 +29,7 @@ function load_from_file(infile)
 end
 
 function save_to_disk(lines, filename)
-  local outfile = io.open(filename, 'w')
+  local outfile = App.open_for_writing(filename)
   for _,line in ipairs(lines) do
     if line.mode == 'drawing' then
       store_drawing(outfile, line)

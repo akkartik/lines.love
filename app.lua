@@ -15,6 +15,7 @@ function love.run()
   App.run_tests()
 
   App.disable_tests()
+  if App.initialize_globals then App.initialize_globals() end
   if App.initialize then App.initialize(love.arg.parseGameArguments(arg), arg) end
   if love.timer then love.timer.step() end
 
@@ -129,6 +130,8 @@ App = {screen={}}
 function App.initialize_for_test()
   App.screen.init({width=100, height=50})
   App.screen.contents = {}  -- clear screen
+  App.filesystem = {}
+  if App.initialize_globals then App.initialize_globals() end
 end
 
 function App.screen.init(dims)
@@ -199,6 +202,18 @@ function App.screen.check(y, expected_contents, msg)
   check_eq(contents, expected_contents, msg)
 end
 
+-- fake files
+function App.open_for_writing(filename)
+  App.filesystem[filename] = ''
+  return {
+    write = function(self, s)
+              App.filesystem[filename] = App.filesystem[filename]..s
+            end,
+    close = function(self)
+            end
+  }
+end
+
 function App.run_tests()
   local sorted_names = {}
   for name,binding in pairs(_G) do
@@ -228,10 +243,13 @@ function App.disable_tests()
 
   -- test methods are disallowed outside tests
   App.screen.init = nil
+  App.filesystem = nil
   App.run_after_textinput = nil
+  App.run_after_keychord = nil
   -- other methods dispatch to real hardware
   App.screen.print = love.graphics.print
   App.newText = love.graphics.newText
   App.screen.draw = love.graphics.draw
   App.width = function(text) return text:getWidth() end
+  App.open_for_writing = function(filename) return io.open(filename, 'w') end
 end

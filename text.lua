@@ -95,6 +95,51 @@ function test_draw_text()
   App.screen.check(y, 'ghi', 'F - test_draw_text/screen:3')
 end
 
+function test_draw_wrapping_text()
+  io.write('\ntest_draw_wrapping_text')
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'defgh', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_draw_wrapping_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_draw_wrapping_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'gh', 'F - test_draw_wrapping_text/screen:3')
+end
+
+function test_edit_wrapping_text()
+  io.write('\ntest_edit_wrapping_text')
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'def', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=4}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.run_after_textinput('g')
+  App.run_after_textinput('h')
+  App.run_after_textinput('i')
+  App.run_after_textinput('j')
+  App.run_after_textinput('k')
+  App.run_after_textinput('l')
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_edit_wrapping_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghij', 'F - test_edit_wrapping_text/screen:3')
+end
+
 function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
