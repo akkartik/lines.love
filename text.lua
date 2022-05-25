@@ -641,7 +641,7 @@ function test_pageup_scrolls_up_from_middle_screen_line()
 end
 
 function Text.compute_fragments(line, line_width)
---?   print('compute_fragments')
+--?   print('compute_fragments', line_width)
   line.fragments = {}
   local x = 25
   -- try to wrap at word boundaries
@@ -1158,6 +1158,7 @@ function Text.previous_screen_line(pos2)
 end
 
 function Text.populate_screen_line_starting_pos(line_index)
+--?   print('Text.populate_screen_line_starting_pos')
   -- duplicate some logic from Text.draw
   local line = Lines[line_index]
   if line.fragments == nil then

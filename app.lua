@@ -14,6 +14,7 @@ function love.run()
   -- Tests always run at the start.
   App.run_tests()
 
+--?   print('==')
   App.disable_tests()
   if App.initialize_globals then App.initialize_globals() end
   if App.initialize then App.initialize(love.arg.parseGameArguments(arg), arg) end
@@ -42,7 +43,7 @@ function love.run()
       love.graphics.origin()
       love.graphics.clear(love.graphics.getBackgroundColor())
 
-      if App.draw then App:draw() end
+      if App.draw then App.draw() end
 
       love.graphics.present()
     end

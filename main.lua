@@ -62,10 +62,6 @@ Cursor_x, Cursor_y = 0, 0  -- in pixels
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
--- maximum width available to either text or drawings, in pixels
-Line_width = math.floor(App.screen.width/2/40)*40
---? Line_width = 100
-
 Zoom = 1.5
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
@@ -86,6 +82,10 @@ function App.initialize(arg)
 --?   App.screen.width = 120
 --?   App.screen.height = 200
 --?   love.window.setMode(App.screen.width, App.screen.height)
+
+  -- maximum width available to either text or drawings, in pixels
+  Line_width = math.floor(App.screen.width/2/40)*40
+--?   Line_width = 100
 
   -- still in App.initialize
   if #arg > 0 then
