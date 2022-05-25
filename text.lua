@@ -140,6 +140,23 @@ function test_edit_wrapping_text()
   App.screen.check(y, 'ghij', 'F - test_edit_wrapping_text/screen:3')
 end
 
+function test_move_cursor_using_mouse()
+  io.write('\ntest_move_cursor_using_mouse')
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'def', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()  -- populate line.y for each line in Lines
+  local screen_top_margin = 15  -- pixels
+  local screen_left_margin = 25  -- pixels
+  App.run_after_mousepress(screen_left_margin+8,screen_top_margin+5, '1')
+  check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
+  check_eq(Cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
+end
+
 function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
@@ -980,7 +997,7 @@ end
 
 function Text.in_line(line, x,y)
   if line.y == nil then return false end  -- outside current page
-  if x < 16 then return false end
+  if x < 25 then return false end
   if y < line.y then return false end
   if line.screen_line_starting_pos == nil then return y < line.y + math.floor(15*Zoom) end
   return y < line.y + #line.screen_line_starting_pos * math.floor(15*Zoom)

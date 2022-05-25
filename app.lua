@@ -186,6 +186,12 @@ function App.run_after_keychord(key)
   App.draw()
 end
 
+function App.run_after_mousepress(x,y, button)
+  App.mousepressed(x,y, button)
+  App.screen.contents = {}
+  App.draw()
+end
+
 function App.width(text)
   return text.text:getWidth()
 end
