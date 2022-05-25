@@ -772,6 +772,28 @@ function Text.keychord_pressed(chord)
     Text.left()
   elseif chord == 'right' then
     Text.right()
+  -- left/right by one word
+  -- C- hotkeys reserved for drawings, so we'll use M-
+  elseif chord == 'M-left' then
+    while true do
+      Text.left()
+      if Cursor1.pos == 1 then break end
+      assert(Cursor1.pos > 1)
+      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+      assert(offset > 1)
+      if Lines[Cursor1.line].data:sub(offset-1,offset-1) == ' ' then
+        break
+      end
+    end
+  elseif chord == 'M-right' then
+    while true do
+      Text.right()
+      if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
+      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+      if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then
+        break
+      end
+    end
   elseif chord == 'home' then
     Cursor1.pos = 1
   elseif chord == 'end' then
