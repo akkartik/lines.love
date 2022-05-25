@@ -769,41 +769,9 @@ function Text.keychord_pressed(chord)
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
   elseif chord == 'left' then
-    assert(Lines[Cursor1.line].mode == 'text')
-    if Cursor1.pos > 1 then
-      Cursor1.pos = Cursor1.pos-1
-    else
-      local new_cursor_line = Cursor1.line
-      while new_cursor_line > 1 do
-        new_cursor_line = new_cursor_line-1
-        if Lines[new_cursor_line].mode == 'text' then
-          Cursor1.line = new_cursor_line
-          Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
-          break
-        end
-      end
-      if Cursor1.line < Screen_top1.line then
-        Screen_top1.line = Cursor1.line
-      end
-    end
+    Text.left()
   elseif chord == 'right' then
-    assert(Lines[Cursor1.line].mode == 'text')
-    if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
-      Cursor1.pos = Cursor1.pos+1
-    else
-      local new_cursor_line = Cursor1.line
-      while new_cursor_line <= #Lines-1 do
-        new_cursor_line = new_cursor_line+1
-        if Lines[new_cursor_line].mode == 'text' then
-          Cursor1.line = new_cursor_line
-          Cursor1.pos = 1
-          break
-        end
-      end
-      if Cursor1.line > Screen_bottom1.line then
-        Screen_top1.line = Cursor1.line
-      end
-    end
+    Text.right()
   elseif chord == 'home' then
     Cursor1.pos = 1
   elseif chord == 'end' then
@@ -954,6 +922,46 @@ function Text.keychord_pressed(chord)
       end
     end
 --?     print('=>', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos, Screen_bottom1.line, Screen_bottom1.pos)
+  end
+end
+
+function Text.left()
+  assert(Lines[Cursor1.line].mode == 'text')
+  if Cursor1.pos > 1 then
+    Cursor1.pos = Cursor1.pos-1
+  else
+    local new_cursor_line = Cursor1.line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if Lines[new_cursor_line].mode == 'text' then
+        Cursor1.line = new_cursor_line
+        Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+        break
+      end
+    end
+    if Cursor1.line < Screen_top1.line then
+      Screen_top1.line = Cursor1.line
+    end
+  end
+end
+
+function Text.right()
+  assert(Lines[Cursor1.line].mode == 'text')
+  if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
+    Cursor1.pos = Cursor1.pos+1
+  else
+    local new_cursor_line = Cursor1.line
+    while new_cursor_line <= #Lines-1 do
+      new_cursor_line = new_cursor_line+1
+      if Lines[new_cursor_line].mode == 'text' then
+        Cursor1.line = new_cursor_line
+        Cursor1.pos = 1
+        break
+      end
+    end
+    if Cursor1.line > Screen_bottom1.line then
+      Screen_top1.line = Cursor1.line
+    end
   end
 end
 
