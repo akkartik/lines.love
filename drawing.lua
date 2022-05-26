@@ -388,6 +388,8 @@ function Drawing.keychord_pressed(chord)
       end
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.vertices = {drawing.pending.center}
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'square' then
+      -- reuse existing (1-2) vertices
     end
     drawing.pending.mode = 'rectangle'
   elseif chord == 'C-s' and not love.mouse.isDown('1') then
@@ -403,6 +405,12 @@ function Drawing.keychord_pressed(chord)
       end
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.vertices = {drawing.pending.center}
+    elseif drawing.pending.mode == 'rectangle' then
+      -- reuse existing (1-2) vertices
+    elseif drawing.pending.mode == 'polygon' then
+      while #drawing.pending.vertices > 2 do
+        table.remove(drawing.pending.vertices)
+      end
     end
     drawing.pending.mode = 'square'
   elseif love.mouse.isDown('1') and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
@@ -427,7 +435,7 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       drawing.pending.center = drawing.pending.p1
-    elseif drawing.pending.mode == 'polygon' then
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       drawing.pending.center = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'circle'
@@ -455,7 +463,7 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'line' then
       -- do nothing
-    elseif drawing.pending.mode == 'polygon' then
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       drawing.pending.p1 = drawing.pending.vertices[1]
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.p1 = drawing.pending.center
