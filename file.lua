@@ -66,7 +66,7 @@ function load_drawing(infile_next_line)
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
       local name = shape.center.name
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
-      drawing.point[shape.center].name = name
+      drawing.points[shape.center].name = name
     else
       print(shape.mode)
       assert(false)
@@ -155,7 +155,7 @@ function load_drawing_from_array(iter, a, i)
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
       local name = shape.center.name
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
-      drawing.point[shape.center].name = name
+      drawing.points[shape.center].name = name
     else
       print(shape.mode)
       assert(false)
