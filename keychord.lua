@@ -13,7 +13,6 @@ function App.combine_modifiers(key)
   local down = love.keyboard.isDown
   if down('lctrl') or down('rctrl') then
     result = result..'C-'
-    print(result)
   end
   if down('lalt') or down('ralt') then
     result = result..'M-'
