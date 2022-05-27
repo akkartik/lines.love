@@ -23,3 +23,8 @@ function App.combine_modifiers(key)
   result = result..key
   return result
 end
+
+function App.modifier_down()
+  local down = love.keyboard.isDown
+  return down('lctrl') or down('rctrl') or down('lalt') or down('ralt') or down('lgui') or down('rgui')
+end

@@ -739,6 +739,8 @@ end
 
 function Text.textinput(t)
   if love.mouse.isDown('1') then return end
+  if App.modifier_down() then return end
+  local down = love.keyboard.isDown
   Text.insert_at_cursor(t)
 end
 
@@ -793,6 +795,12 @@ function Text.keychord_pressed(chord)
       if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then
         break
       end
+    end
+  -- paste
+  elseif chord == 'M-v' then
+    local s = love.system.getClipboardText()
+    for _,code in utf8.codes(s) do
+      Text.insert_at_cursor(utf8.char(code))
     end
   elseif chord == 'home' then
     Cursor1.pos = 1
