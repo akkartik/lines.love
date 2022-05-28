@@ -53,8 +53,8 @@ Lines = {{mode='text', data=''}}
 --
 -- Most of the time we'll only persist positions in schema 1, translating to
 -- schema 2 when that's convenient.
-Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of screen
+Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
