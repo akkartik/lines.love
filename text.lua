@@ -115,6 +115,47 @@ function test_draw_wrapping_text()
   App.screen.check(y, 'gh', 'F - test_draw_wrapping_text/screen:3')
 end
 
+function test_draw_word_wrapping_text()
+  io.write('\ntest_draw_word_wrapping_text')
+  App.screen.init{width=60, height=60}
+  Lines = load_array{'abc def ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc ', 'F - test_draw_word_wrapping_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def ', 'F - test_draw_word_wrapping_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_draw_word_wrapping_text/screen:3')
+end
+
+function test_draw_text_wrapping_within_word()
+  -- arrange a screen line that needs to be split within a word
+  io.write('\ntest_draw_text_wrapping_within_word')
+  App.screen.init{width=60, height=60}
+  Lines = load_array{'abcd e fghijk', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  App.draw()
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abcd ', 'F - test_draw_text_wrapping_within_word/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'e fghi', 'F - test_draw_text_wrapping_within_word/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jk', 'F - test_draw_text_wrapping_within_word/screen:3')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
@@ -740,13 +781,14 @@ function Text.compute_fragments(line, line_width)
 --?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
 --?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
     if x + frag_width > line_width then
-      assert(25 + frag_width > line_width)  -- avoid infinite loop when window is too narrow
       while x + frag_width > line_width do
+--?         print(x, frag, frag_width, line_width)
         if x < 0.8*line_width then
 --?           print(frag, x, frag_width, line_width)
           -- long word; chop it at some letter
           -- We're not going to reimplement TeX here.
           local b = Text.nearest_pos_less_than(frag, line_width - x)
+          assert(b > 0)  -- avoid infinite loop when window is too narrow
 --?           print('space for '..tostring(b)..' graphemes')
           local frag1 = string.sub(frag, 1, b)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
@@ -766,6 +808,7 @@ function Text.compute_fragments(line, line_width)
 --?       print('inserting '..frag..' of width '..tostring(frag_width)..'px')
       table.insert(line.fragments, {data=frag, text=frag_text})
     end
+    x = x + frag_width
   end
 end
 
