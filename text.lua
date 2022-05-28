@@ -657,6 +657,38 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   App.screen.check(y, 'ghi ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:3')
 end
 
+function test_enter_on_bottom_line_scrolls_down()
+  io.write('\ntest_enter_on_bottom_line_scrolls_down')
+  -- display a few lines with cursor on bottom line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=3, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:3')
+  -- after hitting the enter key the screen scrolls down
+  App.run_after_keychord('return')
+  check_eq(Screen_top1.line, 2, 'F - test_enter_on_bottom_line_scrolls_down/screen_top')
+  check_eq(Cursor1.line, 4, 'F - test_enter_on_bottom_line_scrolls_down/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_enter_on_bottom_line_scrolls_down/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'g', 'F - test_enter_on_bottom_line_scrolls_down/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'hi', 'F - test_enter_on_bottom_line_scrolls_down/screen:3')
+end
+
 function test_position_cursor_on_recently_edited_wrapping_line()
   -- draw a line wrapping over 2 screen lines
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
@@ -767,6 +799,10 @@ function Text.keychord_pressed(chord)
     Cursor1.line = Cursor1.line+1
     Cursor1.pos = 1
     save_to_disk(Lines, Filename)
+    if Cursor1.line > Screen_bottom1.line then
+      Screen_top1.line = Cursor1.line
+      Text.scroll_up_while_cursor_on_screen()
+    end
   elseif chord == 'tab' then
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
