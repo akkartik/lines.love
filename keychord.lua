@@ -17,8 +17,11 @@ function App.combine_modifiers(key)
   if down('lalt') or down('ralt') then
     result = result..'M-'
   end
+  if down('lshift') or down('rshift') then
+    result = result..'S-'  -- don't try to use this with letters/digits
+  end
   if down('lgui') or down('rgui') then
-    result = result..'S-'
+    result = result..'s-'
   end
   result = result..key
   return result
