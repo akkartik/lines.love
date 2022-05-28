@@ -770,6 +770,68 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   check_eq(Cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
 end
 
+function test_backspace_can_scroll_up()
+  io.write('\ntest_backspace_can_scroll_up')
+  -- display the lines 2/3/4 with the cursor on line 2
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = 120
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'def', 'F - test_backspace_can_scroll_up/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up/baseline/screen:3')
+  -- after hitting backspace the screen scrolls up by one line
+  App.run_after_keychord('backspace')
+  check_eq(Screen_top1.line, 1, 'F - test_backspace_can_scroll_up/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_backspace_can_scroll_up/cursor')
+  y = screen_top_margin
+  App.screen.check(y, 'abcdef', 'F - test_backspace_can_scroll_up/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up/screen:3')
+end
+
+function test_backspace_can_scroll_up_screen_line()
+  io.write('\ntest_backspace_can_scroll_up_screen_line')
+  -- display lines starting from second screen line of a line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=3, pos=5}
+  Screen_top1 = {line=3, pos=5}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:2')
+  -- after hitting backspace the screen scrolls up by one screen line
+  App.run_after_keychord('backspace')
+  y = screen_top_margin
+  App.screen.check(y, 'ghijk', 'F - test_backspace_can_scroll_up_screen_line/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'l', 'F - test_backspace_can_scroll_up_screen_line/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/screen:3')
+  check_eq(Screen_top1.line, 3, 'F - test_backspace_can_scroll_up_screen_line/screen_top')
+  check_eq(Screen_top1.pos, 1, 'F - test_backspace_can_scroll_up_screen_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_backspace_can_scroll_up_screen_line/cursor:line')
+  check_eq(Cursor1.pos, 4, 'F - test_backspace_can_scroll_up_screen_line/cursor:pos')
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
@@ -910,6 +972,12 @@ function Text.keychord_pressed(chord)
       end
       Cursor1.line = Cursor1.line-1
     end
+    if Cursor1.line < Screen_top1.line or (Cursor1.line == Screen_top1.line and Cursor1.pos < Screen_top1.pos) then
+      local top2 = Text.to2(Screen_top1)
+      top2 = Text.previous_screen_line(top2)
+      Screen_top1 = Text.to1(top2)
+    end
+    assert(Cursor1.line > Screen_top1.line or (Cursor1.line == Screen_top1.line and Cursor1.pos >= Screen_top1.pos))
     save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
