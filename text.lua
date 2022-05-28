@@ -579,7 +579,7 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
 end
 
 function test_up_arrow_scrolls_up_to_empty_line()
-  io.write('\ntest_up_arrow_scrolls_up_from_empty_line')
+  io.write('\ntest_up_arrow_scrolls_up_to_empty_line')
   -- display a screenful of text with an empty line just above it outside the screen
   App.screen.init{width=120, height=60}
   Lines = load_array{'', 'abc', 'def', 'ghi', 'jkl'}
@@ -592,21 +592,21 @@ function test_up_arrow_scrolls_up_to_empty_line()
   local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
-  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:1')
+  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:1')
   y = y + line_height
-  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:2')
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:2')
   y = y + line_height
-  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_from_empty_line/baseline/screen:3')
+  App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up by one line
   App.run_after_keychord('up')
-  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_from_empty_line/screen_top')
-  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_from_empty_line/cursor')
+  check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_to_empty_line/screen_top')
+  check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_to_empty_line/cursor')
   y = screen_top_margin
   -- empty first line
   y = y + line_height
-  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_from_empty_line/screen:2')
+  App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/screen:2')
   y = y + line_height
-  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_from_empty_line/screen:3')
+  App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_empty_line/screen:3')
 end
 
 function test_pageup()
