@@ -987,7 +987,7 @@ function test_backspace_over_selection()
 end
 
 function test_backspace_over_selection_reverse()
-  io.write('\ntest_backspace_over_selection')
+  io.write('\ntest_backspace_over_selection_reverse')
   -- select just one character within a line with cursor after selection
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
@@ -1006,7 +1006,7 @@ function test_backspace_over_selection_reverse()
 end
 
 function test_backspace_over_multiple_lines()
-  io.write('\ntest_backspace_over_selection')
+  io.write('\ntest_backspace_over_multiple_lines')
   -- select just one character within a line with cursor after selection
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
@@ -1026,7 +1026,7 @@ function test_backspace_over_multiple_lines()
 end
 
 function test_backspace_to_end_of_line()
-  io.write('\ntest_backspace_over_selection')
+  io.write('\ntest_backspace_to_end_of_line')
   -- select region from cursor to end of line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
@@ -1046,7 +1046,7 @@ function test_backspace_to_end_of_line()
 end
 
 function test_backspace_to_start_of_line()
-  io.write('\ntest_backspace_over_selection')
+  io.write('\ntest_backspace_to_start_of_line')
   -- select region from cursor to start of line
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
