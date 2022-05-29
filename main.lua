@@ -39,12 +39,6 @@ function App.initialize_globals()
 -- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
 -- The field names are carefully chosen so that switching modes in midstream
 -- remembers previously entered points where that makes sense.
---
--- Open question: how to maintain Sketchpad-style constraints? Answer for now:
--- we don't. Constraints operate only for the duration of a drawing operation.
--- We'll continue to persist them just to keep the option open to continue
--- solving for them. But for now, this is a program to create static drawings
--- once, and read them passively thereafter.
 Lines = {{mode='text', data=''}}
 
 -- Lines can be too long to fit on screen, in which case they _wrap_ into
