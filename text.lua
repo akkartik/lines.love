@@ -992,6 +992,34 @@ function Text.keychord_pressed(chord)
     Text.up()
   elseif chord == 'down' then
     Text.down()
+  elseif chord == 'pageup' then
+    -- duplicate some logic from love.draw
+    local top2 = Text.to2(Screen_top1)
+--?     print(App.screen.height)
+    local y = App.screen.height - math.floor(15*Zoom)
+    while y >= 15 do
+--?       print(y, top2.line)
+      if Screen_top1.line == 1 and Screen_top1.pos == 1 then break end
+      if Lines[Screen_top1.line].mode == 'text' then
+        y = y - math.floor(15*Zoom)
+      elseif Lines[Screen_top1.line].mode == 'drawing' then
+        y = y - 20 - Drawing.pixels(Lines[Screen_top1.line].h)
+      end
+      top2 = Text.previous_screen_line(top2)
+    end
+    Screen_top1 = Text.to1(top2)
+    Cursor1.line = Screen_top1.line
+    Cursor1.pos = Screen_top1.pos
+    Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+--?     print(Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
+  elseif chord == 'pagedown' then
+    Screen_top1.line = Screen_bottom1.line
+    Screen_top1.pos = Screen_bottom1.pos
+--?     print('setting top to', Screen_top1.line, Screen_top1.pos)
+    Cursor1.line = Screen_top1.line
+    Cursor1.pos = Screen_top1.pos
+    Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+--?     print('top now', Screen_top1.line)
   end
 end
 
