@@ -30,7 +30,7 @@ function Text.draw(line, line_width, line_index)
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
-      if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos > Screen_top1.pos) then
+      if Text.lt1(Screen_top1, {line=line_index, pos=pos}) then
         y = y + math.floor(15*Zoom)
         if y + math.floor(15*Zoom) > App.screen.height then
 --?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
@@ -43,7 +43,7 @@ function Text.draw(line, line_width, line_index)
     end
 --?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
-    if line_index > Screen_top1.line or (line_index == Screen_top1.line and pos >= Screen_top1.pos) then
+    if Text.le1(Screen_top1, {line=line_index, pos=pos}) then
 --?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y, 0, Zoom)
     end
@@ -937,12 +937,12 @@ function Text.keychord_pressed(chord)
       end
       Cursor1.line = Cursor1.line-1
     end
-    if Cursor1.line < Screen_top1.line or (Cursor1.line == Screen_top1.line and Cursor1.pos < Screen_top1.pos) then
+    if Text.lt1(Cursor1, Screen_top1) then
       local top2 = Text.to2(Screen_top1)
       top2 = Text.previous_screen_line(top2)
       Screen_top1 = Text.to1(top2)
     end
-    assert(Cursor1.line > Screen_top1.line or (Cursor1.line == Screen_top1.line and Cursor1.pos >= Screen_top1.pos))
+    assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
@@ -1110,7 +1110,7 @@ function Text.down()
   else
     -- move down one screen line in current line
     local scroll_up = false
-    if Cursor1.line > Screen_bottom1.line or (Cursor1.line == Screen_bottom1.line and Cursor1.pos >= Screen_bottom1.pos) then
+    if Text.le1(Screen_bottom1, Cursor1) then
       scroll_up = true
     end
 --?     print('cursor is NOT at final screen line of its line')
@@ -1428,6 +1428,26 @@ function Text.to1(pos2)
     result.pos = Lines[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos - 1
   end
   return result
+end
+
+function Text.lt1(a, b)
+  if a.line < b.line then
+    return true
+  end
+  if a.line > b.line then
+    return false
+  end
+  return a.pos < b.pos
+end
+
+function Text.le1(a, b)
+  if a.line < b.line then
+    return true
+  end
+  if a.line > b.line then
+    return false
+  end
+  return a.pos <= b.pos
 end
 
 function Text.previous_screen_line(pos2)
