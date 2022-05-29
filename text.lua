@@ -882,13 +882,14 @@ function Text.textinput(t)
 end
 
 function Text.insert_at_cursor(t)
+  if Selection1.line then Text.delete_selection() end
   local byte_offset
   if Cursor1.pos > 1 then
-    byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
+    byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
   else
-    byte_offset = 0
+    byte_offset = 1
   end
-  Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset)..t..string.sub(Lines[Cursor1.line].data, byte_offset+1)
+  Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)..t..string.sub(Lines[Cursor1.line].data, byte_offset)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
