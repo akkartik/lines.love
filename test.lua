@@ -11,6 +11,14 @@ function check(x, msg)
   end
 end
 
+function check_nil(x, msg)
+  if x == nil then
+    io.write('.')
+  else
+    error(msg..'; should be nil but got "'..x..'"')
+  end
+end
+
 function check_eq(x, expected, msg)
   if eq(x, expected) then
     io.write('.')

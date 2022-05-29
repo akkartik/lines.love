@@ -60,6 +60,8 @@ Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of scr
 Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
+Selection1 = {}
+
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
 Current_drawing_mode = 'line'
@@ -178,6 +180,15 @@ function App.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
+        if love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift') then
+          if Selection1.line == nil then
+            Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+          end
+        else
+          if Selection1.line then
+            Selection1 = {}
+          end
+        end
         Text.move_cursor(line_index, line, x, y)
       end
     elseif line.mode == 'drawing' then

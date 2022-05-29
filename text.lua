@@ -25,6 +25,7 @@ function Text.draw(line, line_width, line_index)
     local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = math.floor(App.width(frag_text)*Zoom)
+    local frag_len = utf8.len(frag)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
     if x + frag_width > line_width then
@@ -44,11 +45,33 @@ function Text.draw(line, line_width, line_index)
 --?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
     if Text.le1(Screen_top1, {line=line_index, pos=pos}) then
+      if Selection1.line then
+        local lo, hi = Text.clip_selection(line_index, pos, pos+frag_len)
+        if lo then
+          local lo_offset = utf8.offset(line.data, lo)
+          local hi_offset = utf8.offset(line.data, hi)
+          local pos_offset = utf8.offset(line.data, pos)
+          local lo_px
+          if pos == lo then
+            lo_px = 0
+          else
+            local before = line.data:sub(pos_offset, lo_offset-1)
+            local before_text = App.newText(love.graphics.getFont(), before)
+            lo_px = App.width(before_text)*Zoom
+          end
+--?           print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
+          local s = line.data:sub(lo_offset, hi_offset-1)
+          local text = App.newText(love.graphics.getFont(), s)
+          local text_width = App.width(text)*Zoom
+          love.graphics.setColor(0.7,0.7,0.9)
+          love.graphics.rectangle('fill', x+lo_px,y, text_width,math.floor(15*Zoom))
+          love.graphics.setColor(0,0,0)
+        end
+      end
 --?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y, 0, Zoom)
     end
     -- render cursor if necessary
-    local frag_len = utf8.len(frag)
     if line_index == Cursor1.line then
       if pos <= Cursor1.pos and pos + frag_len > Cursor1.pos then
         Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
@@ -64,8 +87,82 @@ function Text.draw(line, line_width, line_index)
 end
 -- manual tests:
 --  draw with small line_width of 100
---  short words break on spaces
---  long words break when they must
+
+-- Return any intersection of the region from Selection1 to Cursor1 with the
+-- region between {line=line_index, pos=apos} and {line=line_index, pos=bpos}.
+-- apos must be less than bpos. However Selection1 and Cursor1 can be in any order.
+-- Result: positions spos,epos between apos,bpos.
+function Text.clip_selection(line_index, apos, bpos)
+  if Selection1.line == nil then return nil,nil end
+  -- min,max = sorted(Selection1,Cursor1)
+  local minl,minp = Selection1.line,Selection1.pos
+  local maxl,maxp = Cursor1.line,Cursor1.pos
+  if minl > maxl then
+    minl,maxl = maxl,minl
+    minp,maxp = maxp,minp
+  elseif minl == maxl then
+    if minp > maxp then
+      minp,maxp = maxp,minp
+    end
+  end
+  -- check if intervals are disjoint
+  if line_index < minl then return nil,nil end
+  if line_index > maxl then return nil,nil end
+  if line_index == minl and bpos <= minp then return nil,nil end
+  if line_index == maxl and apos >= maxp then return nil,nil end
+  -- compare bounds more carefully (start inclusive, end exclusive)
+  local a_ge = Text.le1({line=minl, pos=minp}, {line=line_index, pos=apos})
+  local b_lt = Text.lt1({line=line_index, pos=bpos}, {line=maxl, pos=maxp})
+--?   print(minl,line_index,maxl, '--', minp,apos,bpos,maxp, '--', a_ge,b_lt)
+  if a_ge and b_lt then
+    -- fully contained
+    return apos,bpos
+  elseif a_ge then
+    assert(maxl == line_index)
+    return apos,maxp
+  elseif b_lt then
+    assert(minl == line_index)
+    return minp,bpos
+  else
+    assert(minl == maxl and minl == line_index)
+    return minp,maxp
+  end
+end
+
+function Text.delete_selection()
+  if Selection1.line == nil then return end
+  -- min,max = sorted(Selection1,Cursor1)
+  local minl,minp = Selection1.line,Selection1.pos
+  local maxl,maxp = Cursor1.line,Cursor1.pos
+  if minl > maxl then
+    minl,maxl = maxl,minl
+    minp,maxp = maxp,minp
+  elseif minl == maxl then
+    if minp > maxp then
+      minp,maxp = maxp,minp
+    end
+  end
+  -- update Cursor1 and Selection1
+  Cursor1.line = minl
+  Cursor1.pos = minp
+  Selection1 = {}
+  -- delete everything between min (inclusive) and max (exclusive)
+  Lines[minl].fragments = nil
+  Lines[minl].screen_line_starting_pos = nil
+  local min_offset = utf8.offset(Lines[minl].data, minp)
+  local max_offset = utf8.offset(Lines[maxl].data, maxp)
+  if minl == maxl then
+--?     print('minl == maxl')
+    Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..Lines[minl].data:sub(max_offset)
+    return
+  end
+  assert(minl < maxl)
+  local rhs = Lines[maxl].data:sub(max_offset)
+  for i=maxl,minl+1,-1 do
+    table.remove(Lines, i)
+  end
+  Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..rhs
+end
 
 function Text.draw_cursor(x, y)
   love.graphics.setColor(1,0,0)
@@ -832,6 +929,107 @@ function test_backspace_can_scroll_up_screen_line()
   check_eq(Cursor1.pos, 4, 'F - test_backspace_can_scroll_up_screen_line/cursor:pos')
 end
 
+-- some tests for operating over selections created using Shift- chords
+-- we're just testing delete_selection, and it works the same for all keys
+
+function test_backspace_over_selection()
+  io.write('\ntest_backspace_over_selection')
+  -- select just one character within a line with cursor before selection
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Zoom = 1
+  -- backspace deletes the selected character, even though it's after the cursor
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'bc', "F - test_backspace_over_selection/data")
+  -- cursor (remains) at start of selection
+  check_eq(Cursor1.line, 1, "F - test_backspace_over_selection/cursor:line")
+  check_eq(Cursor1.pos, 1, "F - test_backspace_over_selection/cursor:pos")
+  -- selection is cleared
+  check_nil(Selection1.line, "F - test_backspace_over_selection/selection")
+end
+
+function test_backspace_over_selection_reverse()
+  io.write('\ntest_backspace_over_selection')
+  -- select just one character within a line with cursor after selection
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Selection1 = {line=1, pos=1}
+  Zoom = 1
+  -- backspace deletes the selected character
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'bc', "F - test_backspace_over_selection_reverse/data")
+  -- cursor moves to start of selection
+  check_eq(Cursor1.line, 1, "F - test_backspace_over_selection_reverse/cursor:line")
+  check_eq(Cursor1.pos, 1, "F - test_backspace_over_selection_reverse/cursor:pos")
+  -- selection is cleared
+  check_nil(Selection1.line, "F - test_backspace_over_selection_reverse/selection")
+end
+
+function test_backspace_over_multiple_lines()
+  io.write('\ntest_backspace_over_selection')
+  -- select just one character within a line with cursor after selection
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Selection1 = {line=4, pos=2}
+  Zoom = 1
+  -- backspace deletes the region and joins the remaining portions of lines on either side
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'akl', "F - test_backspace_over_multiple_lines/data:1")
+  check_eq(Lines[2].data, 'mno', "F - test_backspace_over_multiple_lines/data:2")
+  -- cursor remains at start of selection
+  check_eq(Cursor1.line, 1, "F - test_backspace_over_multiple_lines/cursor:line")
+  check_eq(Cursor1.pos, 2, "F - test_backspace_over_multiple_lines/cursor:pos")
+  -- selection is cleared
+  check_nil(Selection1.line, "F - test_backspace_over_multiple_lines/selection")
+end
+
+function test_backspace_to_end_of_line()
+  io.write('\ntest_backspace_over_selection')
+  -- select region from cursor to end of line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Selection1 = {line=1, pos=4}
+  Zoom = 1
+  -- backspace deletes rest of line without joining to any other line
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'a', "F - test_backspace_to_start_of_line/data:1")
+  check_eq(Lines[2].data, 'def', "F - test_backspace_to_start_of_line/data:2")
+  -- cursor remains at start of selection
+  check_eq(Cursor1.line, 1, "F - test_backspace_to_start_of_line/cursor:line")
+  check_eq(Cursor1.pos, 2, "F - test_backspace_to_start_of_line/cursor:pos")
+  -- selection is cleared
+  check_nil(Selection1.line, "F - test_backspace_to_start_of_line/selection")
+end
+
+function test_backspace_to_start_of_line()
+  io.write('\ntest_backspace_over_selection')
+  -- select region from cursor to start of line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Selection1 = {line=2, pos=3}
+  Zoom = 1
+  -- backspace deletes beginning of line without joining to any other line
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'abc', "F - test_backspace_to_start_of_line/data:1")
+  check_eq(Lines[2].data, 'f', "F - test_backspace_to_start_of_line/data:2")
+  -- cursor remains at start of selection
+  check_eq(Cursor1.line, 2, "F - test_backspace_to_start_of_line/cursor:line")
+  check_eq(Cursor1.pos, 1, "F - test_backspace_to_start_of_line/cursor:pos")
+  -- selection is cleared
+  check_nil(Selection1.line, "F - test_backspace_to_start_of_line/selection")
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
@@ -897,6 +1095,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
+--?   print(chord)
   --== shortcuts that mutate text
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -914,6 +1113,10 @@ function Text.keychord_pressed(chord)
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
   elseif chord == 'backspace' then
+    if Selection1.line then
+      Text.delete_selection()
+      return
+    end
     if Cursor1.pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
       local byte_end = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -946,6 +1149,10 @@ function Text.keychord_pressed(chord)
     assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
   elseif chord == 'delete' then
+    if Selection1.line then
+      Text.delete_selection()
+      return
+    end
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
       local byte_end = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos+1)
@@ -977,25 +1184,105 @@ function Text.keychord_pressed(chord)
     end
   --== shortcuts that move the cursor
   elseif chord == 'left' then
+    if Selection1.line then
+      Selection1 = {}
+    end
     Text.left()
   elseif chord == 'right' then
+    if Selection1.line then
+      Selection1 = {}
+    end
+    Text.right()
+  elseif chord == 'S-left' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
+    Text.left()
+  elseif chord == 'S-right' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
     Text.right()
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
+    if Selection1.line then
+      Selection1 = {}
+    end
     Text.word_left()
   elseif chord == 'M-right' then
+    if Selection1.line then
+      Selection1 = {}
+    end
+    Text.word_right()
+  elseif chord == 'M-S-left' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
+    Text.word_left()
+  elseif chord == 'M-S-right' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
     Text.word_right()
   elseif chord == 'home' then
+    if Selection1.line then
+      Selection1 = {}
+    end
     Cursor1.pos = 1
   elseif chord == 'end' then
+    if Selection1.line then
+      Selection1 = {}
+    end
+    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+  elseif chord == 'S-home' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
+    Cursor1.pos = 1
+  elseif chord == 'S-end' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'up' then
+    if Selection1.line then
+      Selection1 = {}
+    end
     Text.up()
   elseif chord == 'down' then
+    if Selection1.line then
+      Selection1 = {}
+    end
+    Text.down()
+  elseif chord == 'S-up' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
+    Text.up()
+  elseif chord == 'S-down' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
     Text.down()
   elseif chord == 'pageup' then
+    if Selection1.line then
+      Selection1 = {}
+    end
     Text.pageup()
   elseif chord == 'pagedown' then
+    if Selection1.line then
+      Selection1 = {}
+    end
+    Text.pagedown()
+  elseif chord == 'S-pageup' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
+    Text.pageup()
+  elseif chord == 'S-pagedown' then
+    if Selection1.line == nil then
+      Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
+    end
     Text.pagedown()
   end
 end
@@ -1149,7 +1436,7 @@ function Text.word_right()
     Text.right()
     if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
     local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
-    if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then
+    if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then  -- TODO: other space characters
       break
     end
   end
