@@ -25,7 +25,7 @@ function Text.draw(line, line_width, line_index)
     local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = math.floor(App.width(frag_text)*Zoom)
-    local s=tostring
+--?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
     if x + frag_width > line_width then
       assert(x > 25)  -- no overfull lines
