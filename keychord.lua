@@ -33,6 +33,22 @@ function App.modifier_down()
   return array.any(Modifiers, love.keyboard.isDown)
 end
 
+function App.ctrl_down()
+  return love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')
+end
+
+function App.alt_down()
+  return love.keyboard.isDown('lalt') or love.keyboard.isDown('ralt')
+end
+
+function App.shift_down()
+  return love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')
+end
+
+function App.gui_down()
+  return love.keyboard.isDown('lgui') or love.keyboard.isDown('rgui')
+end
+
 array = {}
 
 function array.find(arr, elem)
