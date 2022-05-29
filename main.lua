@@ -16,9 +16,12 @@ require 'icons'
 function App.initialize_globals()
 -- a line is either text or a drawing
 -- a text is a table with:
---    mode = 'text'
---    string data
---    screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
+--    mode = 'text',
+--    string data,
+--    a (y) coord in pixels (updated while painting screen),
+--    some cached data that's blown away and recomputed when data changes:
+--      fragments: snippets of rendered love.graphics.Text, guaranteed to not wrap
+--      screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
 -- a drawing is a table with:
 --    mode = 'drawing'
 --    a (y) coord in pixels (updated while painting screen),
