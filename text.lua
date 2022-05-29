@@ -896,6 +896,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
+  --== shortcuts that mutate text
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
@@ -911,42 +912,6 @@ function Text.keychord_pressed(chord)
   elseif chord == 'tab' then
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
-  elseif chord == 'left' then
-    Text.left()
-  elseif chord == 'right' then
-    Text.right()
-  -- left/right by one word
-  -- C- hotkeys reserved for drawings, so we'll use M-
-  elseif chord == 'M-left' then
-    while true do
-      Text.left()
-      if Cursor1.pos == 1 then break end
-      assert(Cursor1.pos > 1)
-      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
-      assert(offset > 1)
-      if Lines[Cursor1.line].data:sub(offset-1,offset-1) == ' ' then
-        break
-      end
-    end
-  elseif chord == 'M-right' then
-    while true do
-      Text.right()
-      if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
-      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
-      if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then
-        break
-      end
-    end
-  -- paste
-  elseif chord == 'M-v' then
-    local s = love.system.getClipboardText()
-    for _,code in utf8.codes(s) do
-      Text.insert_at_cursor(utf8.char(code))
-    end
-  elseif chord == 'home' then
-    Cursor1.pos = 1
-  elseif chord == 'end' then
-    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'backspace' then
     if Cursor1.pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
@@ -1003,6 +968,43 @@ function Text.keychord_pressed(chord)
       end
     end
     save_to_disk(Lines, Filename)
+  -- paste
+  elseif chord == 'M-v' then
+    local s = love.system.getClipboardText()
+    for _,code in utf8.codes(s) do
+      Text.insert_at_cursor(utf8.char(code))
+    end
+  --== shortcuts that move the cursor
+  elseif chord == 'left' then
+    Text.left()
+  elseif chord == 'right' then
+    Text.right()
+  -- left/right by one word
+  -- C- hotkeys reserved for drawings, so we'll use M-
+  elseif chord == 'M-left' then
+    while true do
+      Text.left()
+      if Cursor1.pos == 1 then break end
+      assert(Cursor1.pos > 1)
+      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+      assert(offset > 1)
+      if Lines[Cursor1.line].data:sub(offset-1,offset-1) == ' ' then
+        break
+      end
+    end
+  elseif chord == 'M-right' then
+    while true do
+      Text.right()
+      if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
+      local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+      if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then
+        break
+      end
+    end
+  elseif chord == 'home' then
+    Cursor1.pos = 1
+  elseif chord == 'end' then
+    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'up' then
     assert(Lines[Cursor1.line].mode == 'text')
 --?     print('up', Cursor1.pos, Screen_top1.pos)
