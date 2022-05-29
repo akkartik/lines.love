@@ -164,6 +164,41 @@ function Text.delete_selection()
   Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..rhs
 end
 
+function Text.selection()
+  if Selection1.line == nil then return end
+  -- min,max = sorted(Selection1,Cursor1)
+  local minl,minp = Selection1.line,Selection1.pos
+  local maxl,maxp = Cursor1.line,Cursor1.pos
+  if minl > maxl then
+    minl,maxl = maxl,minl
+    minp,maxp = maxp,minp
+  elseif minl == maxl then
+    if minp > maxp then
+      minp,maxp = maxp,minp
+    end
+  end
+  local min_offset = utf8.offset(Lines[minl].data, minp)
+  local max_offset = utf8.offset(Lines[maxl].data, maxp)
+  if minl == maxl then
+    return Lines[minl].data:sub(min_offset, max_offset-1)
+  end
+  assert(minl < maxl)
+  local result = Lines[minl].data:sub(min_offset)..'\n'
+  for i=minl+1,maxl-1 do
+    if Lines[i].mode == 'text' then
+      result = result..Lines[i].data..'\n'
+    end
+  end
+  result = result..Lines[maxl].data:sub(1, max_offset-1)
+  return result
+end
+
+function Text.cut_selection()
+  local result = Text.selection()
+  Text.delete_selection()
+  return result
+end
+
 function Text.draw_cursor(x, y)
   love.graphics.setColor(1,0,0)
   love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
@@ -1177,6 +1212,16 @@ function Text.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   -- paste
+  elseif chord == 'M-c' then
+    local s = Text.selection()
+    if s then
+      love.system.setClipboardText(s)
+    end
+  elseif chord == 'M-x' then
+    local s = Text.cut_selection()
+    if s then
+      love.system.setClipboardText(s)
+    end
   elseif chord == 'M-v' then
     local s = love.system.getClipboardText()
     for _,code in utf8.codes(s) do
