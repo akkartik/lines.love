@@ -56,11 +56,11 @@ function Drawing.draw(line)
           local name_text
           -- TODO: avoid computing name width on every repaint
           if p.name == '' then
-            name_text = love.graphics.newText(love.graphics.getFont(), 'm')  -- 1em
+            name_text = App.newText(love.graphics.getFont(), 'm')  -- 1em
           else
-            name_text = love.graphics.newText(love.graphics.getFont(), p.name)
+            name_text = App.newText(love.graphics.getFont(), p.name)
           end
-          love.graphics.rectangle('fill', x,y, math.floor(name_text:getWidth()*Zoom), math.floor(15*Zoom))
+          love.graphics.rectangle('fill', x,y, math.floor(App.width(name_text)*Zoom), math.floor(15*Zoom))
         end
       end
     end

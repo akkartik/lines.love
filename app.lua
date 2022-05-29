@@ -163,6 +163,10 @@ function App.newText(font, s)
   return {type='text', data=s, text=love.graphics.newText(font, s)}
 end
 
+function App.width(text)
+  return text.text:getWidth()
+end
+
 function App.screen.draw(obj, x,y)
   if type(obj) == 'userdata' then
     -- ignore most things as graphics the test harness can't handle
@@ -190,10 +194,6 @@ function App.run_after_mousepress(x,y, button)
   App.mousepressed(x,y, button)
   App.screen.contents = {}
   App.draw()
-end
-
-function App.width(text)
-  return text.text:getWidth()
 end
 
 function App.screen.check(y, expected_contents, msg)
