@@ -219,6 +219,8 @@ function Drawing.mouse_pressed(drawing, x,y, button)
     drawing.pending = {mode=Current_drawing_mode, center=j}
   elseif Current_drawing_mode == 'move' then
     -- all the action is in mouse_released
+  elseif Current_drawing_mode == 'name' then
+    -- all the action is in mouse_released
   else
     print(Current_drawing_mode)
     assert(false)
@@ -332,6 +334,8 @@ function Drawing.mouse_released(x,y, button)
           Lines.current.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, Lines.current.pending.end_angle)
           table.insert(Lines.current.shapes, Lines.current.pending)
         end
+      elseif Lines.current.pending.mode == 'name' then
+        -- all the action is in mouse_released
       else
         print(Lines.current.pending.mode)
         assert(false)
