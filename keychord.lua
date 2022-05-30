@@ -12,17 +12,16 @@ end
 
 function App.combine_modifiers(key)
   local result = ''
-  local down = love.keyboard.isDown
-  if down('lctrl') or down('rctrl') then
+  if App.ctrl_down() then
     result = result..'C-'
   end
-  if down('lalt') or down('ralt') then
+  if App.alt_down() then
     result = result..'M-'
   end
-  if down('lshift') or down('rshift') then
+  if App.shift_down() then
     result = result..'S-'  -- don't try to use this with letters/digits
   end
-  if down('lgui') or down('rgui') then
+  if App.cmd_down() then
     result = result..'s-'
   end
   result = result..key
@@ -30,7 +29,7 @@ function App.combine_modifiers(key)
 end
 
 function App.modifier_down()
-  return array.any(Modifiers, love.keyboard.isDown)
+  return App.ctrl_down() or App.alt_down() or App.shift_down() or App.cmd_down()
 end
 
 function App.ctrl_down()
@@ -45,7 +44,7 @@ function App.shift_down()
   return love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')
 end
 
-function App.gui_down()
+function App.cmd_down()
   return love.keyboard.isDown('lgui') or love.keyboard.isDown('rgui')
 end
 

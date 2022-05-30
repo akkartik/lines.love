@@ -1109,7 +1109,7 @@ end
 
 function Text.textinput(t)
   if love.mouse.isDown('1') then return end
-  if App.modifier_down() then return end
+  if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
   local down = love.keyboard.isDown
   Text.insert_at_cursor(t)
 end
