@@ -1,7 +1,8 @@
-Known issues:
-* Touchpads can drag the mouse pointer using a light touch or a heavy click.
-  On Linux, drags using the light touch get interrupted when a key is pressed.
-  You'll have to press down to drag.
+# Plain text with lines
+
+http://akkartik.name/lines.html
+
+## Known issues
 
 * No support yet for Unicode graphemes spanning multiple codepoints.
 
@@ -33,3 +34,7 @@ Known issues:
 
   Bottomline: at the moment moving points connected to manhattan lines,
   rectangles or squares can break drawings in subtle ways.
+
+* Touchpads can drag the mouse pointer using a light touch or a heavy click.
+  On Linux, drags using the light touch get interrupted when a key is pressed.
+  You'll have to press down to drag.
