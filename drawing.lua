@@ -454,12 +454,8 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.p1 = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'line'
-  elseif chord == 'C-l' then
+  elseif chord == 'C-l' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'line'
-    local drawing,_,shape = Drawing.select_shape_at_mouse()
-    if drawing then
-      Drawing.convert_line(drawing, shape)
-    end
   elseif love.mouse.isDown('1') and chord == 'm' then
     Current_drawing_mode = 'manhattan'
     local drawing = Drawing.select_drawing_at_mouse()
@@ -475,10 +471,6 @@ function Drawing.keychord_pressed(chord)
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'manhattan'
-    local drawing,_,shape = Drawing.select_shape_at_mouse()
-    if drawing then
-      Drawing.convert_horvert(drawing, shape)
-    end
   elseif chord == 'C-s' and not love.mouse.isDown('1') then
     local drawing,_,shape = Drawing.select_shape_at_mouse()
     if drawing then
