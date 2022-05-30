@@ -67,6 +67,8 @@ function load_drawing(infile_next_line)
       local name = shape.center.name
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
       drawing.points[shape.center].name = name
+    elseif shape.mode == 'deleted' then
+      -- ignore
     else
       print(shape.mode)
       assert(false)
@@ -95,6 +97,8 @@ function store_drawing(outfile, drawing)
       outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius})..'\n')
     elseif shape.mode == 'arc' then
       outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius, start_angle=shape.start_angle, end_angle=shape.end_angle})..'\n')
+    elseif shape.mode == 'deleted' then
+      -- ignore
     else
       print(shape.mode)
       assert(false)
@@ -156,6 +160,8 @@ function load_drawing_from_array(iter, a, i)
       local name = shape.center.name
       shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
       drawing.points[shape.center].name = name
+    elseif shape.mode == 'deleted' then
+      -- ignore
     else
       print(shape.mode)
       assert(false)
