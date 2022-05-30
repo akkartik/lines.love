@@ -1737,7 +1737,9 @@ function Text.x(s, pos)
 end
 
 function Text.to2(pos1)
-  assert(Lines[pos1.line].mode == 'text')
+  if Lines[pos1.line].mode == 'drawing' then
+    return {line=pos1.line, screen_line=1, screen_pos=1}
+  end
   local result = {line=pos1.line, screen_line=1}
   if Lines[pos1.line].screen_line_starting_pos == nil then
     result.screen_pos = pos1.pos
