@@ -458,7 +458,7 @@ function Drawing.keychord_pressed(chord)
     Current_drawing_mode = 'line'
     local drawing,_,shape = Drawing.select_shape_at_mouse()
     if drawing then
-      convert_line(drawing, shape)
+      Drawing.convert_line(drawing, shape)
     end
   elseif love.mouse.isDown('1') and chord == 'm' then
     Current_drawing_mode = 'manhattan'
@@ -477,7 +477,7 @@ function Drawing.keychord_pressed(chord)
     Current_drawing_mode = 'manhattan'
     local drawing,_,shape = Drawing.select_shape_at_mouse()
     if drawing then
-      convert_horvert(drawing, shape)
+      Drawing.convert_horvert(drawing, shape)
     end
   elseif chord == 'C-s' and not love.mouse.isDown('1') then
     local drawing,_,shape = Drawing.select_shape_at_mouse()
@@ -680,7 +680,7 @@ end
 -- turn a line either horizontal or vertical
 function Drawing.convert_horvert(drawing, shape)
   if shape.mode == 'freehand' then
-    convert_line(shape)
+    Drawing.convert_line(shape)
   end
   assert(shape.mode == 'line')
   local p1 = drawing.points[shape.p1]
