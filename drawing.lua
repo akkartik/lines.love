@@ -649,7 +649,7 @@ function Drawing.contains_point(shape, p)
     -- not supported
   elseif shape.mode == 'line' or shape.mode == 'manhattan' then
     return shape.p1 == p or shape.p2 == p
-  elseif shape.mode == 'polygon' then
+  elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
     return table.find(shape.vertices, p)
   elseif shape.mode == 'circle' then
     return shape.center == p
