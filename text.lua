@@ -862,6 +862,32 @@ function test_enter_on_bottom_line_scrolls_down()
   App.screen.check(y, 'hi', 'F - test_enter_on_bottom_line_scrolls_down/screen:3')
 end
 
+function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
+  io.write('\ntest_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom')
+  -- display just the bottom line on screen
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=4, pos=2}
+  Screen_top1 = {line=4, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'jkl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/baseline/screen:1')
+  -- after hitting the enter key the screen does not scroll down
+  App.run_after_keychord('return')
+  check_eq(Screen_top1.line, 4, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen_top')
+  check_eq(Cursor1.line, 5, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'j', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'kl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:2')
+end
+
 function test_position_cursor_on_recently_edited_wrapping_line()
   -- draw a line wrapping over 2 screen lines
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
@@ -1135,12 +1161,13 @@ function Text.keychord_pressed(chord)
   if chord == 'return' then
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
+    local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
     Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
     Lines[Cursor1.line].fragments = nil
     Cursor1.line = Cursor1.line+1
     Cursor1.pos = 1
     save_to_disk(Lines, Filename)
-    if Cursor1.line > Screen_bottom1.line then
+    if scroll_down then
       Screen_top1.line = Cursor1.line
       Text.scroll_up_while_cursor_on_screen()
     end
