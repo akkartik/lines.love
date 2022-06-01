@@ -88,18 +88,18 @@ end
 --       >jkl
 --     ]])
 --     App.args = {'/tmp/foo'}
+--     -- define a screen with room for 2 lines of text
 --     App.screen.init{
 --       width=100
 --       height=30
 --     }
---     App.font{
+--     App.font.init{
 --       height=15
 --     }
+--     -- check that screen shows next 2 lines of text after hitting pagedown
 --     App.run_after_keychord('pagedown')
---     App.check_screen_contents{
---       y0='ghi'
---       y15=''
---     }
+--     App.screen.check(0, 'ghi')
+--     App.screen.check(15, 'jkl')
 --   end
 --
 -- All functions starting with 'test_' (no modules) will run before the app
