@@ -1170,6 +1170,34 @@ function test_undo_delete_text()
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
 end
 
+function test_zzz_undo_load_test()
+  print('\n\nTesting a 10KB file')
+  -- create a large list of lines
+  local lines = {}
+  -- 10k characters, hundred lines, 2k words
+  for i=1,100 do
+    local line = ''
+    for c=1,20 do
+      line = line..'abcd '
+    end
+  end
+  Lines = load_array(lines)
+  -- perform 1000 mutations
+  print('are the dots printing quickly and without any pauses?')
+  for i=1,1000 do
+    if i%50 == 0 then
+      App.run_after_keychord('return')
+    else
+      App.run_after_textinput('a')
+    end
+    if i%10 == 0 then
+      io.write(i)
+      io.write(' ')
+      io.flush()
+    end
+  end
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
