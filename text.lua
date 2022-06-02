@@ -3,6 +3,8 @@ Text = {}
 
 local utf8 = require 'utf8'
 
+require 'undo'
+
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
@@ -1091,6 +1093,83 @@ function test_backspace_to_start_of_line()
   check_nil(Selection1.line, "F - test_backspace_to_start_of_line/selection")
 end
 
+function test_undo_insert_text()
+  io.write('\ntest_undo_insert_text')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=4}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  -- insert a character
+  App.run_after_textinput('g')
+  check_eq(Cursor1.line, 2, 'F - test_undo_insert_text/baseline/cursor:line')
+  check_eq(Cursor1.pos, 5, 'F - test_undo_insert_text/baseline/cursor:pos')
+  check_nil(Selection1.line, 'F - test_undo_insert_text/baseline/selection:line')
+  check_nil(Selection1.pos, 'F - test_undo_insert_text/baseline/selection:pos')
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_undo_insert_text/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'defg', 'F - test_undo_insert_text/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'xyz', 'F - test_undo_insert_text/baseline/screen:3')
+  -- undo
+  App.run_after_keychord('M-z')
+  check_eq(Cursor1.line, 2, 'F - test_undo_insert_text/cursor:line')
+  check_eq(Cursor1.pos, 4, 'F - test_undo_insert_text/cursor:pos')
+  check_nil(Selection1.line, 'F - test_undo_insert_text/selection:line')
+  check_nil(Selection1.pos, 'F - test_undo_insert_text/selection:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_undo_insert_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_undo_insert_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'xyz', 'F - test_undo_insert_text/screen:3')
+end
+
+function test_undo_delete_text()
+  io.write('\ntest_undo_delete_text')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'defg', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=5}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  -- delete a character
+  App.run_after_keychord('backspace')
+  check_eq(Cursor1.line, 2, 'F - test_undo_delete_text/baseline/cursor:line')
+  check_eq(Cursor1.pos, 4, 'F - test_undo_delete_text/baseline/cursor:pos')
+  check_nil(Selection1.line, 'F - test_undo_delete_text/baseline/selection:line')
+  check_nil(Selection1.pos, 'F - test_undo_delete_text/baseline/selection:pos')
+  local screen_top_margin = 15  -- pixels
+  local line_height = 15  -- pixels
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_undo_delete_text/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_undo_delete_text/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'xyz', 'F - test_undo_delete_text/baseline/screen:3')
+  -- undo
+--?   -- after undo, the backspaced key is selected
+  App.run_after_keychord('M-z')
+  check_eq(Cursor1.line, 2, 'F - test_undo_delete_text/cursor:line')
+  check_eq(Cursor1.pos, 5, 'F - test_undo_delete_text/cursor:pos')
+  check_nil(Selection1.line, 'F - test_undo_delete_text/selection:line')
+  check_nil(Selection1.pos, 'F - test_undo_delete_text/selection:pos')
+--?   check_eq(Selection1.line, 2, 'F - test_undo_delete_text/selection:line')
+--?   check_eq(Selection1.pos, 4, 'F - test_undo_delete_text/selection:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_undo_delete_text/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'defg', 'F - test_undo_delete_text/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
+end
+
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
@@ -1142,6 +1221,8 @@ end
 
 function Text.insert_at_cursor(t)
   if Selection1.line then Text.delete_selection() end
+  -- Collect what you did in an event that can be undone.
+  local before = snapshot_everything()
   local byte_offset
   if Cursor1.pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -1152,6 +1233,8 @@ function Text.insert_at_cursor(t)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
+  -- finalize undo event
+  record_undo_event({before=before, after=snapshot_everything()})
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
@@ -1159,6 +1242,7 @@ function Text.keychord_pressed(chord)
 --?   print(chord)
   --== shortcuts that mutate text
   if chord == 'return' then
+    local before = snapshot_everything()
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
     local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
@@ -1171,12 +1255,18 @@ function Text.keychord_pressed(chord)
       Screen_top1.line = Cursor1.line
       Text.scroll_up_while_cursor_on_screen()
     end
+    record_undo_event({before=before, after=snapshot_everything()})
   elseif chord == 'tab' then
+    local before = snapshot_everything()
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
+    record_undo_event({before=before, after=snapshot_everything()})
   elseif chord == 'backspace' then
+    local before = snapshot_everything()
     if Selection1.line then
       Text.delete_selection()
+      save_to_disk(Lines, Filename)
+      record_undo_event({before=before, after=snapshot_everything()})
       return
     end
     if Cursor1.pos > 1 then
@@ -1210,9 +1300,13 @@ function Text.keychord_pressed(chord)
     end
     assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
+    record_undo_event({before=before, after=snapshot_everything()})
   elseif chord == 'delete' then
+    local before = snapshot_everything()
     if Selection1.line then
       Text.delete_selection()
+      save_to_disk(Lines, Filename)
+      record_undo_event({before=before, after=snapshot_everything()})
       return
     end
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
@@ -1238,6 +1332,37 @@ function Text.keychord_pressed(chord)
       end
     end
     save_to_disk(Lines, Filename)
+    record_undo_event({before=before, after=snapshot_everything()})
+  -- undo/redo really belongs in main.lua, but it's here so I can test the
+  -- text-specific portions of it
+  elseif chord == 'M-z' then
+    local event = undo_event()
+    if event then
+      local src = event.before
+      Screen_top1 = deepcopy(src.screen_top)
+      Cursor1 = deepcopy(src.cursor)
+      Selection1 = deepcopy(src.selection)
+      if src.lines then
+        Lines = deepcopy(src.lines)
+      end
+    end
+  elseif chord == 'M-y' then
+    local event = redo_event()
+    if event then
+      local src = event.after
+      Screen_top1 = deepcopy(src.screen_top)
+      Cursor1 = deepcopy(src.cursor)
+      Selection1 = deepcopy(src.selection)
+      if src.lines then
+        Lines = deepcopy(src.lines)
+--?         for _,line in ipairs(Lines) do
+--?           if line.mode == 'drawing' then
+--?             print('restoring', line.points, 'with', #line.points, 'points')
+--?             print('restoring', line.shapes, 'with', #line.shapes, 'shapes')
+--?           end
+--?         end
+      end
+    end
   -- paste
   elseif chord == 'M-c' then
     local s = Text.selection()

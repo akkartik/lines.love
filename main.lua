@@ -65,6 +65,10 @@ Zoom = 1.5
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
+-- undo
+History = {}
+Next_history = 1
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -102,6 +106,7 @@ function App.initialize(arg)
 end  -- App.initialize
 
 function App.filedropped(file)
+  App.initialize_globals()  -- in particular, forget all undo history
   Filename = file:getFilename()
   file:open('r')
   Lines = load_from_file(file)
