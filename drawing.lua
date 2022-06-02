@@ -348,7 +348,10 @@ function Drawing.mouse_released(x,y, button)
     end
   end
   save_to_disk(Lines, Filename)
-  record_undo_event({before=Drawing.before, after=snapshot_everything()})
+  if Drawing.before then
+    record_undo_event({before=Drawing.before, after=snapshot_everything()})
+    Drawing.before = nil
+  end
 end
 
 function Drawing.keychord_pressed(chord)

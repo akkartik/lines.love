@@ -142,6 +142,7 @@ function App.draw()
         button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
+                       Drawing.before = snapshot_everything()
                        table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                        if Cursor1.line >= line_index then
                          Cursor1.line = Cursor1.line+1
