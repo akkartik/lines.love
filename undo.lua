@@ -33,7 +33,7 @@ function redo_event()
 end
 
 -- Make copies of objects; the rest of the app may mutate them in place, but undo requires immutable histories.
-function snapshot_everything()
+function snapshot()
   -- compare with App.initialize_globals
   local event = {
     screen_top=deepcopy(Screen_top1),

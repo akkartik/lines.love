@@ -206,7 +206,7 @@ function Drawing.in_drawing(drawing, x,y)
 end
 
 function Drawing.mouse_pressed(drawing, x,y, button)
-  Drawing.before = snapshot_everything()
+  Drawing.before = snapshot()
   if Current_drawing_mode == 'freehand' then
     drawing.pending = {mode=Current_drawing_mode, points={{x=Drawing.coord(x-16), y=Drawing.coord(y-drawing.y)}}}
   elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
@@ -349,7 +349,7 @@ function Drawing.mouse_released(x,y, button)
   end
   save_to_disk(Lines, Filename)
   if Drawing.before then
-    record_undo_event({before=Drawing.before, after=snapshot_everything()})
+    record_undo_event({before=Drawing.before, after=snapshot()})
     Drawing.before = nil
   end
 end

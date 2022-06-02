@@ -1250,7 +1250,7 @@ end
 function Text.insert_at_cursor(t)
   if Selection1.line then Text.delete_selection() end
   -- Collect what you did in an event that can be undone.
-  local before = snapshot_everything()
+  local before = snapshot()
   local byte_offset
   if Cursor1.pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -1262,7 +1262,7 @@ function Text.insert_at_cursor(t)
   Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
   -- finalize undo event
-  record_undo_event({before=before, after=snapshot_everything()})
+  record_undo_event({before=before, after=snapshot()})
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
@@ -1270,7 +1270,7 @@ function Text.keychord_pressed(chord)
 --?   print(chord)
   --== shortcuts that mutate text
   if chord == 'return' then
-    local before = snapshot_everything()
+    local before = snapshot()
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
     local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
@@ -1283,18 +1283,18 @@ function Text.keychord_pressed(chord)
       Screen_top1.line = Cursor1.line
       Text.scroll_up_while_cursor_on_screen()
     end
-    record_undo_event({before=before, after=snapshot_everything()})
+    record_undo_event({before=before, after=snapshot()})
   elseif chord == 'tab' then
-    local before = snapshot_everything()
+    local before = snapshot()
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot_everything()})
+    record_undo_event({before=before, after=snapshot()})
   elseif chord == 'backspace' then
-    local before = snapshot_everything()
+    local before = snapshot()
     if Selection1.line then
       Text.delete_selection()
       save_to_disk(Lines, Filename)
-      record_undo_event({before=before, after=snapshot_everything()})
+      record_undo_event({before=before, after=snapshot()})
       return
     end
     if Cursor1.pos > 1 then
@@ -1328,13 +1328,13 @@ function Text.keychord_pressed(chord)
     end
     assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot_everything()})
+    record_undo_event({before=before, after=snapshot()})
   elseif chord == 'delete' then
-    local before = snapshot_everything()
+    local before = snapshot()
     if Selection1.line then
       Text.delete_selection()
       save_to_disk(Lines, Filename)
-      record_undo_event({before=before, after=snapshot_everything()})
+      record_undo_event({before=before, after=snapshot()})
       return
     end
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
@@ -1360,7 +1360,7 @@ function Text.keychord_pressed(chord)
       end
     end
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot_everything()})
+    record_undo_event({before=before, after=snapshot()})
   -- undo/redo really belongs in main.lua, but it's here so I can test the
   -- text-specific portions of it
   elseif chord == 'M-z' then
