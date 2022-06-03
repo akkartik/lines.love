@@ -55,6 +55,7 @@ Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
 Selection1 = {}
+Recent_mouse = {}  -- when selecting text, avoid recomputing some state on every single frame
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
 
@@ -138,9 +139,6 @@ function App.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
   love.graphics.setColor(0, 0, 0)
-  for line_index,line in ipairs(Lines) do
-    line.y = nil
-  end
   assert(Text.le1(Screen_top1, Cursor1))
   local y = Margin_top
 --?   print('== draw')
@@ -198,7 +196,8 @@ function App.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
-        Text.move_cursor(line_index, line, x, y)
+        Cursor1.line = line_index
+        Cursor1.pos = Text.to_pos_on_line(line, x, y)
         Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
       end
     elseif line.mode == 'drawing' then
@@ -217,7 +216,8 @@ function App.mousereleased(x,y, button)
     for line_index,line in ipairs(Lines) do
       if line.mode == 'text' then
         if Text.in_line(line, x,y) then
-          Text.move_cursor(line_index, line, x, y)
+          Cursor1.line = line_index
+          Cursor1.pos = Text.to_pos_on_line(line, x, y)
           if Text.eq1(Cursor1, Selection1) then
             Selection1 = {}
           end
@@ -228,6 +228,7 @@ function App.mousereleased(x,y, button)
 end
 
 function App.textinput(t)
+  for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
   if Search_term then
     Search_term = Search_term..t
     Search_text = nil
@@ -243,6 +244,7 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
+  for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
   if Search_term then
     if chord == 'escape' then
       Search_term = nil

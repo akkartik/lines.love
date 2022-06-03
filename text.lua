@@ -213,15 +213,22 @@ function rfind(s, pat, i)
   return endpos-#pat+1
 end
 
--- Return any intersection of the region from Selection1 to Cursor1 with the
--- region between {line=line_index, pos=apos} and {line=line_index, pos=bpos}.
+-- Return any intersection of the region from Selection1 to Cursor1 (or
+-- current mouse, if mouse is pressed; or recent mouse if mouse is pressed and
+-- currently over a drawing) with the region between {line=line_index, pos=apos}
+-- and {line=line_index, pos=bpos}.
 -- apos must be less than bpos. However Selection1 and Cursor1 can be in any order.
 -- Result: positions spos,epos between apos,bpos.
 function Text.clip_selection(line_index, apos, bpos)
   if Selection1.line == nil then return nil,nil end
   -- min,max = sorted(Selection1,Cursor1)
   local minl,minp = Selection1.line,Selection1.pos
-  local maxl,maxp = Cursor1.line,Cursor1.pos
+  local maxl,maxp
+  if love.mouse.isDown('1') then
+    maxl,maxp = Text.mouse_pos()
+  else
+    maxl,maxp = Cursor1.line,Cursor1.pos
+  end
   if minl > maxl then
     minl,maxl = maxl,minl
     minp,maxp = maxp,minp
@@ -251,6 +258,31 @@ function Text.clip_selection(line_index, apos, bpos)
   else
     assert(minl == maxl and minl == line_index)
     return minp,maxp
+  end
+end
+
+-- inefficient for some reason, so don't do it on every frame
+function Text.mouse_pos()
+  local time = love.timer.getTime()
+  if Recent_mouse.time and Recent_mouse.time > time-0.1 then
+    return Recent_mouse.line, Recent_mouse.pos
+  end
+  Recent_mouse.time = time
+  local line,pos = Text.to_pos(love.mouse.getX(), love.mouse.getY())
+  if line then
+    Recent_mouse.line = line
+    Recent_mouse.pos = pos
+  end
+  return Recent_mouse.line, Recent_mouse.pos
+end
+
+function Text.to_pos(x,y)
+  for line_index,line in ipairs(Lines) do
+    if line.mode == 'text' then
+      if Text.in_line(line, x,y) then
+        return line_index, Text.to_pos_on_line(line, x,y)
+      end
+    end
   end
 end
 
@@ -1829,12 +1861,10 @@ function Text.in_line(line, x,y)
   return y < line.y + #line.screen_line_starting_pos * Line_height
 end
 
--- mx,my in pixels
-function Text.move_cursor(line_index, line, mx, my)
-  Cursor1.line = line_index
+-- convert mx,my in pixels to schema-1 coordinates
+function Text.to_pos_on_line(line, mx, my)
   if line.screen_line_starting_pos == nil then
-    Cursor1.pos = Text.nearest_cursor_pos(line.data, mx)
-    return
+    return Text.nearest_cursor_pos(line.data, mx)
   end
   assert(line.fragments)
   assert(my >= line.y)
@@ -1847,12 +1877,10 @@ function Text.move_cursor(line_index, line, mx, my)
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
       if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
-        Cursor1.pos = line.screen_line_starting_pos[screen_line_index+1]
-        return
+        return line.screen_line_starting_pos[screen_line_index+1]
       end
       local s = string.sub(line.data, screen_line_starting_pos)
-      Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
-      return
+      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
     end
     y = nexty
   end
