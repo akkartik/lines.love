@@ -63,6 +63,7 @@ Previous_drawing_mode = nil
 
 Font_height = 14
 Line_height = 15
+Margin_top = 15
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
@@ -135,7 +136,7 @@ function App.draw()
     line.y = nil
   end
   assert(Text.le1(Screen_top1, Cursor1))
-  local y = 15
+  local y = Margin_top
 --?   print('== draw')
   for line_index,line in ipairs(Lines) do
 --?     print('draw:', y, line_index, line)
