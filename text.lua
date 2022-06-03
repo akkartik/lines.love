@@ -132,6 +132,13 @@ function Text.clip_selection(line_index, apos, bpos)
 end
 
 function Text.delete_selection()
+  local minl,maxl = minmax(Selection1.line, Cursor1.line)
+  local before = snapshot(minl, maxl)
+  Text.delete_selection_without_undo()
+  record_undo_event({before=before, after=snapshot(Cursor1.line)})
+end
+
+function Text.delete_selection_without_undo()
   if Selection1.line == nil then return end
   -- min,max = sorted(Selection1,Cursor1)
   local minl,minp = Selection1.line,Selection1.pos
@@ -1170,34 +1177,6 @@ function test_undo_delete_text()
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
 end
 
-function test_zzz_undo_load_test()
-  print('\n\nTesting a 10KB file')
-  -- create a large list of lines
-  local lines = {}
-  -- 10k characters, hundred lines, 2k words
-  for i=1,100 do
-    local line = ''
-    for c=1,20 do
-      line = line..'abcd '
-    end
-  end
-  Lines = load_array(lines)
-  -- perform 1000 mutations
-  print('are the dots printing quickly and without any pauses?')
-  for i=1,1000 do
-    if i%50 == 0 then
-      App.run_after_keychord('return')
-    else
-      App.run_after_textinput('a')
-    end
-    if i%10 == 0 then
-      io.write(i)
-      io.write(' ')
-      io.flush()
-    end
-  end
-end
-
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
@@ -1243,14 +1222,15 @@ end
 function Text.textinput(t)
   if love.mouse.isDown('1') then return end
   if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
-  local down = love.keyboard.isDown
+  if Selection1.line then
+    Text.delete_selection()
+  end
+  local before = snapshot(Cursor1.line)
   Text.insert_at_cursor(t)
+  record_undo_event({before=before, after=snapshot(Cursor1.line)})
 end
 
 function Text.insert_at_cursor(t)
-  if Selection1.line then Text.delete_selection() end
-  -- Collect what you did in an event that can be undone.
-  local before = snapshot()
   local byte_offset
   if Cursor1.pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -1261,8 +1241,6 @@ function Text.insert_at_cursor(t)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
-  -- finalize undo event
-  record_undo_event({before=before, after=snapshot()})
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
@@ -1270,7 +1248,8 @@ function Text.keychord_pressed(chord)
 --?   print(chord)
   --== shortcuts that mutate text
   if chord == 'return' then
-    local before = snapshot()
+    local before_line = Cursor1.line
+    local before = snapshot(before_line)
     local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
     table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
     local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
@@ -1283,19 +1262,23 @@ function Text.keychord_pressed(chord)
       Screen_top1.line = Cursor1.line
       Text.scroll_up_while_cursor_on_screen()
     end
-    record_undo_event({before=before, after=snapshot()})
+    record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   elseif chord == 'tab' then
-    local before = snapshot()
+    local before = snapshot(Cursor1.line)
     Text.insert_at_cursor('\t')
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot()})
+    record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'backspace' then
-    local before = snapshot()
     if Selection1.line then
       Text.delete_selection()
       save_to_disk(Lines, Filename)
-      record_undo_event({before=before, after=snapshot()})
       return
+    end
+    local before
+    if Cursor1.pos > 1 then
+      before = snapshot(Cursor1.line)
+    else
+      before = snapshot(Cursor1.line-1, Cursor1.line)
     end
     if Cursor1.pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
@@ -1328,14 +1311,18 @@ function Text.keychord_pressed(chord)
     end
     assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot()})
+    record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'delete' then
-    local before = snapshot()
     if Selection1.line then
       Text.delete_selection()
       save_to_disk(Lines, Filename)
-      record_undo_event({before=before, after=snapshot()})
       return
+    end
+    local before
+    if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
+      before = snapshot(Cursor1.line)
+    else
+      before = snapshot(Cursor1.line, Cursor1.line+1)
     end
     if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -1360,7 +1347,7 @@ function Text.keychord_pressed(chord)
       end
     end
     save_to_disk(Lines, Filename)
-    record_undo_event({before=before, after=snapshot()})
+    record_undo_event({before=before, after=snapshot(Cursor1.line)})
   -- undo/redo really belongs in main.lua, but it's here so I can test the
   -- text-specific portions of it
   elseif chord == 'M-z' then
@@ -1370,9 +1357,7 @@ function Text.keychord_pressed(chord)
       Screen_top1 = deepcopy(src.screen_top)
       Cursor1 = deepcopy(src.cursor)
       Selection1 = deepcopy(src.selection)
-      if src.lines then
-        Lines = deepcopy(src.lines)
-      end
+      patch(Lines, event.after, event.before)
     end
   elseif chord == 'M-y' then
     local event = redo_event()
@@ -1381,15 +1366,7 @@ function Text.keychord_pressed(chord)
       Screen_top1 = deepcopy(src.screen_top)
       Cursor1 = deepcopy(src.cursor)
       Selection1 = deepcopy(src.selection)
-      if src.lines then
-        Lines = deepcopy(src.lines)
---?         for _,line in ipairs(Lines) do
---?           if line.mode == 'drawing' then
---?             print('restoring', line.points, 'with', #line.points, 'points')
---?             print('restoring', line.shapes, 'with', #line.shapes, 'shapes')
---?           end
---?         end
-      end
+      patch(Lines, event.before, event.after)
     end
   -- paste
   elseif chord == 'M-c' then
@@ -1403,10 +1380,13 @@ function Text.keychord_pressed(chord)
       love.system.setClipboardText(s)
     end
   elseif chord == 'M-v' then
+    local before_line = Cursor1.line
+    local before = snapshot(before_line)
     local s = love.system.getClipboardText()
     for _,code in utf8.codes(s) do
       Text.insert_at_cursor(utf8.char(code))
     end
+    record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
     if Selection1.line then

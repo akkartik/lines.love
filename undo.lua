@@ -32,8 +32,16 @@ function redo_event()
   end
 end
 
+-- Copy all relevant global state.
 -- Make copies of objects; the rest of the app may mutate them in place, but undo requires immutable histories.
-function snapshot()
+function snapshot(s,e)
+  -- Snapshot everything by default, but subset if requested.
+  if s == nil and e == nil then
+    s = 1
+    e = #Lines
+  elseif e == nil then
+    e = s
+  end
   -- compare with App.initialize_globals
   local event = {
     screen_top=deepcopy(Screen_top1),
@@ -43,10 +51,13 @@ function snapshot()
     previous_drawing_mode=Previous_drawing_mode,
     zoom=Zoom,
     lines={},
+    start_line=s,
+    end_line=e,
     -- no filename; undo history is cleared when filename changes
   }
   -- deep copy lines without cached stuff like text fragments
-  for _,line in ipairs(Lines) do
+  for i=s,e do
+    local line = Lines[i]
     if line.mode == 'text' then
       table.insert(event.lines, {mode='text', data=line.data})
     elseif line.mode == 'drawing' then
@@ -64,6 +75,24 @@ function snapshot()
   return event
 end
 
+function patch(lines, from, to)
+--?   if #from.lines == 1 and #to.lines == 1 then
+--?     assert(from.start_line == from.end_line)
+--?     assert(to.start_line == to.end_line)
+--?     assert(from.start_line == to.start_line)
+--?     lines[from.start_line] = to.lines[1]
+--?     return
+--?   end
+  assert(from.start_line == to.start_line)
+  for i=from.end_line,from.start_line,-1 do
+    table.remove(lines, i)
+  end
+  assert(#to.lines == to.end_line-to.start_line+1)
+  for i=1,#to.lines do
+    table.insert(lines, to.start_line+i-1, to.lines[i])
+  end
+end
+
 -- https://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/26367080#26367080
 function deepcopy(obj, seen)
   if type(obj) ~= 'table' then return obj end
@@ -75,4 +104,8 @@ function deepcopy(obj, seen)
     result[deepcopy(k, s)] = deepcopy(v, s)
   end
   return result
+end
+
+function minmax(a, b)
+  return math.min(a,b), math.max(a,b)
 end

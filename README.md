@@ -6,9 +6,8 @@ http://akkartik.name/lines.html
 
 * No support yet for Unicode graphemes spanning multiple codepoints.
 
-* Undo is extremely inefficient in space. While this app is extremely unlikely
-  to lose the current state of a file at any moment, undo history is volatile
-  and should be considered unstable.
+* Undo/redo can be sluggish in large files. If things get sluggish, killing
+  the process can lose data.
 
 * The text cursor will always stay on the screen. This can have some strange
   implications:
