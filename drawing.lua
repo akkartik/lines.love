@@ -226,13 +226,13 @@ function Drawing.mouse_pressed(drawing, x,y, button)
     print(Current_drawing_mode)
     assert(false)
   end
-  Lines.current = drawing
+  Lines.current_drawing = drawing
 end
 
 -- a couple of operations on drawings need to constantly check the state of the mouse
 function Drawing.update()
-  if Lines.current == nil then return end
-  local drawing = Lines.current
+  if Lines.current_drawing == nil then return end
+  local drawing = Lines.current_drawing
   assert(drawing.mode == 'drawing')
   local x, y = love.mouse.getX(), love.mouse.getY()
   if love.mouse.isDown('1') then
@@ -260,8 +260,8 @@ function Drawing.mouse_released(x,y, button)
   if Current_drawing_mode == 'move' then
     Current_drawing_mode = Previous_drawing_mode
     Previous_drawing_mode = nil
-  elseif Lines.current then
-    local drawing = Lines.current
+  elseif Lines.current_drawing then
+    local drawing = Lines.current_drawing
     if drawing.pending then
       if drawing.pending.mode == 'freehand' then
         -- the last point added during update is good enough
@@ -344,8 +344,8 @@ function Drawing.mouse_released(x,y, button)
         print(drawing.pending.mode)
         assert(false)
       end
-      Lines.current.pending = {}
-      Lines.current = nil
+      Lines.current_drawing.pending = {}
+      Lines.current_drawing = nil
     end
   end
   save_to_disk(Lines, Filename)
@@ -480,7 +480,7 @@ function Drawing.keychord_pressed(chord)
       end
       Current_drawing_mode = 'move'
       drawing.pending = {mode=Current_drawing_mode, target_point=p}
-      Lines.current = drawing
+      Lines.current_drawing = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
     local drawing,_,p = Drawing.select_point_at_mouse()
@@ -490,7 +490,7 @@ function Drawing.keychord_pressed(chord)
       end
       Current_drawing_mode = 'move'
       drawing.pending = {mode=Current_drawing_mode, target_point=p}
-      Lines.current = drawing
+      Lines.current_drawing = drawing
     end
   elseif chord == 'C-n' and not love.mouse.isDown('1') then
     local drawing,point_index,p = Drawing.select_point_at_mouse()
@@ -502,7 +502,7 @@ function Drawing.keychord_pressed(chord)
       Current_drawing_mode = 'name'
       p.name = ''
       drawing.pending = {mode=Current_drawing_mode, target_point=point_index}
-      Lines.current = drawing
+      Lines.current_drawing = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then
     local drawing,i,p = Drawing.select_point_at_mouse()

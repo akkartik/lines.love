@@ -228,7 +228,7 @@ function App.textinput(t)
     Search_text = nil
     Text.search_next()
   elseif Current_drawing_mode == 'name' then
-    local drawing = Lines.current
+    local drawing = Lines.current_drawing
     local p = drawing.points[drawing.pending.target_point]
     p.name = p.name..t
   else
@@ -362,7 +362,7 @@ function App.keychord_pressed(chord)
       Current_drawing_mode = Previous_drawing_mode
       Previous_drawing_mode = nil
     else
-      local drawing = Lines.current
+      local drawing = Lines.current_drawing
       local p = drawing.points[drawing.pending.target_point]
       if chord == 'escape' then
         p.name = nil
