@@ -61,8 +61,10 @@ Cursor_x, Cursor_y = 0, 0  -- in pixels
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
+-- values for tests
 Font_height = 14
 Line_height = 15
+
 Margin_top = 15
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
@@ -96,6 +98,10 @@ function App.initialize(arg)
   -- maximum width available to either text or drawings, in pixels
   Line_width = math.floor(App.screen.width/2/40)*40
 --?   Line_width = 100
+
+  Font_height = 20
+  love.graphics.setFont(love.graphics.newFont(Font_height))
+  Line_height = 26
 
   -- still in App.initialize
   if #arg > 0 then
@@ -258,18 +264,18 @@ function App.keychord_pressed(chord)
   elseif chord == 'C-=' then
     Font_height = Font_height+2
     love.graphics.setFont(love.graphics.newFont(Font_height))
-    Line_height = math.floor(Font_height*1.1)
+    Line_height = math.floor(Font_height*1.3)
     Text.redraw_all()
   elseif chord == 'C--' then
     Font_height = Font_height-2
     love.graphics.setFont(love.graphics.newFont(Font_height))
     Text.redraw_all()
-    Line_height = math.floor(Font_height*1.1)
+    Line_height = math.floor(Font_height*1.3)
   elseif chord == 'C-0' then
-    Font_height = 14
+    Font_height = 20
     love.graphics.setFont(love.graphics.newFont(Font_height))
     Text.redraw_all()
-    Line_height = 15
+    Line_height = 26
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
