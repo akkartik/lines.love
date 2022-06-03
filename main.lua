@@ -276,6 +276,24 @@ function App.keychord_pressed(chord)
     love.graphics.setFont(love.graphics.newFont(Font_height))
     Text.redraw_all()
     Line_height = 26
+  elseif chord == 'C-z' then
+    local event = undo_event()
+    if event then
+      local src = event.before
+      Screen_top1 = deepcopy(src.screen_top)
+      Cursor1 = deepcopy(src.cursor)
+      Selection1 = deepcopy(src.selection)
+      patch(Lines, event.after, event.before)
+    end
+  elseif chord == 'C-y' then
+    local event = redo_event()
+    if event then
+      local src = event.after
+      Screen_top1 = deepcopy(src.screen_top)
+      Cursor1 = deepcopy(src.cursor)
+      Selection1 = deepcopy(src.selection)
+      patch(Lines, event.before, event.after)
+    end
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then

@@ -1168,7 +1168,7 @@ function test_undo_insert_text()
   y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_insert_text/baseline/screen:3')
   -- undo
-  App.run_after_keychord('M-z')
+  App.run_after_keychord('C-z')
   check_eq(Cursor1.line, 2, 'F - test_undo_insert_text/cursor:line')
   check_eq(Cursor1.pos, 4, 'F - test_undo_insert_text/cursor:pos')
   check_nil(Selection1.line, 'F - test_undo_insert_text/selection:line')
@@ -1203,7 +1203,7 @@ function test_undo_delete_text()
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/baseline/screen:3')
   -- undo
 --?   -- after undo, the backspaced key is selected
-  App.run_after_keychord('M-z')
+  App.run_after_keychord('C-z')
   check_eq(Cursor1.line, 2, 'F - test_undo_delete_text/cursor:line')
   check_eq(Cursor1.pos, 5, 'F - test_undo_delete_text/cursor:pos')
   check_nil(Selection1.line, 'F - test_undo_delete_text/selection:line')
@@ -1379,26 +1379,6 @@ function Text.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
-  -- undo/redo really belongs in main.lua, but it's here so I can test the
-  -- text-specific portions of it
-  elseif chord == 'M-z' then
-    local event = undo_event()
-    if event then
-      local src = event.before
-      Screen_top1 = deepcopy(src.screen_top)
-      Cursor1 = deepcopy(src.cursor)
-      Selection1 = deepcopy(src.selection)
-      patch(Lines, event.after, event.before)
-    end
-  elseif chord == 'M-y' then
-    local event = redo_event()
-    if event then
-      local src = event.after
-      Screen_top1 = deepcopy(src.screen_top)
-      Cursor1 = deepcopy(src.cursor)
-      Selection1 = deepcopy(src.selection)
-      patch(Lines, event.before, event.after)
-    end
   -- paste
   elseif chord == 'M-c' then
     local s = Text.selection()
