@@ -255,6 +255,8 @@ function App.keychord_pressed(chord)
     elseif chord == 'down' then
       Cursor1.pos = Cursor1.pos+1
       Text.search_next()
+    elseif chord == 'up' then
+      Text.search_previous()
     end
     return
   elseif chord == 'C-f' then

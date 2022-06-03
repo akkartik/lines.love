@@ -163,6 +163,56 @@ function Text.search_next()
   end
 end
 
+function Text.search_previous()
+  -- search current line
+  local pos = rfind(Lines[Cursor1.line].data, Search_term, Cursor1.pos)
+  if pos then
+    Cursor1.pos = pos
+  end
+  if pos == nil then
+    for i=Cursor1.line-1,1,-1 do
+      pos = rfind(Lines[i].data, Search_term)
+      if pos then
+        Cursor1.line = i
+        Cursor1.pos = pos
+        break
+      end
+    end
+  end
+  if pos == nil then
+    -- wrap around
+    for i=#Lines,Cursor1.line+1,-1 do
+      pos = rfind(Lines[i].data, Search_term)
+      if pos then
+        Cursor1.line = i
+        Cursor1.pos = pos
+        break
+      end
+    end
+  end
+  if pos == nil then
+    Cursor1.line = Search_backup_cursor1.line
+    Cursor1.pos = Search_backup_cursor1.pos
+  end
+  if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
+    Screen_top1.line = Cursor1.line
+    local _, pos = Text.pos_at_start_of_cursor_screen_line()
+    Screen_top1.pos = pos
+  end
+end
+
+function rfind(s, pat, i)
+  local rs = s:reverse()
+  local rpat = pat:reverse()
+  if i == nil then i = #s end
+  local ri = #s - i + 1
+  local rendpos = rs:find(rpat, ri)
+  if rendpos == nil then return nil end
+  local endpos = #s - rendpos + 1
+  assert (endpos >= #pat)
+  return endpos-#pat+1
+end
+
 -- Return any intersection of the region from Selection1 to Cursor1 with the
 -- region between {line=line_index, pos=apos} and {line=line_index, pos=bpos}.
 -- apos must be less than bpos. However Selection1 and Cursor1 can be in any order.
