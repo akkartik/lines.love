@@ -355,7 +355,7 @@ function Drawing.mouse_released(x,y, button)
 end
 
 function Drawing.keychord_pressed(chord)
-  if chord == 'C-f' and not love.mouse.isDown('1') then
+  if chord == 'C-p' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'polygon'

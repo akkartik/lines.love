@@ -17,7 +17,7 @@ function draw_help_without_mouse_pressed(drawing)
   y = y + Line_height
   y = y + Line_height
   if Current_drawing_mode ~= 'freehand' then
-    love.graphics.print("* Press 'ctrl+f' to switch to drawing freehand strokes", 16+30,y)
+    love.graphics.print("* Press 'ctrl+p' to switch to drawing freehand strokes", 16+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'line' then
