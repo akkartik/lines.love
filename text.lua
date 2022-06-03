@@ -26,7 +26,7 @@ function Text.draw(line, line_width, line_index)
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
-    local frag_width = math.floor(App.width(frag_text)*Zoom)
+    local frag_width = App.width(frag_text)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
@@ -34,8 +34,8 @@ function Text.draw(line, line_width, line_index)
       assert(x > 25)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if Text.lt1(Screen_top1, {line=line_index, pos=pos}) then
-        y = y + math.floor(15*Zoom)
-        if y + math.floor(15*Zoom) > App.screen.height then
+        y = y + Line_height
+        if y + Line_height > App.screen.height then
 --?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
           return y, screen_line_starting_pos
         end
@@ -59,19 +59,19 @@ function Text.draw(line, line_width, line_index)
           else
             local before = line.data:sub(pos_offset, lo_offset-1)
             local before_text = App.newText(love.graphics.getFont(), before)
-            lo_px = App.width(before_text)*Zoom
+            lo_px = App.width(before_text)
           end
 --?           print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
           local s = line.data:sub(lo_offset, hi_offset-1)
           local text = App.newText(love.graphics.getFont(), s)
-          local text_width = App.width(text)*Zoom
+          local text_width = App.width(text)
           love.graphics.setColor(0.7,0.7,0.9)
-          love.graphics.rectangle('fill', x+lo_px,y, text_width,math.floor(15*Zoom))
+          love.graphics.rectangle('fill', x+lo_px,y, text_width,Line_height)
           love.graphics.setColor(0,0,0)
         end
       end
 --?       print('drawing '..frag)
-      App.screen.draw(frag_text, x,y, 0, Zoom)
+      App.screen.draw(frag_text, x,y)
     end
     -- render cursor if necessary
     if line_index == Cursor1.line then
@@ -82,9 +82,9 @@ function Text.draw(line, line_width, line_index)
               Search_text = App.newText(love.graphics.getFont(), Search_term)
             end
             love.graphics.setColor(0.7,1,1)
-            love.graphics.rectangle('fill', x,y, math.floor(App.width(Search_text)*Zoom),math.floor(15*Zoom))
+            love.graphics.rectangle('fill', x,y, App.width(Search_text),Line_height)
             love.graphics.setColor(0,0,0)
-            love.graphics.print(Search_term, x,y, 0, Zoom)
+            love.graphics.print(Search_term, x,y)
           end
         else
           Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
@@ -105,7 +105,7 @@ end
 --  draw with small line_width of 100
 
 function Text.draw_search_bar()
-  local h = math.floor(15*Zoom)+2
+  local h = Line_height+2
   local y = App.screen.height-h
   love.graphics.setColor(0.9,0.9,0.9)
   love.graphics.rectangle('fill', 0, y-10, App.screen.width-1, h+8)
@@ -116,12 +116,12 @@ function Text.draw_search_bar()
   love.graphics.setColor(0.6,0.6,0.6)
   love.graphics.rectangle('line', 20, y-6, App.screen.width-40, h+2, 2,2)
   love.graphics.setColor(0,0,0)
-  App.screen.print(Search_term, 25,y-5, 0, Zoom)
+  App.screen.print(Search_term, 25,y-5)
   love.graphics.setColor(1,0,0)
   if Search_text == nil then
     Search_text = App.newText(love.graphics.getFont(), Search_term)
   end
-  love.graphics.circle('fill', 25+math.floor(App.width(Search_text)*Zoom),y-5+h, 2)
+  love.graphics.circle('fill', 25+App.width(Search_text),y-5+h, 2)
   love.graphics.setColor(0,0,0)
 end
 
@@ -283,10 +283,10 @@ end
 
 function Text.draw_cursor(x, y)
   love.graphics.setColor(1,0,0)
-  love.graphics.circle('fill', x,y+math.floor(15*Zoom), 2)
+  love.graphics.circle('fill', x,y+Line_height, 2)
   love.graphics.setColor(0,0,0)
   Cursor_x = x
-  Cursor_y = y+math.floor(15*Zoom)
+  Cursor_y = y+Line_height
 end
 
 function test_draw_text()
@@ -297,15 +297,13 @@ function test_draw_text()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_draw_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_draw_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_draw_text/screen:3')
 end
 
@@ -317,15 +315,13 @@ function test_draw_wrapping_text()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_draw_wrapping_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_draw_wrapping_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'gh', 'F - test_draw_wrapping_text/screen:3')
 end
 
@@ -337,15 +333,13 @@ function test_draw_word_wrapping_text()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc ', 'F - test_draw_word_wrapping_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def ', 'F - test_draw_word_wrapping_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_draw_word_wrapping_text/screen:3')
 end
 
@@ -358,15 +352,13 @@ function test_draw_text_wrapping_within_word()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abcd ', 'F - test_draw_text_wrapping_within_word/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'e fghi', 'F - test_draw_text_wrapping_within_word/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jk', 'F - test_draw_text_wrapping_within_word/screen:3')
 end
 
@@ -378,7 +370,6 @@ function test_edit_wrapping_text()
   Cursor1 = {line=2, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.run_after_textinput('g')
   App.run_after_textinput('h')
   App.run_after_textinput('i')
@@ -386,12 +377,11 @@ function test_edit_wrapping_text()
   App.run_after_textinput('k')
   App.run_after_textinput('l')
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_edit_wrapping_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghij', 'F - test_edit_wrapping_text/screen:3')
 end
 
@@ -404,15 +394,13 @@ function test_insert_newline()
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_insert_newline/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_insert_newline/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_insert_newline/baseline/screen:3')
   -- after hitting the enter key the screen scrolls down
   App.run_after_keychord('return')
@@ -421,9 +409,9 @@ function test_insert_newline()
   check_eq(Cursor1.pos, 1, 'F - test_insert_newline/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'a', 'F - test_insert_newline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'bc', 'F - test_insert_newline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_insert_newline/screen:3')
 end
 
@@ -436,15 +424,13 @@ function test_insert_from_clipboard()
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_insert_from_clipboard/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_insert_from_clipboard/baseline/screen:3')
   -- after hitting the enter key the screen scrolls down
   App.clipboard = 'xy\nz'
@@ -454,9 +440,9 @@ function test_insert_from_clipboard()
   check_eq(Cursor1.pos, 2, 'F - test_insert_from_clipboard/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'axy', 'F - test_insert_from_clipboard/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'zbc', 'F - test_insert_from_clipboard/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/screen:3')
 end
 
@@ -468,7 +454,6 @@ function test_move_cursor_using_mouse()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()  -- populate line.y for each line in Lines
   local screen_top_margin = 15  -- pixels
   local screen_left_margin = 25  -- pixels
@@ -485,14 +470,12 @@ function test_pagedown()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   -- initially the first two lines are displayed
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_pagedown/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_pagedown/baseline/screen:2')
   -- after pagedown the bottom line becomes the top
   App.run_after_keychord('pagedown')
@@ -500,7 +483,7 @@ function test_pagedown()
   check_eq(Cursor1.line, 2, 'F - test_pagedown/cursor')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_pagedown/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_pagedown/screen:2')
 end
 
@@ -517,7 +500,6 @@ function test_pagedown_skips_drawings()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
   local drawing_height = 20 + App.screen.width / 2  -- default
   -- initially the screen displays the first line and the drawing
@@ -543,15 +525,13 @@ function test_pagedown_shows_one_screen_line_in_common()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:3')
   -- after pagedown the bottom screen line becomes the top
   App.run_after_keychord('pagedown')
@@ -561,9 +541,9 @@ function test_pagedown_shows_one_screen_line_in_common()
   check_eq(Cursor1.pos, 5, 'F - test_pagedown_shows_one_screen_line_in_common/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_pagedown_shows_one_screen_line_in_common/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mn', 'F - test_pagedown_shows_one_screen_line_in_common/screen:3')
 end
 
@@ -575,16 +555,14 @@ function test_down_arrow_moves_cursor()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   -- initially the first three lines are displayed
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/baseline/screen:3')
   -- after hitting the down arrow, the cursor moves down by 1 line
   App.run_after_keychord('down')
@@ -593,9 +571,9 @@ function test_down_arrow_moves_cursor()
   -- the screen is unchanged
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_moves_cursor/screen:3')
 end
 
@@ -608,15 +586,13 @@ function test_down_arrow_scrolls_down_by_one_line()
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:3')
   -- after hitting the down arrow the screen scrolls down by one line
   App.run_after_keychord('down')
@@ -624,9 +600,9 @@ function test_down_arrow_scrolls_down_by_one_line()
   check_eq(Cursor1.line, 4, 'F - test_down_arrow_scrolls_down_by_one_line/cursor')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_down_arrow_scrolls_down_by_one_line/screen:3')
 end
 
@@ -639,15 +615,13 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_screen_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi ', 'F - test_down_arrow_scrolls_down_by_one_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the down arrow the screen scrolls down by one line
   App.run_after_keychord('down')
@@ -656,9 +630,9 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   check_eq(Cursor1.pos, 5, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi ', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:3')
 end
 
@@ -671,15 +645,13 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghijk', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:3')
   -- after hitting the down arrow the screen scrolls down by one line
   App.run_after_keychord('down')
@@ -688,9 +660,9 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   check_eq(Cursor1.pos, 6, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghijk', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'l', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:3')
 end
 
@@ -702,15 +674,13 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
   -- after hitting pagedown the screen scrolls down to start of a long line
   App.run_after_keychord('pagedown')
@@ -724,9 +694,9 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   check_eq(Cursor1.pos, 6, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'l', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:3')
 end
 
@@ -739,15 +709,13 @@ function test_up_arrow_moves_cursor()
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_moves_cursor/baseline/screen:3')
   -- after hitting the up arrow the cursor moves up by 1 line
   App.run_after_keychord('up')
@@ -756,9 +724,9 @@ function test_up_arrow_moves_cursor()
   -- the screen is unchanged
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_moves_cursor/screen:3')
 end
 
@@ -771,15 +739,13 @@ function test_up_arrow_scrolls_up_by_one_line()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up by one line
   App.run_after_keychord('up')
@@ -787,9 +753,9 @@ function test_up_arrow_scrolls_up_by_one_line()
   check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_line/cursor')
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_by_one_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_line/screen:3')
 end
 
@@ -802,21 +768,19 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   Cursor1 = {line=3, pos=6}
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:2')
   -- after hitting the up arrow the screen scrolls up to first screen line
   App.run_after_keychord('up')
   y = screen_top_margin
   App.screen.check(y, 'ghi ', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:3')
   check_eq(Screen_top1.line, 3, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
   check_eq(Screen_top1.pos, 1, 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen_top')
@@ -833,23 +797,21 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up to final screen line of previous line
   App.run_after_keychord('up')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:3')
   check_eq(Screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen_top')
   check_eq(Screen_top1.pos, 5, 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen_top')
@@ -866,15 +828,13 @@ function test_up_arrow_scrolls_up_to_empty_line()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up by one line
   App.run_after_keychord('up')
@@ -882,9 +842,9 @@ function test_up_arrow_scrolls_up_to_empty_line()
   check_eq(Cursor1.line, 1, 'F - test_up_arrow_scrolls_up_to_empty_line/cursor')
   y = screen_top_margin
   -- empty first line
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_empty_line/screen:3')
 end
 
@@ -896,14 +856,12 @@ function test_pageup()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   -- initially the last two lines are displayed
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_pageup/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_pageup/baseline/screen:2')
   -- after pageup the cursor goes to first line
   App.run_after_keychord('pageup')
@@ -911,7 +869,7 @@ function test_pageup()
   check_eq(Cursor1.line, 1, 'F - test_pageup/cursor')
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_pageup/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_pageup/screen:2')
 end
 
@@ -924,15 +882,13 @@ function test_pageup_scrolls_up_by_screen_line()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'ghi', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the page-up key the screen scrolls up to top
   App.run_after_keychord('pageup')
@@ -941,9 +897,9 @@ function test_pageup_scrolls_up_by_screen_line()
   check_eq(Cursor1.pos, 1, 'F - test_pageup_scrolls_up_by_screen_line/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_by_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_by_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_pageup_scrolls_up_by_screen_line/screen:3')
 end
 
@@ -956,13 +912,11 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   Cursor1 = {line=2, pos=5}
   Screen_top1 = {line=2, pos=5}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the page-up key the screen scrolls up to top
   App.run_after_keychord('pageup')
@@ -971,9 +925,9 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   check_eq(Cursor1.pos, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:3')
 end
 
@@ -986,15 +940,13 @@ function test_enter_on_bottom_line_scrolls_down()
   Cursor1 = {line=3, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:3')
   -- after hitting the enter key the screen scrolls down
   App.run_after_keychord('return')
@@ -1003,9 +955,9 @@ function test_enter_on_bottom_line_scrolls_down()
   check_eq(Cursor1.pos, 1, 'F - test_enter_on_bottom_line_scrolls_down/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'g', 'F - test_enter_on_bottom_line_scrolls_down/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'hi', 'F - test_enter_on_bottom_line_scrolls_down/screen:3')
 end
 
@@ -1018,9 +970,7 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   Cursor1 = {line=4, pos=2}
   Screen_top1 = {line=4, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'jkl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/baseline/screen:1')
@@ -1031,7 +981,7 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   check_eq(Cursor1.pos, 1, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'j', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'kl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:2')
 end
 
@@ -1044,16 +994,14 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   Cursor1 = {line=1, pos=25}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   App.draw()
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   -- I don't understand why 120px fits so much on a fake screen, but whatever..
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:3')
   -- add to the line until it's wrapping over 3 screen lines
   App.run_after_textinput('s')
@@ -1062,9 +1010,9 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   check_eq(Cursor1.pos, 28, 'F - test_move_cursor_using_mouse/cursor:pos')
   y = screen_top_margin
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
   local screen_top_margin = 15  -- pixels
@@ -1084,15 +1032,13 @@ function test_backspace_can_scroll_up()
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'def', 'F - test_backspace_can_scroll_up/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up/baseline/screen:3')
   -- after hitting backspace the screen scrolls up by one line
   App.run_after_keychord('backspace')
@@ -1100,9 +1046,9 @@ function test_backspace_can_scroll_up()
   check_eq(Cursor1.line, 1, 'F - test_backspace_can_scroll_up/cursor')
   y = screen_top_margin
   App.screen.check(y, 'abcdef', 'F - test_backspace_can_scroll_up/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up/screen:3')
 end
 
@@ -1115,21 +1061,19 @@ function test_backspace_can_scroll_up_screen_line()
   Cursor1 = {line=3, pos=5}
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
-  Zoom = 1
   local screen_top_margin = 15  -- pixels
-  local line_height = math.floor(15*Zoom)  -- pixels
   App.draw()
   local y = screen_top_margin
   App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:2')
   -- after hitting backspace the screen scrolls up by one screen line
   App.run_after_keychord('backspace')
   y = screen_top_margin
   App.screen.check(y, 'ghijk', 'F - test_backspace_can_scroll_up_screen_line/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'l', 'F - test_backspace_can_scroll_up_screen_line/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/screen:3')
   check_eq(Screen_top1.line, 3, 'F - test_backspace_can_scroll_up_screen_line/screen_top')
   check_eq(Screen_top1.pos, 1, 'F - test_backspace_can_scroll_up_screen_line/screen_top')
@@ -1148,7 +1092,6 @@ function test_backspace_over_selection()
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
-  Zoom = 1
   -- backspace deletes the selected character, even though it's after the cursor
   App.run_after_keychord('backspace')
   check_eq(Lines[1].data, 'bc', "F - test_backspace_over_selection/data")
@@ -1167,7 +1110,6 @@ function test_backspace_over_selection_reverse()
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=1, pos=1}
-  Zoom = 1
   -- backspace deletes the selected character
   App.run_after_keychord('backspace')
   check_eq(Lines[1].data, 'bc', "F - test_backspace_over_selection_reverse/data")
@@ -1186,7 +1128,6 @@ function test_backspace_over_multiple_lines()
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=4, pos=2}
-  Zoom = 1
   -- backspace deletes the region and joins the remaining portions of lines on either side
   App.run_after_keychord('backspace')
   check_eq(Lines[1].data, 'akl', "F - test_backspace_over_multiple_lines/data:1")
@@ -1206,7 +1147,6 @@ function test_backspace_to_end_of_line()
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=1, pos=4}
-  Zoom = 1
   -- backspace deletes rest of line without joining to any other line
   App.run_after_keychord('backspace')
   check_eq(Lines[1].data, 'a', "F - test_backspace_to_start_of_line/data:1")
@@ -1226,7 +1166,6 @@ function test_backspace_to_start_of_line()
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}
   Selection1 = {line=2, pos=3}
-  Zoom = 1
   -- backspace deletes beginning of line without joining to any other line
   App.run_after_keychord('backspace')
   check_eq(Lines[1].data, 'abc', "F - test_backspace_to_start_of_line/data:1")
@@ -1246,7 +1185,6 @@ function test_undo_insert_text()
   Cursor1 = {line=2, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   -- insert a character
   App.run_after_textinput('g')
   check_eq(Cursor1.line, 2, 'F - test_undo_insert_text/baseline/cursor:line')
@@ -1254,12 +1192,11 @@ function test_undo_insert_text()
   check_nil(Selection1.line, 'F - test_undo_insert_text/baseline/selection:line')
   check_nil(Selection1.pos, 'F - test_undo_insert_text/baseline/selection:pos')
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'defg', 'F - test_undo_insert_text/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_insert_text/baseline/screen:3')
   -- undo
   App.run_after_keychord('M-z')
@@ -1269,9 +1206,9 @@ function test_undo_insert_text()
   check_nil(Selection1.pos, 'F - test_undo_insert_text/selection:pos')
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_undo_insert_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_insert_text/screen:3')
 end
 
@@ -1283,7 +1220,6 @@ function test_undo_delete_text()
   Cursor1 = {line=2, pos=5}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  Zoom = 1
   -- delete a character
   App.run_after_keychord('backspace')
   check_eq(Cursor1.line, 2, 'F - test_undo_delete_text/baseline/cursor:line')
@@ -1291,12 +1227,11 @@ function test_undo_delete_text()
   check_nil(Selection1.line, 'F - test_undo_delete_text/baseline/selection:line')
   check_nil(Selection1.pos, 'F - test_undo_delete_text/baseline/selection:pos')
   local screen_top_margin = 15  -- pixels
-  local line_height = 15  -- pixels
   local y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/baseline/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'def', 'F - test_undo_delete_text/baseline/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/baseline/screen:3')
   -- undo
 --?   -- after undo, the backspaced key is selected
@@ -1309,9 +1244,9 @@ function test_undo_delete_text()
 --?   check_eq(Selection1.pos, 4, 'F - test_undo_delete_text/selection:pos')
   y = screen_top_margin
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/screen:1')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'defg', 'F - test_undo_delete_text/screen:2')
-  y = y + line_height
+  y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
 end
 
@@ -1322,7 +1257,7 @@ function Text.compute_fragments(line, line_width)
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_text = App.newText(love.graphics.getFont(), frag)
-    local frag_width = math.floor(App.width(frag_text)*Zoom)
+    local frag_width = App.width(frag_text)
 --?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
 --?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
     if x + frag_width > line_width then
@@ -1337,14 +1272,14 @@ function Text.compute_fragments(line, line_width)
 --?           print('space for '..tostring(b)..' graphemes')
           local frag1 = string.sub(frag, 1, b)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
-          local frag1_width = math.floor(App.width(frag1_text)*Zoom)
+          local frag1_width = App.width(frag1_text)
 --?           print(frag, x, frag1_width, line_width)
           assert(x + frag1_width <= line_width)
 --?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
           table.insert(line.fragments, {data=frag1, text=frag1_text})
           frag = string.sub(frag, b+1)
           frag_text = App.newText(love.graphics.getFont(), frag)
-          frag_width = math.floor(App.width(frag_text)*Zoom)
+          frag_width = App.width(frag_text)
         end
         x = 25  -- new line
       end
@@ -1528,7 +1463,7 @@ function Text.keychord_pressed(chord)
       Lines[i].screen_line_starting_pos = nil
       Text.populate_screen_line_starting_pos(i)
     end
-    if Cursor1.line-Screen_top1.line+1 + num_newlines > App.screen.height/math.floor(15*Zoom) then
+    if Cursor1.line-Screen_top1.line+1 + num_newlines > App.screen.height/Line_height then
       Screen_top1.line = Cursor1.line
       Screen_top1.pos = 1
       Text.scroll_up_while_cursor_on_screen()
@@ -1536,8 +1471,8 @@ function Text.keychord_pressed(chord)
     -- hack 2: if we have too much text wrapping we definitely need to scroll
     local clipboard_text = App.newText(love.graphics.getFont(), clipboard_data)
     local clipboard_width = App.width(clipboard_text)
---?     print(Cursor_y, Cursor_y*Line_width, Cursor_y*Line_width+Cursor_x, Cursor_y*Line_width+Cursor_x+clipboard_width, Line_width*App.screen.height/math.floor(15*Zoom))
-    if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/math.floor(15*Zoom) then
+--?     print(Cursor_y, Cursor_y*Line_width, Cursor_y*Line_width+Cursor_x, Cursor_y*Line_width+Cursor_x+clipboard_width, Line_width*App.screen.height/Line_height)
+    if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/Line_height then
       Screen_top1.line = Cursor1.line
       Screen_top1.pos = 1
       Text.scroll_up_while_cursor_on_screen()
@@ -1651,7 +1586,7 @@ end
 function Text.insert_return()
   local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
-  local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
+  local scroll_down = (Cursor_y + Line_height) > App.screen.height
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
   Lines[Cursor1.line].fragments = nil
   Cursor1.line = Cursor1.line+1
@@ -1666,12 +1601,12 @@ function Text.pageup()
   -- duplicate some logic from love.draw
   local top2 = Text.to2(Screen_top1)
 --?   print(App.screen.height)
-  local y = App.screen.height - math.floor(15*Zoom)
+  local y = App.screen.height - Line_height
   while y >= 15 do
 --?     print(y, top2.line)
     if Screen_top1.line == 1 and Screen_top1.pos == 1 then break end
     if Lines[Screen_top1.line].mode == 'text' then
-      y = y - math.floor(15*Zoom)
+      y = y - Line_height
     elseif Lines[Screen_top1.line].mode == 'drawing' then
       y = y - 20 - Drawing.pixels(Lines[Screen_top1.line].h)
     end
@@ -1894,8 +1829,8 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
     assert(Cursor1.line == #Lines+1)
     table.insert(Lines, {mode='text', data=''})
   end
---?   print(y, App.screen.height, App.screen.height-math.floor(15*Zoom))
-  if y > App.screen.height - math.floor(15*Zoom) then
+--?   print(y, App.screen.height, App.screen.height-Line_height)
+  if y > App.screen.height - Line_height then
 --?     print('scroll up')
     Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()
@@ -1905,13 +1840,13 @@ end
 function Text.scroll_up_while_cursor_on_screen()
   local top2 = Text.to2(Cursor1)
 --?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
-  local y = App.screen.height - math.floor(15*Zoom)
+  local y = App.screen.height - Line_height
   -- duplicate some logic from love.draw
   while true do
 --?     print(y, 'top2:', top2.line, top2.screen_line, top2.screen_pos)
     if top2.line == 1 and top2.screen_line == 1 then break end
     if top2.screen_line > 1 or Lines[top2.line-1].mode == 'text' then
-      local h = math.floor(15*Zoom)
+      local h = Line_height
       if y - h < 15 then  -- top margin = 15
         break
       end
@@ -1939,8 +1874,8 @@ function Text.in_line(line, x,y)
   if line.y == nil then return false end  -- outside current page
   if x < 25 then return false end
   if y < line.y then return false end
-  if line.screen_line_starting_pos == nil then return y < line.y + math.floor(15*Zoom) end
-  return y < line.y + #line.screen_line_starting_pos * math.floor(15*Zoom)
+  if line.screen_line_starting_pos == nil then return y < line.y + Line_height end
+  return y < line.y + #line.screen_line_starting_pos * Line_height
 end
 
 -- mx,my in pixels
@@ -1955,7 +1890,7 @@ function Text.move_cursor(line_index, line, mx, my)
   -- duplicate some logic from Text.draw
   local y = line.y
   for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
-    local nexty = y + math.floor(15*Zoom)
+    local nexty = y + Line_height
     if my < nexty then
       -- On all wrapped screen lines but the final one, clicks past end of
       -- line position cursor on final character of screen line.
@@ -2062,7 +1997,7 @@ function Text.x(s, pos)
   assert(offset)
   local s_before = s:sub(1, offset-1)
   local text_before = App.newText(love.graphics.getFont(), s_before)
-  return math.floor(App.width(text_before)*Zoom)
+  return App.width(text_before)
 end
 
 function Text.to2(pos1)
@@ -2147,7 +2082,7 @@ function Text.populate_screen_line_starting_pos(line_index)
     local frag, frag_text = f.data, f.text
 --?     print(x, frag)
     -- render fragment
-    local frag_width = math.floor(App.width(frag_text)*Zoom)
+    local frag_width = App.width(frag_text)
     if x + frag_width > Line_width then
       x = 25
       if line.screen_line_starting_pos == nil then
@@ -2160,6 +2095,13 @@ function Text.populate_screen_line_starting_pos(line_index)
     x = x + frag_width
     local frag_len = utf8.len(frag)
     pos = pos + frag_len
+  end
+end
+
+function Text.redraw_all()
+  for _,line in ipairs(Lines) do
+    line.fragments = nil
+    line.screen_line_starting_pos = nil
   end
 end
 

@@ -49,7 +49,7 @@ function Drawing.draw(line)
       if p.name then
         -- todo: clip
         local x,y = Drawing.pixels(p.x)+16+5, Drawing.pixels(p.y)+line.y+5
-        love.graphics.print(p.name, x,y, 0, Zoom)
+        love.graphics.print(p.name, x,y)
         if Current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
           love.graphics.setColor(1,0,0,0.1)
@@ -60,7 +60,7 @@ function Drawing.draw(line)
           else
             name_text = App.newText(love.graphics.getFont(), p.name)
           end
-          love.graphics.rectangle('fill', x,y, math.floor(App.width(name_text)*Zoom), math.floor(15*Zoom))
+          love.graphics.rectangle('fill', x,y, App.width(name_text), Line_height)
         end
       end
     end
@@ -355,19 +355,7 @@ function Drawing.mouse_released(x,y, button)
 end
 
 function Drawing.keychord_pressed(chord)
-  if chord == 'C-=' then
-    Line_width = Line_width/Zoom
-    Zoom = Zoom+0.5
-    Line_width = Line_width*Zoom
-  elseif chord == 'C--' then
-    Line_width = Line_width/Zoom
-    Zoom = Zoom-0.5
-    Line_width = Line_width*Zoom
-  elseif chord == 'C-0' then
-    Line_width = Line_width/Zoom
-    Zoom = 1.5
-    Line_width = Line_width*Zoom
-  elseif chord == 'C-f' and not love.mouse.isDown('1') then
+  if chord == 'C-f' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'freehand'
   elseif chord == 'C-g' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'polygon'

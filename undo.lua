@@ -49,7 +49,6 @@ function snapshot(s,e)
     cursor=deepcopy(Cursor1),
     current_drawing_mode=Drawing_mode,
     previous_drawing_mode=Previous_drawing_mode,
-    zoom=Zoom,
     lines={},
     start_line=s,
     end_line=e,

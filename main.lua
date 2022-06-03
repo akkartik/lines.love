@@ -61,7 +61,8 @@ Cursor_x, Cursor_y = 0, 0  -- in pixels
 Current_drawing_mode = 'line'
 Previous_drawing_mode = nil
 
-Zoom = 1.5
+Font_height = 14
+Line_height = 15
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
@@ -138,7 +139,7 @@ function App.draw()
 --?   print('== draw')
   for line_index,line in ipairs(Lines) do
 --?     print('draw:', y, line_index, line)
-    if y + math.floor(15*Zoom) > App.screen.height then break end
+    if y + Line_height > App.screen.height then break end
 --?     print('a')
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
@@ -158,7 +159,7 @@ function App.draw()
               Text.draw_cursor(25, y)
             end
           end
-        y = y + math.floor(15*Zoom)  -- text height
+        y = y + Line_height
       elseif line.mode == 'drawing' then
         y = y+10 -- padding
         line.y = y
@@ -168,7 +169,7 @@ function App.draw()
 --?         print('text')
         line.y = y
         y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
-        y = y + math.floor(15*Zoom)  -- text height
+        y = y + Line_height
 --?         print('=> y', y)
       end
     end
@@ -253,6 +254,21 @@ function App.keychord_pressed(chord)
     Search_term = ''
     Search_backup_cursor1 = {line=Cursor1.line, pos=Cursor1.pos}
     assert(Search_text == nil)
+  elseif chord == 'C-=' then
+    Font_height = Font_height+2
+    love.graphics.setFont(love.graphics.newFont(Font_height))
+    Line_height = math.floor(Font_height*1.1)
+    Text.redraw_all()
+  elseif chord == 'C--' then
+    Font_height = Font_height-2
+    love.graphics.setFont(love.graphics.newFont(Font_height))
+    Text.redraw_all()
+    Line_height = math.floor(Font_height*1.1)
+  elseif chord == 'C-0' then
+    Font_height = 14
+    love.graphics.setFont(love.graphics.newFont(Font_height))
+    Text.redraw_all()
+    Line_height = 15
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
