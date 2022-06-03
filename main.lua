@@ -294,6 +294,54 @@ function App.keychord_pressed(chord)
       Selection1 = deepcopy(src.selection)
       patch(Lines, event.before, event.after)
     end
+  -- clipboard
+  elseif chord == 'C-c' then
+    local s = Text.selection()
+    if s then
+      App.setClipboardText(s)
+    end
+  elseif chord == 'C-x' then
+    local s = Text.cut_selection()
+    if s then
+      App.setClipboardText(s)
+    end
+  elseif chord == 'C-v' then
+    -- We don't have a good sense of when to scroll, so we'll be conservative
+    -- and sometimes scroll when we didn't quite need to.
+    local before_line = Cursor1.line
+    local before = snapshot(before_line)
+    local clipboard_data = App.getClipboardText()
+    local num_newlines = 0  -- hack 1
+    for _,code in utf8.codes(clipboard_data) do
+      local c = utf8.char(code)
+      if c == '\n' then
+        Text.insert_return()
+        num_newlines = num_newlines+1
+      else
+        Text.insert_at_cursor(utf8.char(code))
+      end
+    end
+    -- hack 1: if we have too many newlines we definitely need to scroll
+    for i=before_line,Cursor1.line do
+      Lines[i].screen_line_starting_pos = nil
+      Text.populate_screen_line_starting_pos(i)
+    end
+    if Cursor1.line-Screen_top1.line+1 + num_newlines > App.screen.height/Line_height then
+      Screen_top1.line = Cursor1.line
+      Screen_top1.pos = 1
+      Text.scroll_up_while_cursor_on_screen()
+    end
+    -- hack 2: if we have too much text wrapping we definitely need to scroll
+    local clipboard_text = App.newText(love.graphics.getFont(), clipboard_data)
+    local clipboard_width = App.width(clipboard_text)
+--?     print(Cursor_y, Cursor_y*Line_width, Cursor_y*Line_width+Cursor_x, Cursor_y*Line_width+Cursor_x+clipboard_width, Line_width*App.screen.height/Line_height)
+    if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/Line_height then
+      Screen_top1.line = Cursor1.line
+      Screen_top1.pos = 1
+      Text.scroll_up_while_cursor_on_screen()
+    end
+    record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
+  -- dispatch to drawing or text
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
