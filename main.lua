@@ -77,7 +77,7 @@ Next_history = 1
 -- search
 Search_term = nil
 Search_text = nil
-Search_backup_cursor1 = nil  -- where to position the cursor if search term was not found
+Search_backup = nil  -- stuff to restore when cancelling search
 
 end  -- App.initialize_globals
 
@@ -249,11 +249,13 @@ function App.keychord_pressed(chord)
     if chord == 'escape' then
       Search_term = nil
       Search_text = nil
-      Cursor1 = Search_backup_cursor1
-      Search_backup_cursor1 = nil
+      Cursor1 = Search_backup.cursor
+      Screen_top1 = Search_backup.screen_top
+      Search_backup = nil
     elseif chord == 'return' then
       Search_term = nil
       Search_text = nil
+      Search_backup = nil
     elseif chord == 'backspace' then
       local len = utf8.len(Search_term)
       local byte_offset = utf8.offset(Search_term, len)
@@ -268,7 +270,7 @@ function App.keychord_pressed(chord)
     return
   elseif chord == 'C-f' then
     Search_term = ''
-    Search_backup_cursor1 = {line=Cursor1.line, pos=Cursor1.pos}
+    Search_backup = {cursor={line=Cursor1.line, pos=Cursor1.pos}, screen_top={line=Screen_top1.line, pos=Screen_top1.pos}}
     assert(Search_text == nil)
   elseif chord == 'C-=' then
     Font_height = Font_height+2

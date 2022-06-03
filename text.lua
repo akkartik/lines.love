@@ -153,8 +153,10 @@ function Text.search_next()
     end
   end
   if pos == nil then
-    Cursor1.line = Search_backup_cursor1.line
-    Cursor1.pos = Search_backup_cursor1.pos
+    Cursor1.line = Search_backup.cursor.line
+    Cursor1.pos = Search_backup.cursor.pos
+    Screen_top1.line = Search_backup.screen_top.line
+    Screen_top1.pos = Search_backup.screen_top.pos
   end
   if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
     Screen_top1.line = Cursor1.line
@@ -191,8 +193,10 @@ function Text.search_previous()
     end
   end
   if pos == nil then
-    Cursor1.line = Search_backup_cursor1.line
-    Cursor1.pos = Search_backup_cursor1.pos
+    Cursor1.line = Search_backup.cursor.line
+    Cursor1.pos = Search_backup.cursor.pos
+    Screen_top1.line = Search_backup.screen_top.line
+    Screen_top1.pos = Search_backup.screen_top.pos
   end
   if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
     Screen_top1.line = Cursor1.line
