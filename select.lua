@@ -51,6 +51,8 @@ function Text.clip_selection(line_index, apos, bpos)
 end
 
 -- draw highlight for line corresponding to (lo,hi) given an approximate x,y and pos on the same screen line
+-- Creates text objects every time, so use this sparingly.
+-- Returns some intermediate computation useful elsewhere.
 function Text.draw_highlight(line, x,y, pos, lo,hi)
   if lo then
     local lo_offset = utf8.offset(line.data, lo)
@@ -71,6 +73,7 @@ function Text.draw_highlight(line, x,y, pos, lo,hi)
     love.graphics.setColor(0.7,0.7,0.9)
     love.graphics.rectangle('fill', x+lo_px,y, text_width,Line_height)
     love.graphics.setColor(0,0,0)
+    return lo_px
   end
 end
 

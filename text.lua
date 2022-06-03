@@ -62,13 +62,9 @@ function Text.draw(line, line_width, line_index)
       if pos <= Cursor1.pos and pos + frag_len > Cursor1.pos then
         if Search_term then
           if Lines[Cursor1.line].data:sub(Cursor1.pos, Cursor1.pos+utf8.len(Search_term)-1) == Search_term then
-            if Search_text == nil then
-              Search_text = App.newText(love.graphics.getFont(), Search_term)
-            end
-            love.graphics.setColor(0.7,1,1)
-            love.graphics.rectangle('fill', x,y, App.width(Search_text),Line_height)
+            local lo_px = Text.draw_highlight(line, x,y, pos, Cursor1.pos, Cursor1.pos+utf8.len(Search_term))
             love.graphics.setColor(0,0,0)
-            love.graphics.print(Search_term, x,y)
+            love.graphics.print(Search_term, x+lo_px,y)
           end
         else
           Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
