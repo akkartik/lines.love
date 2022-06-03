@@ -76,19 +76,92 @@ function Text.draw(line, line_width, line_index)
     -- render cursor if necessary
     if line_index == Cursor1.line then
       if pos <= Cursor1.pos and pos + frag_len > Cursor1.pos then
-        Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
+        if Search_term then
+          if Lines[Cursor1.line].data:sub(Cursor1.pos, Cursor1.pos+utf8.len(Search_term)-1) == Search_term then
+            if Search_text == nil then
+              Search_text = App.newText(love.graphics.getFont(), Search_term)
+            end
+            love.graphics.setColor(0.7,1,1)
+            love.graphics.rectangle('fill', x,y, math.floor(App.width(Search_text)*Zoom),math.floor(15*Zoom))
+            love.graphics.setColor(0,0,0)
+            love.graphics.print(Search_term, x,y, 0, Zoom)
+          end
+        else
+          Text.draw_cursor(x+Text.x(frag, Cursor1.pos-pos+1), y)
+        end
       end
     end
     x = x + frag_width
     pos = pos + frag_len
   end
-  if line_index == Cursor1.line and Cursor1.pos == pos then
-    Text.draw_cursor(x, y)
+  if Search_term == nil then
+    if line_index == Cursor1.line and Cursor1.pos == pos then
+      Text.draw_cursor(x, y)
+    end
   end
   return y, screen_line_starting_pos
 end
 -- manual tests:
 --  draw with small line_width of 100
+
+function Text.draw_search_bar()
+  local h = math.floor(15*Zoom)+2
+  local y = App.screen.height-h
+  love.graphics.setColor(0.9,0.9,0.9)
+  love.graphics.rectangle('fill', 0, y-10, App.screen.width-1, h+8)
+  love.graphics.setColor(0.6,0.6,0.6)
+  love.graphics.line(0, y-10, App.screen.width-1, y-10)
+  love.graphics.setColor(1,1,1)
+  love.graphics.rectangle('fill', 20, y-6, App.screen.width-40, h+2, 2,2)
+  love.graphics.setColor(0.6,0.6,0.6)
+  love.graphics.rectangle('line', 20, y-6, App.screen.width-40, h+2, 2,2)
+  love.graphics.setColor(0,0,0)
+  App.screen.print(Search_term, 25,y-5, 0, Zoom)
+  love.graphics.setColor(1,0,0)
+  if Search_text == nil then
+    Search_text = App.newText(love.graphics.getFont(), Search_term)
+  end
+  love.graphics.circle('fill', 25+math.floor(App.width(Search_text)*Zoom),y-5+h, 2)
+  love.graphics.setColor(0,0,0)
+end
+
+function Text.search_next()
+  -- search current line
+  local pos = Lines[Cursor1.line].data:find(Search_term, Cursor1.pos)
+  if pos then
+    Cursor1.pos = pos
+  end
+  if pos == nil then
+    for i=Cursor1.line+1,#Lines do
+      pos = Lines[i].data:find(Search_term)
+      if pos then
+        Cursor1.line = i
+        Cursor1.pos = pos
+        break
+      end
+    end
+  end
+  if pos == nil then
+    -- wrap around
+    for i=1,Cursor1.line-1 do
+      pos = Lines[i].data:find(Search_term)
+      if pos then
+        Cursor1.line = i
+        Cursor1.pos = pos
+        break
+      end
+    end
+  end
+  if pos == nil then
+    Cursor1.line = Search_backup_cursor1.line
+    Cursor1.pos = Search_backup_cursor1.pos
+  end
+  if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
+    Screen_top1.line = Cursor1.line
+    local _, pos = Text.pos_at_start_of_cursor_screen_line()
+    Screen_top1.pos = pos
+  end
+end
 
 -- Return any intersection of the region from Selection1 to Cursor1 with the
 -- region between {line=line_index, pos=apos} and {line=line_index, pos=bpos}.
@@ -1823,7 +1896,6 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
   end
 --?   print(y, App.screen.height, App.screen.height-math.floor(15*Zoom))
   if y > App.screen.height - math.floor(15*Zoom) then
---?   if Cursor1.line > Screen_bottom1.line then
 --?     print('scroll up')
     Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()

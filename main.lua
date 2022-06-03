@@ -69,6 +69,11 @@ Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 History = {}
 Next_history = 1
 
+-- search
+Search_term = nil
+Search_text = nil
+Search_backup_cursor1 = nil  -- where to position the cursor if search term was not found
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -148,8 +153,10 @@ function App.draw()
                          Cursor1.line = Cursor1.line+1
                        end
                      end})
-          if line_index == Cursor1.line then
-            Text.draw_cursor(25, y)
+          if Search_term == nil then
+            if line_index == Cursor1.line then
+              Text.draw_cursor(25, y)
+            end
           end
         y = y + math.floor(15*Zoom)  -- text height
       elseif line.mode == 'drawing' then
@@ -167,7 +174,9 @@ function App.draw()
     end
   end
 --?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
---?   os.exit(1)
+  if Search_term then
+    Text.draw_search_bar()
+  end
 end
 
 function App.update(dt)
@@ -175,6 +184,7 @@ function App.update(dt)
 end
 
 function App.mousepressed(x,y, mouse_button)
+  if Search_term then return end
   propagate_to_button_handlers(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
@@ -200,11 +210,16 @@ function App.mousepressed(x,y, mouse_button)
 end
 
 function App.mousereleased(x,y, button)
+  if Search_term then return end
   Drawing.mouse_released(x,y, button)
 end
 
 function App.textinput(t)
-  if Current_drawing_mode == 'name' then
+  if Search_term then
+    Search_term = Search_term..t
+    Search_text = nil
+    Text.search_next()
+  elseif Current_drawing_mode == 'name' then
     local drawing = Lines.current
     local p = drawing.points[drawing.pending.target_point]
     p.name = p.name..t
@@ -215,7 +230,30 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
-  if love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
+  if Search_term then
+    if chord == 'escape' then
+      Search_term = nil
+      Search_text = nil
+      Cursor1 = Search_backup_cursor1
+      Search_backup_cursor1 = nil
+    elseif chord == 'return' then
+      Search_term = nil
+      Search_text = nil
+    elseif chord == 'backspace' then
+      local len = utf8.len(Search_term)
+      local byte_offset = utf8.offset(Search_term, len)
+      Search_term = string.sub(Search_term, 1, byte_offset-1)
+      Search_text = nil
+    elseif chord == 'down' then
+      Cursor1.pos = Cursor1.pos+1
+      Text.search_next()
+    end
+    return
+  elseif chord == 'C-f' then
+    Search_term = ''
+    Search_backup_cursor1 = {line=Cursor1.line, pos=Cursor1.pos}
+    assert(Search_text == nil)
+  elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = Drawing.current_drawing()
