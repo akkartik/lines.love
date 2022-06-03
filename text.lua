@@ -1437,8 +1437,8 @@ function Text.keychord_pressed(chord)
   elseif chord == 'M-v' then
     local before_line = Cursor1.line
     local before = snapshot(before_line)
-    local s = App.getClipboardText()
-    for _,code in utf8.codes(s) do
+    local clipboard_data = App.getClipboardText()
+    for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
       if c == '\n' then
         Text.insert_return()
