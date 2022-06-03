@@ -322,6 +322,71 @@ function test_edit_wrapping_text()
   App.screen.check(y, 'ghij', 'F - test_edit_wrapping_text/screen:3')
 end
 
+function test_insert_newline()
+  io.write('\ntest_insert_newline')
+  -- display a few lines with cursor on bottom line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_insert_newline/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_insert_newline/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_insert_newline/baseline/screen:3')
+  -- after hitting the enter key the screen scrolls down
+  App.run_after_keychord('return')
+  check_eq(Screen_top1.line, 1, 'F - test_insert_newline/screen_top')
+  check_eq(Cursor1.line, 2, 'F - test_insert_newline/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_insert_newline/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'a', 'F - test_insert_newline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'bc', 'F - test_insert_newline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_insert_newline/screen:3')
+end
+
+function test_insert_from_clipboard()
+  io.write('\ntest_insert_from_clipboard')
+  -- display a few lines with cursor on bottom line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Zoom = 1
+  local screen_top_margin = 15  -- pixels
+  local line_height = math.floor(15*Zoom)  -- pixels
+  App.draw()
+  local y = screen_top_margin
+  App.screen.check(y, 'abc', 'F - test_insert_from_clipboard/baseline/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_insert_from_clipboard/baseline/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'ghi', 'F - test_insert_from_clipboard/baseline/screen:3')
+  -- after hitting the enter key the screen scrolls down
+  App.clipboard = 'xy\nz'
+  App.run_after_keychord('M-v')
+  check_eq(Screen_top1.line, 1, 'F - test_insert_from_clipboard/screen_top')
+  check_eq(Cursor1.line, 2, 'F - test_insert_from_clipboard/cursor:line')
+  check_eq(Cursor1.pos, 2, 'F - test_insert_from_clipboard/cursor:pos')
+  y = screen_top_margin
+  App.screen.check(y, 'axy', 'F - test_insert_from_clipboard/screen:1')
+  y = y + line_height
+  App.screen.check(y, 'zbc', 'F - test_insert_from_clipboard/screen:2')
+  y = y + line_height
+  App.screen.check(y, 'def', 'F - test_insert_from_clipboard/screen:3')
+end
+
 function test_move_cursor_using_mouse()
   io.write('\ntest_move_cursor_using_mouse')
   App.screen.init{width=50, height=60}
@@ -1362,17 +1427,17 @@ function Text.keychord_pressed(chord)
   elseif chord == 'M-c' then
     local s = Text.selection()
     if s then
-      love.system.setClipboardText(s)
+      App.setClipboardText(s)
     end
   elseif chord == 'M-x' then
     local s = Text.cut_selection()
     if s then
-      love.system.setClipboardText(s)
+      App.setClipboardText(s)
     end
   elseif chord == 'M-v' then
     local before_line = Cursor1.line
     local before = snapshot(before_line)
-    local s = love.system.getClipboardText()
+    local s = App.getClipboardText()
     for _,code in utf8.codes(s) do
       local c = utf8.char(code)
       if c == '\n' then

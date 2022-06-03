@@ -178,6 +178,14 @@ function App.screen.draw(obj, x,y)
   end
 end
 
+App.clipboard = ''
+function App.getClipboardText()
+  return App.clipboard
+end
+function App.setClipboardText(s)
+  App.clipboard = s
+end
+
 function App.run_after_textinput(t)
   App.textinput(t)
   App.screen.contents = {}
@@ -259,4 +267,6 @@ function App.disable_tests()
   App.screen.draw = love.graphics.draw
   App.width = function(text) return text:getWidth() end
   App.open_for_writing = function(filename) return io.open(filename, 'w') end
+  App.getClipboardText = love.system.getClipboardText
+  App.setClipboardText = love.system.setClipboardText
 end
