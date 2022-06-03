@@ -1250,18 +1250,8 @@ function Text.keychord_pressed(chord)
   if chord == 'return' then
     local before_line = Cursor1.line
     local before = snapshot(before_line)
-    local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
-    table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
-    local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
-    Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
-    Lines[Cursor1.line].fragments = nil
-    Cursor1.line = Cursor1.line+1
-    Cursor1.pos = 1
+    Text.insert_return()
     save_to_disk(Lines, Filename)
-    if scroll_down then
-      Screen_top1.line = Cursor1.line
-      Text.scroll_up_while_cursor_on_screen()
-    end
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   elseif chord == 'tab' then
     local before = snapshot(Cursor1.line)
@@ -1384,7 +1374,12 @@ function Text.keychord_pressed(chord)
     local before = snapshot(before_line)
     local s = love.system.getClipboardText()
     for _,code in utf8.codes(s) do
-      Text.insert_at_cursor(utf8.char(code))
+      local c = utf8.char(code)
+      if c == '\n' then
+        Text.insert_return()
+      else
+        Text.insert_at_cursor(utf8.char(code))
+      end
     end
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   --== shortcuts that move the cursor
@@ -1489,6 +1484,20 @@ function Text.keychord_pressed(chord)
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
     Text.pagedown()
+  end
+end
+
+function Text.insert_return()
+  local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+  table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
+  local scroll_down = (Cursor_y + math.floor(15*Zoom)) > App.screen.height
+  Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
+  Lines[Cursor1.line].fragments = nil
+  Cursor1.line = Cursor1.line+1
+  Cursor1.pos = 1
+  if scroll_down then
+    Screen_top1.line = Cursor1.line
+    Text.scroll_up_while_cursor_on_screen()
   end
 end
 
