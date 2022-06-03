@@ -52,26 +52,7 @@ function Text.draw(line, line_width, line_index)
     if Text.le1(Screen_top1, {line=line_index, pos=pos}) then
       if Selection1.line then
         local lo, hi = Text.clip_selection(line_index, pos, pos+frag_len)
-        if lo then
-          local lo_offset = utf8.offset(line.data, lo)
-          local hi_offset = utf8.offset(line.data, hi)
-          local pos_offset = utf8.offset(line.data, pos)
-          local lo_px
-          if pos == lo then
-            lo_px = 0
-          else
-            local before = line.data:sub(pos_offset, lo_offset-1)
-            local before_text = App.newText(love.graphics.getFont(), before)
-            lo_px = App.width(before_text)
-          end
---?           print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
-          local s = line.data:sub(lo_offset, hi_offset-1)
-          local text = App.newText(love.graphics.getFont(), s)
-          local text_width = App.width(text)
-          love.graphics.setColor(0.7,0.7,0.9)
-          love.graphics.rectangle('fill', x+lo_px,y, text_width,Line_height)
-          love.graphics.setColor(0,0,0)
-        end
+        Text.draw_highlight(line, x,y, pos, lo,hi)
       end
 --?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y)

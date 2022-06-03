@@ -50,6 +50,30 @@ function Text.clip_selection(line_index, apos, bpos)
   end
 end
 
+-- draw highlight for line corresponding to (lo,hi) given an approximate x,y and pos on the same screen line
+function Text.draw_highlight(line, x,y, pos, lo,hi)
+  if lo then
+    local lo_offset = utf8.offset(line.data, lo)
+    local hi_offset = utf8.offset(line.data, hi)
+    local pos_offset = utf8.offset(line.data, pos)
+    local lo_px
+    if pos == lo then
+      lo_px = 0
+    else
+      local before = line.data:sub(pos_offset, lo_offset-1)
+      local before_text = App.newText(love.graphics.getFont(), before)
+      lo_px = App.width(before_text)
+    end
+--?     print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
+    local s = line.data:sub(lo_offset, hi_offset-1)
+    local text = App.newText(love.graphics.getFont(), s)
+    local text_width = App.width(text)
+    love.graphics.setColor(0.7,0.7,0.9)
+    love.graphics.rectangle('fill', x+lo_px,y, text_width,Line_height)
+    love.graphics.setColor(0,0,0)
+  end
+end
+
 -- inefficient for some reason, so don't do it on every frame
 function Text.mouse_pos()
   local time = love.timer.getTime()
