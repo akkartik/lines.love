@@ -41,3 +41,7 @@ http://akkartik.name/lines.html
 * Touchpads can drag the mouse pointer using a light touch or a heavy click.
   On Linux, drags using the light touch get interrupted when a key is pressed.
   You'll have to press down to drag.
+
+* Can't scroll while selecting text with mouse.
+
+* No scrollbars yet. That stuff is hard.
