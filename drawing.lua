@@ -261,86 +261,87 @@ function Drawing.mouse_released(x,y, button)
     Current_drawing_mode = Previous_drawing_mode
     Previous_drawing_mode = nil
   elseif Lines.current then
-    if Lines.current.pending then
-      if Lines.current.pending.mode == 'freehand' then
+    local drawing = Lines.current
+    if drawing.pending then
+      if drawing.pending.mode == 'freehand' then
         -- the last point added during update is good enough
-        table.insert(Lines.current.shapes, Lines.current.pending)
-      elseif Lines.current.pending.mode == 'line' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local j = Drawing.insert_point(Lines.current.points, mx,my)
-          Lines.current.pending.p2 = j
-          table.insert(Lines.current.shapes, Lines.current.pending)
+        table.insert(drawing.shapes, drawing.pending)
+      elseif drawing.pending.mode == 'line' then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+          local j = Drawing.insert_point(drawing.points, mx,my)
+          drawing.pending.p2 = j
+          table.insert(drawing.shapes, drawing.pending)
         end
-      elseif Lines.current.pending.mode == 'manhattan' then
-        local p1 = Lines.current.points[Lines.current.pending.p1]
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
+      elseif drawing.pending.mode == 'manhattan' then
+        local p1 = drawing.points[drawing.pending.p1]
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-            local j = Drawing.insert_point(Lines.current.points, mx, p1.y)
-            Lines.current.pending.p2 = j
+            local j = Drawing.insert_point(drawing.points, mx, p1.y)
+            drawing.pending.p2 = j
           else
-            local j = Drawing.insert_point(Lines.current.points, p1.x, my)
-            Lines.current.pending.p2 = j
+            local j = Drawing.insert_point(drawing.points, p1.x, my)
+            drawing.pending.p2 = j
           end
-          local p2 = Lines.current.points[Lines.current.pending.p2]
-          love.mouse.setPosition(16+Drawing.pixels(p2.x), Lines.current.y+Drawing.pixels(p2.y))
-          table.insert(Lines.current.shapes, Lines.current.pending)
+          local p2 = drawing.points[drawing.pending.p2]
+          love.mouse.setPosition(16+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
+          table.insert(drawing.shapes, drawing.pending)
         end
-      elseif Lines.current.pending.mode == 'polygon' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, mx,my))
-          table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif drawing.pending.mode == 'polygon' then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+          table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, mx,my))
+          table.insert(drawing.shapes, drawing.pending)
         end
-      elseif Lines.current.pending.mode == 'rectangle' then
-        assert(#Lines.current.pending.vertices <= 2)
-        if #Lines.current.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-          if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-            local first = Lines.current.points[Lines.current.pending.vertices[1]]
-            local second = Lines.current.points[Lines.current.pending.vertices[2]]
+      elseif drawing.pending.mode == 'rectangle' then
+        assert(#drawing.pending.vertices <= 2)
+        if #drawing.pending.vertices == 2 then
+          local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+          if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+            local first = drawing.points[drawing.pending.vertices[1]]
+            local second = drawing.points[drawing.pending.vertices[2]]
             local thirdx,thirdy, fourthx,fourthy = Drawing.complete_rectangle(first.x,first.y, second.x,second.y, mx,my)
-            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, thirdx,thirdy))
-            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, fourthx,fourthy))
-            table.insert(Lines.current.shapes, Lines.current.pending)
+            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, thirdx,thirdy))
+            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, fourthx,fourthy))
+            table.insert(drawing.shapes, drawing.pending)
           end
         else
           -- too few points; draw nothing
         end
-      elseif Lines.current.pending.mode == 'square' then
-        assert(#Lines.current.pending.vertices <= 2)
-        if #Lines.current.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-          if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-            local first = Lines.current.points[Lines.current.pending.vertices[1]]
-            local second = Lines.current.points[Lines.current.pending.vertices[2]]
+      elseif drawing.pending.mode == 'square' then
+        assert(#drawing.pending.vertices <= 2)
+        if #drawing.pending.vertices == 2 then
+          local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+          if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+            local first = drawing.points[drawing.pending.vertices[1]]
+            local second = drawing.points[drawing.pending.vertices[2]]
             local thirdx,thirdy, fourthx,fourthy = Drawing.complete_square(first.x,first.y, second.x,second.y, mx,my)
-            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, thirdx,thirdy))
-            table.insert(Lines.current.pending.vertices, Drawing.insert_point(Lines.current.points, fourthx,fourthy))
-            table.insert(Lines.current.shapes, Lines.current.pending)
+            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, thirdx,thirdy))
+            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, fourthx,fourthy))
+            table.insert(drawing.shapes, drawing.pending)
           end
         end
-      elseif Lines.current.pending.mode == 'circle' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local center = Lines.current.points[Lines.current.pending.center]
-          Lines.current.pending.radius = geom.dist(center.x,center.y, mx,my)
-          table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif drawing.pending.mode == 'circle' then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+          local center = drawing.points[drawing.pending.center]
+          drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
+          table.insert(drawing.shapes, drawing.pending)
         end
-      elseif Lines.current.pending.mode == 'arc' then
-        local mx,my = Drawing.coord(x-16), Drawing.coord(y-Lines.current.y)
-        if mx >= 0 and mx < 256 and my >= 0 and my < Lines.current.h then
-          local center = Lines.current.points[Lines.current.pending.center]
-          Lines.current.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, Lines.current.pending.end_angle)
-          table.insert(Lines.current.shapes, Lines.current.pending)
+      elseif drawing.pending.mode == 'arc' then
+        local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
+        if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
+          local center = drawing.points[drawing.pending.center]
+          drawing.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, drawing.pending.end_angle)
+          table.insert(drawing.shapes, drawing.pending)
         end
-      elseif Lines.current.pending.mode == 'move' then
+      elseif drawing.pending.mode == 'move' then
         -- drop it
-      elseif Lines.current.pending.mode == 'name' then
+      elseif drawing.pending.mode == 'name' then
         -- drop it
       else
-        print(Lines.current.pending.mode)
+        print(drawing.pending.mode)
         assert(false)
       end
       Lines.current.pending = {}
