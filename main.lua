@@ -198,16 +198,8 @@ function App.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
-        if love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift') then
-          if Selection1.line == nil then
-            Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
-          end
-        else
-          if Selection1.line then
-            Selection1 = {}
-          end
-        end
         Text.move_cursor(line_index, line, x, y)
+        Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
@@ -219,7 +211,20 @@ end
 
 function App.mousereleased(x,y, button)
   if Search_term then return end
-  Drawing.mouse_released(x,y, button)
+  if Lines.current_drawing then
+    Drawing.mouse_released(x,y, button)
+  else
+    for line_index,line in ipairs(Lines) do
+      if line.mode == 'text' then
+        if Text.in_line(line, x,y) then
+          Text.move_cursor(line_index, line, x, y)
+          if Text.eq1(Cursor1, Selection1) then
+            Selection1 = {}
+          end
+        end
+      end
+    end
+  end
 end
 
 function App.textinput(t)

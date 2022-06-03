@@ -499,7 +499,7 @@ function test_move_cursor_using_mouse()
   Screen_bottom1 = {}
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
-  App.run_after_mousepress(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+8,Margin_top+5, '1')
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
 end
@@ -1039,7 +1039,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
   local screen_left_margin = 25  -- pixels
-  App.run_after_mousepress(screen_left_margin+8,Margin_top+Line_height*2+5, '1')
+  App.run_after_mouserelease(screen_left_margin+8,Margin_top+Line_height*2+5, '1')
   -- cursor should move
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
@@ -1978,6 +1978,10 @@ function Text.to1(pos2)
     result.pos = Lines[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos - 1
   end
   return result
+end
+
+function Text.eq1(a, b)
+  return a.line == b.line and a.pos == b.pos
 end
 
 function Text.lt1(a, b)

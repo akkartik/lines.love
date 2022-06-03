@@ -204,6 +204,12 @@ function App.run_after_mousepress(x,y, button)
   App.draw()
 end
 
+function App.run_after_mouserelease(x,y, button)
+  App.mousereleased(x,y, button)
+  App.screen.contents = {}
+  App.draw()
+end
+
 function App.screen.check(y, expected_contents, msg)
 --?   print('checking for "'..expected_contents..'" at y '..tostring(y))
   local screen_row = 'y'..tostring(y)
