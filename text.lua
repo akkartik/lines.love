@@ -395,8 +395,20 @@ function Text.pageup()
 end
 
 function Text.pagedown()
-  Screen_top1.line = Screen_bottom1.line
-  Screen_top1.pos = Screen_bottom1.pos
+  -- If a line/paragraph gets to a page boundary, I often want to scroll
+  -- before I get to the bottom.
+  -- However, only do this if it makes forward progress.
+  local top2 = Text.to2(Screen_bottom1)
+  if top2.screen_line > 1 then
+    top2.screen_line = math.max(top2.screen_line-10, 1)
+  end
+  local new_top1 = Text.to1(top2)
+  if Text.lt1(Screen_top1, new_top1) then
+    Screen_top1 = new_top1
+  else
+    Screen_top1.line = Screen_bottom1.line
+    Screen_top1.pos = Screen_bottom1.pos
+  end
 --?   print('setting top to', Screen_top1.line, Screen_top1.pos)
   Cursor1.line = Screen_top1.line
   Cursor1.pos = Screen_top1.pos

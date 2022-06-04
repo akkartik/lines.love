@@ -246,9 +246,9 @@ function test_pagedown_skips_drawings()
   App.screen.check(y, 'def', 'F - test_pagedown_skips_drawings/screen:1')
 end
 
-function test_pagedown_shows_one_screen_line_in_common()
-  io.write('\ntest_pagedown_shows_one_screen_line_in_common')
-  -- some lines of text with a drawing intermixed
+function test_pagedown_often_shows_start_of_wrapping_line()
+  io.write('\ntest_pagedown_often_shows_start_of_wrapping_line')
+  -- draw a few lines ending in part of a wrapping line
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def ghi jkl', 'mno'}
   Line_width = App.screen.width
@@ -257,23 +257,51 @@ function test_pagedown_shows_one_screen_line_in_common()
   Screen_bottom1 = {}
   App.draw()
   local y = Margin_top
-  App.screen.check(y, 'abc', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:1')
+  App.screen.check(y, 'abc', 'F - test_pagedown_often_shows_start_of_wrapping_line/baseline/screen:1')
   y = y + Line_height
-  App.screen.check(y, 'def ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:2')
+  App.screen.check(y, 'def ', 'F - test_pagedown_often_shows_start_of_wrapping_line/baseline/screen:2')
   y = y + Line_height
-  App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/baseline/screen:3')
-  -- after pagedown the bottom screen line becomes the top
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_often_shows_start_of_wrapping_line/baseline/screen:3')
+  -- after pagedown we start drawing from the bottom _line_ (multiple screen lines)
   App.run_after_keychord('pagedown')
-  check_eq(Screen_top1.line, 2, 'F - test_pagedown_shows_one_screen_line_in_common/screen_top:line')
-  check_eq(Screen_top1.pos, 5, 'F - test_pagedown_shows_one_screen_line_in_common/screen_top:pos')
-  check_eq(Cursor1.line, 2, 'F - test_pagedown_shows_one_screen_line_in_common/cursor:line')
-  check_eq(Cursor1.pos, 5, 'F - test_pagedown_shows_one_screen_line_in_common/cursor:pos')
+  check_eq(Screen_top1.line, 2, 'F - test_pagedown_often_shows_start_of_wrapping_line/screen_top:line')
+  check_eq(Screen_top1.pos, 1, 'F - test_pagedown_often_shows_start_of_wrapping_line/screen_top:pos')
+  check_eq(Cursor1.line, 2, 'F - test_pagedown_often_shows_start_of_wrapping_line/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_pagedown_often_shows_start_of_wrapping_line/cursor:pos')
   y = Margin_top
-  App.screen.check(y, 'ghi ', 'F - test_pagedown_shows_one_screen_line_in_common/screen:1')
+  App.screen.check(y, 'def ', 'F - test_pagedown_often_shows_start_of_wrapping_line/screen:1')
   y = y + Line_height
-  App.screen.check(y, 'jkl', 'F - test_pagedown_shows_one_screen_line_in_common/screen:2')
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_often_shows_start_of_wrapping_line/screen:2')
   y = y + Line_height
-  App.screen.check(y, 'mn', 'F - test_pagedown_shows_one_screen_line_in_common/screen:3')
+  App.screen.check(y, 'jkl', 'F - test_pagedown_often_shows_start_of_wrapping_line/screen:3')
+end
+
+function test_pagedown_can_start_from_middle_of_long_wrapping_line()
+  io.write('\ntest_pagedown_can_start_from_middle_of_long_wrapping_line')
+  -- draw a few lines starting from a very long wrapping line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc def ghi jkl mno pqr stu vwx yza bcd efg hij', 'XYZ'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'abc ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'def ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/baseline/screen:3')
+  -- after pagedown we scroll down the very long wrapping line
+  App.run_after_keychord('pagedown')
+  check_eq(Screen_top1.line, 1, 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen_top:line')
+  check_eq(Screen_top1.pos, 9, 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen_top:pos')
+  y = Margin_top
+  App.screen.check(y, 'ghi ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'jkl m', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'no ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:3')
 end
 
 function test_down_arrow_moves_cursor()
