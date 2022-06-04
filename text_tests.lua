@@ -159,11 +159,39 @@ function test_move_cursor_using_mouse()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
+  Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
   App.run_after_mouserelease(screen_left_margin+8,Margin_top+5, '1')
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
+  check_nil(Selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
+  check_nil(Selection1.pos, 'F - test_move_cursor_using_mouse/selection:pos')
+end
+
+function test_select_text_using_mouse()
+  io.write('\ntest_select_text_using_mouse')
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'def', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Selection1 = {}
+  App.draw()  -- populate line.y for each line in Lines
+  local screen_left_margin = 25  -- pixels
+  -- click on first location
+  App.run_after_mousepress(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+8,Margin_top+5, '1')
+  -- hold down shift and click somewhere else
+  App.keypress('lshift')
+  App.run_after_mousepress(screen_left_margin+20,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+20,Margin_top+Line_height+5, '1')
+  App.keyrelease('lshift')
+  check_eq(Cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
+  check_eq(Cursor1.pos, 4, 'F - test_select_text_using_mouse/cursor:pos')
+  check_eq(Selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
+  check_eq(Selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
 end
 
 function test_pagedown()

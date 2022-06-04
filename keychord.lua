@@ -28,24 +28,24 @@ function App.combine_modifiers(key)
   return result
 end
 
-function App.modifier_down()
+function App.any_modifier_down()
   return App.ctrl_down() or App.alt_down() or App.shift_down() or App.cmd_down()
 end
 
 function App.ctrl_down()
-  return love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')
+  return App.modifier_down('lctrl') or App.modifier_down('rctrl')
 end
 
 function App.alt_down()
-  return love.keyboard.isDown('lalt') or love.keyboard.isDown('ralt')
+  return App.modifier_down('lalt') or App.modifier_down('ralt')
 end
 
 function App.shift_down()
-  return love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')
+  return App.modifier_down('lshift') or App.modifier_down('rshift')
 end
 
 function App.cmd_down()
-  return love.keyboard.isDown('lgui') or love.keyboard.isDown('rgui')
+  return App.modifier_down('lgui') or App.modifier_down('rgui')
 end
 
 array = {}

@@ -186,6 +186,18 @@ function App.setClipboardText(s)
   App.clipboard = s
 end
 
+App.modifier_keys = {}
+function App.keypress(key)
+  App.modifier_keys[key] = true
+end
+function App.keyrelease(key)
+  App.modifier_keys[key] = nil
+end
+
+function App.modifier_down(key)
+  return App.modifier_keys[key]
+end
+
 function App.run_after_textinput(t)
   App.textinput(t)
   App.screen.contents = {}
@@ -267,6 +279,9 @@ function App.disable_tests()
   App.filesystem = nil
   App.run_after_textinput = nil
   App.run_after_keychord = nil
+  App.keypress = nil
+  App.keyrelease = nil
+  App.modifier_keys = nil
   -- other methods dispatch to real hardware
   App.screen.print = love.graphics.print
   App.newText = love.graphics.newText
@@ -275,4 +290,5 @@ function App.disable_tests()
   App.open_for_writing = function(filename) return io.open(filename, 'w') end
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText
+  App.modifier_down = love.keyboard.isDown
 end
