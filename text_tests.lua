@@ -94,7 +94,7 @@ end
 
 function test_insert_newline()
   io.write('\ntest_insert_newline')
-  -- display a few lines with cursor on bottom line
+  -- display a few lines
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
@@ -108,7 +108,7 @@ function test_insert_newline()
   App.screen.check(y, 'def', 'F - test_insert_newline/baseline/screen:2')
   y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_insert_newline/baseline/screen:3')
-  -- after hitting the enter key the screen scrolls down
+  -- hitting the enter key splits the line
   App.run_after_keychord('return')
   check_eq(Screen_top1.line, 1, 'F - test_insert_newline/screen_top')
   check_eq(Cursor1.line, 2, 'F - test_insert_newline/cursor:line')

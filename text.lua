@@ -491,9 +491,9 @@ function Text.down()
     end
   else
     -- move down one screen line in current line
-    local scroll_up = false
+    local scroll_down = false
     if Text.le1(Screen_bottom1, Cursor1) then
-      scroll_up = true
+      scroll_down = true
     end
 --?     print('cursor is NOT at final screen line of its line')
     local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
@@ -502,7 +502,7 @@ function Text.down()
     local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
-    if scroll_up then
+    if scroll_down then
       Screen_top1.line = Cursor1.line
 --?       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
