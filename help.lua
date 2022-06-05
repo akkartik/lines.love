@@ -29,7 +29,7 @@ function draw_help_without_mouse_pressed(drawing)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'circle' then
-    love.graphics.print("* Press 'ctrl+c' to switch to drawing circles/arcs", 16+30,y)
+    love.graphics.print("* Press 'ctrl+o' to switch to drawing circles/arcs", 16+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'polygon' then
@@ -95,7 +95,7 @@ function draw_help_with_mouse_pressed(drawing)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'circle' then
-    love.graphics.print("* Press 'c' to switch to drawing circles/arcs", 16+30,y)
+    love.graphics.print("* Press 'o' to switch to drawing circles/arcs", 16+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'polygon' then

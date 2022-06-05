@@ -418,7 +418,7 @@ function Drawing.keychord_pressed(chord)
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
-  elseif chord == 'C-c' and not love.mouse.isDown('1') then
+  elseif chord == 'C-o' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'a' and Current_drawing_mode == 'circle' then
     local drawing = Drawing.current_drawing()
@@ -428,7 +428,7 @@ function Drawing.keychord_pressed(chord)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
-  elseif love.mouse.isDown('1') and chord == 'c' then
+  elseif love.mouse.isDown('1') and chord == 'o' then
     Current_drawing_mode = 'circle'
     local drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
