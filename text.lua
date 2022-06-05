@@ -887,6 +887,7 @@ end
 
 function Text.redraw_all()
   for _,line in ipairs(Lines) do
+    line.y = nil
     line.fragments = nil
     line.screen_line_starting_pos = nil
   end

@@ -252,7 +252,6 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
-  for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
   if Search_term then
     if chord == 'escape' then
       Search_term = nil
@@ -290,6 +289,7 @@ function App.keychord_pressed(chord)
     initialize_font_settings(20)
     Text.redraw_all()
   elseif chord == 'C-z' then
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local event = undo_event()
     if event then
       local src = event.before
@@ -299,6 +299,7 @@ function App.keychord_pressed(chord)
       patch(Lines, event.after, event.before)
     end
   elseif chord == 'C-y' then
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local event = redo_event()
     if event then
       local src = event.after
@@ -309,16 +310,19 @@ function App.keychord_pressed(chord)
     end
   -- clipboard
   elseif chord == 'C-c' then
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local s = Text.selection()
     if s then
       App.setClipboardText(s)
     end
   elseif chord == 'C-x' then
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local s = Text.cut_selection()
     if s then
       App.setClipboardText(s)
     end
   elseif chord == 'C-v' then
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
     -- and sometimes scroll when we didn't quite need to.
     local before_line = Cursor1.line
@@ -356,6 +360,7 @@ function App.keychord_pressed(chord)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   -- dispatch to drawing or text
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
+    -- DON'T reset line.y here
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local drawing = Drawing.current_drawing()
@@ -385,6 +390,7 @@ function App.keychord_pressed(chord)
     end
     save_to_disk(Lines, Filename)
   else
+    for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
   end
 end
