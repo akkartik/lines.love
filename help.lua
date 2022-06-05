@@ -9,12 +9,9 @@ function draw_help_without_mouse_pressed(drawing)
   y = y + Line_height
   love.graphics.print("then press the mouse button to drop it", 16+30+bullet_indent(),y)
   y = y + Line_height
-  love.graphics.print("* Hover on a point and press 'ctrl+n' to name it,", 16+30,y)
-  y = y + Line_height
-  love.graphics.print("then press 'enter' to finish", 16+30+bullet_indent(),y)
+  love.graphics.print("* Hover on a point and press 'ctrl+n', type a name, then press 'enter'", 16+30,y)
   y = y + Line_height
   love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y)
-  y = y + Line_height
   y = y + Line_height
   if Current_drawing_mode ~= 'freehand' then
     love.graphics.print("* Press 'ctrl+p' to switch to drawing freehand strokes", 16+30,y)
@@ -44,12 +41,9 @@ function draw_help_without_mouse_pressed(drawing)
     love.graphics.print("* Press 'ctrl+s' to switch to drawing squares", 16+30,y)
     y = y + Line_height
   end
-  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out", 16+30,y)
+  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out, ctrl+0 to reset zoom", 16+30,y)
   y = y + Line_height
-  love.graphics.print("* Press 'ctrl+0' to reset zoom", 16+30,y)
-  y = y + Line_height
-  y = y + Line_height
-  love.graphics.print("Hit 'esc' now to hide this message", 16+30,y)
+  love.graphics.print("Press 'esc' now to hide this message", 16+30,y)
   y = y + Line_height
   love.graphics.setColor(0,0.5,0, 0.1)
   love.graphics.rectangle('fill', 16,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
