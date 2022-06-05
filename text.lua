@@ -364,7 +364,6 @@ function Text.insert_return()
   Cursor1.line = Cursor1.line+1
   Cursor1.pos = 1
   if scroll_down then
-    Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()
   end
 end
@@ -484,7 +483,6 @@ function Text.down()
     end
     if Cursor1.line > Screen_bottom1.line then
 --?       print('screen top before:', Screen_top1.line, Screen_top1.pos)
-      Screen_top1.line = Cursor1.line
 --?       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
@@ -503,7 +501,6 @@ function Text.down()
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
     if scroll_down then
-      Screen_top1.line = Cursor1.line
 --?       print('scroll up preserving cursor')
       Text.scroll_up_while_cursor_on_screen()
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
@@ -616,7 +613,6 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 --?   print(y, App.screen.height, App.screen.height-Line_height)
   if y > App.screen.height - Line_height then
 --?     print('scroll up')
-    Screen_top1.line = Cursor1.line
     Text.scroll_up_while_cursor_on_screen()
   end
 end

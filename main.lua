@@ -344,8 +344,6 @@ function App.keychord_pressed(chord)
       Text.populate_screen_line_starting_pos(i)
     end
     if Cursor1.line-Screen_top1.line+1 + num_newlines > App.screen.height/Line_height then
-      Screen_top1.line = Cursor1.line
-      Screen_top1.pos = 1
       Text.scroll_up_while_cursor_on_screen()
     end
     -- hack 2: if we have too much text wrapping we definitely need to scroll
@@ -353,8 +351,6 @@ function App.keychord_pressed(chord)
     local clipboard_width = App.width(clipboard_text)
 --?     print(Cursor_y, Cursor_y*Line_width, Cursor_y*Line_width+Cursor_x, Cursor_y*Line_width+Cursor_x+clipboard_width, Line_width*App.screen.height/Line_height)
     if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/Line_height then
-      Screen_top1.line = Cursor1.line
-      Screen_top1.pos = 1
       Text.scroll_up_while_cursor_on_screen()
     end
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
