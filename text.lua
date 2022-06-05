@@ -364,7 +364,7 @@ function Text.insert_return()
   Cursor1.line = Cursor1.line+1
   Cursor1.pos = 1
   if scroll_down then
-    Text.scroll_up_while_cursor_on_screen()
+    Text.snap_cursor_to_bottom_of_screen()
   end
 end
 
@@ -484,7 +484,7 @@ function Text.down()
     if Cursor1.line > Screen_bottom1.line then
 --?       print('screen top before:', Screen_top1.line, Screen_top1.pos)
 --?       print('scroll up preserving cursor')
-      Text.scroll_up_while_cursor_on_screen()
+      Text.snap_cursor_to_bottom_of_screen()
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
     end
   else
@@ -502,7 +502,7 @@ function Text.down()
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
     if scroll_down then
 --?       print('scroll up preserving cursor')
-      Text.scroll_up_while_cursor_on_screen()
+      Text.snap_cursor_to_bottom_of_screen()
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
     end
   end
@@ -613,11 +613,11 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 --?   print(y, App.screen.height, App.screen.height-Line_height)
   if y > App.screen.height - Line_height then
 --?     print('scroll up')
-    Text.scroll_up_while_cursor_on_screen()
+    Text.snap_cursor_to_bottom_of_screen()
   end
 end
 
-function Text.scroll_up_while_cursor_on_screen()
+function Text.snap_cursor_to_bottom_of_screen()
   local top2 = Text.to2(Cursor1)
 --?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
   local y = App.screen.height - Line_height
