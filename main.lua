@@ -92,13 +92,9 @@ function App.initialize(arg)
   App.screen.width = App.screen.width-100
   App.screen.height = App.screen.height-100
   love.window.setMode(App.screen.width, App.screen.height)
---?   App.screen.width = 120
---?   App.screen.height = 200
---?   love.window.setMode(App.screen.width, App.screen.height)
 
   -- maximum width available to either text or drawings, in pixels
   Line_width = math.floor(App.screen.width/2/40)*40
---?   Line_width = 100
 
   Font_height = 20
   love.graphics.setFont(love.graphics.newFont(Font_height))
