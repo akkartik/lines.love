@@ -146,13 +146,17 @@ function Text.textinput(t)
 end
 
 function Text.insert_at_cursor(t)
+--?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   local byte_offset
   if Cursor1.pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
   else
     byte_offset = 1
   end
---?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
+  if byte_offset == nil then
+    print(Cursor1.line, Cursor1.pos, byte_offset, Lines[Cursor1.line].data)
+    assert(false)
+  end
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)..t..string.sub(Lines[Cursor1.line].data, byte_offset)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
