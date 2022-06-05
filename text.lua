@@ -156,9 +156,8 @@ function Text.insert_at_cursor(t)
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)..t..string.sub(Lines[Cursor1.line].data, byte_offset)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
-  local scroll_down = Text.le1(Screen_bottom1, Cursor1)
   Cursor1.pos = Cursor1.pos+1
-  if scroll_down then
+  if Cursor_y >= App.screen.height - Line_height then
     Text.populate_screen_line_starting_pos(Cursor1.line)
     Text.snap_cursor_to_bottom_of_screen()
 --?     print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)

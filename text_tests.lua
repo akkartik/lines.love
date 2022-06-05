@@ -132,7 +132,7 @@ end
 
 function test_insert_from_clipboard()
   io.write('\ntest_insert_from_clipboard')
-  -- display a few lines with cursor on bottom line
+  -- display a few lines
   App.screen.init{width=25+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
@@ -146,7 +146,7 @@ function test_insert_from_clipboard()
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/baseline/screen:2')
   y = y + Line_height
   App.screen.check(y, 'ghi', 'F - test_insert_from_clipboard/baseline/screen:3')
-  -- after hitting the enter key the screen scrolls down
+  -- paste some text including a newline, check that new line is created
   App.clipboard = 'xy\nz'
   App.run_after_keychord('C-v')
   check_eq(Screen_top1.line, 1, 'F - test_insert_from_clipboard/screen_top')
@@ -734,6 +734,25 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   App.screen.check(y, 'j', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
   y = y + Line_height
   App.screen.check(y, 'kl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:2')
+end
+
+function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom()
+  io.write('\ntest_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom')
+  -- display just an empty bottom line on screen
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', ''}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- after hitting the inserting_text key the screen does not scroll down
+  App.run_after_textinput('a')
+  check_eq(Screen_top1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen_top')
+  check_eq(Cursor1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:line')
+  check_eq(Cursor1.pos, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
+  local y = Margin_top
+  App.screen.check(y, 'a', 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
 end
 
 function test_typing_on_bottom_line_scrolls_down()

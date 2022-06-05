@@ -166,6 +166,7 @@ function App.draw()
               Text.draw_cursor(25, y)
             end
           end
+        Screen_bottom1.pos = Screen_top1.pos
         y = y + Line_height
       elseif line.mode == 'drawing' then
         y = y+10 -- padding
