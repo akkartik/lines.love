@@ -1,6 +1,16 @@
 -- major tests for text editing flows
 -- This still isn't quite as thorough as I'd like.
 
+function test_insert_first_character()
+  io.write('\ntest_insert_first_character')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{}
+  App.draw()
+  App.run_after_textinput('a')
+  local y = Margin_top
+  App.screen.check(y, 'a', 'F - test_insert_first_character/screen:1')
+end
+
 function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
