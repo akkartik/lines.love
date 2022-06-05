@@ -472,7 +472,7 @@ function Drawing.keychord_pressed(chord)
     if drawing then
       smoothen(shape)
     end
-  elseif chord == 'C-v' and not love.mouse.isDown('1') then
+  elseif chord == 'C-u' and not love.mouse.isDown('1') then
     local drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then

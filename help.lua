@@ -5,9 +5,9 @@ function draw_help_without_mouse_pressed(drawing)
   y = y + Line_height
   love.graphics.print("* Press the mouse button to start drawing a "..current_shape(), 16+30,y)
   y = y + Line_height
-  love.graphics.print("* Hover on a point and press 'ctrl+v' to start moving it,", 16+30,y)
+  love.graphics.print("* Hover on a point and press 'ctrl+u' to pick it up and start moving it,", 16+30,y)
   y = y + Line_height
-  love.graphics.print("then press the mouse button to finish", 16+30+bullet_indent(),y)
+  love.graphics.print("then press the mouse button to drop it", 16+30+bullet_indent(),y)
   y = y + Line_height
   love.graphics.print("* Hover on a point and press 'ctrl+n' to name it,", 16+30,y)
   y = y + Line_height
