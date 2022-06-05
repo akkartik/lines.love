@@ -56,7 +56,7 @@ function Drawing.draw(line)
           local name_text
           -- TODO: avoid computing name width on every repaint
           if p.name == '' then
-            name_text = App.newText(love.graphics.getFont(), 'm')  -- 1em
+            name_text = Em
           else
             name_text = App.newText(love.graphics.getFont(), p.name)
           end

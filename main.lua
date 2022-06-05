@@ -93,12 +93,7 @@ function App.initialize(arg)
   App.screen.height = App.screen.height-100
   love.window.setMode(App.screen.width, App.screen.height)
 
-  -- maximum width available to either text or drawings, in pixels
-  Line_width = math.floor(App.screen.width/2/40)*40
-
-  Font_height = 20
-  love.graphics.setFont(love.graphics.newFont(Font_height))
-  Line_height = 26
+  initialize_font_settings(20)
 
   -- still in App.initialize
   if #arg > 0 then
@@ -114,6 +109,17 @@ function App.initialize(arg)
   love.window.setTitle('Text with Lines - '..Filename)
 
 end  -- App.initialize
+
+function initialize_font_settings(font_height)
+  Font_height = font_height
+  love.graphics.setFont(love.graphics.newFont(Font_height))
+  Line_height = math.floor(font_height*1.3)
+
+  -- maximum width available to either text or drawings, in pixels
+  Em = App.newText(love.graphics.getFont(), 'm')
+  -- readable text width is 50-75 chars
+  Line_width = math.min(40*App.width(Em), App.screen.width-50)
+end
 
 function App.filedropped(file)
   App.initialize_globals()  -- in particular, forget all undo history
@@ -275,20 +281,14 @@ function App.keychord_pressed(chord)
     Search_backup = {cursor={line=Cursor1.line, pos=Cursor1.pos}, screen_top={line=Screen_top1.line, pos=Screen_top1.pos}}
     assert(Search_text == nil)
   elseif chord == 'C-=' then
-    Font_height = Font_height+2
-    love.graphics.setFont(love.graphics.newFont(Font_height))
-    Line_height = math.floor(Font_height*1.3)
+    initialize_font_settings(Font_height+2)
     Text.redraw_all()
   elseif chord == 'C--' then
-    Font_height = Font_height-2
-    love.graphics.setFont(love.graphics.newFont(Font_height))
+    initialize_font_settings(Font_height-2)
     Text.redraw_all()
-    Line_height = math.floor(Font_height*1.3)
   elseif chord == 'C-0' then
-    Font_height = 20
-    love.graphics.setFont(love.graphics.newFont(Font_height))
+    initialize_font_settings(20)
     Text.redraw_all()
-    Line_height = 26
   elseif chord == 'C-z' then
     local event = undo_event()
     if event then
