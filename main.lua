@@ -336,7 +336,7 @@ function App.keychord_pressed(chord)
         Text.insert_return()
         num_newlines = num_newlines+1
       else
-        Text.insert_at_cursor(utf8.char(code))
+        Text.insert_at_cursor(c)
       end
     end
     -- hack 1: if we have too many newlines we definitely need to scroll
