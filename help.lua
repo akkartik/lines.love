@@ -103,11 +103,11 @@ function draw_help_with_mouse_pressed(drawing)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'rectangle' then
-    love.graphics.print("* Press 'g' to switch to drawing rectangles", 16+30,y)
+    love.graphics.print("* Press 'r' to switch to drawing rectangles", 16+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'square' then
-    love.graphics.print("* Press 'g' to switch to drawing squares", 16+30,y)
+    love.graphics.print("* Press 's' to switch to drawing squares", 16+30,y)
     y = y + Line_height
   end
   love.graphics.setColor(0,0.5,0, 0.1)
