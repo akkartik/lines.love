@@ -78,12 +78,11 @@ function test_edit_wrapping_text()
   Cursor1 = {line=2, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
+  App.draw()
   App.run_after_textinput('g')
   App.run_after_textinput('h')
   App.run_after_textinput('i')
   App.run_after_textinput('j')
-  App.run_after_textinput('k')
-  App.run_after_textinput('l')
   local y = Margin_top
   App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
   y = y + Line_height
@@ -727,6 +726,37 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   App.screen.check(y, 'kl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:2')
 end
 
+function test_typing_on_bottom_line_scrolls_down()
+  io.write('\ntest_typing_on_bottom_line_scrolls_down')
+  -- display a few lines with cursor on bottom line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=3, pos=4}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'abc', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'def', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'ghi', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:3')
+  -- after typing something the line wraps and the screen scrolls down
+  App.run_after_textinput('j')
+  App.run_after_textinput('k')
+  App.run_after_textinput('l')
+  check_eq(Screen_top1.line, 2, 'F - test_typing_on_bottom_line_scrolls_down/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_typing_on_bottom_line_scrolls_down/cursor:line')
+  check_eq(Cursor1.pos, 7, 'F - test_typing_on_bottom_line_scrolls_down/cursor:pos')
+  y = Margin_top
+  App.screen.check(y, 'def', 'F - test_typing_on_bottom_line_scrolls_down/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'ghijk', 'F - test_typing_on_bottom_line_scrolls_down/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'l', 'F - test_typing_on_bottom_line_scrolls_down/screen:3')
+end
+
 function test_position_cursor_on_recently_edited_wrapping_line()
   -- draw a line wrapping over 2 screen lines
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
@@ -924,6 +954,7 @@ function test_undo_insert_text()
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
   -- insert a character
+  App.draw()
   App.run_after_textinput('g')
   check_eq(Cursor1.line, 2, 'F - test_undo_insert_text/baseline/cursor:line')
   check_eq(Cursor1.pos, 5, 'F - test_undo_insert_text/baseline/cursor:pos')
