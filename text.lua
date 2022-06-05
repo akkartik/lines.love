@@ -182,10 +182,6 @@ function Text.keychord_pressed(chord)
     local before
     if Cursor1.pos > 1 then
       before = snapshot(Cursor1.line)
-    else
-      before = snapshot(Cursor1.line-1, Cursor1.line)
-    end
-    if Cursor1.pos > 1 then
       local byte_start = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos-1)
       local byte_end = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
       if byte_start then
@@ -198,6 +194,7 @@ function Text.keychord_pressed(chord)
         Cursor1.pos = Cursor1.pos-1
       end
     elseif Cursor1.line > 1 then
+      before = snapshot(Cursor1.line-1, Cursor1.line)
       if Lines[Cursor1.line-1].mode == 'drawing' then
         table.remove(Lines, Cursor1.line-1)
       else
