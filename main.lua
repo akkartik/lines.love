@@ -322,6 +322,7 @@ function App.keychord_pressed(chord)
     if s then
       App.setClipboardText(s)
     end
+    save_to_disk(Lines, Filename)
   elseif chord == 'C-v' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
@@ -354,6 +355,7 @@ function App.keychord_pressed(chord)
     if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/Line_height then
       Text.snap_cursor_to_bottom_of_screen()
     end
+    save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   -- dispatch to drawing or text
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
