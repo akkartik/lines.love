@@ -87,11 +87,14 @@ function App.initialize(arg)
 
   -- maximize window
   love.window.setMode(0, 0)  -- maximize
-  App.screen.width, App.screen.height = love.window.getMode()
+  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
   -- shrink slightly to account for window decoration
   App.screen.width = App.screen.width-100
   App.screen.height = App.screen.height-100
-  love.window.setMode(App.screen.width, App.screen.height)
+  App.screen.flags.resizable = true
+  App.screen.flags.minwidth = math.min(App.screen.width, 200)
+  App.screen.flags.minheight = math.min(App.screen.width, 200)
+  love.window.updateMode(App.screen.width, App.screen.height, App.screen.flags)
 
   initialize_font_settings(20)
 
@@ -109,6 +112,14 @@ function App.initialize(arg)
   love.window.setTitle('Text with Lines - '..Filename)
 
 end  -- App.initialize
+
+function love.resize(w, h)
+--?   print(("Window resized to width: %d and height: %d."):format(w, h))
+  App.screen.width, App.screen.height = w, h
+  Line_width = math.min(40*App.width(Em), App.screen.width-50)
+  -- Should I Text.redraw_all() here to reset text fragments? It doesn't seem
+  -- to be needed, based on repeatedly resizing the window up and down.
+end
 
 function initialize_font_settings(font_height)
   Font_height = font_height
