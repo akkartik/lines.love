@@ -32,6 +32,10 @@ For shortcuts while editing drawings, consult the online help. Either:
 * click on a drawing to start a stroke and then press and hold `h` to see your
   options at any point during a stroke.
 
+lines.love has been exclusively tested so far with a US keyboard layout. If
+you use a different layout, please let me know if things worked, or if you
+found anything amiss: http://akkartik.name/about
+
 ## Known issues
 
 * There's a bug in freehand drawings (C-p mode) that causes them to be
