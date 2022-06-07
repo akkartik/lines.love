@@ -674,7 +674,9 @@ function Text.to_pos_on_line(line, mx, my)
   if line.screen_line_starting_pos == nil then
     return Text.nearest_cursor_pos(line.data, mx)
   end
-  assert(line.fragments)
+  if line.fragments == nil then
+    Text.compute_fragments(line, Line_width)
+  end
   assert(my >= line.y)
   -- duplicate some logic from Text.draw
   local y = line.y
