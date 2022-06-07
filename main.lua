@@ -85,7 +85,13 @@ function App.initialize(arg)
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
-  initialize_window_geometry()
+  if arg[1] == '-geometry' then
+    initialize_window_geometry(arg[2])
+    table.remove(arg, 2)
+    table.remove(arg, 1)
+  else
+    initialize_window_geometry()
+  end
 
   initialize_font_settings(20)
 
@@ -106,17 +112,36 @@ function App.initialize(arg)
   end
 end  -- App.initialize
 
-function initialize_window_geometry()
-  -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
-  -- shrink slightly to account for window decoration
-  App.screen.width = App.screen.width-100
-  App.screen.height = App.screen.height-100
+function initialize_window_geometry(geometry_spec)
+  local geometry_initialized
+  if geometry_spec then
+    geometry_initialized = parse_geometry_spec(geometry_spec)
+  end
+  if not geometry_initialized then
+    -- maximize window
+    love.window.setMode(0, 0)  -- maximize
+    App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
+    -- shrink slightly to account for window decoration
+    App.screen.width = App.screen.width-100
+    App.screen.height = App.screen.height-100
+  end
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.width, 200)
   love.window.updateMode(App.screen.width, App.screen.height, App.screen.flags)
+end
+
+function parse_geometry_spec(geometry_spec)
+  local width, height, x, y = geometry_spec:match('(%d+)x(%d+)%+(%d+)%+(%d+)')
+  if width == nil then
+    print('invalid geometry spec: '..geometry_spec)
+    print('expected format: {width}x{height}+{x}+{y}')
+    return false
+  end
+  App.screen.width = math.floor(tonumber(width))
+  App.screen.height = math.floor(tonumber(height))
+  App.screen.flags = {x=math.floor(tonumber(x)), y=math.floor(tonumber(y))}
+  return true
 end
 
 function love.resize(w, h)
