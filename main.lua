@@ -89,7 +89,6 @@ function App.initialize(arg)
 
   initialize_font_settings(20)
 
-  -- still in App.initialize
   if #arg > 0 then
     Filename = arg[1]
   end
