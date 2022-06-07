@@ -1,6 +1,36 @@
 # Plain text with lines
 
+An editor for plain text where you can also seamlessly insert line drawings.
+Designed above all to be easy to modify and give you early warning if your
+modifications break something.
+
 http://akkartik.name/lines.html
+
+## Selecting files
+
+By default, lines.love reads/writes the file `lines.txt` in your default
+user/home directory (`https://love2d.org/wiki/love.filesystem.getUserDirectory`).
+
+To open a different file, either pass it in as a commandline argument or drag
+and drop the file on to the lines.love window.
+
+```sh
+$ love . /path/to/file  # from this repo directory
+$ path/to/love path/to/lines.love path/to/file/to/edit  # from anywhere
+```
+
+## Keyboard shortcuts
+
+While editing text:
+* `ctrl+f` to find patterns within a file
+* `ctrl+c` to copy, `ctrl+x` to cut, `ctrl+v` to paste
+* `ctrl+z` to undo, `ctrl+y` to redo
+* `ctrl+=` to zoom in, `ctrl+-` to zoom out, `ctrl+0` to reset zoom
+
+For shortcuts while editing drawings, consult the online help. Either:
+* hover on a drawing and hit `ctrl+h`, or
+* click on a drawing to start a stroke and then press and hold `h` to see your
+  options at any point during a stroke.
 
 ## Known issues
 
@@ -53,3 +83,22 @@ http://akkartik.name/lines.html
 * Can't scroll while selecting text with mouse.
 
 * No scrollbars yet. That stuff is hard.
+
+## Mirrors and Forks
+
+Updates to lines.love can be downloaded from the following mirrors in addition
+to the website above:
+* https://github.com/akkartik/lines.love
+* https://repo.or.cz/lines.love.git
+* https://codeberg.org/akkartik/lines.love
+* https://tildegit.org/akkartik/lines.love
+* https://git.tilde.institute/akkartik/lines.love
+* https://git.sr.ht/~akkartik/lines.love
+* https://pagure.io/lines.love
+
+Forks of Teliva are encouraged. If you show me your fork, I'll link to it
+here.
+
+## Feedback
+
+[Most appreciated.](http://akkartik.name/contact)
