@@ -6,18 +6,35 @@ modifications break something.
 
 http://akkartik.name/lines.html
 
-## Selecting files
+## Invocation
+
+Like all LÖVE apps, lines.love can be invoked either from a terminal or
+by clicking on the application in a graphical desktop.
+
+When invoked from a terminal, you can pass the love binary the path to either
+the zipped lines.love or a directory containing lines.love unzipped.
+
+```sh
+$ path/to/love path/to/lines.love
+
+$ path/to/love .  # from this repo directory
+$ path/to/love path/to/lines/directory  # from anywhere
+```
 
 By default, lines.love reads/writes the file `lines.txt` in your default
 user/home directory (`https://love2d.org/wiki/love.filesystem.getUserDirectory`).
 
-To open a different file, either pass it in as a commandline argument or drag
-and drop the file on to the lines.love window.
+When invoked from a terminal, you can pass in a different file to edit, either
+to the zipped or unzipped versions:
 
 ```sh
-$ love . /path/to/file  # from this repo directory
-$ path/to/love path/to/lines.love path/to/file/to/edit  # from anywhere
+$ path/to/love path/to/lines.love path/to/file/to/edit
+
+$ path/to/love path/to/lines/directory /path/to/file/to/edit
 ```
+
+On a graphical desktop you can also drag and drop a file icon on to the
+lines.love window.
 
 ## Keyboard shortcuts
 
