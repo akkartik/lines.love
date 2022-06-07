@@ -100,6 +100,10 @@ function App.initialize(arg)
     end
   end
   love.window.setTitle('Text with Lines - '..Filename)
+
+  if #arg > 1 then
+    print('ignoring commandline args after '..arg[1])
+  end
 end  -- App.initialize
 
 function initialize_window_geometry()
