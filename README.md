@@ -96,7 +96,7 @@ to the website above:
 * https://git.sr.ht/~akkartik/lines.love
 * https://pagure.io/lines.love
 
-Forks of Teliva are encouraged. If you show me your fork, I'll link to it
+Forks of lines.love are encouraged. If you show me your fork, I'll link to it
 here.
 
 ## Feedback
