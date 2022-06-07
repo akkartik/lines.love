@@ -99,7 +99,7 @@ function App.initialize(arg)
       break
     end
   end
-  love.window.setTitle('Text with Lines - '..Filename)
+  love.window.setTitle('lines.love - '..Filename)
 
   if #arg > 1 then
     print('ignoring commandline args after '..arg[1])
