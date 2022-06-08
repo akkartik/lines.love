@@ -79,6 +79,9 @@ Search_term = nil
 Search_text = nil
 Search_backup = nil  -- stuff to restore when cancelling search
 
+-- resize
+Last_resize_time = nil
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -148,8 +151,8 @@ function love.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Line_width = math.min(40*App.width(Em), App.screen.width-50)
-  -- Should I Text.redraw_all() here to reset text fragments? It doesn't seem
-  -- to be needed, based on repeatedly resizing the window up and down.
+  Text.redraw_all()
+  Last_resize_time = love.timer.getTime()
 end
 
 function initialize_font_settings(font_height)
@@ -183,6 +186,16 @@ function App.draw()
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
   love.graphics.setColor(0, 0, 0)
+
+  -- some hysteresis while resizing
+  if Last_resize_time then
+    if love.timer.getTime() - Last_resize_time < 0.1 then
+      return
+    else
+      Last_resize_time = nil
+    end
+  end
+
   assert(Text.le1(Screen_top1, Cursor1))
   local y = Margin_top
 --?   print('== draw')
@@ -231,6 +244,14 @@ function App.draw()
 end
 
 function App.update(dt)
+  -- some hysteresis while resizing
+  if Last_resize_time then
+    if love.timer.getTime() - Last_resize_time < 0.1 then
+      return
+    else
+      Last_resize_time = nil
+    end
+  end
   Drawing.update(dt)
 end
 
