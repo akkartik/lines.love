@@ -55,6 +55,7 @@ Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
 Selection1 = {}
+Old_cursor1, Old_selection1, Mousepress_shift = nil  -- some extra state to compute selection between mousepress and mouserelease
 Recent_mouse = {}  -- when selecting text, avoid recomputing some state on every single frame
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
@@ -271,13 +272,19 @@ function App.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
-        if App.shift_down() then
-          Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
-        end
-        Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
-        if not App.shift_down() then
-          Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
-        end
+        -- delicate dance between cursor, selection and old cursor
+        -- manual tests:
+        --  regular press+release: sets cursor, clears selection
+        --  shift press+release:
+        --    sets selection to old cursor if not set otherwise leaves it untouched
+        --    sets cursor
+        --  press and hold to start a selection: sets selection on press, cursor on release
+        --  press and hold, then press shift: ignore shift
+        --    i.e. mousereleased should never look at shift state
+        Old_cursor1 = Cursor1
+        Old_selection1 = Selection1
+        Mousepress_shift = App.shift_down()
+        Selection1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
@@ -296,9 +303,14 @@ function App.mousereleased(x,y, button)
       if line.mode == 'text' then
         if Text.in_line(line, x,y) then
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
-          if Text.eq1(Cursor1, Selection1) and not App.shift_down() then
-            Selection1 = {}
+          if Mousepress_shift then
+            if Old_selection1.line == nil then
+              Selection1 = Old_cursor1
+            else
+              Selection1 = Old_selection1
+            end
           end
+          Old_cursor1, Old_selection1, Mousepress_shift = nil
         end
       end
     end

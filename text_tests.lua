@@ -224,6 +224,36 @@ function test_select_text_using_mouse_and_shift()
   check_eq(Cursor1.pos, 4, 'F - test_select_text_using_mouse_and_shift/cursor:pos')
 end
 
+function test_select_text_repeatedly_using_mouse_and_shift()
+  io.write('\ntest_select_text_repeatedly_using_mouse_and_shift')
+  App.screen.init{width=50, height=60}
+  Lines = load_array{'abc', 'def', 'xyz'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Selection1 = {}
+  App.draw()  -- populate line.y for each line in Lines
+  local screen_left_margin = 25  -- pixels
+  -- click on first location
+  App.run_after_mousepress(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+8,Margin_top+5, '1')
+  -- hold down shift and click on a second location
+  App.keypress('lshift')
+  App.run_after_mousepress(screen_left_margin+20,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+20,Margin_top+Line_height+5, '1')
+  -- hold down shift and click at a third location
+  App.keypress('lshift')
+  App.run_after_mousepress(screen_left_margin+20,Margin_top+5, '1')
+  App.run_after_mouserelease(screen_left_margin+8,Margin_top+Line_height+5, '1')
+  App.keyrelease('lshift')
+  -- selection is between first and third location. forget the second location, not the first.
+  check_eq(Selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
+  check_eq(Selection1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:pos')
+  check_eq(Cursor1.line, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:line')
+  check_eq(Cursor1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:pos')
+end
+
 function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
