@@ -113,6 +113,11 @@ function App.initialize(arg)
   if #arg > 1 then
     print('ignoring commandline args after '..arg[1])
   end
+
+  if rawget(_G, 'jit') then
+    jit.off()
+    jit.flush()
+  end
 end  -- App.initialize
 
 function initialize_window_geometry(geometry_spec)
