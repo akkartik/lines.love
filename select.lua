@@ -102,6 +102,12 @@ function Text.to_pos(x,y)
   end
 end
 
+function Text.cut_selection()
+  local result = Text.selection()
+  Text.delete_selection()
+  return result
+end
+
 function Text.delete_selection()
   local minl,maxl = minmax(Selection1.line, Cursor1.line)
   local before = snapshot(minl, maxl)
@@ -171,10 +177,4 @@ function Text.selection()
   end
   table.insert(result, Lines[maxl].data:sub(1, max_offset-1))
   return table.concat(result, '\n')
-end
-
-function Text.cut_selection()
-  local result = Text.selection()
-  Text.delete_selection()
-  return result
 end
