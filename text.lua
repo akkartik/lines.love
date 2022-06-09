@@ -86,7 +86,7 @@ end
 
 function Text.draw_cursor(x, y)
   love.graphics.setColor(1,0,0)
-  love.graphics.line(x,y, x,y+Line_height)
+  love.graphics.rectangle('fill', x,y, 3,Line_height)
   love.graphics.setColor(0,0,0)
   Cursor_x = x
   Cursor_y = y+Line_height
