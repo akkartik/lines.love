@@ -85,9 +85,12 @@ end
 --  draw with small line_width of 100
 
 function Text.draw_cursor(x, y)
-  love.graphics.setColor(1,0,0, 0.8)
-  love.graphics.rectangle('fill', x,y, 3,Line_height)
-  love.graphics.setColor(0,0,0)
+  -- blink every 0.5s
+  if math.floor(Cursor_time*2)%2 == 0 then
+    love.graphics.setColor(1,0,0)
+    love.graphics.rectangle('fill', x,y, 3,Line_height)
+    love.graphics.setColor(0,0,0)
+  end
   Cursor_x = x
   Cursor_y = y+Line_height
 end

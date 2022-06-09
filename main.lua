@@ -82,6 +82,9 @@ Search_backup = nil  -- stuff to restore when cancelling search
 -- resize
 Last_resize_time = nil
 
+-- blinking cursor
+Cursor_time = 0
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -249,6 +252,7 @@ function App.draw()
 end
 
 function App.update(dt)
+  Cursor_time = Cursor_time + dt
   -- some hysteresis while resizing
   if Last_resize_time then
     if love.timer.getTime() - Last_resize_time < 0.1 then
