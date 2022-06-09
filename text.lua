@@ -85,7 +85,7 @@ end
 --  draw with small line_width of 100
 
 function Text.draw_cursor(x, y)
-  love.graphics.setColor(1,0,0)
+  love.graphics.setColor(1,0,0, 0.8)
   love.graphics.rectangle('fill', x,y, 3,Line_height)
   love.graphics.setColor(0,0,0)
   Cursor_x = x
