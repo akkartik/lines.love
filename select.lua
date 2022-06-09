@@ -163,14 +163,14 @@ function Text.selection()
     return Lines[minl].data:sub(min_offset, max_offset-1)
   end
   assert(minl < maxl)
-  local result = Lines[minl].data:sub(min_offset)..'\n'
+  local result = {Lines[minl].data:sub(min_offset)}
   for i=minl+1,maxl-1 do
     if Lines[i].mode == 'text' then
-      result = result..Lines[i].data..'\n'
+      table.insert(result, Lines[i].data)
     end
   end
-  result = result..Lines[maxl].data:sub(1, max_offset-1)
-  return result
+  table.insert(result, Lines[maxl].data:sub(1, max_offset-1))
+  return table.concat(result, '\n')
 end
 
 function Text.cut_selection()
