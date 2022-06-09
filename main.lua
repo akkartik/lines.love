@@ -274,8 +274,7 @@ function App.mousepressed(x,y, mouse_button)
         if App.shift_down() then
           Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
         end
-        Cursor1.line = line_index
-        Cursor1.pos = Text.to_pos_on_line(line, x, y)
+        Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
         if not App.shift_down() then
           Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
         end
@@ -296,8 +295,7 @@ function App.mousereleased(x,y, button)
     for line_index,line in ipairs(Lines) do
       if line.mode == 'text' then
         if Text.in_line(line, x,y) then
-          Cursor1.line = line_index
-          Cursor1.pos = Text.to_pos_on_line(line, x, y)
+          Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
           if Text.eq1(Cursor1, Selection1) and not App.shift_down() then
             Selection1 = {}
           end
