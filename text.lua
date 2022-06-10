@@ -179,6 +179,9 @@ function Text.keychord_pressed(chord)
     local before_line = Cursor1.line
     local before = snapshot(before_line)
     Text.insert_return()
+    if (Cursor_y + Line_height) > App.screen.height then
+      Text.snap_cursor_to_bottom_of_screen()
+    end
     save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   elseif chord == 'tab' then
@@ -372,14 +375,10 @@ end
 function Text.insert_return()
   local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
-  local scroll_down = (Cursor_y + Line_height) > App.screen.height
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
   Lines[Cursor1.line].fragments = nil
   Cursor1.line = Cursor1.line+1
   Cursor1.pos = 1
-  if scroll_down then
-    Text.snap_cursor_to_bottom_of_screen()
-  end
 end
 
 function Text.pageup()

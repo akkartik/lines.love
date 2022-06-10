@@ -420,6 +420,9 @@ function App.keychord_pressed(chord)
       local c = utf8.char(code)
       if c == '\n' then
         Text.insert_return()
+        if (Cursor_y + Line_height) > App.screen.height then
+          Text.snap_cursor_to_bottom_of_screen()
+        end
         num_newlines = num_newlines+1
       else
         Text.insert_at_cursor(c)
