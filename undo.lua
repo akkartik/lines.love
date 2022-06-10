@@ -36,10 +36,8 @@ end
 -- Make copies of objects; the rest of the app may mutate them in place, but undo requires immutable histories.
 function snapshot(s,e)
   -- Snapshot everything by default, but subset if requested.
-  if s == nil and e == nil then
-    s = 1
-    e = #Lines
-  elseif e == nil then
+  assert(s)
+  if e == nil then
     e = s
   end
   assert(#Lines > 0)

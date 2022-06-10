@@ -290,6 +290,9 @@ function App.mousepressed(x,y, mouse_button)
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
+        Lines.current_drawing_index = line_index
+        Lines.current_drawing = line
+        Drawing.before = snapshot(line_index)
         Drawing.mouse_pressed(line, x,y, button)
       end
     end
@@ -300,6 +303,11 @@ function App.mousereleased(x,y, button)
   if Search_term then return end
   if Lines.current_drawing then
     Drawing.mouse_released(x,y, button)
+    save_to_disk(Lines, Filename)
+    if Drawing.before then
+      record_undo_event({before=Drawing.before, after=snapshot(Lines.current_drawing_index)})
+      Drawing.before = nil
+    end
   else
     for line_index,line in ipairs(Lines) do
       if line.mode == 'text' then
