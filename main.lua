@@ -425,7 +425,13 @@ function App.keychord_pressed(chord)
         end
         num_newlines = num_newlines+1
       else
+--?         print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
         Text.insert_at_cursor(c)
+        if Cursor_y >= App.screen.height - Line_height then
+          Text.populate_screen_line_starting_pos(Cursor1.line)
+          Text.snap_cursor_to_bottom_of_screen()
+--?           print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
+        end
       end
     end
     -- hack 1: if we have too many newlines we definitely need to scroll

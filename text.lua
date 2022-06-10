@@ -144,12 +144,17 @@ function Text.textinput(t)
     Text.delete_selection()
   end
   local before = snapshot(Cursor1.line)
+--?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   Text.insert_at_cursor(t)
+  if Cursor_y >= App.screen.height - Line_height then
+    Text.populate_screen_line_starting_pos(Cursor1.line)
+    Text.snap_cursor_to_bottom_of_screen()
+--?     print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
+  end
   record_undo_event({before=before, after=snapshot(Cursor1.line)})
 end
 
 function Text.insert_at_cursor(t)
---?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   local byte_offset
   if Cursor1.pos > 1 then
     byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -164,11 +169,6 @@ function Text.insert_at_cursor(t)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
   Cursor1.pos = Cursor1.pos+1
-  if Cursor_y >= App.screen.height - Line_height then
-    Text.populate_screen_line_starting_pos(Cursor1.line)
-    Text.snap_cursor_to_bottom_of_screen()
---?     print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
-  end
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
@@ -186,7 +186,13 @@ function Text.keychord_pressed(chord)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   elseif chord == 'tab' then
     local before = snapshot(Cursor1.line)
+--?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     Text.insert_at_cursor('\t')
+    if Cursor_y >= App.screen.height - Line_height then
+      Text.populate_screen_line_starting_pos(Cursor1.line)
+      Text.snap_cursor_to_bottom_of_screen()
+--?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
+    end
     save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'backspace' then
