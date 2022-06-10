@@ -388,13 +388,13 @@ function Text.insert_return()
 end
 
 function Text.pageup()
-  print('pageup')
+--?   print('pageup')
   -- duplicate some logic from love.draw
   local top2 = Text.to2(Screen_top1)
 --?   print(App.screen.height)
   local y = App.screen.height - Line_height
   while y >= Margin_top do
---?     print(y, top2.line)
+--?     print(y, top2.line, top2.screen_line, top2.screen_pos)
     if Screen_top1.line == 1 and Screen_top1.pos == 1 then break end
     if Lines[Screen_top1.line].mode == 'text' then
       y = y - Line_height
@@ -408,11 +408,11 @@ function Text.pageup()
   Cursor1.pos = Screen_top1.pos
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
 --?   print(Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
-  print('pageup end')
+--?   print('pageup end')
 end
 
 function Text.pagedown()
-  print('pagedown')
+--?   print('pagedown')
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
   -- However, only do this if it makes forward progress.
@@ -433,7 +433,7 @@ function Text.pagedown()
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
 --?   print('top now', Screen_top1.line)
   Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-  print('pagedown end')
+--?   print('pagedown end')
 end
 
 function Text.up()
@@ -810,15 +810,14 @@ function Text.to2(pos1)
   end
   local result = {line=pos1.line, screen_line=1}
   if Lines[pos1.line].screen_line_starting_pos == nil then
-    result.screen_pos = pos1.pos
-  else
-    for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
-      local spos = Lines[pos1.line].screen_line_starting_pos[i]
-      if spos <= pos1.pos then
-        result.screen_line = i
-        result.screen_pos = pos1.pos - spos + 1
-        break
-      end
+    Text.populate_screen_line_starting_pos(pos1.line)
+  end
+  for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
+    local spos = Lines[pos1.line].screen_line_starting_pos[i]
+    if spos <= pos1.pos then
+      result.screen_line = i
+      result.screen_pos = pos1.pos - spos + 1
+      break
     end
   end
   assert(result.screen_pos)
@@ -867,15 +866,14 @@ function Text.previous_screen_line(pos2)
   else
     local l = Lines[pos2.line-1]
     if l.screen_line_starting_pos == nil then
-      return {line=pos2.line-1, screen_line=1, screen_pos=1}
-    else
-      return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
+      Text.populate_screen_line_starting_pos(pos2.line-1)
     end
+    return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
   end
 end
 
 function Text.populate_screen_line_starting_pos(line_index)
---?   print('Text.populate_screen_line_starting_pos')
+--?   print('Text.populate_screen_line_starting_pos', line_index)
   local line = Lines[line_index]
   if line.screen_line_starting_pos then
     return
@@ -904,7 +902,7 @@ function Text.populate_screen_line_starting_pos(line_index)
 end
 
 function Text.redraw_all()
-  print('clearing fragments')
+--?   print('clearing fragments')
   for _,line in ipairs(Lines) do
     line.y = nil
     line.fragments = nil
