@@ -355,7 +355,7 @@ function Drawing.keychord_pressed(chord)
     Current_drawing_mode = 'polygon'
   elseif love.mouse.isDown('1') and chord == 'g' then
     Current_drawing_mode = 'polygon'
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
@@ -372,7 +372,7 @@ function Drawing.keychord_pressed(chord)
     Current_drawing_mode = 'rectangle'
   elseif love.mouse.isDown('1') and chord == 'r' then
     Current_drawing_mode = 'rectangle'
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
@@ -389,7 +389,7 @@ function Drawing.keychord_pressed(chord)
     Current_drawing_mode = 'square'
   elseif love.mouse.isDown('1') and chord == 's' then
     Current_drawing_mode = 'square'
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
@@ -407,14 +407,14 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'square'
   elseif love.mouse.isDown('1') and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-o' and not love.mouse.isDown('1') then
     Current_drawing_mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'a' and Current_drawing_mode == 'circle' then
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     drawing.pending.mode = 'arc'
     local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
@@ -423,7 +423,7 @@ function Drawing.keychord_pressed(chord)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
   elseif love.mouse.isDown('1') and chord == 'o' then
     Current_drawing_mode = 'circle'
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
@@ -434,7 +434,7 @@ function Drawing.keychord_pressed(chord)
     drawing.pending.mode = 'circle'
   elseif love.mouse.isDown('1') and chord == 'l' then
     Current_drawing_mode = 'line'
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
@@ -466,7 +466,7 @@ function Drawing.keychord_pressed(chord)
       smoothen(shape)
     end
   elseif chord == 'C-u' and not love.mouse.isDown('1') then
-    local drawing,_,p = Drawing.select_point_at_mouse()
+    local _,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         Previous_drawing_mode = Current_drawing_mode
@@ -476,7 +476,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
-    local drawing,_,p = Drawing.select_point_at_mouse()
+    local _,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         Previous_drawing_mode = Current_drawing_mode
@@ -486,7 +486,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing = drawing
     end
   elseif chord == 'C-n' and not love.mouse.isDown('1') then
-    local drawing,point_index,p = Drawing.select_point_at_mouse()
+    local _,drawing,point_index,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         -- don't clobber
@@ -498,7 +498,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then
-    local drawing,i,p = Drawing.select_point_at_mouse()
+    local _,drawing,i,p = Drawing.select_point_at_mouse()
     if drawing then
       for _,shape in ipairs(drawing.shapes) do
         if Drawing.contains_point(shape, i) then
@@ -578,10 +578,10 @@ end
 
 function Drawing.current_drawing()
   local x, y = love.mouse.getX(), love.mouse.getY()
-  for _,drawing in ipairs(Lines) do
+  for drawing_index,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       if Drawing.in_drawing(drawing, x,y) then
-        return drawing
+        return drawing_index,drawing
       end
     end
   end
@@ -606,7 +606,7 @@ function Drawing.select_shape_at_mouse()
 end
 
 function Drawing.select_point_at_mouse()
-  for _,drawing in ipairs(Lines) do
+  for drawing_index,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       local x, y = love.mouse.getX(), love.mouse.getY()
       if Drawing.in_drawing(drawing, x,y) then
@@ -614,7 +614,7 @@ function Drawing.select_point_at_mouse()
         for i,point in ipairs(drawing.points) do
           assert(point)
           if Drawing.near(point, mx,my) then
-            return drawing,i,point
+            return drawing_index,drawing,i,point
           end
         end
       end
