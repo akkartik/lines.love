@@ -223,6 +223,7 @@ function Text.keychord_pressed(chord)
       local top2 = Text.to2(Screen_top1)
       top2 = Text.previous_screen_line(top2)
       Screen_top1 = Text.to1(top2)
+      Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
     assert(Text.le1(Screen_top1, Cursor1))
     save_to_disk(Lines, Filename)
@@ -423,6 +424,7 @@ function Text.pagedown()
   Cursor1.pos = Screen_top1.pos
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
 --?   print('top now', Screen_top1.line)
+  Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
 
 function Text.up()
@@ -662,6 +664,7 @@ function Text.snap_cursor_to_bottom_of_screen()
 --?   print('top2 finally:', top2.line, top2.screen_line, top2.screen_pos)
   Screen_top1 = Text.to1(top2)
 --?   print('top1 finally:', Screen_top1.line, Screen_top1.pos)
+  Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
 
 function Text.in_line(line, x,y)
@@ -895,6 +898,7 @@ function Text.populate_screen_line_starting_pos(line_index)
 end
 
 function Text.redraw_all()
+  print('clearing fragments')
   for _,line in ipairs(Lines) do
     line.y = nil
     line.fragments = nil

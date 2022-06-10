@@ -12,6 +12,8 @@ local geom = require 'geom'
 require 'help'
 require 'icons'
 
+local mri = require 'MemoryReferenceInfo'
+
 -- run in both tests and a real run
 function App.initialize_globals()
 -- a line is either text or a drawing
@@ -86,6 +88,10 @@ Last_resize_time = nil
 -- blinking cursor
 Cursor_time = 0
 
+Initialize_done = false
+Before_done = false
+mri.m_cConfig.m_bAllMemoryRefFileAddTime = false
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -105,7 +111,9 @@ function App.initialize(arg)
   if #arg > 0 then
     Filename = arg[1]
   end
+  print('init', collectgarbage('count'))
   Lines = load_from_disk(Filename)
+  print('load_from_disk', collectgarbage('count'))
   for i,line in ipairs(Lines) do
     if line.mode == 'text' then
       Cursor1.line = i
@@ -118,10 +126,12 @@ function App.initialize(arg)
     print('ignoring commandline args after '..arg[1])
   end
 
-  if rawget(_G, 'jit') then
-    jit.off()
-    jit.flush()
-  end
+  Initialize_done = true
+
+--?   if rawget(_G, 'jit') then
+--?     jit.off()
+--?     jit.flush()
+--?   end
 end  -- App.initialize
 
 function initialize_window_geometry(geometry_spec)
@@ -190,7 +200,12 @@ function App.filedropped(file)
   love.window.setTitle('Text with Lines - '..Filename)
 end
 
+frame_index = 0
 function App.draw()
+  frame_index = frame_index+1
+  if frame_index % 10 == 0 then
+    print(frame_index)
+  end
   Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
@@ -249,6 +264,24 @@ function App.draw()
 --?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
   if Search_term then
     Text.draw_search_bar()
+  end
+
+  if Initialize_done then
+    if not Before_done then
+      Before_done = true
+      print('before', collectgarbage('count'))
+      collectgarbage('collect')
+      mri.m_cMethods.DumpMemorySnapshot('./', '0', -1)
+      frame_index = 0
+    elseif frame_index == 1000 then
+      print('after', collectgarbage('count'))
+      collectgarbage('collect')
+      mri.m_cMethods.DumpMemorySnapshot('./', '1', -1)
+      mri.m_cMethods.DumpMemorySnapshotComparedFile("./", "Compared", -1,
+          "./LuaMemRefInfo-All-[0].txt",
+          "./LuaMemRefInfo-All-[1].txt")
+      os.exit(1)
+    end
   end
 end
 
@@ -396,6 +429,7 @@ function App.keychord_pressed(chord)
     end
   -- clipboard
   elseif chord == 'C-c' then
+    print('C-c', collectgarbage('count'))
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local s = Text.selection()
     if s then
