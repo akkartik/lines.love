@@ -254,6 +254,23 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   check_eq(Cursor1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:pos')
 end
 
+function test_cut_without_selection()
+  io.write('\ntest_cut_without_selection')
+  -- display a few lines
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  Selection1 = {}
+  App.draw()
+  -- try to cut without selecting text
+  App.run_after_keychord('C-x')
+  -- no crash
+  check_nil(Selection1.line, 'F - test_cut_without_selection')
+end
+
 function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
