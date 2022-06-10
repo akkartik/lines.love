@@ -206,6 +206,7 @@ function App.draw()
   end
 
   assert(Text.le1(Screen_top1, Cursor1))
+  Cursor_y = -1
   local y = Margin_top
 --?   print('== draw')
   for line_index,line in ipairs(Lines) do
@@ -247,6 +248,9 @@ function App.draw()
 --?         print('=> y', y)
       end
     end
+  end
+  if Cursor_y == -1 then
+    Cursor_y = App.screen.height
   end
 --?   print('screen bottom: '..tostring(Screen_bottom1.pos)..' in '..tostring(Lines[Screen_bottom1.line].data))
   if Search_term then
@@ -427,13 +431,10 @@ function App.keychord_pressed(chord)
     local before_line = Cursor1.line
     local before = snapshot(before_line)
     local clipboard_data = App.getClipboardText()
-    local num_newlines = 0  -- hack 1
---?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
       if c == '\n' then
         Text.insert_return()
-        num_newlines = num_newlines+1
       else
         Text.insert_at_cursor(c)
       end
@@ -441,22 +442,6 @@ function App.keychord_pressed(chord)
     App.draw()
     if Cursor_y >= App.screen.height - Line_height then
       Text.populate_screen_line_starting_pos(Cursor1.line)
-      Text.snap_cursor_to_bottom_of_screen()
---?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
-    end
-    -- hack 1: if we have too many newlines we definitely need to scroll
-    for i=before_line,Cursor1.line do
-      Lines[i].screen_line_starting_pos = nil
-      Text.populate_screen_line_starting_pos(i)
-    end
-    if Cursor1.line-Screen_top1.line+1 + num_newlines > App.screen.height/Line_height then
-      Text.snap_cursor_to_bottom_of_screen()
-    end
-    -- hack 2: if we have too much text wrapping we definitely need to scroll
-    local clipboard_text = App.newText(love.graphics.getFont(), clipboard_data)
-    local clipboard_width = App.width(clipboard_text)
---?     print(Cursor_y, Cursor_y*Line_width, Cursor_y*Line_width+Cursor_x, Cursor_y*Line_width+Cursor_x+clipboard_width, Line_width*App.screen.height/Line_height)
-    if Cursor_y*Line_width+Cursor_x + clipboard_width > Line_width*App.screen.height/Line_height then
       Text.snap_cursor_to_bottom_of_screen()
     end
     save_to_disk(Lines, Filename)
