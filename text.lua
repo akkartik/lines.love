@@ -903,7 +903,7 @@ function Text.populate_screen_line_starting_pos(line_index)
 end
 
 function Text.redraw_all()
-  print('clearing fragments')
+--?   print('clearing fragments')
   for _,line in ipairs(Lines) do
     line.y = nil
     line.fragments = nil
