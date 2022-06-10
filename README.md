@@ -70,13 +70,15 @@ found anything amiss: http://akkartik.name/contact
 
 * No support yet for Unicode graphemes spanning multiple codepoints.
 
-* Undo/redo can be sluggish in large files. If things get sluggish, killing
-  the process can lose data.
+* Undo/redo can be sluggish in large files.
 
 * Large files may grow sluggish in other ways. I've noticed in 100KB files
   that closing the window can take a few seconds. And it seems to take longer
   in proportion to how far down my edits are. The phenomenon persists even if
   I take out undo history.
+
+* If you kill the process, say by force-quitting because things things get
+  sluggish, you can lose data.
 
 * The text cursor will always stay on the screen. This can have some strange
   implications:
