@@ -335,9 +335,11 @@ function App.textinput(t)
     Search_text = nil
     Text.search_next()
   elseif Current_drawing_mode == 'name' then
+    local before = snapshot(Lines.current_drawing_index)
     local drawing = Lines.current_drawing
     local p = drawing.points[drawing.pending.target_point]
     p.name = p.name..t
+    record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
   else
     Text.textinput(t)
   end
