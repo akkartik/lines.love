@@ -22,9 +22,7 @@ function Text.draw(line, line_width, line_index)
   if line.fragments == nil then
     Text.compute_fragments(line, line_width)
   end
-  if line.screen_line_starting_pos == nil then
-    Text.populate_screen_line_starting_pos(line_index)
-  end
+  Text.populate_screen_line_starting_pos(line_index)
 --?   print('--')
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
@@ -450,10 +448,6 @@ function Text.up()
 --?         print('found previous text line')
         Cursor1.line = new_cursor_line
         Text.populate_screen_line_starting_pos(Cursor1.line)
-        if Lines[Cursor1.line].screen_line_starting_pos == nil then
-          Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x)
-          break
-        end
         -- previous text line found, pick its final screen line
 --?         print('has multiple screen lines')
         local screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos
@@ -598,9 +592,7 @@ function Text.right()
 end
 
 function Text.pos_at_start_of_cursor_screen_line()
-  if Lines[Cursor1.line].screen_line_starting_pos == nil then
-    return 1,1
-  end
+  Text.populate_screen_line_starting_pos(Cursor1.line)
   for i=#Lines[Cursor1.line].screen_line_starting_pos,1,-1 do
     local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
     if spos <= Cursor1.pos then
@@ -611,9 +603,7 @@ function Text.pos_at_start_of_cursor_screen_line()
 end
 
 function Text.cursor_at_final_screen_line()
-  if Lines[Cursor1.line].screen_line_starting_pos == nil then
-    return true
-  end
+  Text.populate_screen_line_starting_pos(Cursor1.line)
   local screen_lines = Lines[Cursor1.line].screen_line_starting_pos
 --?   print(screen_lines[#screen_lines], Cursor1.pos)
   return screen_lines[#screen_lines] <= Cursor1.pos
@@ -680,15 +670,12 @@ function Text.in_line(line, x,y)
   if line.y == nil then return false end  -- outside current page
   if x < 25 then return false end
   if y < line.y then return false end
-  if line.screen_line_starting_pos == nil then return y < line.y + Line_height end
+  Text.populate_screen_line_starting_pos(Cursor1.line)
   return y < line.y + #line.screen_line_starting_pos * Line_height
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
 function Text.to_pos_on_line(line, mx, my)
-  if line.screen_line_starting_pos == nil then
-    return Text.nearest_cursor_pos(line.data, mx)
-  end
   if line.fragments == nil then
     Text.compute_fragments(line, Line_width)
   end
@@ -809,9 +796,7 @@ function Text.to2(pos1)
     return {line=pos1.line, screen_line=1, screen_pos=1}
   end
   local result = {line=pos1.line, screen_line=1}
-  if Lines[pos1.line].screen_line_starting_pos == nil then
-    Text.populate_screen_line_starting_pos(pos1.line)
-  end
+  Text.populate_screen_line_starting_pos(pos1.line)
   for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
     local spos = Lines[pos1.line].screen_line_starting_pos[i]
     if spos <= pos1.pos then
@@ -865,9 +850,7 @@ function Text.previous_screen_line(pos2)
     return {line=pos2.line-1, screen_line=1, screen_pos=1}
   else
     local l = Lines[pos2.line-1]
-    if l.screen_line_starting_pos == nil then
-      Text.populate_screen_line_starting_pos(pos2.line-1)
-    end
+    Text.populate_screen_line_starting_pos(pos2.line-1)
     return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
   end
 end

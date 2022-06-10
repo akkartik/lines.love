@@ -441,7 +441,6 @@ function App.keychord_pressed(chord)
     end
     App.draw()
     if Cursor_y >= App.screen.height - Line_height then
-      Text.populate_screen_line_starting_pos(Cursor1.line)
       Text.snap_cursor_to_bottom_of_screen()
     end
     save_to_disk(Lines, Filename)
