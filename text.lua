@@ -388,6 +388,7 @@ function Text.insert_return()
 end
 
 function Text.pageup()
+  print('pageup')
   -- duplicate some logic from love.draw
   local top2 = Text.to2(Screen_top1)
 --?   print(App.screen.height)
@@ -407,9 +408,11 @@ function Text.pageup()
   Cursor1.pos = Screen_top1.pos
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
 --?   print(Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
+  print('pageup end')
 end
 
 function Text.pagedown()
+  print('pagedown')
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
   -- However, only do this if it makes forward progress.
@@ -430,6 +433,7 @@ function Text.pagedown()
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
 --?   print('top now', Screen_top1.line)
   Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+  print('pagedown end')
 end
 
 function Text.up()
@@ -880,6 +884,7 @@ function Text.populate_screen_line_starting_pos(line_index)
   if line.fragments == nil then
     Text.compute_fragments(line, Line_width)
   end
+  line.screen_line_starting_pos = {1}
   local x = 25
   local pos = 1
   for _, f in ipairs(line.fragments) do
@@ -889,12 +894,8 @@ function Text.populate_screen_line_starting_pos(line_index)
     local frag_width = App.width(frag_text)
     if x + frag_width > Line_width then
       x = 25
-      if line.screen_line_starting_pos == nil then
-        line.screen_line_starting_pos = {1, pos}
-      else
---?         print(' ', #line.screen_line_starting_pos, line.data)
-        table.insert(line.screen_line_starting_pos, pos)
-      end
+--?       print(' ', #line.screen_line_starting_pos, line.data)
+      table.insert(line.screen_line_starting_pos, pos)
     end
     x = x + frag_width
     local frag_len = utf8.len(frag)
@@ -903,7 +904,7 @@ function Text.populate_screen_line_starting_pos(line_index)
 end
 
 function Text.redraw_all()
---?   print('clearing fragments')
+  print('clearing fragments')
   for _,line in ipairs(Lines) do
     line.y = nil
     line.fragments = nil
