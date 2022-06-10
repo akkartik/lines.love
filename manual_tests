@@ -36,6 +36,9 @@ persistence:
   draw a line, circle, rectangle, square, polygon, quit, restart. All the shapes you drew should still be visible.
   select a point and name it, quit, restart. Name is still visible.
 
+clipboard:
+  cut/copy without making a selection
+
 resize:
   create a file containing a long line of characters without spaces. try
   resizing the window vertically and horizontally, as far as possible.

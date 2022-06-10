@@ -103,12 +103,14 @@ function Text.to_pos(x,y)
 end
 
 function Text.cut_selection()
+  if Selection1.line == nil then return end
   local result = Text.selection()
   Text.delete_selection()
   return result
 end
 
 function Text.delete_selection()
+  if Selection1.line == nil then return end
   local minl,maxl = minmax(Selection1.line, Cursor1.line)
   local before = snapshot(minl, maxl)
   Text.delete_selection_without_undo()
