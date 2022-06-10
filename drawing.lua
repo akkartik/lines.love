@@ -466,27 +466,29 @@ function Drawing.keychord_pressed(chord)
       smoothen(shape)
     end
   elseif chord == 'C-u' and not love.mouse.isDown('1') then
-    local _,drawing,_,p = Drawing.select_point_at_mouse()
+    local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         Previous_drawing_mode = Current_drawing_mode
       end
       Current_drawing_mode = 'move'
       drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
   elseif love.mouse.isDown('1') and chord == 'v' then
-    local _,drawing,_,p = Drawing.select_point_at_mouse()
+    local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         Previous_drawing_mode = Current_drawing_mode
       end
       Current_drawing_mode = 'move'
       drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
   elseif chord == 'C-n' and not love.mouse.isDown('1') then
-    local _,drawing,point_index,p = Drawing.select_point_at_mouse()
+    local drawing_index,drawing,point_index,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         -- don't clobber
@@ -495,6 +497,7 @@ function Drawing.keychord_pressed(chord)
       Current_drawing_mode = 'name'
       p.name = ''
       drawing.pending = {mode=Current_drawing_mode, target_point=point_index}
+      Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
   elseif chord == 'C-d' and not love.mouse.isDown('1') then
