@@ -42,6 +42,11 @@ function snapshot(s,e)
   elseif e == nil then
     e = s
   end
+  assert(#Lines > 0)
+  if s < 1 then s = 1 end
+  if s > #Lines then s = #Lines end
+  if e < 1 then e = 1 end
+  if e > #Lines then e = #Lines end
   -- compare with App.initialize_globals
   local event = {
     screen_top=deepcopy(Screen_top1),
