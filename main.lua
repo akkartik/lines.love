@@ -428,23 +428,21 @@ function App.keychord_pressed(chord)
     local before = snapshot(before_line)
     local clipboard_data = App.getClipboardText()
     local num_newlines = 0  -- hack 1
+--?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
       if c == '\n' then
         Text.insert_return()
-        if (Cursor_y + Line_height) > App.screen.height then
-          Text.snap_cursor_to_bottom_of_screen()
-        end
         num_newlines = num_newlines+1
       else
---?         print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
         Text.insert_at_cursor(c)
-        if Cursor_y >= App.screen.height - Line_height then
-          Text.populate_screen_line_starting_pos(Cursor1.line)
-          Text.snap_cursor_to_bottom_of_screen()
---?           print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
-        end
       end
+    end
+    App.draw()
+    if Cursor_y >= App.screen.height - Line_height then
+      Text.populate_screen_line_starting_pos(Cursor1.line)
+      Text.snap_cursor_to_bottom_of_screen()
+--?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     end
     -- hack 1: if we have too many newlines we definitely need to scroll
     for i=before_line,Cursor1.line do

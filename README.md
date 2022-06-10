@@ -73,10 +73,10 @@ found anything amiss: http://akkartik.name/contact
 * Undo/redo can be sluggish in large files. If things get sluggish, killing
   the process can lose data.
 
-* Large files may grow sluggish in other ways. Pasting more than a line or two
-  gets slow. I've noticed in 100KB files that closing the window can take a
-  few seconds. And it seems to take longer in proportion to how far down my
-  edits are. The phenomenon persists even if I take out undo history.
+* Large files may grow sluggish in other ways. I've noticed in 100KB files
+  that closing the window can take a few seconds. And it seems to take longer
+  in proportion to how far down my edits are. The phenomenon persists even if
+  I take out undo history.
 
 * The text cursor will always stay on the screen. This can have some strange
   implications:
