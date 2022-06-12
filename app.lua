@@ -260,6 +260,10 @@ function App.run_tests()
     _G[name]()
   end
   print()
+  -- clean up all test methods
+  for _,name in ipairs(sorted_names) do
+    _G[name] = nil
+  end
 end
 
 -- call this once all tests are run
