@@ -11,6 +11,18 @@ function test_insert_first_character()
   App.screen.check(y, 'a', 'F - test_insert_first_character/screen:1')
 end
 
+function test_press_ctrl()
+  io.write('\ntest_press_ctrl')
+  -- press ctrl while the cursor is on text
+  App.screen.init{width=50, height=80}
+  Lines = load_array{''}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.run_after_keychord('C-m')
+end
+
 function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
