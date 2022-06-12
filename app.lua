@@ -236,6 +236,15 @@ function App.run_after_keychord(key)
   App.draw()
 end
 
+function App.run_after_mouse_click(x,y, button)
+  App.fake_mouse_press(x,y, button)
+  App.mousepressed(x,y, button)
+  App.fake_mouse_release(x,y, button)
+  App.mousereleased(x,y, button)
+  App.screen.contents = {}
+  App.draw()
+end
+
 function App.run_after_mouse_press(x,y, button)
   App.fake_mouse_press(x,y, button)
   App.mousepressed(x,y, button)

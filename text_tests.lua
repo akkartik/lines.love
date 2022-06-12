@@ -23,6 +23,23 @@ function test_press_ctrl()
   App.run_after_keychord('C-m')
 end
 
+function test_click_with_mouse()
+  io.write('\ntest_click')
+  -- display two lines with cursor on one of them
+  App.screen.init{width=50, height=80}
+  Lines = load_array{'abc', 'def'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  -- click on the other line
+  local screen_left_margin = 25  -- pixels
+  App.draw()
+  App.run_after_mouse_click(screen_left_margin+8,Margin_top+5, '1')
+  -- cursor moves
+  check_eq(Cursor1.line, 1, 'F - test_click/cursor')
+end
+
 function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
