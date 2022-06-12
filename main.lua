@@ -448,7 +448,11 @@ function App.keychord_pressed(chord)
   -- dispatch to drawing or text
   elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
+    local drawing_index, drawing = Drawing.current_drawing()
+    local before = snapshot(drawing_index)
     Drawing.keychord_pressed(chord)
+    record_undo_event({before=before, after=snapshot(drawing_index)})
+    save_to_disk(Lines, Filename)
   elseif chord == 'escape' and love.mouse.isDown('1') then
     local _,drawing = Drawing.current_drawing()
     if drawing then
@@ -465,6 +469,7 @@ function App.keychord_pressed(chord)
       Current_drawing_mode = Previous_drawing_mode
       Previous_drawing_mode = nil
     else
+      local before = snapshot(Lines.current_drawing_index)
       local drawing = Lines.current_drawing
       local p = drawing.points[drawing.pending.target_point]
       if chord == 'escape' then
@@ -474,6 +479,7 @@ function App.keychord_pressed(chord)
         local byte_offset = utf8.offset(p.name, len-1)
         p.name = string.sub(p.name, 1, byte_offset)
       end
+      record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
     end
     save_to_disk(Lines, Filename)
   else
