@@ -446,7 +446,7 @@ function App.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   -- dispatch to drawing or text
-  elseif love.mouse.isDown('1') or chord:sub(1,2) == 'C-' then
+  elseif App.mouse_down('1') or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
     local drawing_index, drawing = Drawing.current_drawing()
     if drawing_index then
@@ -455,12 +455,12 @@ function App.keychord_pressed(chord)
       record_undo_event({before=before, after=snapshot(drawing_index)})
       save_to_disk(Lines, Filename)
     end
-  elseif chord == 'escape' and love.mouse.isDown('1') then
+  elseif chord == 'escape' and App.mouse_down('1') then
     local _,drawing = Drawing.current_drawing()
     if drawing then
       drawing.pending = {}
     end
-  elseif chord == 'escape' and not love.mouse.isDown('1') then
+  elseif chord == 'escape' and not App.mouse_down('1') then
     for _,line in ipairs(Lines) do
       if line.mode == 'drawing' then
         line.show_help = false

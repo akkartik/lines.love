@@ -5,7 +5,7 @@ geom = require 'geom'
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts.
 function Drawing.draw(line)
-  local pmx,pmy = love.mouse.getX(), love.mouse.getY()
+  local pmx,pmy = App.mouse_x(), App.mouse_y()
   if pmx < 16+Line_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     love.graphics.setColor(0.75,0.75,0.75)
     love.graphics.rectangle('line', 16,line.y, Line_width,Drawing.pixels(line.h))
@@ -15,7 +15,7 @@ function Drawing.draw(line)
       icon[Previous_drawing_mode](16+Line_width-20, line.y+4)
     end
 
-    if love.mouse.isDown('1') and love.keyboard.isDown('h') then
+    if App.mouse_down('1') and love.keyboard.isDown('h') then
       draw_help_with_mouse_pressed(line)
       return
     end
@@ -116,14 +116,14 @@ function Drawing.draw_pending_shape(left,top, drawing)
   elseif shape.mode == 'freehand' then
     Drawing.draw_shape(left,top, drawing, shape)
   elseif shape.mode == 'line' then
-    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
+    local mx,my = Drawing.coord(App.mouse_x()-left), Drawing.coord(App.mouse_y()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
     local p1 = drawing.points[shape.p1]
     love.graphics.line(Drawing.pixels(p1.x)+left,Drawing.pixels(p1.y)+top, Drawing.pixels(mx)+left,Drawing.pixels(my)+top)
   elseif shape.mode == 'manhattan' then
-    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
+    local mx,my = Drawing.coord(App.mouse_x()-left), Drawing.coord(App.mouse_y()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
@@ -143,9 +143,9 @@ function Drawing.draw_pending_shape(left,top, drawing)
       end
       prev = curr
     end
-    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, love.mouse.getX(),love.mouse.getY())
+    love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, App.mouse_x(),App.mouse_y())
   elseif shape.mode == 'rectangle' then
-    local pmx,pmy = love.mouse.getX(), love.mouse.getY()
+    local pmx,pmy = App.mouse_x(), App.mouse_y()
     local first = drawing.points[shape.vertices[1]]
     if #shape.vertices == 1 then
       love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, pmx,pmy)
@@ -159,7 +159,7 @@ function Drawing.draw_pending_shape(left,top, drawing)
     love.graphics.line(Drawing.pixels(thirdx)+left,Drawing.pixels(thirdy)+top, Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top)
     love.graphics.line(Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top, Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top)
   elseif shape.mode == 'square' then
-    local pmx,pmy = love.mouse.getX(), love.mouse.getY()
+    local pmx,pmy = App.mouse_x(), App.mouse_y()
     local first = drawing.points[shape.vertices[1]]
     if #shape.vertices == 1 then
       love.graphics.line(Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top, pmx,pmy)
@@ -174,15 +174,15 @@ function Drawing.draw_pending_shape(left,top, drawing)
     love.graphics.line(Drawing.pixels(fourthx)+left,Drawing.pixels(fourthy)+top, Drawing.pixels(first.x)+left,Drawing.pixels(first.y)+top)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
+    local mx,my = Drawing.coord(App.mouse_x()-left), Drawing.coord(App.mouse_y()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
     local cx,cy = Drawing.pixels(center.x)+left, Drawing.pixels(center.y)+top
-    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, love.mouse.getX(),love.mouse.getY()))
+    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, App.mouse_x(),App.mouse_y()))
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
-    local mx,my = Drawing.coord(love.mouse.getX()-left), Drawing.coord(love.mouse.getY()-top)
+    local mx,my = Drawing.coord(App.mouse_x()-left), Drawing.coord(App.mouse_y()-top)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
@@ -232,11 +232,11 @@ function Drawing.update()
   if Lines.current_drawing == nil then return end
   local drawing = Lines.current_drawing
   assert(drawing.mode == 'drawing')
-  local x, y = love.mouse.getX(), love.mouse.getY()
-  if love.mouse.isDown('1') then
+  local x, y = App.mouse_x(), App.mouse_y()
+  if App.mouse_down('1') then
     if Drawing.in_drawing(drawing, x,y) then
       if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(love.mouse.getX()-16), y=Drawing.coord(love.mouse.getY()-drawing.y)})
+        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-16), y=Drawing.coord(App.mouse_y()-drawing.y)})
       elseif drawing.pending.mode == 'move' then
         local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
         drawing.pending.target_point.x = mx
@@ -283,7 +283,7 @@ function Drawing.mouse_released(x,y, button)
             drawing.pending.p2 = j
           end
           local p2 = drawing.points[drawing.pending.p2]
-          love.mouse.setPosition(16+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
+          App.mouse_move(16+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'polygon' then
@@ -349,11 +349,11 @@ function Drawing.mouse_released(x,y, button)
 end
 
 function Drawing.keychord_pressed(chord)
-  if chord == 'C-p' and not love.mouse.isDown('1') then
+  if chord == 'C-p' and not App.mouse_down('1') then
     Current_drawing_mode = 'freehand'
-  elseif chord == 'C-g' and not love.mouse.isDown('1') then
+  elseif chord == 'C-g' and not App.mouse_down('1') then
     Current_drawing_mode = 'polygon'
-  elseif love.mouse.isDown('1') and chord == 'g' then
+  elseif App.mouse_down('1') and chord == 'g' then
     Current_drawing_mode = 'polygon'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
@@ -368,9 +368,9 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'polygon'
-  elseif chord == 'C-r' and not love.mouse.isDown('1') then
+  elseif chord == 'C-r' and not App.mouse_down('1') then
     Current_drawing_mode = 'rectangle'
-  elseif love.mouse.isDown('1') and chord == 'r' then
+  elseif App.mouse_down('1') and chord == 'r' then
     Current_drawing_mode = 'rectangle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
@@ -385,9 +385,9 @@ function Drawing.keychord_pressed(chord)
       -- reuse existing (1-2) vertices
     end
     drawing.pending.mode = 'rectangle'
-  elseif chord == 'C-s' and not love.mouse.isDown('1') then
+  elseif chord == 'C-s' and not App.mouse_down('1') then
     Current_drawing_mode = 'square'
-  elseif love.mouse.isDown('1') and chord == 's' then
+  elseif App.mouse_down('1') and chord == 's' then
     Current_drawing_mode = 'square'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
@@ -406,22 +406,22 @@ function Drawing.keychord_pressed(chord)
       end
     end
     drawing.pending.mode = 'square'
-  elseif love.mouse.isDown('1') and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
+  elseif App.mouse_down('1') and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
     local _,drawing = Drawing.current_drawing()
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-16), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
-  elseif chord == 'C-o' and not love.mouse.isDown('1') then
+  elseif chord == 'C-o' and not App.mouse_down('1') then
     Current_drawing_mode = 'circle'
-  elseif love.mouse.isDown('1') and chord == 'a' and Current_drawing_mode == 'circle' then
+  elseif App.mouse_down('1') and chord == 'a' and Current_drawing_mode == 'circle' then
     local _,drawing = Drawing.current_drawing()
     drawing.pending.mode = 'arc'
-    local mx,my = Drawing.coord(love.mouse.getX()-16), Drawing.coord(love.mouse.getY()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-16), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
-  elseif love.mouse.isDown('1') and chord == 'o' then
+  elseif App.mouse_down('1') and chord == 'o' then
     Current_drawing_mode = 'circle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
@@ -432,7 +432,7 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.center = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'circle'
-  elseif love.mouse.isDown('1') and chord == 'l' then
+  elseif App.mouse_down('1') and chord == 'l' then
     Current_drawing_mode = 'line'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
@@ -443,9 +443,9 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.p1 = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'line'
-  elseif chord == 'C-l' and not love.mouse.isDown('1') then
+  elseif chord == 'C-l' and not App.mouse_down('1') then
     Current_drawing_mode = 'line'
-  elseif love.mouse.isDown('1') and chord == 'm' then
+  elseif App.mouse_down('1') and chord == 'm' then
     Current_drawing_mode = 'manhattan'
     local drawing = Drawing.select_drawing_at_mouse()
     if drawing.pending.mode == 'freehand' then
@@ -458,14 +458,14 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.p1 = drawing.pending.center
     end
     drawing.pending.mode = 'manhattan'
-  elseif chord == 'C-m' and not love.mouse.isDown('1') then
+  elseif chord == 'C-m' and not App.mouse_down('1') then
     Current_drawing_mode = 'manhattan'
-  elseif chord == 'C-s' and not love.mouse.isDown('1') then
+  elseif chord == 'C-s' and not App.mouse_down('1') then
     local drawing,_,shape = Drawing.select_shape_at_mouse()
     if drawing then
       smoothen(shape)
     end
-  elseif chord == 'C-u' and not love.mouse.isDown('1') then
+  elseif chord == 'C-u' and not App.mouse_down('1') then
     local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
@@ -476,7 +476,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
-  elseif love.mouse.isDown('1') and chord == 'v' then
+  elseif App.mouse_down('1') and chord == 'v' then
     local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
@@ -487,7 +487,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
-  elseif chord == 'C-n' and not love.mouse.isDown('1') then
+  elseif chord == 'C-n' and not App.mouse_down('1') then
     local drawing_index,drawing,point_index,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
@@ -500,7 +500,7 @@ function Drawing.keychord_pressed(chord)
       Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
-  elseif chord == 'C-d' and not love.mouse.isDown('1') then
+  elseif chord == 'C-d' and not App.mouse_down('1') then
     local _,drawing,i,p = Drawing.select_point_at_mouse()
     if drawing then
       for _,shape in ipairs(drawing.shapes) do
@@ -523,7 +523,7 @@ function Drawing.keychord_pressed(chord)
     if drawing then
       shape.mode = 'deleted'
     end
-  elseif chord == 'C-h' and not love.mouse.isDown('1') then
+  elseif chord == 'C-h' and not App.mouse_down('1') then
     local drawing = Drawing.select_drawing_at_mouse()
     if drawing then
       drawing.show_help = true
@@ -580,7 +580,7 @@ function Drawing.complete_square(firstx,firsty, secondx,secondy, x,y)
 end
 
 function Drawing.current_drawing()
-  local x, y = love.mouse.getX(), love.mouse.getY()
+  local x, y = App.mouse_x(), App.mouse_y()
   for drawing_index,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
       if Drawing.in_drawing(drawing, x,y) then
@@ -594,7 +594,7 @@ end
 function Drawing.select_shape_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
-      local x, y = love.mouse.getX(), love.mouse.getY()
+      local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
         local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
@@ -611,7 +611,7 @@ end
 function Drawing.select_point_at_mouse()
   for drawing_index,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
-      local x, y = love.mouse.getX(), love.mouse.getY()
+      local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
         local mx,my = Drawing.coord(x-16), Drawing.coord(y-drawing.y)
         for i,point in ipairs(drawing.points) do
@@ -628,7 +628,7 @@ end
 function Drawing.select_drawing_at_mouse()
   for _,drawing in ipairs(Lines) do
     if drawing.mode == 'drawing' then
-      local x, y = love.mouse.getX(), love.mouse.getY()
+      local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
         return drawing
       end

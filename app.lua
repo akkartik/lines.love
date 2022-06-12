@@ -132,6 +132,8 @@ function App.initialize_for_test()
   App.screen.init({width=100, height=50})
   App.screen.contents = {}  -- clear screen
   App.filesystem = {}
+  App.fake_key_pressed = {}
+  App.fake_mouse_state = {x=-1, y=-1}
   if App.initialize_globals then App.initialize_globals() end
 end
 
@@ -186,16 +188,40 @@ function App.setClipboardText(s)
   App.clipboard = s
 end
 
-App.modifier_keys = {}
-function App.keypress(key)
-  App.modifier_keys[key] = true
+App.fake_key_pressed = {}
+function App.fake_key_press(key)
+  App.fake_key_pressed[key] = true
 end
-function App.keyrelease(key)
-  App.modifier_keys[key] = nil
+function App.fake_key_release(key)
+  App.fake_key_pressed[key] = nil
+end
+function App.modifier_down(key)
+  return App.fake_key_pressed[key]
 end
 
-function App.modifier_down(key)
-  return App.modifier_keys[key]
+App.fake_mouse_state = {x=-1, y=-1}  -- x,y always set
+function App.fake_mouse_press(x,y, button)
+  App.fake_mouse_state.x = x
+  App.fake_mouse_state.y = y
+  App.fake_mouse_state[button] = true
+end
+function App.fake_mouse_release(x,y, button)
+  App.fake_mouse_state.x = x
+  App.fake_mouse_state.y = y
+  App.fake_mouse_state[button] = nil
+end
+function App.mouse_move(x,y)
+  App.fake_mouse_state.x = x
+  App.fake_mouse_state.y = y
+end
+function App.mouse_down(button)
+  return App.fake_mouse_state[button]
+end
+function App.mouse_x()
+  return App.fake_mouse_state.x
+end
+function App.mouse_y()
+  return App.fake_mouse_state.y
 end
 
 function App.run_after_textinput(t)
@@ -210,13 +236,15 @@ function App.run_after_keychord(key)
   App.draw()
 end
 
-function App.run_after_mousepress(x,y, button)
+function App.run_after_mouse_press(x,y, button)
+  App.fake_mouse_press(x,y, button)
   App.mousepressed(x,y, button)
   App.screen.contents = {}
   App.draw()
 end
 
-function App.run_after_mouserelease(x,y, button)
+function App.run_after_mouse_release(x,y, button)
+  App.fake_mouse_release(x,y, button)
   App.mousereleased(x,y, button)
   App.screen.contents = {}
   App.draw()
@@ -283,7 +311,12 @@ function App.disable_tests()
   App.run_after_keychord = nil
   App.keypress = nil
   App.keyrelease = nil
-  App.modifier_keys = nil
+  App.fake_key_pressed = nil
+  App.fake_key_press = nil
+  App.fake_key_release = nil
+  App.fake_mouse_state = nil
+  App.fake_mouse_press = nil
+  App.fake_mouse_release = nil
   -- other methods dispatch to real hardware
   App.screen.print = love.graphics.print
   App.newText = love.graphics.newText
@@ -293,4 +326,8 @@ function App.disable_tests()
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText
   App.modifier_down = love.keyboard.isDown
+  App.mouse_move = love.mouse.setPosition
+  App.mouse_down = love.mouse.isDown
+  App.mouse_x = love.mouse.getX
+  App.mouse_y = love.mouse.getY
 end

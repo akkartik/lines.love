@@ -136,7 +136,7 @@ function Text.compute_fragments(line, line_width)
 end
 
 function Text.textinput(t)
-  if love.mouse.isDown('1') then return end
+  if App.mouse_down('1') then return end
   if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
   if Selection1.line then
     Text.delete_selection()

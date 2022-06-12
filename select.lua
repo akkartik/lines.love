@@ -13,7 +13,7 @@ function Text.clip_selection(line_index, apos, bpos)
   -- min,max = sorted(Selection1,Cursor1)
   local minl,minp = Selection1.line,Selection1.pos
   local maxl,maxp
-  if love.mouse.isDown('1') then
+  if App.mouse_down('1') then
     maxl,maxp = Text.mouse_pos()
   else
     maxl,maxp = Cursor1.line,Cursor1.pos
@@ -84,7 +84,7 @@ function Text.mouse_pos()
     return Recent_mouse.line, Recent_mouse.pos
   end
   Recent_mouse.time = time
-  local line,pos = Text.to_pos(love.mouse.getX(), love.mouse.getY())
+  local line,pos = Text.to_pos(App.mouse_x(), App.mouse_y())
   if line then
     Recent_mouse.line = line
     Recent_mouse.pos = pos
