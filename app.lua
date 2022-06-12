@@ -256,10 +256,8 @@ function App.run_tests()
   end
   table.sort(sorted_names)
   for _,name in ipairs(sorted_names) do
-    if name:find('test_') == 1 then
-      App.initialize_for_test()
-      _G[name]()
-    end
+    App.initialize_for_test()
+    _G[name]()
   end
   print()
 end
