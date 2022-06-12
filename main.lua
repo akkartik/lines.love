@@ -450,7 +450,7 @@ function App.keychord_pressed(chord)
     -- DON'T reset line.y here
     Drawing.keychord_pressed(chord)
   elseif chord == 'escape' and love.mouse.isDown('1') then
-    local drawing = Drawing.current_drawing()
+    local _,drawing = Drawing.current_drawing()
     if drawing then
       drawing.pending = {}
     end
