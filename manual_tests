@@ -14,6 +14,11 @@ persistence:
   draw a line, circle, rectangle, square, polygon, quit, restart. All the shapes you drew should still be visible.
   select a point and name it, quit, restart. Name is still visible.
 
+undo:
+  naming points
+  deleting points
+  moving points
+
 resize:
   create a file containing a long line of characters without spaces. try
   resizing the window vertically and horizontally, as far as possible.
