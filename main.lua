@@ -86,8 +86,6 @@ Last_resize_time = nil
 -- blinking cursor
 Cursor_time = 0
 
-Quit = false
-
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -125,8 +123,6 @@ function App.initialize(arg)
     jit.off()
     jit.flush()
   end
-
-  Quit = true
 end  -- App.initialize
 
 function initialize_window_geometry(geometry_spec)
@@ -263,8 +259,6 @@ function App.draw()
   if Search_term then
     Text.draw_search_bar()
   end
-
---?   if Quit then os.exit(1) end
 end
 
 function App.update(dt)
