@@ -47,7 +47,7 @@ function Drawing.draw(line)
         love.graphics.circle('fill', Drawing.pixels(p.x)+Margin_left,Drawing.pixels(p.y)+line.y, 2)
       end
       if p.name then
-        -- todo: clip
+        -- TODO: clip
         local x,y = Drawing.pixels(p.x)+Margin_left+5, Drawing.pixels(p.y)+line.y+5
         love.graphics.print(p.name, x,y)
         if Current_drawing_mode == 'name' and i == line.pending.target_point then
@@ -95,7 +95,7 @@ function Drawing.draw_shape(left,top, drawing, shape)
     local curr = drawing.points[shape.vertices[1]]
     love.graphics.line(Drawing.pixels(prev.x)+left,Drawing.pixels(prev.y)+top, Drawing.pixels(curr.x)+left,Drawing.pixels(curr.y)+top)
   elseif shape.mode == 'circle' then
-    -- todo: clip
+    -- TODO: clip
     local center = drawing.points[shape.center]
     love.graphics.circle('line', Drawing.pixels(center.x)+left,Drawing.pixels(center.y)+top, Drawing.pixels(shape.radius))
   elseif shape.mode == 'arc' then
