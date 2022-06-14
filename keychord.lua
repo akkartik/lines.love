@@ -5,6 +5,7 @@ Modifiers = {'lctrl', 'rctrl', 'lalt', 'ralt', 'lshift', 'rshift', 'lgui', 'rgui
 function App.keypressed(key, scancode, isrepeat)
   if array.find(Modifiers, key) then
     -- do nothing when the modifier is pressed
+    return
   end
   -- include the modifier(s) when the non-modifer is pressed
   App.keychord_pressed(App.combine_modifiers(key))
