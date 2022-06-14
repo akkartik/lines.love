@@ -937,7 +937,6 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   Screen_bottom1 = {}
   App.draw()
   local y = Margin_top
-  -- I don't understand why 120px fits so much on a fake screen, but whatever..
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:1')
   y = y + Line_height
   App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:2')
