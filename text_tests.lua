@@ -68,9 +68,8 @@ function test_click_with_mouse()
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
   -- click on the other line
-  local screen_left_margin = 25  -- pixels
   App.draw()
-  App.run_after_mouse_click(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_click(Margin_left+8,Margin_top+5, 1)
   -- cursor moves
   check_eq(Cursor1.line, 1, 'F - test_click_with_mouse/cursor')
 end
@@ -211,7 +210,7 @@ end
 function test_insert_newline()
   io.write('\ntest_insert_newline')
   -- display a few lines
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -240,7 +239,7 @@ end
 function test_insert_newline_at_start_of_line()
   io.write('\ntest_insert_newline_at_start_of_line')
   -- display a line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=1}
@@ -257,7 +256,7 @@ end
 function test_insert_from_clipboard()
   io.write('\ntest_insert_from_clipboard')
   -- display a few lines
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -294,8 +293,7 @@ function test_move_cursor_using_mouse()
   Screen_bottom1 = {}
   Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
-  local screen_left_margin = 25  -- pixels
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+8,Margin_top+5, 1)
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
   check_nil(Selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
@@ -312,11 +310,10 @@ function test_select_text_using_mouse()
   Screen_bottom1 = {}
   Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
-  local screen_left_margin = 25  -- pixels
   -- press and hold on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_press(Margin_left+8,Margin_top+5, 1)
   -- drag and release somewhere else
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
+  App.run_after_mouse_release(Margin_left+20,Margin_top+Line_height+5, 1)
   check_eq(Selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
   check_eq(Selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
   check_eq(Cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
@@ -333,14 +330,13 @@ function test_select_text_using_mouse_and_shift()
   Screen_bottom1 = {}
   Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
-  local screen_left_margin = 25  -- pixels
   -- click on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_press(Margin_left+8,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+8,Margin_top+5, 1)
   -- hold down shift and click somewhere else
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
+  App.run_after_mouse_press(Margin_left+20,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+20,Margin_top+Line_height+5, 1)
   App.fake_key_release('lshift')
   check_eq(Selection1.line, 1, 'F - test_select_text_using_mouse_and_shift/selection:line')
   check_eq(Selection1.pos, 2, 'F - test_select_text_using_mouse_and_shift/selection:pos')
@@ -358,18 +354,17 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   Screen_bottom1 = {}
   Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
-  local screen_left_margin = 25  -- pixels
   -- click on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_press(Margin_left+8,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+8,Margin_top+5, 1)
   -- hold down shift and click on a second location
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
+  App.run_after_mouse_press(Margin_left+20,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+20,Margin_top+Line_height+5, 1)
   -- hold down shift and click at a third location
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height+5, 1)
+  App.run_after_mouse_press(Margin_left+20,Margin_top+5, 1)
+  App.run_after_mouse_release(Margin_left+8,Margin_top+Line_height+5, 1)
   App.fake_key_release('lshift')
   -- selection is between first and third location. forget the second location, not the first.
   check_eq(Selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
@@ -381,7 +376,7 @@ end
 function test_cut_without_selection()
   io.write('\ntest_cut_without_selection')
   -- display a few lines
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -480,7 +475,7 @@ end
 function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   io.write('\ntest_pagedown_can_start_from_middle_of_long_wrapping_line')
   -- draw a few lines starting from a very long wrapping line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def ghi jkl mno pqr stu vwx yza bcd efg hij', 'XYZ'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -565,7 +560,7 @@ end
 function test_down_arrow_scrolls_down_by_one_screen_line()
   io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=1}
@@ -594,7 +589,7 @@ end
 function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word()
   io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=1}
@@ -622,7 +617,7 @@ end
 
 function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   io.write('\ntest_page_down_followed_by_down_arrow_does_not_scroll_screen_up')
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=1}
@@ -713,7 +708,7 @@ end
 function test_up_arrow_scrolls_up_by_one_screen_line()
   io.write('\ntest_up_arrow_scrolls_up_by_one_screen_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=6}
@@ -741,7 +736,7 @@ end
 function test_up_arrow_scrolls_up_to_final_screen_line()
   io.write('\ntest_up_arrow_scrolls_up_to_final_screen_line')
   -- display lines starting just after a long line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}
@@ -823,7 +818,7 @@ end
 function test_pageup_scrolls_up_by_screen_line()
   io.write('\ntest_pageup_scrolls_up_by_screen_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}
@@ -852,7 +847,7 @@ end
 function test_pageup_scrolls_up_from_middle_screen_line()
   io.write('\ntest_pageup_scrolls_up_from_middle_screen_line')
   -- display a few lines starting from the middle of a line (Cursor1.pos > 1)
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=5}
@@ -879,7 +874,7 @@ end
 function test_enter_on_bottom_line_scrolls_down()
   io.write('\ntest_enter_on_bottom_line_scrolls_down')
   -- display a few lines with cursor on bottom line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=2}
@@ -908,7 +903,7 @@ end
 function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   io.write('\ntest_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom')
   -- display just the bottom line on screen
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=4, pos=2}
@@ -931,7 +926,7 @@ end
 function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   io.write('\ntest_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom')
   -- display just an empty bottom line on screen
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', ''}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}
@@ -950,7 +945,7 @@ end
 function test_typing_on_bottom_line_scrolls_down()
   io.write('\ntest_typing_on_bottom_line_scrolls_down')
   -- display a few lines with cursor on bottom line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=4}
@@ -1006,8 +1001,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   y = y + Line_height
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
-  local screen_left_margin = 25  -- pixels
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height*2+5, 1)
+  App.run_after_mouse_release(Margin_left+8,Margin_top+Line_height*2+5, 1)
   -- cursor should move
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
@@ -1044,7 +1038,7 @@ end
 function test_backspace_can_scroll_up_screen_line()
   io.write('\ntest_backspace_can_scroll_up_screen_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=3, pos=5}
@@ -1072,7 +1066,7 @@ end
 function test_backspace_past_line_boundary()
   io.write('\ntest_backspace_past_line_boundary')
   -- position cursor at start of a (non-first) line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def'}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}
@@ -1087,7 +1081,7 @@ end
 function test_backspace_over_selection()
   io.write('\ntest_backspace_over_selection')
   -- select just one character within a line with cursor before selection
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=1}
@@ -1105,7 +1099,7 @@ end
 function test_backspace_over_selection_reverse()
   io.write('\ntest_backspace_over_selection_reverse')
   -- select just one character within a line with cursor after selection
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -1123,7 +1117,7 @@ end
 function test_backspace_over_multiple_lines()
   io.write('\ntest_backspace_over_multiple_lines')
   -- select just one character within a line with cursor after selection
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -1142,7 +1136,7 @@ end
 function test_backspace_to_end_of_line()
   io.write('\ntest_backspace_to_end_of_line')
   -- select region from cursor to end of line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=1, pos=2}
@@ -1161,7 +1155,7 @@ end
 function test_backspace_to_start_of_line()
   io.write('\ntest_backspace_to_start_of_line')
   -- select region from cursor to start of line
-  App.screen.init{width=25+30, height=60}
+  App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Line_width = App.screen.width
   Cursor1 = {line=2, pos=1}

@@ -68,6 +68,7 @@ Font_height = 14
 Line_height = 15
 
 Margin_top = 15
+Margin_left = 25
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
@@ -233,7 +234,7 @@ function App.draw()
                      end})
           if Search_term == nil then
             if line_index == Cursor1.line then
-              Text.draw_cursor(25, y)
+              Text.draw_cursor(Margin_left, y)
             end
           end
         Screen_bottom1.pos = Screen_top1.pos

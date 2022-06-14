@@ -15,7 +15,7 @@ function Text.draw(line, line_width, line_index)
 --?   print('text.draw', line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
-  local x = 25
+  local x = Margin_left
   local y = line.y
   local pos = 1
   local screen_line_starting_pos = 1
@@ -32,7 +32,7 @@ function Text.draw(line, line_width, line_index)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
     if x + frag_width > line_width then
-      assert(x > 25)  -- no overfull lines
+      assert(x > Margin_left)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if Text.lt1(Screen_top1, {line=line_index, pos=pos}) then
         y = y + Line_height
@@ -43,7 +43,7 @@ function Text.draw(line, line_width, line_index)
         screen_line_starting_pos = pos
 --?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
       end
-      x = 25
+      x = Margin_left
     end
 --?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
@@ -96,7 +96,7 @@ end
 function Text.compute_fragments(line, line_width)
 --?   print('compute_fragments', line_width)
   line.fragments = {}
-  local x = 25
+  local x = Margin_left
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_text = App.newText(love.graphics.getFont(), frag)
@@ -126,7 +126,7 @@ function Text.compute_fragments(line, line_width)
           frag_text = App.newText(love.graphics.getFont(), frag)
           frag_width = App.width(frag_text)
         end
-        x = 25  -- new line
+        x = Margin_left  -- new line
       end
     end
     if #frag > 0 then
@@ -679,7 +679,7 @@ end
 
 function Text.in_line(line_index,line, x,y)
   if line.y == nil then return false end  -- outside current page
-  if x < 25 then return false end
+  if x < Margin_left then return false end
   if y < line.y then return false end
   Text.populate_screen_line_starting_pos(line_index)
   return y < line.y + #line.screen_line_starting_pos * Line_height
@@ -735,7 +735,7 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
     return 1
   end
   local len = utf8.len(line)
-  local max_x = 25+Text.x(line, len+1)
+  local max_x = Margin_left+Text.x(line, len+1)
   if x > max_x then
     return len+1
   end
@@ -747,8 +747,8 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
       return left
     end
     local curr = math.floor((left+right)/2)
-    local currxmin = 25+Text.x(line, curr)
-    local currxmax = 25+Text.x(line, curr+1)
+    local currxmin = Margin_left+Text.x(line, curr)
+    local currxmax = Margin_left+Text.x(line, curr+1)
 --?     print('nearest', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       if x-currxmin < currxmax-x then
@@ -883,7 +883,7 @@ function Text.populate_screen_line_starting_pos(line_index)
     Text.compute_fragments(line, Line_width)
   end
   line.screen_line_starting_pos = {1}
-  local x = 25
+  local x = Margin_left
   local pos = 1
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
@@ -891,7 +891,7 @@ function Text.populate_screen_line_starting_pos(line_index)
     local frag_width = App.width(frag_text)
 --?     print(x, pos, frag, frag_width)
     if x + frag_width > Line_width then
-      x = 25
+      x = Margin_left
       table.insert(line.screen_line_starting_pos, pos)
 --?       print('new screen line:', #line.screen_line_starting_pos, pos)
     end
