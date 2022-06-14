@@ -1,5 +1,4 @@
 -- major tests for text editing flows
--- This still isn't quite as thorough as I'd like.
 
 function test_initial_state()
   io.write('\ntest_initial_state')
