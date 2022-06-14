@@ -6,7 +6,7 @@ Wish I had some static typing here. We're not going to try to write tests to cat
 
 -- manual tests
 drawing
-  draw a line, circle, rectangle, square, polygon
+  draw a rectangle, square, polygon
   select a point and move it
   select a point and name it
 
