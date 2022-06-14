@@ -12,7 +12,7 @@ require 'text_tests'
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
 function Text.draw(line, line_width, line_index)
---?   print('text.draw')
+--?   print('text.draw', line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
   local x = 25
@@ -380,6 +380,9 @@ end
 
 function Text.insert_return()
   local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+--?   print(Cursor1.line, Cursor1.pos, #Lines[Cursor1.line].data)
+--?   print(Lines[Cursor1.line].data)
+  assert(byte_offset)
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
   Lines[Cursor1.line].fragments = nil
@@ -678,6 +681,7 @@ end
 
 -- convert mx,my in pixels to schema-1 coordinates
 function Text.to_pos_on_line(line, mx, my)
+--?   print('Text.to_pos_on_line', mx, my, 'width', Line_width)
   if line.fragments == nil then
     Text.compute_fragments(line, Line_width)
   end
@@ -685,15 +689,20 @@ function Text.to_pos_on_line(line, mx, my)
   -- duplicate some logic from Text.draw
   local y = line.y
   for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
+--?     print('iter', y, screen_line_index, screen_line_starting_pos, string.sub(line.data, screen_line_starting_pos))
     local nexty = y + Line_height
     if my < nexty then
       -- On all wrapped screen lines but the final one, clicks past end of
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
       if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
+--?         print('past end of non-final line; return')
         return line.screen_line_starting_pos[screen_line_index+1]
       end
-      local s = string.sub(line.data, screen_line_starting_pos)
+      local screen_line_starting_byte_offset = utf8.offset(line.data, screen_line_starting_pos)
+      assert(screen_line_starting_byte_offset)
+      local s = string.sub(line.data, screen_line_starting_byte_offset)
+--?       print('return', mx, Text.nearest_cursor_pos(s, mx), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1)
       return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
     end
     y = nexty
@@ -872,13 +881,13 @@ function Text.populate_screen_line_starting_pos(line_index)
   local pos = 1
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
---?     print(x, frag)
     -- render fragment
     local frag_width = App.width(frag_text)
+--?     print(x, pos, frag, frag_width)
     if x + frag_width > Line_width then
       x = 25
---?       print(' ', #line.screen_line_starting_pos, line.data)
       table.insert(line.screen_line_starting_pos, pos)
+--?       print('new screen line:', #line.screen_line_starting_pos, pos)
     end
     x = x + frag_width
     local frag_len = utf8.len(frag)

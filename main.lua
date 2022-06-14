@@ -86,6 +86,8 @@ Last_resize_time = nil
 -- blinking cursor
 Cursor_time = 0
 
+Quit = false
+
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -101,6 +103,7 @@ function App.initialize(arg)
   end
 
   initialize_font_settings(20)
+--?   Line_width = 80
 
   if #arg > 0 then
     Filename = arg[1]
@@ -122,6 +125,8 @@ function App.initialize(arg)
     jit.off()
     jit.flush()
   end
+
+  Quit = true
 end  -- App.initialize
 
 function initialize_window_geometry(geometry_spec)
@@ -258,6 +263,8 @@ function App.draw()
   if Search_term then
     Text.draw_search_bar()
   end
+
+--?   if Quit then os.exit(1) end
 end
 
 function App.update(dt)
@@ -319,6 +326,7 @@ function App.mousereleased(x,y, button)
       if line.mode == 'text' then
         if Text.in_line(line_index,line, x,y) then
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
+--?           print(Cursor1.line, Cursor1.pos)
           if Mousepress_shift then
             if Old_selection1.line == nil then
               Selection1 = Old_cursor1
