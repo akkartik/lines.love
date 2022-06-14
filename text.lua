@@ -402,7 +402,7 @@ function Text.pageup()
     if Lines[Screen_top1.line].mode == 'text' then
       y = y - Line_height
     elseif Lines[Screen_top1.line].mode == 'drawing' then
-      y = y - 20 - Drawing.pixels(Lines[Screen_top1.line].h)
+      y = y - Drawing_padding_height - Drawing.pixels(Lines[Screen_top1.line].h)
     end
     top2 = Text.previous_screen_line(top2)
   end
@@ -627,7 +627,7 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
       break
     end
 --?     print('cursor skips', Cursor1.line)
-    y = y + 20 + Drawing.pixels(Lines[Cursor1.line].h)
+    y = y + Drawing_padding_height + Drawing.pixels(Lines[Cursor1.line].h)
     Cursor1.line = Cursor1.line + 1
   end
   -- hack: insert a text line at bottom of file if necessary
@@ -662,7 +662,7 @@ function Text.snap_cursor_to_bottom_of_screen()
       assert(Lines[top2.line-1].mode == 'drawing')
       -- We currently can't draw partial drawings, so either skip it entirely
       -- or not at all.
-      local h = 20 + Drawing.pixels(Lines[top2.line-1].h)
+      local h = Drawing_padding_height + Drawing.pixels(Lines[top2.line-1].h)
       if y - h < Margin_top then
         break
       end

@@ -70,6 +70,10 @@ Line_height = 15
 Margin_top = 15
 Margin_left = 25
 
+Drawing_padding_top = 10
+Drawing_padding_bottom = 10
+Drawing_padding_height = Drawing_padding_top + Drawing_padding_bottom
+
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
 
 -- undo
@@ -240,10 +244,10 @@ function App.draw()
         Screen_bottom1.pos = Screen_top1.pos
         y = y + Line_height
       elseif line.mode == 'drawing' then
-        y = y+10 -- padding
+        y = y+Drawing_padding_top
         line.y = y
         Drawing.draw(line)
-        y = y + Drawing.pixels(line.h) + 10 -- padding
+        y = y + Drawing.pixels(line.h) + Drawing_padding_bottom
       else
 --?         print('text')
         line.y = y
