@@ -1,3 +1,10 @@
+-- static properties of the code
+All strings are UTF-8. Bytes within them are not characters.
+I try to label byte offsets as _offset, and character positions as _pos.
+For example, string.sub should never use a _pos to substring, only an _offset.
+Wish I had some static typing here. We're not going to try to write tests to catch issues like this.
+
+-- manual tests
 file load:
   cursor_line = 1
   first line is a drawing -> cursor_line = 2

@@ -464,7 +464,9 @@ function Text.up()
           Screen_top1.pos = screen_line_starting_pos
 --?           print('pos of top of screen is also '..tostring(Screen_top1.pos)..' of the same line')
         end
-        local s = string.sub(Lines[Cursor1.line].data, screen_line_starting_pos)
+        local screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, screen_line_starting_pos)
+        assert(screen_line_starting_byte_offset)
+        local s = string.sub(Lines[Cursor1.line].data, screen_line_starting_byte_offset)
         Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
         break
       end
@@ -482,7 +484,9 @@ function Text.up()
       Screen_top1.pos = new_screen_line_starting_pos
 --?       print('also setting pos of top of screen to '..tostring(Screen_top1.pos))
     end
-    local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+    local new_screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+    assert(new_screen_line_starting_byte_offset)
+    local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now '..tostring(Cursor1.pos))
   end
@@ -520,7 +524,9 @@ function Text.down()
     local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index+1]
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
-    local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+    local new_screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
+    assert(new_screen_line_starting_byte_offset)
+    local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
     if scroll_down then
@@ -689,7 +695,9 @@ function Text.to_pos_on_line(line, mx, my)
   -- duplicate some logic from Text.draw
   local y = line.y
   for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
---?     print('iter', y, screen_line_index, screen_line_starting_pos, string.sub(line.data, screen_line_starting_pos))
+      local screen_line_starting_byte_offset = utf8.offset(line.data, screen_line_starting_pos)
+      assert(screen_line_starting_byte_offset)
+--?     print('iter', y, screen_line_index, screen_line_starting_pos, string.sub(line.data, screen_line_starting_byte_offset))
     local nexty = y + Line_height
     if my < nexty then
       -- On all wrapped screen lines but the final one, clicks past end of
@@ -699,8 +707,6 @@ function Text.to_pos_on_line(line, mx, my)
 --?         print('past end of non-final line; return')
         return line.screen_line_starting_pos[screen_line_index+1]
       end
-      local screen_line_starting_byte_offset = utf8.offset(line.data, screen_line_starting_pos)
-      assert(screen_line_starting_byte_offset)
       local s = string.sub(line.data, screen_line_starting_byte_offset)
 --?       print('return', mx, Text.nearest_cursor_pos(s, mx), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1)
       return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
