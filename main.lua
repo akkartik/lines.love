@@ -33,7 +33,6 @@ function App.initialize_globals()
 --    an array points for mode 'freehand' (raw x,y coords; freehand drawings don't pollute the points array of a drawing)
 --    an array vertices for mode 'polygon', 'rectangle', 'square'
 --    p1, p2 for mode 'line'
---    p1, p2, arrow-mode for mode 'arrow-line'
 --    center, radius for mode 'circle'
 --    center, radius, start_angle, end_angle for mode 'arc'
 -- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
