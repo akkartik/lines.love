@@ -408,10 +408,18 @@ function Drawing.keychord_pressed(chord)
       end
     end
     drawing.pending.mode = 'square'
-  elseif App.mouse_down(1) and chord == 'p' and (Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
+  elseif App.mouse_down(1) and chord == 'p' and Current_drawing_mode == 'polygon' then
     local _,drawing = Drawing.current_drawing()
     local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
+    table.insert(drawing.pending.vertices, j)
+  elseif App.mouse_down(1) and chord == 'p' and (Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
+    local _,drawing = Drawing.current_drawing()
+    local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local j = Drawing.insert_point(drawing.points, mx,my)
+    while #drawing.pending.vertices >= 2 do
+      table.remove(drawing.pending.vertices)
+    end
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-o' and not App.mouse_down(1) then
     Current_drawing_mode = 'circle'
