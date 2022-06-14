@@ -24,7 +24,7 @@ function test_press_ctrl()
 end
 
 function test_click_with_mouse()
-  io.write('\ntest_click')
+  io.write('\ntest_click_with_mouse')
   -- display two lines with cursor on one of them
   App.screen.init{width=50, height=80}
   Lines = load_array{'abc', 'def'}
@@ -37,7 +37,7 @@ function test_click_with_mouse()
   App.draw()
   App.run_after_mouse_click(screen_left_margin+8,Margin_top+5, '1')
   -- cursor moves
-  check_eq(Cursor1.line, 1, 'F - test_click/cursor')
+  check_eq(Cursor1.line, 1, 'F - test_click_with_mouse/cursor')
 end
 
 function test_draw_text()
