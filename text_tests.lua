@@ -1,6 +1,42 @@
 -- major tests for text editing flows
 -- This still isn't quite as thorough as I'd like.
 
+function test_initial_state()
+  io.write('\ntest_initial_state')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{}
+  App.draw()
+  check_eq(#Lines, 1, 'F - test_initial_state/#lines')
+  check_eq(Cursor1.line, 1, 'F - test_initial_state/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_initial_state/cursor:pos')
+  check_eq(Screen_top1.line, 1, 'F - test_initial_state/screen_top:line')
+  check_eq(Screen_top1.pos, 1, 'F - test_initial_state/screen_top:pos')
+end
+
+function test_click_to_create_drawing()
+  io.write('\ntest_click_to_create_drawing')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{}
+  App.draw()
+  App.run_after_mouse_click(8,Margin_top+8, 1)
+  -- cursor skips drawing to always remain on text
+  check_eq(#Lines, 2, 'F - test_click_to_create_drawing/#lines')
+  check_eq(Cursor1.line, 2, 'F - test_click_to_create_drawing/cursor')
+end
+
+function test_backspace_to_delete_drawing()
+  io.write('\ntest_backspace_to_delete_drawing')
+  -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'```lines', '```', ''}
+  -- cursor is on text as always (outside tests this will get initialized correctly)
+  Cursor1.line = 2
+  -- backspacing deletes the drawing
+  App.run_after_keychord('backspace')
+  check_eq(#Lines, 1, 'F - test_backspace_to_delete_drawing/#lines')
+  check_eq(Cursor1.line, 1, 'F - test_backspace_to_delete_drawing/cursor')
+end
+
 function test_insert_first_character()
   io.write('\ntest_insert_first_character')
   App.screen.init{width=120, height=60}
@@ -200,6 +236,23 @@ function test_insert_newline()
   App.screen.check(y, 'bc', 'F - test_insert_newline/screen:2')
   y = y + Line_height
   App.screen.check(y, 'def', 'F - test_insert_newline/screen:3')
+end
+
+function test_insert_newline_at_start_of_line()
+  io.write('\ntest_insert_newline_at_start_of_line')
+  -- display a line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc'}
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  -- hitting the enter key splits the line
+  App.run_after_keychord('return')
+  check_eq(Cursor1.line, 2, 'F - test_insert_newline_at_start_of_line/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_insert_newline_at_start_of_line/cursor:pos')
+  check_eq(Lines[1].data, '', 'F - test_insert_newline_at_start_of_line/data:1')
+  check_eq(Lines[2].data, 'abc', 'F - test_insert_newline_at_start_of_line/data:2')
 end
 
 function test_insert_from_clipboard()
@@ -1015,6 +1068,18 @@ function test_backspace_can_scroll_up_screen_line()
   check_eq(Screen_top1.pos, 1, 'F - test_backspace_can_scroll_up_screen_line/screen_top')
   check_eq(Cursor1.line, 3, 'F - test_backspace_can_scroll_up_screen_line/cursor:line')
   check_eq(Cursor1.pos, 4, 'F - test_backspace_can_scroll_up_screen_line/cursor:pos')
+end
+
+function test_backspace_past_line_boundary()
+  io.write('\ntest_backspace_past_line_boundary')
+  -- position cursor at start of a (non-first) line
+  App.screen.init{width=25+30, height=60}
+  Lines = load_array{'abc', 'def'}
+  Line_width = App.screen.width
+  Cursor1 = {line=2, pos=1}
+  -- backspace joins with previous line
+  App.run_after_keychord('backspace')
+  check_eq(Lines[1].data, 'abcdef', "F - test_backspace_past_line_boundary")
 end
 
 -- some tests for operating over selections created using Shift- chords

@@ -5,46 +5,14 @@ For example, string.sub should never use a _pos to substring, only an _offset.
 Wish I had some static typing here. We're not going to try to write tests to catch issues like this.
 
 -- manual tests
-file load:
-  cursor_line = 1
-  first line is a drawing -> cursor_line = 2
-click on text -> cursor moves
-click on first character of text -> cursor on first character of text
-click to right of text -> cursor past end of line
-click to right of wrapped text -> cursor on final character of line
-click on drawing -> cursor doesn't move
-cursor past end of line -> renders
-create drawing -> cursor bumps down below drawing
-backspace
-  cursor_pos == 0, previous line is a drawing -> delete drawing, cursor still visible at start of line
-  cursor_pos == 0, previous line is text -> join lines, cursor still at same character
-
 drawing
   draw a line, circle, rectangle, square, polygon
   select a point and move it
   select a point and name it
 
-enter
-  cursor_pos == 0 -> insert empty line above current line
-
-scrolling:
-  given moby dick, a file containing all text:
-  page up moves top line on screen to bottom
-  page down moves bottom line on screen to top
-  cursor remains on screen
-  cursor remains on text line
-  'up' arrow with cursor at top of screen scrolls up one line (drawings still fully in or out)
-    if cursor line wrapped before, it scrolls up by only one screen line
-    if previous line (above top of screen) wrapped, it scrolls up by only one screen line
-  'down' arrow with cursor at bottom of screen scrolls down one line (drawings still fully in or out)
-    if cursor line wrapped before, it scrolls down by only one screen line
-
 persistence:
   draw a line, circle, rectangle, square, polygon, quit, restart. All the shapes you drew should still be visible.
   select a point and name it, quit, restart. Name is still visible.
-
-clipboard:
-  cut/copy without making a selection
 
 resize:
   create a file containing a long line of characters without spaces. try
