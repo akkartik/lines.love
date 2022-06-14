@@ -55,7 +55,7 @@ Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
 
 Selection1 = {}
-Old_cursor1, Old_selection1, Mousepress_shift = nil  -- some extra state to compute selection between mousepress and mouserelease
+Old_cursor1, Old_selection1, Mousepress_shift = nil  -- some extra state to compute selection between mouse press and release
 Recent_mouse = {}  -- when selecting text, avoid recomputing some state on every single frame
 
 Cursor_x, Cursor_y = 0, 0  -- in pixels
@@ -450,7 +450,7 @@ function App.keychord_pressed(chord)
     save_to_disk(Lines, Filename)
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   -- dispatch to drawing or text
-  elseif App.mouse_down('1') or chord:sub(1,2) == 'C-' then
+  elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
     local drawing_index, drawing = Drawing.current_drawing()
     if drawing_index then
@@ -459,12 +459,12 @@ function App.keychord_pressed(chord)
       record_undo_event({before=before, after=snapshot(drawing_index)})
       save_to_disk(Lines, Filename)
     end
-  elseif chord == 'escape' and App.mouse_down('1') then
+  elseif chord == 'escape' and App.mouse_down(1) then
     local _,drawing = Drawing.current_drawing()
     if drawing then
       drawing.pending = {}
     end
-  elseif chord == 'escape' and not App.mouse_down('1') then
+  elseif chord == 'escape' and not App.mouse_down(1) then
     for _,line in ipairs(Lines) do
       if line.mode == 'drawing' then
         line.show_help = false

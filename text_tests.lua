@@ -35,7 +35,7 @@ function test_click_with_mouse()
   -- click on the other line
   local screen_left_margin = 25  -- pixels
   App.draw()
-  App.run_after_mouse_click(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouse_click(screen_left_margin+8,Margin_top+5, 1)
   -- cursor moves
   check_eq(Cursor1.line, 1, 'F - test_click_with_mouse/cursor')
 end
@@ -147,7 +147,7 @@ function test_click_on_wrapping_line_containing_non_ascii()
   y = y + Line_height
   -- click past the end of it
   App.draw()
-  App.run_after_mouse_click(App.screen.width-2,y-2, '1')
+  App.run_after_mouse_click(App.screen.width-2,y-2, 1)
   -- cursor moves to end of line
   check_eq(Cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
 end
@@ -243,7 +243,7 @@ function test_move_cursor_using_mouse()
   Selection1 = {}
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
   check_nil(Selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
@@ -262,9 +262,9 @@ function test_select_text_using_mouse()
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
   -- press and hold on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
   -- drag and release somewhere else
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, '1')
+  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
   check_eq(Selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
   check_eq(Selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
   check_eq(Cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
@@ -283,12 +283,12 @@ function test_select_text_using_mouse_and_shift()
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
   -- click on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, '1')
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
   -- hold down shift and click somewhere else
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, '1')
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, '1')
+  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
+  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
   App.fake_key_release('lshift')
   check_eq(Selection1.line, 1, 'F - test_select_text_using_mouse_and_shift/selection:line')
   check_eq(Selection1.pos, 2, 'F - test_select_text_using_mouse_and_shift/selection:pos')
@@ -308,16 +308,16 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   App.draw()  -- populate line.y for each line in Lines
   local screen_left_margin = 25  -- pixels
   -- click on first location
-  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, '1')
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, '1')
+  App.run_after_mouse_press(screen_left_margin+8,Margin_top+5, 1)
+  App.run_after_mouse_release(screen_left_margin+8,Margin_top+5, 1)
   -- hold down shift and click on a second location
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, '1')
-  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, '1')
+  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
+  App.run_after_mouse_release(screen_left_margin+20,Margin_top+Line_height+5, 1)
   -- hold down shift and click at a third location
   App.fake_key_press('lshift')
-  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, '1')
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height+5, '1')
+  App.run_after_mouse_press(screen_left_margin+20,Margin_top+5, 1)
+  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height+5, 1)
   App.fake_key_release('lshift')
   -- selection is between first and third location. forget the second location, not the first.
   check_eq(Selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
@@ -955,7 +955,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
   local screen_left_margin = 25  -- pixels
-  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height*2+5, '1')
+  App.run_after_mouse_release(screen_left_margin+8,Margin_top+Line_height*2+5, 1)
   -- cursor should move
   check_eq(Cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
