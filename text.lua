@@ -110,17 +110,19 @@ function Text.compute_fragments(line, line_width)
 --?           print(frag, x, frag_width, line_width)
           -- long word; chop it at some letter
           -- We're not going to reimplement TeX here.
-          local b = Text.nearest_pos_less_than(frag, line_width - x)
-          assert(b > 0)  -- avoid infinite loop when window is too narrow
---?           print('space for '..tostring(b)..' graphemes')
-          local frag1 = string.sub(frag, 1, b)
+          local bpos = Text.nearest_pos_less_than(frag, line_width - x)
+          assert(bpos > 0)  -- avoid infinite loop when window is too narrow
+          local boffset = utf8.offset(frag, bpos+1)  -- byte _after_ bpos
+          assert(boffset)
+--?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset)..' bytes')
+          local frag1 = string.sub(frag, 1, boffset-1)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
           local frag1_width = App.width(frag1_text)
 --?           print(frag, x, frag1_width, line_width)
           assert(x + frag1_width <= line_width)
 --?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
           table.insert(line.fragments, {data=frag1, text=frag1_text})
-          frag = string.sub(frag, b+1)
+          frag = string.sub(frag, boffset)
           frag_text = App.newText(love.graphics.getFont(), frag)
           frag_width = App.width(frag_text)
         end

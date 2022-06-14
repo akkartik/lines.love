@@ -194,6 +194,8 @@ function App.draw()
   Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
+--?   love.graphics.setColor(0, 1, 0)
+--?   love.graphics.line(Line_width,0, Line_width,App.screen.height)
   love.graphics.setColor(0, 0, 0)
 
   -- some hysteresis while resizing

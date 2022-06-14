@@ -109,6 +109,24 @@ function test_draw_text_wrapping_within_word()
   App.screen.check(y, 'jk', 'F - test_draw_text_wrapping_within_word/screen:3')
 end
 
+function test_draw_wrapping_text_containing_non_ascii()
+  -- draw a long line containing non-ASCII
+  io.write('\ntest_draw_wrapping_text_containing_non_ascii')
+  App.screen.init{width=60, height=60}
+  Lines = load_array{'madam I’m adam', 'xyz'}  -- notice the non-ASCII apostrophe
+  Line_width = App.screen.width
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'mada', 'F - test_draw_wrapping_text_containing_non_ascii/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'm I’', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'm ad', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
