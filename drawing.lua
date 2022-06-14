@@ -2,6 +2,8 @@
 Drawing = {}
 geom = require 'geom'
 
+require 'drawing_tests'
+
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts.
 function Drawing.draw(line)
@@ -202,7 +204,7 @@ end
 
 function Drawing.in_drawing(drawing, x,y)
   if drawing.y == nil then return false end  -- outside current page
-  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= 16 and x < 16+Line_width
+  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Margin_left and x < Margin_left+Line_width
 end
 
 function Drawing.mouse_pressed(drawing, x,y, button)
