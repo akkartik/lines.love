@@ -260,6 +260,10 @@ function Drawing.mouse_released(x,y, button)
   if Current_drawing_mode == 'move' then
     Current_drawing_mode = Previous_drawing_mode
     Previous_drawing_mode = nil
+    if Lines.current_drawing then
+      Lines.current_drawing.pending = {}
+      Lines.current_drawing = nil
+    end
   elseif Lines.current_drawing then
     local drawing = Lines.current_drawing
     if drawing.pending then
@@ -336,8 +340,6 @@ function Drawing.mouse_released(x,y, button)
           drawing.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, drawing.pending.end_angle)
           table.insert(drawing.shapes, drawing.pending)
         end
-      elseif drawing.pending.mode == 'move' then
-        -- drop it
       elseif drawing.pending.mode == 'name' then
         -- drop it
       else
@@ -476,17 +478,6 @@ function Drawing.keychord_pressed(chord)
       smoothen(shape)
     end
   elseif chord == 'C-u' and not App.mouse_down(1) then
-    local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
-    if drawing then
-      if Previous_drawing_mode == nil then
-        Previous_drawing_mode = Current_drawing_mode
-      end
-      Current_drawing_mode = 'move'
-      drawing.pending = {mode=Current_drawing_mode, target_point=p}
-      Lines.current_drawing_index = drawing_index
-      Lines.current_drawing = drawing
-    end
-  elseif App.mouse_down(1) and chord == 'v' then
     local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then

@@ -12,9 +12,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 ### Todo list
 
-drawing
-  select a point and move it
-
 persistence:
   draw a line, circle, rectangle, square, polygon, quit, restart. All the shapes you drew should still be visible.
   select a point and name it, quit, restart. Name is still visible.

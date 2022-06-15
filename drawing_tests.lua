@@ -356,3 +356,43 @@ function test_name_point()
   check_eq(Current_drawing_mode, 'line', 'F - test_name_point/mode:3')
   check_eq(p2.name, 'A', 'F - test_name_point')
 end
+
+function test_move_point()
+  io.write('\ntest_move_point')
+  -- create a drawing with a line
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  -- draw a line
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_move_point/baseline/#shapes')
+  check_eq(#drawing.points, 2, 'F - test_move_point/baseline/#points')
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_move_point/baseline/shape:1')
+  local p1 = drawing.points[drawing.shapes[1].p1]
+  local p2 = drawing.points[drawing.shapes[1].p2]
+  check_eq(p1.x, 5, 'F - test_move_point/baseline/p1:x')
+  check_eq(p1.y, 6, 'F - test_move_point/baseline/p1:y')
+  check_eq(p2.x, 35, 'F - test_move_point/baseline/p2:x')
+  check_eq(p2.y, 36, 'F - test_move_point/baseline/p2:y')
+  check_nil(p2.name, 'F - test_move_point/baseline/p2:name')
+  -- enter 'move' mode without moving the mouse
+  App.run_after_keychord('C-u')
+  check_eq(Current_drawing_mode, 'move', 'F - test_move_point/mode:1')
+  -- point is lifted
+  check_eq(drawing.pending.mode, 'move', 'F - test_move_point/mode:2')
+  check_eq(drawing.pending.target_point, p2, 'F - test_move_point/target')
+  -- move point
+  App.mouse_move(Margin_left+26, Margin_top+Drawing_padding_top+44)
+  App.update(0.05)
+  local p2 = drawing.points[drawing.shapes[1].p2]
+  check_eq(p2.x, 26, 'F - test_move_point/x')
+  check_eq(p2.y, 44, 'F - test_move_point/y')
+  -- exit 'move' mode
+  App.run_after_mouse_click(Margin_left+26, Margin_top+Drawing_padding_top+44, 1)
+  check_eq(Current_drawing_mode, 'line', 'F - test_move_point/mode:3')
+  check_eq(drawing.pending, {}, 'F - test_move_point/pending')
+end
