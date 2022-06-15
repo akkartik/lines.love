@@ -366,7 +366,7 @@ function Drawing.keychord_pressed(chord)
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
       end
-    elseif drawing.pending.mode == 'square' or drawing.pending.mode == 'rectangle' then
+    elseif drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       -- reuse existing vertices
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
       drawing.pending.vertices = {drawing.pending.center}
@@ -383,10 +383,10 @@ function Drawing.keychord_pressed(chord)
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
       end
-    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
-      drawing.pending.vertices = {drawing.pending.center}
     elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'square' then
       -- reuse existing (1-2) vertices
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'rectangle'
   elseif chord == 'C-s' and not App.mouse_down(1) then
@@ -400,14 +400,14 @@ function Drawing.keychord_pressed(chord)
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
       end
-    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
-      drawing.pending.vertices = {drawing.pending.center}
-    elseif drawing.pending.mode == 'rectangle' then
-      -- reuse existing (1-2) vertices
     elseif drawing.pending.mode == 'polygon' then
       while #drawing.pending.vertices > 2 do
         table.remove(drawing.pending.vertices)
       end
+    elseif drawing.pending.mode == 'rectangle' then
+      -- reuse existing (1-2) vertices
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'square'
   elseif App.mouse_down(1) and chord == 'p' and Current_drawing_mode == 'polygon' then
@@ -449,10 +449,10 @@ function Drawing.keychord_pressed(chord)
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
-    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
-      drawing.pending.p1 = drawing.pending.center
     elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       drawing.pending.p1 = drawing.pending.vertices[1]
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
     end
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' and not App.mouse_down(1) then
