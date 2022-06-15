@@ -2,9 +2,22 @@
 -- We minimize assumptions about specific pixels, and try to test at the level
 -- of specific shapes. In particular, no tests of freehand drawings.
 
+function test_creating_drawing_saves()
+  io.write('\ntest_creating_drawing_saves')
+  App.screen.init{width=120, height=60}
+  Filename = 'foo'
+  Lines = load_array{}
+  App.draw()
+  -- click on button to create drawing
+  App.run_after_mouse_click(8,Margin_top+8, 1)
+  -- filesystem contains drawing and an empty line of text
+  check_eq(App.filesystem['foo'], '```lines\n```\n\n', 'F - test_creating_drawing_saves')
+end
+
 function test_draw_line()
   io.write('\ntest_draw_line')
   -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
+  Filename = 'foo'
   App.screen.init{width=Margin_left+300, height=300}
   Lines = load_array{'```lines', '```', ''}
   Line_width = 256  -- drawing coordinates 1:1 with pixels
@@ -28,6 +41,19 @@ function test_draw_line()
   check_eq(p1.y, 6, 'F - test_draw_line/p1:y')
   check_eq(p2.x, 35, 'F - test_draw_line/p2:x')
   check_eq(p2.y, 36, 'F - test_draw_line/p2:y')
+  -- The format on disk isn't perfectly stable. Table fields can be reordered.
+  -- So just reload from disk to verify.
+  Lines = load_from_disk(Filename)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_draw_line/save/#shapes')
+  check_eq(#drawing.points, 2, 'F - test_draw_line/save/#points')
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_draw_line/save/shape:1')
+  local p1 = drawing.points[drawing.shapes[1].p1]
+  local p2 = drawing.points[drawing.shapes[1].p2]
+  check_eq(p1.x, 5, 'F - test_draw_line/save/p1:x')
+  check_eq(p1.y, 6, 'F - test_draw_line/save/p1:y')
+  check_eq(p2.x, 35, 'F - test_draw_line/save/p2:x')
+  check_eq(p2.y, 36, 'F - test_draw_line/save/p2:y')
 end
 
 function test_draw_horizontal_line()

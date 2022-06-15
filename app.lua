@@ -276,8 +276,21 @@ end
 function App.open_for_writing(filename)
   App.filesystem[filename] = ''
   return {
-    write = function(self, s)
-              App.filesystem[filename] = App.filesystem[filename]..s
+    write = function(self, ...)
+              local args = {...}
+              for i,s in ipairs(args) do
+                App.filesystem[filename] = App.filesystem[filename]..s
+              end
+            end,
+    close = function(self)
+            end
+  }
+end
+
+function App.open_for_reading(filename)
+  return {
+    lines = function(self)
+              return App.filesystem[filename]:gmatch('[^\n]+')
             end,
     close = function(self)
             end
@@ -331,6 +344,7 @@ function App.disable_tests()
   App.newText = love.graphics.newText
   App.screen.draw = love.graphics.draw
   App.width = function(text) return text:getWidth() end
+  App.open_for_reading = function(filename) return io.open(filename, 'r') end
   App.open_for_writing = function(filename) return io.open(filename, 'w') end
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText

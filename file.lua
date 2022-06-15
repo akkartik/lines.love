@@ -2,7 +2,7 @@
 Drawing = require 'drawing'
 
 function load_from_disk(filename)
-  local infile = io.open(filename)
+  local infile = App.open_for_reading(filename)
   local result = load_from_file(infile)
   if infile then infile:close() end
   return result
