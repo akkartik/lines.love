@@ -429,7 +429,6 @@ function Drawing.keychord_pressed(chord)
     local _,drawing = Drawing.current_drawing()
     drawing.pending.mode = 'arc'
     local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
-    local j = Drawing.insert_point(drawing.points, mx,my)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)

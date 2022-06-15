@@ -176,7 +176,7 @@ function test_draw_arc()
   App.run_after_mouse_release(Margin_left+35+50, Margin_top+Drawing_padding_top+36+50, 1)  -- 45°
   local drawing = Lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_arc/#shapes')
-  check_eq(#drawing.points, 2, 'F - test_draw_arc/#points')
+  check_eq(#drawing.points, 1, 'F - test_draw_arc/#points')
   check_eq(drawing.shapes[1].mode, 'arc', 'F - test_draw_horizontal_line/shape_mode')
   local arc = drawing.shapes[1]
   check_eq(arc.radius, 30, 'F - test_draw_arc/radius')
