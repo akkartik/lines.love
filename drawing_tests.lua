@@ -365,7 +365,6 @@ function test_move_point()
   Line_width = 256  -- drawing coordinates 1:1 with pixels
   Current_drawing_mode = 'line'
   App.draw()
-  -- draw a line
   App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
   App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
   local drawing = Lines[1]
@@ -395,4 +394,109 @@ function test_move_point()
   App.run_after_mouse_click(Margin_left+26, Margin_top+Drawing_padding_top+44, 1)
   check_eq(Current_drawing_mode, 'line', 'F - test_move_point/mode:3')
   check_eq(drawing.pending, {}, 'F - test_move_point/pending')
+end
+
+function test_delete_lines_at_point()
+  io.write('\ntest_delete_lines_at_point')
+  -- create a drawing with two lines connected at a point
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  App.run_after_mouse_press(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  App.run_after_mouse_release(Margin_left+55, Margin_top+Drawing_padding_top+26, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 2, 'F - test_delete_lines_at_point/baseline/#shapes')
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_delete_lines_at_point/baseline/shape:1')
+  check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_lines_at_point/baseline/shape:2')
+  -- hover on the common point and delete
+  App.mouse_move(Margin_left+35, Margin_top+Drawing_padding_top+36)
+  App.run_after_keychord('C-d')
+  check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_lines_at_point/shape:1')
+  check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_delete_lines_at_point/shape:2')
+end
+
+function test_delete_line_under_mouse_pointer()
+  io.write('\ntest_delete_line_under_mouse_pointer')
+  -- create a drawing with two lines connected at a point
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  App.run_after_mouse_press(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  App.run_after_mouse_release(Margin_left+55, Margin_top+Drawing_padding_top+26, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 2, 'F - test_delete_line_under_mouse_pointer/baseline/#shapes')
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_delete_line_under_mouse_pointer/baseline/shape:1')
+  check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_line_under_mouse_pointer/baseline/shape:2')
+  -- hover on one of the lines and delete
+  App.mouse_move(Margin_left+25, Margin_top+Drawing_padding_top+26)
+  App.run_after_keychord('C-d')
+  -- only that line is deleted
+  check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_line_under_mouse_pointer/shape:1')
+  check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_line_under_mouse_pointer/shape:2')
+end
+
+function test_delete_point_from_polygon()
+  io.write('\ntest_delete_point_from_polygon')
+  -- create a drawing with two lines connected at a point
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  -- first point
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_keychord('g')  -- polygon mode
+  -- second point
+  App.mouse_move(Margin_left+65, Margin_top+Drawing_padding_top+36)
+  App.run_after_keychord('p')  -- add point
+  -- third point
+  App.mouse_move(Margin_left+35, Margin_top+Drawing_padding_top+26)
+  App.run_after_keychord('p')  -- add point
+  -- fourth point
+  App.run_after_mouse_release(Margin_left+14, Margin_top+Drawing_padding_top+16, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_delete_point_from_polygon/baseline/#shapes')
+  check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/baseline/mode')
+  check_eq(#drawing.shapes[1].vertices, 4, 'F - test_delete_point_from_polygon/baseline/vertices')
+  -- hover on a point and delete
+  App.mouse_move(Margin_left+35, Margin_top+Drawing_padding_top+26)
+  App.run_after_keychord('C-d')
+  -- just the one point is deleted
+  check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/shape')
+  check_eq(#drawing.shapes[1].vertices, 3, 'F - test_delete_point_from_polygon/vertices')
+end
+
+function test_delete_point_from_polygon()
+  io.write('\ntest_delete_point_from_polygon')
+  -- create a drawing with two lines connected at a point
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  -- first point
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_keychord('g')  -- polygon mode
+  -- second point
+  App.mouse_move(Margin_left+65, Margin_top+Drawing_padding_top+36)
+  App.run_after_keychord('p')  -- add point
+  -- third point
+  App.run_after_mouse_release(Margin_left+14, Margin_top+Drawing_padding_top+16, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_delete_point_from_polygon/baseline/#shapes')
+  check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/baseline/mode')
+  check_eq(#drawing.shapes[1].vertices, 3, 'F - test_delete_point_from_polygon/baseline/vertices')
+  -- hover on a point and delete
+  App.mouse_move(Margin_left+65, Margin_top+Drawing_padding_top+36)
+  App.run_after_keychord('C-d')
+  -- there's < 3 points left, so the whole polygon is deleted
+  check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_point_from_polygon')
 end
