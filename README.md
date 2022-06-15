@@ -128,6 +128,10 @@ to the website above:
 Forks of lines.love are encouraged. If you show me your fork, I'll link to it
 here.
 
+* https://github.com/akkartik/lines-polygon-experiment -- an experiment that
+  uses separate shortcuts for regular polygons. `ctrl+3` for triangles,
+  `ctrl+4` for squares, etc.
+
 ## Feedback
 
 [Most appreciated.](http://akkartik.name/contact)
