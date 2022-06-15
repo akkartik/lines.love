@@ -351,6 +351,7 @@ end
 function test_name_point()
   io.write('\ntest_name_point')
   -- create a drawing with a line
+  Filename = 'foo'
   App.screen.init{width=Margin_left+300, height=300}
   Lines = load_array{'```lines', '```', ''}
   Line_width = 256  -- drawing coordinates 1:1 with pixels
@@ -381,11 +382,16 @@ function test_name_point()
   App.run_after_keychord('return')
   check_eq(Current_drawing_mode, 'line', 'F - test_name_point/mode:3')
   check_eq(p2.name, 'A', 'F - test_name_point')
+  -- change is saved
+  Lines = load_from_disk(Filename)
+  local p2 = Lines[1].points[drawing.shapes[1].p2]
+  check_eq(p2.name, 'A', 'F - test_name_point/save')
 end
 
 function test_move_point()
   io.write('\ntest_move_point')
   -- create a drawing with a line
+  Filename = 'foo'
   App.screen.init{width=Margin_left+300, height=300}
   Lines = load_array{'```lines', '```', ''}
   Line_width = 256  -- drawing coordinates 1:1 with pixels
@@ -404,6 +410,13 @@ function test_move_point()
   check_eq(p2.x, 35, 'F - test_move_point/baseline/p2:x')
   check_eq(p2.y, 36, 'F - test_move_point/baseline/p2:y')
   check_nil(p2.name, 'F - test_move_point/baseline/p2:name')
+  -- line is saved to disk
+  Lines = load_from_disk(Filename)
+  local drawing = Lines[1]
+  local p2 = Lines[1].points[drawing.shapes[1].p2]
+  check_eq(p2.x, 35, 'F - test_move_point/save/x')
+  check_eq(p2.y, 36, 'F - test_move_point/save/y')
+  App.draw()
   -- enter 'move' mode without moving the mouse
   App.run_after_keychord('C-u')
   check_eq(Current_drawing_mode, 'move', 'F - test_move_point/mode:1')
@@ -420,11 +433,17 @@ function test_move_point()
   App.run_after_mouse_click(Margin_left+26, Margin_top+Drawing_padding_top+44, 1)
   check_eq(Current_drawing_mode, 'line', 'F - test_move_point/mode:3')
   check_eq(drawing.pending, {}, 'F - test_move_point/pending')
+  -- change is saved
+  Lines = load_from_disk(Filename)
+  local p2 = Lines[1].points[drawing.shapes[1].p2]
+  check_eq(p2.x, 26, 'F - test_move_point/save/x')
+  check_eq(p2.y, 44, 'F - test_move_point/save/y')
 end
 
 function test_delete_lines_at_point()
   io.write('\ntest_delete_lines_at_point')
   -- create a drawing with two lines connected at a point
+  Filename = 'foo'
   App.screen.init{width=Margin_left+300, height=300}
   Lines = load_array{'```lines', '```', ''}
   Line_width = 256  -- drawing coordinates 1:1 with pixels
@@ -443,6 +462,9 @@ function test_delete_lines_at_point()
   App.run_after_keychord('C-d')
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_lines_at_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_delete_lines_at_point/shape:2')
+  -- deleted points disappear after file is reloaded
+  Lines = load_from_disk(Filename)
+  check_eq(#Lines[1].shapes, 0, 'F - test_delete_lines_at_point/save')
 end
 
 function test_delete_line_under_mouse_pointer()

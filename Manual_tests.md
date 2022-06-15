@@ -12,9 +12,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 ### Todo list
 
-persistence:
-  select a point and name it, quit, restart. Name is still visible.
-
 undo:
   naming points
   deleting points
