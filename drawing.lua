@@ -12,9 +12,9 @@ function Drawing.draw(line)
     love.graphics.setColor(0.75,0.75,0.75)
     love.graphics.rectangle('line', Margin_left,line.y, Line_width,Drawing.pixels(line.h))
     if icon[Current_drawing_mode] then
-      icon[Current_drawing_mode](Margin_left+Line_width-20, line.y+4)
+      icon[Current_drawing_mode](Margin_left+Line_width-22, line.y+4)
     else
-      icon[Previous_drawing_mode](Margin_left+Line_width-20, line.y+4)
+      icon[Previous_drawing_mode](Margin_left+Line_width-22, line.y+4)
     end
 
     if App.mouse_down(1) and love.keyboard.isDown('h') then
