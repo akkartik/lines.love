@@ -273,8 +273,7 @@ function Drawing.mouse_released(x,y, button)
       elseif drawing.pending.mode == 'line' then
         local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
-          local j = Drawing.insert_point(drawing.points, mx,my)
-          drawing.pending.p2 = j
+          drawing.pending.p2 = Drawing.insert_point(drawing.points, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'manhattan' then
@@ -282,11 +281,9 @@ function Drawing.mouse_released(x,y, button)
         local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-            local j = Drawing.insert_point(drawing.points, mx, p1.y)
-            drawing.pending.p2 = j
+            drawing.pending.p2 = Drawing.insert_point(drawing.points, mx, p1.y)
           else
-            local j = Drawing.insert_point(drawing.points, p1.x, my)
-            drawing.pending.p2 = j
+            drawing.pending.p2 = Drawing.insert_point(drawing.points, p1.x, my)
           end
           local p2 = drawing.points[drawing.pending.p2]
           App.mouse_move(Margin_left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
