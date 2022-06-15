@@ -352,6 +352,34 @@ end
 function Drawing.keychord_pressed(chord)
   if chord == 'C-p' and not App.mouse_down(1) then
     Current_drawing_mode = 'freehand'
+  elseif App.mouse_down(1) and chord == 'l' then
+    Current_drawing_mode = 'line'
+    local _,drawing = Drawing.current_drawing()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    end
+    drawing.pending.mode = 'line'
+  elseif chord == 'C-l' and not App.mouse_down(1) then
+    Current_drawing_mode = 'line'
+  elseif App.mouse_down(1) and chord == 'm' then
+    Current_drawing_mode = 'manhattan'
+    local drawing = Drawing.select_drawing_at_mouse()
+    if drawing.pending.mode == 'freehand' then
+      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+    elseif drawing.pending.mode == 'line' then
+      -- do nothing
+    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
+      drawing.pending.p1 = drawing.pending.vertices[1]
+    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
+      drawing.pending.p1 = drawing.pending.center
+    end
+    drawing.pending.mode = 'manhattan'
+  elseif chord == 'C-m' and not App.mouse_down(1) then
+    Current_drawing_mode = 'manhattan'
   elseif chord == 'C-g' and not App.mouse_down(1) then
     Current_drawing_mode = 'polygon'
   elseif App.mouse_down(1) and chord == 'g' then
@@ -440,34 +468,6 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.center = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'circle'
-  elseif App.mouse_down(1) and chord == 'l' then
-    Current_drawing_mode = 'line'
-    local _,drawing = Drawing.current_drawing()
-    if drawing.pending.mode == 'freehand' then
-      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
-    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
-      drawing.pending.p1 = drawing.pending.vertices[1]
-    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
-      drawing.pending.p1 = drawing.pending.center
-    end
-    drawing.pending.mode = 'line'
-  elseif chord == 'C-l' and not App.mouse_down(1) then
-    Current_drawing_mode = 'line'
-  elseif App.mouse_down(1) and chord == 'm' then
-    Current_drawing_mode = 'manhattan'
-    local drawing = Drawing.select_drawing_at_mouse()
-    if drawing.pending.mode == 'freehand' then
-      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
-    elseif drawing.pending.mode == 'line' then
-      -- do nothing
-    elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
-      drawing.pending.p1 = drawing.pending.vertices[1]
-    elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
-      drawing.pending.p1 = drawing.pending.center
-    end
-    drawing.pending.mode = 'manhattan'
-  elseif chord == 'C-m' and not App.mouse_down(1) then
-    Current_drawing_mode = 'manhattan'
   elseif chord == 'C-s' and not App.mouse_down(1) then
     local drawing,_,shape = Drawing.select_shape_at_mouse()
     if drawing then
