@@ -14,7 +14,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 undo:
   deleting points
-  moving points
 
 resize:
   create a file containing a long line of characters without spaces. try
