@@ -1,111 +1,111 @@
 function draw_help_without_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   local y = drawing.y+10
-  love.graphics.print("Things you can do:", 16+30,y)
+  love.graphics.print("Things you can do:", Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print("* Press the mouse button to start drawing a "..current_shape(), 16+30,y)
+  love.graphics.print("* Press the mouse button to start drawing a "..current_shape(), Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print("* Hover on a point and press 'ctrl+u' to pick it up and start moving it,", 16+30,y)
+  love.graphics.print("* Hover on a point and press 'ctrl+u' to pick it up and start moving it,", Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print("then press the mouse button to drop it", 16+30+bullet_indent(),y)
+  love.graphics.print("then press the mouse button to drop it", Margin_left+30+bullet_indent(),y)
   y = y + Line_height
-  love.graphics.print("* Hover on a point and press 'ctrl+n', type a name, then press 'enter'", 16+30,y)
+  love.graphics.print("* Hover on a point and press 'ctrl+n', type a name, then press 'enter'", Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", 16+30,y)
+  love.graphics.print("* Hover on a point or shape and press 'ctrl+d' to delete it", Margin_left+30,y)
   y = y + Line_height
   if Current_drawing_mode ~= 'freehand' then
-    love.graphics.print("* Press 'ctrl+p' to switch to drawing freehand strokes", 16+30,y)
+    love.graphics.print("* Press 'ctrl+p' to switch to drawing freehand strokes", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'line' then
-    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", 16+30,y)
+    love.graphics.print("* Press 'ctrl+l' to switch to drawing lines", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", 16+30,y)
+    love.graphics.print("* Press 'ctrl+m' to switch to drawing horizontal/vertical lines", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'circle' then
-    love.graphics.print("* Press 'ctrl+o' to switch to drawing circles/arcs", 16+30,y)
+    love.graphics.print("* Press 'ctrl+o' to switch to drawing circles/arcs", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'polygon' then
-    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", 16+30,y)
+    love.graphics.print("* Press 'ctrl+g' to switch to drawing polygons", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'rectangle' then
-    love.graphics.print("* Press 'ctrl+r' to switch to drawing rectangles", 16+30,y)
+    love.graphics.print("* Press 'ctrl+r' to switch to drawing rectangles", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'square' then
-    love.graphics.print("* Press 'ctrl+s' to switch to drawing squares", 16+30,y)
+    love.graphics.print("* Press 'ctrl+s' to switch to drawing squares", Margin_left+30,y)
     y = y + Line_height
   end
-  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out, ctrl+0 to reset zoom", 16+30,y)
+  love.graphics.print("* Press 'ctrl+=' or 'ctrl+-' to zoom in or out, ctrl+0 to reset zoom", Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print("Press 'esc' now to hide this message", 16+30,y)
+  love.graphics.print("Press 'esc' now to hide this message", Margin_left+30,y)
   y = y + Line_height
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', Margin_left,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(drawing)
   love.graphics.setColor(0,0.5,0)
   local y = drawing.y+10
-  love.graphics.print("You're currently drawing a "..current_shape(drawing.pending), 16+30,y)
+  love.graphics.print("You're currently drawing a "..current_shape(drawing.pending), Margin_left+30,y)
   y = y + Line_height
-  love.graphics.print('Things you can do now:', 16+30,y)
+  love.graphics.print('Things you can do now:', Margin_left+30,y)
   y = y + Line_height
   if Current_drawing_mode == 'freehand' then
-    love.graphics.print('* Release the mouse button to finish drawing the stroke', 16+30,y)
+    love.graphics.print('* Release the mouse button to finish drawing the stroke', Margin_left+30,y)
     y = y + Line_height
   elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
-    love.graphics.print('* Release the mouse button to finish drawing the line', 16+30,y)
+    love.graphics.print('* Release the mouse button to finish drawing the line', Margin_left+30,y)
     y = y + Line_height
   elseif Current_drawing_mode == 'circle' then
     if drawing.pending.mode == 'circle' then
-      love.graphics.print('* Release the mouse button to finish drawing the circle', 16+30,y)
+      love.graphics.print('* Release the mouse button to finish drawing the circle', Margin_left+30,y)
       y = y + Line_height
-      love.graphics.print("* Press 'a' to draw just an arc of a circle", 16+30,y)
+      love.graphics.print("* Press 'a' to draw just an arc of a circle", Margin_left+30,y)
     else
-      love.graphics.print('* Release the mouse button to finish drawing the arc', 16+30,y)
+      love.graphics.print('* Release the mouse button to finish drawing the arc', Margin_left+30,y)
     end
     y = y + Line_height
   elseif Current_drawing_mode == 'polygon' then
-    love.graphics.print('* Release the mouse button to finish drawing the polygon', 16+30,y)
+    love.graphics.print('* Release the mouse button to finish drawing the polygon', Margin_left+30,y)
     y = y + Line_height
-    love.graphics.print("* Press 'p' to add a vertex to the polygon", 16+30,y)
+    love.graphics.print("* Press 'p' to add a vertex to the polygon", Margin_left+30,y)
     y = y + Line_height
   end
-  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", 16+30,y)
+  love.graphics.print("* Press 'esc' then release the mouse button to cancel the current shape", Margin_left+30,y)
   y = y + Line_height
   y = y + Line_height
   if Current_drawing_mode ~= 'line' then
-    love.graphics.print("* Press 'l' to switch to drawing lines", 16+30,y)
+    love.graphics.print("* Press 'l' to switch to drawing lines", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'manhattan' then
-    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", 16+30,y)
+    love.graphics.print("* Press 'm' to switch to drawing horizontal/vertical lines", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'circle' then
-    love.graphics.print("* Press 'o' to switch to drawing circles/arcs", 16+30,y)
+    love.graphics.print("* Press 'o' to switch to drawing circles/arcs", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'polygon' then
-    love.graphics.print("* Press 'g' to switch to drawing polygons", 16+30,y)
+    love.graphics.print("* Press 'g' to switch to drawing polygons", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'rectangle' then
-    love.graphics.print("* Press 'r' to switch to drawing rectangles", 16+30,y)
+    love.graphics.print("* Press 'r' to switch to drawing rectangles", Margin_left+30,y)
     y = y + Line_height
   end
   if Current_drawing_mode ~= 'square' then
-    love.graphics.print("* Press 's' to switch to drawing squares", 16+30,y)
+    love.graphics.print("* Press 's' to switch to drawing squares", Margin_left+30,y)
     y = y + Line_height
   end
   love.graphics.setColor(0,0.5,0, 0.1)
-  love.graphics.rectangle('fill', 16,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', Margin_left,drawing.y, Line_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
 function current_shape(shape)
