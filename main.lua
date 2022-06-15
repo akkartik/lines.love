@@ -409,6 +409,7 @@ function App.keychord_pressed(chord)
       Selection1 = deepcopy(src.selection)
       patch(Lines, event.after, event.before)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      save_to_disk(Lines, Filename)
     end
   elseif chord == 'C-y' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
@@ -420,6 +421,7 @@ function App.keychord_pressed(chord)
       Selection1 = deepcopy(src.selection)
       patch(Lines, event.before, event.after)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      save_to_disk(Lines, Filename)
     end
   -- clipboard
   elseif chord == 'C-c' then

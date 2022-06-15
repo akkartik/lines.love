@@ -13,7 +13,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 ### Todo list
 
 undo:
-  naming points
   deleting points
   moving points
 
