@@ -13,6 +13,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 ### Todo list
 
-resize:
-  create a file containing a long line of characters without spaces. try
-  resizing the window vertically and horizontally, as far as possible.
+* resize:
+  * create a file containing a long line of characters without spaces. try
+    resizing the window vertically and horizontally, as far as possible.
