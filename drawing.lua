@@ -468,11 +468,6 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.center = drawing.pending.vertices[1]
     end
     drawing.pending.mode = 'circle'
-  elseif chord == 'C-s' and not App.mouse_down(1) then
-    local drawing,_,shape = Drawing.select_shape_at_mouse()
-    if drawing then
-      smoothen(shape)
-    end
   elseif chord == 'C-u' and not App.mouse_down(1) then
     local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
     if drawing then
@@ -650,46 +645,6 @@ function Drawing.contains_point(shape, p)
   else
     print(shape.mode)
     assert(false)
-  end
-end
-
-function Drawing.convert_line(drawing, shape)
-  -- Perhaps we should do a more sophisticated "simple linear regression"
-  -- here:
-  --   https://en.wikipedia.org/wiki/Linear_regression#Simple_and_multiple_linear_regression
-  -- But this works well enough for close-to-linear strokes.
-  assert(shape.mode == 'freehand')
-  shape.mode = 'line'
-  shape.p1 = insert_point(drawing.points, shape.points[1].x, shape.points[1].y)
-  local n = #shape.points
-  shape.p2 = insert_point(drawing.points, shape.points[n].x, shape.points[n].y)
-end
-
--- turn a line either horizontal or vertical
-function Drawing.convert_horvert(drawing, shape)
-  if shape.mode == 'freehand' then
-    Drawing.convert_line(shape)
-  end
-  assert(shape.mode == 'line')
-  local p1 = drawing.points[shape.p1]
-  local p2 = drawing.points[shape.p2]
-  if math.abs(p1.x-p2.x) > math.abs(p1.y-p2.y) then
-    p2.y = p1.y
-  else
-    p2.x = p1.x
-  end
-end
-
-function Drawing.smoothen(shape)
-  assert(shape.mode == 'freehand')
-  for _=1,7 do
-    for i=2,#shape.points-1 do
-      local a = shape.points[i-1]
-      local b = shape.points[i]
-      local c = shape.points[i+1]
-      b.x = (a.x + b.x + c.x)/3
-      b.y = (a.y + b.y + c.y)/3
-    end
   end
 end
 
