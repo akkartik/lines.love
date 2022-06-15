@@ -321,3 +321,38 @@ function test_draw_square()
   check_eq(p.x, 5, 'F - test_draw_square/p4:x')
   check_eq(p.y, 66, 'F - test_draw_square/p4:y')
 end
+
+function test_name_point()
+  io.write('\ntest_name_point')
+  -- create a drawing with a line
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'line'
+  App.draw()
+  -- draw a line
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_name_point/baseline/#shapes')
+  check_eq(#drawing.points, 2, 'F - test_name_point/baseline/#points')
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_name_point/baseline/shape:1')
+  local p1 = drawing.points[drawing.shapes[1].p1]
+  local p2 = drawing.points[drawing.shapes[1].p2]
+  check_eq(p1.x, 5, 'F - test_name_point/baseline/p1:x')
+  check_eq(p1.y, 6, 'F - test_name_point/baseline/p1:y')
+  check_eq(p2.x, 35, 'F - test_name_point/baseline/p2:x')
+  check_eq(p2.y, 36, 'F - test_name_point/baseline/p2:y')
+  check_nil(p2.name, 'F - test_name_point/baseline/p2:name')
+  -- enter 'name' mode without moving the mouse
+  App.run_after_keychord('C-n')
+  check_eq(Current_drawing_mode, 'name', 'F - test_name_point/mode:1')
+  App.run_after_textinput('A')
+  check_eq(p2.name, 'A', 'F - test_name_point')
+  -- still in 'name' mode
+  check_eq(Current_drawing_mode, 'name', 'F - test_name_point/mode:2')
+  -- exit 'name' mode
+  App.run_after_keychord('return')
+  check_eq(Current_drawing_mode, 'line', 'F - test_name_point/mode:3')
+  check_eq(p2.name, 'A', 'F - test_name_point')
+end

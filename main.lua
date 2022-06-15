@@ -65,6 +65,8 @@ Previous_drawing_mode = nil
 -- values for tests
 Font_height = 14
 Line_height = 15
+-- widest possible character width
+Em = App.newText(love.graphics.getFont(), 'm')
 
 Margin_top = 15
 Margin_left = 25
@@ -174,8 +176,9 @@ function initialize_font_settings(font_height)
   love.graphics.setFont(love.graphics.newFont(Font_height))
   Line_height = math.floor(font_height*1.3)
 
-  -- maximum width available to either text or drawings, in pixels
   Em = App.newText(love.graphics.getFont(), 'm')
+
+  -- maximum width available to either text or drawings, in pixels
   -- readable text width is 50-75 chars
   Line_width = math.min(40*App.width(Em), App.screen.width-50)
 end
