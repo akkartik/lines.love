@@ -53,6 +53,7 @@ While editing text:
 * `ctrl+c` to copy, `ctrl+x` to cut, `ctrl+v` to paste
 * `ctrl+z` to undo, `ctrl+y` to redo
 * `ctrl+=` to zoom in, `ctrl+-` to zoom out, `ctrl+0` to reset zoom
+* `alt+right`/`alt+left` to jump to the next/previous word, respectively
 
 For shortcuts while editing drawings, consult the online help. Either:
 * hover on a drawing and hit `ctrl+h`, or
