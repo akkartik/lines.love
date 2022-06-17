@@ -157,6 +157,14 @@ function App.screen.print(msg, x,y)
   end
 end
 
+App.time = 1
+function App.getTime()
+  return App.time
+end
+function App.wait_fake_time(t)
+  App.time = App.time + t
+end
+
 -- LÖVE's Text primitive retains no trace of the string it was created from,
 -- so we'll wrap it for our tests.
 --
@@ -329,10 +337,14 @@ function App.disable_tests()
   -- test methods are disallowed outside tests
   App.screen.init = nil
   App.filesystem = nil
+  App.time = nil
   App.run_after_textinput = nil
   App.run_after_keychord = nil
   App.keypress = nil
   App.keyrelease = nil
+  App.run_after_mouse_click = nil
+  App.run_after_mouse_press = nil
+  App.run_after_mouse_release = nil
   App.fake_key_pressed = nil
   App.fake_key_press = nil
   App.fake_key_release = nil
@@ -346,6 +358,7 @@ function App.disable_tests()
   App.width = function(text) return text:getWidth() end
   App.open_for_reading = function(filename) return io.open(filename, 'r') end
   App.open_for_writing = function(filename) return io.open(filename, 'w') end
+  App.getTime = love.timer.getTime
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText
   App.modifier_down = love.keyboard.isDown

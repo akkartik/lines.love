@@ -182,7 +182,7 @@ function Text.keychord_pressed(chord)
     if (Cursor_y + Line_height) > App.screen.height then
       Text.snap_cursor_to_bottom_of_screen()
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   elseif chord == 'tab' then
     local before = snapshot(Cursor1.line)
@@ -193,12 +193,12 @@ function Text.keychord_pressed(chord)
       Text.snap_cursor_to_bottom_of_screen()
 --?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'backspace' then
     if Selection1.line then
       Text.delete_selection()
-      save_to_disk(Lines, Filename)
+      schedule_save()
       return
     end
     local before
@@ -235,12 +235,12 @@ function Text.keychord_pressed(chord)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
     assert(Text.le1(Screen_top1, Cursor1))
-    save_to_disk(Lines, Filename)
+    schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'delete' then
     if Selection1.line then
       Text.delete_selection()
-      save_to_disk(Lines, Filename)
+      schedule_save()
       return
     end
     local before
@@ -271,7 +271,7 @@ function Text.keychord_pressed(chord)
         table.remove(Lines, Cursor1.line+1)
       end
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then

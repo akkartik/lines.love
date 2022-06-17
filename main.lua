@@ -76,6 +76,7 @@ Drawing_padding_bottom = 10
 Drawing_padding_height = Drawing_padding_top + Drawing_padding_bottom
 
 Filename = love.filesystem.getUserDirectory()..'/lines.txt'
+Next_save = nil
 
 -- undo
 History = {}
@@ -168,7 +169,7 @@ function love.resize(w, h)
   App.screen.width, App.screen.height = w, h
   Line_width = math.min(40*App.width(Em), App.screen.width-50)
   Text.redraw_all()
-  Last_resize_time = love.timer.getTime()
+  Last_resize_time = App.getTime()
 end
 
 function initialize_font_settings(font_height)
@@ -208,7 +209,7 @@ function App.draw()
 
   -- some hysteresis while resizing
   if Last_resize_time then
-    if love.timer.getTime() - Last_resize_time < 0.1 then
+    if App.getTime() - Last_resize_time < 0.1 then
       return
     else
       Last_resize_time = nil
@@ -235,7 +236,7 @@ function App.draw()
                        if Cursor1.line >= line_index then
                          Cursor1.line = Cursor1.line+1
                        end
-                       save_to_disk(Lines, Filename)
+                       schedule_save()
                        record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
                      end})
           if Search_term == nil then
@@ -272,13 +273,23 @@ function App.update(dt)
   Cursor_time = Cursor_time + dt
   -- some hysteresis while resizing
   if Last_resize_time then
-    if love.timer.getTime() - Last_resize_time < 0.1 then
+    if App.getTime() - Last_resize_time < 0.1 then
       return
     else
       Last_resize_time = nil
     end
   end
   Drawing.update(dt)
+  if Next_save and Next_save < App.getTime() then
+    save_to_disk(Lines, Filename)
+    Next_save = nil
+  end
+end
+
+function schedule_save()
+  if Next_save == nil then
+    Next_save = App.getTime() + 3  -- short enough that you're likely to still remember what you did
+  end
 end
 
 function App.mousepressed(x,y, mouse_button)
@@ -317,7 +328,7 @@ function App.mousereleased(x,y, button)
   if Search_term then return end
   if Lines.current_drawing then
     Drawing.mouse_released(x,y, button)
-    save_to_disk(Lines, Filename)
+    schedule_save()
     if Drawing.before then
       record_undo_event({before=Drawing.before, after=snapshot(Lines.current_drawing_index)})
       Drawing.before = nil
@@ -358,7 +369,7 @@ function App.textinput(t)
   else
     Text.textinput(t)
   end
-  save_to_disk(Lines, Filename)
+  schedule_save()
 end
 
 function App.keychord_pressed(chord)
@@ -409,7 +420,7 @@ function App.keychord_pressed(chord)
       Selection1 = deepcopy(src.selection)
       patch(Lines, event.after, event.before)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      save_to_disk(Lines, Filename)
+      schedule_save()
     end
   elseif chord == 'C-y' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
@@ -421,7 +432,7 @@ function App.keychord_pressed(chord)
       Selection1 = deepcopy(src.selection)
       patch(Lines, event.before, event.after)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      save_to_disk(Lines, Filename)
+      schedule_save()
     end
   -- clipboard
   elseif chord == 'C-c' then
@@ -436,7 +447,7 @@ function App.keychord_pressed(chord)
     if s then
       App.setClipboardText(s)
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
   elseif chord == 'C-v' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
@@ -456,7 +467,7 @@ function App.keychord_pressed(chord)
     if Cursor_y >= App.screen.height - Line_height then
       Text.snap_cursor_to_bottom_of_screen()
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
@@ -466,7 +477,7 @@ function App.keychord_pressed(chord)
       local before = snapshot(drawing_index)
       Drawing.keychord_pressed(chord)
       record_undo_event({before=before, after=snapshot(drawing_index)})
-      save_to_disk(Lines, Filename)
+      schedule_save()
     end
   elseif chord == 'escape' and App.mouse_down(1) then
     local _,drawing = Drawing.current_drawing()
@@ -496,7 +507,7 @@ function App.keychord_pressed(chord)
       end
       record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
     end
-    save_to_disk(Lines, Filename)
+    schedule_save()
   else
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)

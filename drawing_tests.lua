@@ -10,6 +10,12 @@ function test_creating_drawing_saves()
   App.draw()
   -- click on button to create drawing
   App.run_after_mouse_click(8,Margin_top+8, 1)
+  -- file not immediately saved
+  App.update(0.01)
+  check_nil(App.filesystem['foo'], 'F - test_creating_drawing_saves/early')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- filesystem contains drawing and an empty line of text
   check_eq(App.filesystem['foo'], '```lines\n```\n\n', 'F - test_creating_drawing_saves')
 end
@@ -41,6 +47,9 @@ function test_draw_line()
   check_eq(p1.y, 6, 'F - test_draw_line/p1:y')
   check_eq(p2.x, 35, 'F - test_draw_line/p2:x')
   check_eq(p2.y, 36, 'F - test_draw_line/p2:y')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- The format on disk isn't perfectly stable. Table fields can be reordered.
   -- So just reload from disk to verify.
   Lines = load_from_disk(Filename)
@@ -382,6 +391,9 @@ function test_name_point()
   App.run_after_keychord('return')
   check_eq(Current_drawing_mode, 'line', 'F - test_name_point/mode:3')
   check_eq(p2.name, 'A', 'F - test_name_point')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- change is saved
   Lines = load_from_disk(Filename)
   local p2 = Lines[1].points[drawing.shapes[1].p2]
@@ -410,6 +422,9 @@ function test_move_point()
   check_eq(p2.x, 35, 'F - test_move_point/baseline/p2:x')
   check_eq(p2.y, 36, 'F - test_move_point/baseline/p2:y')
   check_nil(p2.name, 'F - test_move_point/baseline/p2:name')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- line is saved to disk
   Lines = load_from_disk(Filename)
   local drawing = Lines[1]
@@ -433,6 +448,9 @@ function test_move_point()
   App.run_after_mouse_click(Margin_left+26, Margin_top+Drawing_padding_top+44, 1)
   check_eq(Current_drawing_mode, 'line', 'F - test_move_point/mode:3')
   check_eq(drawing.pending, {}, 'F - test_move_point/pending')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- change is saved
   Lines = load_from_disk(Filename)
   local p2 = Lines[1].points[drawing.shapes[1].p2]
@@ -462,6 +480,9 @@ function test_delete_lines_at_point()
   App.run_after_keychord('C-d')
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_lines_at_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_delete_lines_at_point/shape:2')
+  -- wait for some time
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- deleted points disappear after file is reloaded
   Lines = load_from_disk(Filename)
   check_eq(#Lines[1].shapes, 0, 'F - test_delete_lines_at_point/save')
@@ -586,6 +607,9 @@ function test_undo_name_point()
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Next_history, 3, 'F - test_undo_name_point/next_history')
   check_eq(p2.name, '', 'F - test_undo_name_point')  -- not quite what it was before, but close enough
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- undo is saved
   Lines = load_from_disk(Filename)
   local p2 = Lines[1].points[drawing.shapes[1].p2]
@@ -632,6 +656,9 @@ function test_undo_move_point()
   check_eq(Next_history, 2, 'F - test_undo_move_point/next_history')
   check_eq(p2.x, 35, 'F - test_undo_move_point/x')
   check_eq(p2.y, 36, 'F - test_undo_move_point/y')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- undo is saved
   Lines = load_from_disk(Filename)
   local p2 = Lines[1].points[drawing.shapes[1].p2]
@@ -668,6 +695,9 @@ function test_undo_delete_point()
   check_eq(Next_history, 3, 'F - test_undo_move_point/next_history')
   check_eq(drawing.shapes[1].mode, 'line', 'F - test_undo_delete_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_undo_delete_point/shape:2')
+  -- wait until save
+  App.wait_fake_time(3.1)
+  App.update(0)
   -- undo is saved
   Lines = load_from_disk(Filename)
   check_eq(#Lines[1].shapes, 2, 'F - test_undo_delete_point/save')
