@@ -239,11 +239,11 @@ function App.draw()
                        schedule_save()
                        record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
                      end})
-          if Search_term == nil then
-            if line_index == Cursor1.line then
-              Text.draw_cursor(Margin_left, y)
-            end
+        if Search_term == nil then
+          if line_index == Cursor1.line then
+            Text.draw_cursor(Margin_left, y)
           end
+        end
         Screen_bottom1.pos = Screen_top1.pos
         y = y + Line_height
       elseif line.mode == 'drawing' then
