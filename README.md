@@ -66,9 +66,6 @@ found anything amiss: http://akkartik.name/contact
 
 ## Known issues
 
-* There's a bug in freehand drawings (`ctrl+p` mode) that causes them to be
-  highlighted even when the mouse is nowhere near them.
-
 * No support yet for Unicode graphemes spanning multiple codepoints.
 
 * Undo/redo may be sluggish in large files. Large files may grow sluggish in

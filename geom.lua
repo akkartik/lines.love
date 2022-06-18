@@ -1,15 +1,5 @@
 local geom = {}
 
-function geom.on_any_shape(x,y, drawing)
-  for _,shape in ipairs(drawing.shapes) do
-    assert(shape)
-    if geom.on_shape(x,y, drawing, shape) then
-      return true
-    end
-  end
-  return false
-end
-
 function geom.on_shape(x,y, drawing, shape)
   if shape.mode == 'freehand' then
     return geom.on_freehand(x,y, drawing, shape)
