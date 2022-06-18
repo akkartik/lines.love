@@ -1,5 +1,15 @@
 local geom = {}
 
+function geom.on_any_shape(x,y, drawing)
+  for _,shape in ipairs(drawing.shapes) do
+    assert(shape)
+    if geom.on_shape(x,y, drawing, shape) then
+      return true
+    end
+  end
+  return false
+end
+
 function geom.on_shape(x,y, drawing, shape)
   if shape.mode == 'freehand' then
     return geom.on_freehand(x,y, drawing, shape)
@@ -14,20 +24,21 @@ function geom.on_shape(x,y, drawing, shape)
       if y1 > y2 then
         y1,y2 = y2,y1
       end
-      return y >= y1*0.95 and y <= y2*1.05
+      return y >= y1-2 and y <= y2+2
     elseif p1.y == p2.y then
       if y ~= p1.y then return false end
       local x1,x2 = p1.x, p2.x
       if x1 > x2 then
         x1,x2 = x2,x1
       end
-      return x >= x1*0.95 and x <= x2*1.05
+      return x >= x1-2 and x <= x2+2
     end
   elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
     return geom.on_polygon(x,y, drawing, shape)
   elseif shape.mode == 'circle' then
     local center = drawing.points[shape.center]
-    return geom.dist(center.x,center.y, x,y) == shape.radius
+    local dist = geom.dist(center.x,center.y, x,y)
+    return dist > shape.radius*0.95 and dist < shape.radius*1.05
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
     local dist = geom.dist(center.x,center.y, x,y)
@@ -65,24 +76,24 @@ function geom.on_line(x,y, drawing, shape)
     p2 = shape.p2
   end
   if p1.x == p2.x then
-    if math.abs(p1.x-x) > 5 then
+    if math.abs(p1.x-x) > 2 then
       return false
     end
     local y1,y2 = p1.y,p2.y
     if y1 > y2 then
       y1,y2 = y2,y1
     end
-    return y >= y1 and y <= y2
+    return y >= y1-2 and y <= y2+2
   end
   -- has the right slope and intercept
   local m = (p2.y - p1.y) / (p2.x - p1.x)
   local yp = p1.y + m*(x-p1.x)
-  if yp < 0.95*y or yp > 1.05*y then
+  if yp < y-2 or yp > y+2 then
     return false
   end
   -- between endpoints
   local k = (x-p1.x) / (p2.x-p1.x)
-  return k > -0.05 and k < 1.05
+  return k > -0.005 and k < 1.005
 end
 
 function geom.on_polygon(x,y, drawing, shape)

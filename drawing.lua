@@ -4,6 +4,8 @@ geom = require 'geom'
 
 require 'drawing_tests'
 
+Show_nearby = false
+
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts.
 function Drawing.draw(line)
@@ -26,6 +28,17 @@ function Drawing.draw(line)
   if line.show_help then
     draw_help_without_mouse_pressed(line)
     return
+  end
+
+  if Show_nearby then
+    love.graphics.setColor(1,0.75,0.75)
+    for y=0,127 do
+      for x=0,255 do
+        if geom.on_any_shape(x,y, line) then
+          love.graphics.circle('fill', Drawing.pixels(x)+Margin_left, Drawing.pixels(y)+line.y, 2)
+        end
+      end
+    end
   end
 
   local mx,my = Drawing.coord(pmx-Margin_left), Drawing.coord(pmy-line.y)
@@ -370,6 +383,10 @@ function Drawing.mouse_released(x,y, button)
 end
 
 function Drawing.keychord_pressed(chord)
+  if chord == 'C-a' then
+    Show_nearby = not Show_nearby
+    return
+  end
   if chord == 'C-p' and not App.mouse_down(1) then
     Current_drawing_mode = 'freehand'
   elseif App.mouse_down(1) and chord == 'l' then
