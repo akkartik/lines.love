@@ -22,8 +22,6 @@ function geom.on_shape(x,y, drawing, shape)
         x1,x2 = x2,x1
       end
       return x >= x1*0.95 and x <= x2*1.05
-    else
-      assert(false)
     end
   elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
     return geom.on_polygon(x,y, drawing, shape)

@@ -421,7 +421,6 @@ function test_move_point()
   check_eq(p1.y, 6, 'F - test_move_point/baseline/p1:y')
   check_eq(p2.x, 35, 'F - test_move_point/baseline/p2:x')
   check_eq(p2.y, 36, 'F - test_move_point/baseline/p2:y')
-  check_nil(p2.name, 'F - test_move_point/baseline/p2:name')
   -- wait until save
   App.wait_fake_time(3.1)
   App.update(0)
@@ -456,6 +455,32 @@ function test_move_point()
   local p2 = Lines[1].points[drawing.shapes[1].p2]
   check_eq(p2.x, 26, 'F - test_move_point/save/x')
   check_eq(p2.y, 44, 'F - test_move_point/save/y')
+end
+
+function test_move_point_on_manhattan_line()
+  io.write('\ntest_move_point_on_manhattan_line')
+  -- create a drawing with a manhattan line
+  Filename = 'foo'
+  App.screen.init{width=Margin_left+300, height=300}
+  Lines = load_array{'```lines', '```', ''}
+  Line_width = 256  -- drawing coordinates 1:1 with pixels
+  Current_drawing_mode = 'manhattan'
+  App.draw()
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+46, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 1, 'F - test_move_point_on_manhattan_line/baseline/#shapes')
+  check_eq(#drawing.points, 2, 'F - test_move_point_on_manhattan_line/baseline/#points')
+  check_eq(drawing.shapes[1].mode, 'manhattan', 'F - test_move_point_on_manhattan_line/baseline/shape:1')
+  App.draw()
+  -- enter 'move' mode
+  App.run_after_keychord('C-u')
+  check_eq(Current_drawing_mode, 'move', 'F - test_move_point_on_manhattan_line/mode:1')
+  -- move point
+  App.mouse_move(Margin_left+26, Margin_top+Drawing_padding_top+44)
+  App.update(0.05)
+  -- line is no longer manhattan
+  check_eq(drawing.shapes[1].mode, 'line', 'F - test_move_point_on_manhattan_line/baseline/shape:1')
 end
 
 function test_delete_lines_at_point()

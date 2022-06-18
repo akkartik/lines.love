@@ -243,21 +243,36 @@ function Drawing.update()
         local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
         drawing.pending.target_point.x = mx
         drawing.pending.target_point.y = my
+        Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
       end
     end
   elseif Current_drawing_mode == 'move' then
     if Drawing.in_drawing(drawing, x, y) then
       local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
-      if drawing.mode == 'manhattan' then
-        drawing.mode = 'line'
-      elseif drawing.mode == 'rectangle' or drawing.mode == 'square' then
-        drawing.mode = 'polygon'
-      end
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
+      Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
     end
   else
     -- do nothing
+  end
+end
+
+function Drawing.relax_constraints(drawing, p)
+  for _,shape in ipairs(drawing.shapes) do
+    if shape.mode == 'manhattan' then
+      if shape.p1 == p then
+        shape.mode = 'line'
+      elseif shape.p2 == p then
+        shape.mode = 'line'
+      end
+    elseif shape.mode == 'rectangle' or shape.mode == 'square' then
+      for _,v in ipairs(shape.vertices) do
+        if v == p then
+          shape.mode = 'polygon'
+        end
+      end
+    end
   end
 end
 
@@ -474,13 +489,13 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'circle'
   elseif chord == 'C-u' and not App.mouse_down(1) then
-    local drawing_index,drawing,_,p = Drawing.select_point_at_mouse()
+    local drawing_index,drawing,i,p = Drawing.select_point_at_mouse()
     if drawing then
       if Previous_drawing_mode == nil then
         Previous_drawing_mode = Current_drawing_mode
       end
       Current_drawing_mode = 'move'
-      drawing.pending = {mode=Current_drawing_mode, target_point=p}
+      drawing.pending = {mode=Current_drawing_mode, target_point=p, target_point_index=i}
       Lines.current_drawing_index = drawing_index
       Lines.current_drawing = drawing
     end
