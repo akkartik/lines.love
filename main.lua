@@ -12,6 +12,8 @@ local geom = require 'geom'
 require 'help'
 require 'icons'
 
+require 'main_tests'
+
 -- run in both tests and a real run
 function App.initialize_globals()
 -- a line is either text or a drawing
@@ -167,7 +169,7 @@ function parse_geometry_spec(geometry_spec)
   return true
 end
 
-function love.resize(w, h)
+function App.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Line_width = math.min(40*App.width(Em), App.screen.width-50)
