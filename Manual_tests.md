@@ -16,3 +16,9 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 * resize:
   * Create a file containing a long line of characters without spaces. Try
     resizing the window vertically and horizontally, as far as possible.
+
+* line-width button
+  * Create a file containing a single line with a reasonable number of
+    characters. Move the cursor towards the end of the line. Click on
+    line-width icon in the top margin, slide it left and right. Watch the line
+    of characters wrap and unwrap in response. Text should not be selected.
