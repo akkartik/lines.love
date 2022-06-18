@@ -14,6 +14,7 @@ require 'text_tests'
 function Text.draw(line, line_width, line_index)
 --?   print('text.draw', line_index)
   love.graphics.setColor(0,0,0)
+--?   love.graphics.line(Line_width,0, Line_width,App.screen.height)
   -- wrap long lines
   local x = Margin_left
   local y = line.y

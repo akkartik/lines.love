@@ -16,8 +16,8 @@ function test_adjust_line_width()
   App.screen.init{width=Margin_left+300, height=300}
   Line_width = 256
   App.draw()  -- initialize button
-  App.run_after_mouse_press(Margin_left+256, Margin_top-3, 1)
-  App.mouse_move(Margin_left+200, 37)
+  App.run_after_mouse_press(256, Margin_top-3, 1)
+  App.mouse_move(200, 37)
   -- no change for some time
   App.wait_fake_time(0.01)
   App.update(0)

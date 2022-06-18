@@ -222,7 +222,7 @@ function App.draw()
   end
 
   -- line-width indicator
-  button('line-width', {x=Margin_left+Line_width-4,y=Margin_top-10, w=10,h=10, color={1,1,1},
+  button('line-width', {x=Line_width-4,y=Margin_top-10, w=10,h=10, color={1,1,1},
     icon = icon.line_width,
     onpress1 = function() Line_width_hover = App.getTime() end,
   })
@@ -295,7 +295,7 @@ function App.update(dt)
   -- update Line_width with some hysteresis while the indicator is dragged
   if Line_width_hover then
     if App.getTime() - Line_width_hover > 0.1 then
-      Line_width = App.mouse_x() - Margin_left
+      Line_width = App.mouse_x()
       Text.redraw_all()
       if App.mouse_down(1) then
         Line_width_hover = App.getTime()
