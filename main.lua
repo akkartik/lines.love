@@ -317,6 +317,11 @@ function schedule_save()
   end
 end
 
+-- make sure to save before quitting
+function love.quit()
+  save_to_disk(Lines, Filename)
+end
+
 function App.mousepressed(x,y, mouse_button)
   if Search_term then return end
   propagate_to_button_handlers(x,y, mouse_button)
