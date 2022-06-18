@@ -248,6 +248,11 @@ function Drawing.update()
   elseif Current_drawing_mode == 'move' then
     if Drawing.in_drawing(drawing, x, y) then
       local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+      if drawing.mode == 'manhattan' then
+        drawing.mode = 'line'
+      elseif drawing.mode == 'rectangle' or drawing.mode == 'square' then
+        drawing.mode = 'polygon'
+      end
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
     end
