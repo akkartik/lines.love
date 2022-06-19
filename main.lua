@@ -347,6 +347,7 @@ function App.mousepressed(x,y, mouse_button)
         Old_selection1 = Selection1
         Mousepress_shift = App.shift_down()
         Selection1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
+--?         print('selection')
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
@@ -372,6 +373,7 @@ function App.mousereleased(x,y, button)
     for line_index,line in ipairs(Lines) do
       if line.mode == 'text' then
         if Text.in_line(line_index,line, x,y) then
+--?           print('reset selection')
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
 --?           print(Cursor1.line, Cursor1.pos)
           if Mousepress_shift then
@@ -405,6 +407,9 @@ function App.textinput(t)
     Text.textinput(t)
   end
   schedule_save()
+  if not App.shift_down() then
+    Selection1 = {}
+  end
 end
 
 function App.keychord_pressed(chord)
@@ -546,6 +551,9 @@ function App.keychord_pressed(chord)
   else
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
+  end
+  if not App.shift_down() then
+    Selection1 = {}
   end
 end
 

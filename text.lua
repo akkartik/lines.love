@@ -164,7 +164,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
---?   print('chord')
+--?   print('chord', chord, Selection1.line, Selection1.pos)
   --== shortcuts that mutate text
   if chord == 'return' then
     local before_line = Cursor1.line

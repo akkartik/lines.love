@@ -186,6 +186,24 @@ function test_click_on_wrapping_line_containing_non_ascii()
   check_eq(Cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
 end
 
+function test_edit_after_click_resets_selection()
+  io.write('\ntest_edit_after_click_resets_selection')
+  -- display a line of text
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- click past the end of it and hit enter
+  App.run_after_mouse_click(Margin_left+40,Margin_top+5, 1)
+  check(Selection1.line, 'F - test_edit_after_click_resets_selection/baseline')
+  App.run_after_keychord('return')
+  -- selection is reset since shift key is not pressed
+  check_nil(Selection1.line, 'F - test_edit_after_click_resets_selection')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
