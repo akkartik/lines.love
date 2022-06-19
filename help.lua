@@ -83,7 +83,7 @@ function draw_help_with_mouse_pressed(drawing)
     else
       love.graphics.print('* Release the mouse button to finish drawing the rectangle', Margin_left+30,y)
       y = y + Line_height
-      love.graphics.print("* Press 'p' to replace the second vertext of the rectangle", Margin_left+30,y)
+      love.graphics.print("* Press 'p' to replace the second vertex of the rectangle", Margin_left+30,y)
       y = y + Line_height
     end
   elseif Current_drawing_mode == 'square' then
@@ -93,7 +93,7 @@ function draw_help_with_mouse_pressed(drawing)
     else
       love.graphics.print('* Release the mouse button to finish drawing the square', Margin_left+30,y)
       y = y + Line_height
-      love.graphics.print("* Press 'p' to replace the second vertext of the square", Margin_left+30,y)
+      love.graphics.print("* Press 'p' to replace the second vertex of the square", Margin_left+30,y)
       y = y + Line_height
     end
   end
