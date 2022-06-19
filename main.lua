@@ -422,7 +422,7 @@ function App.keychord_pressed(chord)
       Search_backup = nil
     elseif chord == 'backspace' then
       local len = utf8.len(Search_term)
-      local byte_offset = utf8.offset(Search_term, len)
+      local byte_offset = Text.offset(Search_term, len)
       Search_term = string.sub(Search_term, 1, byte_offset-1)
       Search_text = nil
     elseif chord == 'down' then
@@ -537,7 +537,7 @@ function App.keychord_pressed(chord)
         p.name = nil
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
-        local byte_offset = utf8.offset(p.name, len-1)
+        local byte_offset = Text.offset(p.name, len-1)
         p.name = string.sub(p.name, 1, byte_offset)
       end
       record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})

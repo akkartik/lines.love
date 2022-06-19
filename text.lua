@@ -113,8 +113,7 @@ function Text.compute_fragments(line, line_width)
           -- We're not going to reimplement TeX here.
           local bpos = Text.nearest_pos_less_than(frag, line_width - x)
           assert(bpos > 0)  -- avoid infinite loop when window is too narrow
-          local boffset = utf8.offset(frag, bpos+1)  -- byte _after_ bpos
-          assert(boffset)
+          local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
 --?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset)..' bytes')
           local frag1 = string.sub(frag, 1, boffset-1)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
@@ -156,16 +155,7 @@ function Text.textinput(t)
 end
 
 function Text.insert_at_cursor(t)
-  local byte_offset
-  if Cursor1.pos > 1 then
-    byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
-  else
-    byte_offset = 1
-  end
-  if byte_offset == nil then
-    print(Cursor1.line, Cursor1.pos, byte_offset, Lines[Cursor1.line].data)
-    assert(false)
-  end
+  local byte_offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)..t..string.sub(Lines[Cursor1.line].data, byte_offset)
   Lines[Cursor1.line].fragments = nil
   Lines[Cursor1.line].screen_line_starting_pos = nil
@@ -174,7 +164,7 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(chord)
---?   print(chord)
+--?   print('chord')
   --== shortcuts that mutate text
   if chord == 'return' then
     local before_line = Cursor1.line
@@ -380,10 +370,7 @@ function Text.keychord_pressed(chord)
 end
 
 function Text.insert_return()
-  local byte_offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
---?   print(Cursor1.line, Cursor1.pos, #Lines[Cursor1.line].data)
---?   print(Lines[Cursor1.line].data)
-  assert(byte_offset)
+  local byte_offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
   Lines[Cursor1.line].fragments = nil
@@ -465,8 +452,7 @@ function Text.up()
           Screen_top1.pos = screen_line_starting_pos
 --?           print('pos of top of screen is also '..tostring(Screen_top1.pos)..' of the same line')
         end
-        local screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, screen_line_starting_pos)
-        assert(screen_line_starting_byte_offset)
+        local screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, screen_line_starting_pos)
         local s = string.sub(Lines[Cursor1.line].data, screen_line_starting_byte_offset)
         Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
         break
@@ -485,8 +471,7 @@ function Text.up()
       Screen_top1.pos = new_screen_line_starting_pos
 --?       print('also setting pos of top of screen to '..tostring(Screen_top1.pos))
     end
-    local new_screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
-    assert(new_screen_line_starting_byte_offset)
+    local new_screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now '..tostring(Cursor1.pos))
@@ -525,8 +510,7 @@ function Text.down()
     local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
     new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index+1]
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
-    local new_screen_line_starting_byte_offset = utf8.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
-    assert(new_screen_line_starting_byte_offset)
+    local new_screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
     Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
@@ -544,7 +528,7 @@ function Text.word_left()
     Text.left()
     if Cursor1.pos == 1 then break end
     assert(Cursor1.pos > 1)
-    local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+    local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
     assert(offset > 1)
     if Lines[Cursor1.line].data:sub(offset-1,offset-1) == ' ' then
       break
@@ -556,7 +540,7 @@ function Text.word_right()
   while true do
     Text.right()
     if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
-    local offset = utf8.offset(Lines[Cursor1.line].data, Cursor1.pos)
+    local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
     if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then  -- TODO: other space characters
       break
     end
@@ -696,8 +680,7 @@ function Text.to_pos_on_line(line, mx, my)
   -- duplicate some logic from Text.draw
   local y = line.y
   for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
-      local screen_line_starting_byte_offset = utf8.offset(line.data, screen_line_starting_pos)
-      assert(screen_line_starting_byte_offset)
+      local screen_line_starting_byte_offset = Text.offset(line.data, screen_line_starting_pos)
 --?     print('iter', y, screen_line_index, screen_line_starting_pos, string.sub(line.data, screen_line_starting_byte_offset))
     local nexty = y + Line_height
     if my < nexty then
@@ -802,8 +785,7 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
 end
 
 function Text.x(s, pos)
-  local offset = utf8.offset(s, pos)
-  assert(offset)
+  local offset = Text.offset(s, pos)
   local s_before = s:sub(1, offset-1)
   local text_before = App.newText(love.graphics.getFont(), s_before)
   return App.width(text_before)
@@ -857,6 +839,17 @@ function Text.le1(a, b)
     return false
   end
   return a.pos <= b.pos
+end
+
+function Text.offset(s, pos1)
+  if pos1 == 1 then return 1 end
+  local result = utf8.offset(s, pos1)
+  if result == nil then
+    print(Cursor1.line, Cursor1.pos, #Lines[Cursor1.line].data, Lines[Cursor1.line].data)
+    print(pos1, #s, s)
+  end
+  assert(result)
+  return result
 end
 
 function Text.previous_screen_line(pos2)

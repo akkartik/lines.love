@@ -55,9 +55,9 @@ end
 -- Returns some intermediate computation useful elsewhere.
 function Text.draw_highlight(line, x,y, pos, lo,hi)
   if lo then
-    local lo_offset = utf8.offset(line.data, lo)
-    local hi_offset = utf8.offset(line.data, hi)
-    local pos_offset = utf8.offset(line.data, pos)
+    local lo_offset = Text.offset(line.data, lo)
+    local hi_offset = Text.offset(line.data, hi)
+    local pos_offset = Text.offset(line.data, pos)
     local lo_px
     if pos == lo then
       lo_px = 0
@@ -137,8 +137,8 @@ function Text.delete_selection_without_undo()
   -- delete everything between min (inclusive) and max (exclusive)
   Lines[minl].fragments = nil
   Lines[minl].screen_line_starting_pos = nil
-  local min_offset = utf8.offset(Lines[minl].data, minp)
-  local max_offset = utf8.offset(Lines[maxl].data, maxp)
+  local min_offset = Text.offset(Lines[minl].data, minp)
+  local max_offset = Text.offset(Lines[maxl].data, maxp)
   if minl == maxl then
 --?     print('minl == maxl')
     Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..Lines[minl].data:sub(max_offset)
@@ -165,8 +165,8 @@ function Text.selection()
       minp,maxp = maxp,minp
     end
   end
-  local min_offset = utf8.offset(Lines[minl].data, minp)
-  local max_offset = utf8.offset(Lines[maxl].data, maxp)
+  local min_offset = Text.offset(Lines[minl].data, minp)
+  local max_offset = Text.offset(Lines[maxl].data, maxp)
   if minl == maxl then
     return Lines[minl].data:sub(min_offset, max_offset-1)
   end
