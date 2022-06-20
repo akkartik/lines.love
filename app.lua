@@ -232,14 +232,19 @@ function App.mouse_y()
   return App.fake_mouse_state.y
 end
 
+-- all textinput events are also keypresses
 function App.run_after_textinput(t)
+  App.keypressed(t)
   App.textinput(t)
+  App.keyreleased(t)
   App.screen.contents = {}
   App.draw()
 end
 
-function App.run_after_keychord(key)
-  App.keychord_pressed(key)
+-- not all keys are textinput
+function App.run_after_keychord(chord)
+  App.keychord_pressed(chord)
+  App.keyreleased(chord)
   App.screen.contents = {}
   App.draw()
 end

@@ -407,9 +407,6 @@ function App.textinput(t)
     Text.textinput(t)
   end
   schedule_save()
-  if not App.shift_down() then
-    Selection1 = {}
-  end
 end
 
 function App.keychord_pressed(chord)
@@ -540,22 +537,23 @@ function App.keychord_pressed(chord)
       local p = drawing.points[drawing.pending.target_point]
       if chord == 'escape' then
         p.name = nil
+        record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
         local byte_offset = Text.offset(p.name, len-1)
         p.name = string.sub(p.name, 1, byte_offset)
+        record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
       end
-      record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
     end
     schedule_save()
   else
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
   end
-  if not App.shift_down() then
-    Selection1 = {}
-  end
 end
 
 function App.keyreleased(key, scancode)
+  if not App.shift_down() then
+    Selection1 = {}
+  end
 end

@@ -204,6 +204,23 @@ function test_edit_after_click_resets_selection()
   check_nil(Selection1.line, 'F - test_edit_after_click_resets_selection')
 end
 
+function test_edit_deletes_selection()
+  io.write('\ntest_edit_deletes_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- press a key
+  App.run_after_textinput('x')
+  -- selected text is deleted and replaced with the key
+  check_eq(Lines[1].data, 'xbc', 'F - test_edit_deletes_selection')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
