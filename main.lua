@@ -391,7 +391,6 @@ function App.mousereleased(x,y, button)
   end
 end
 
--- don't depend on state of Selection1; use keychord_pressed for that
 function App.textinput(t)
   for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
   if Search_term then
@@ -550,9 +549,6 @@ function App.keychord_pressed(chord)
   else
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
-  end
-  if not App.shift_down() and chord ~= 'C-c' then
-    Selection1 = {}
   end
 end
 

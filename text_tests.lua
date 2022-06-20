@@ -1335,6 +1335,7 @@ function test_undo_restores_selection()
   check_nil(Selection1.line, 'F - test_undo_restores_selection/baseline:selection')
   -- undo
   App.run_after_keychord('C-z')
+  App.run_after_keychord('C-z')
   -- selection is restored
   check_eq(Selection1.line, 1, 'F - test_undo_restores_selection/line')
   check_eq(Selection1.pos, 2, 'F - test_undo_restores_selection/pos')
