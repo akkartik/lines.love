@@ -551,7 +551,7 @@ function App.keychord_pressed(chord)
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
   end
-  if not App.shift_down() then
+  if not App.shift_down() and chord ~= 'C-c' then
     Selection1 = {}
   end
 end

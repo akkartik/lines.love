@@ -243,6 +243,24 @@ function test_edit_deletes_selection()
   check_eq(Lines[1].data, 'xbc', 'F - test_edit_deletes_selection')
 end
 
+function test_copy_does_not_reset_selection()
+  io.write('\ntest_copy_does_not_reset_selection')
+  -- display a line of text with a selection
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- copy selection
+  App.run_after_keychord('C-c')
+  check_eq(App.clipboard, 'a', 'F - test_copy_does_not_reset_selection/clipboard')
+  -- selection is reset since shift key is not pressed
+  check(Selection1.line, 'F - test_copy_does_not_reset_selection')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
