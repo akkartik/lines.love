@@ -175,6 +175,7 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
+    Selection1 = {}
   elseif chord == 'tab' then
     local before = snapshot(Cursor1.line)
 --?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
@@ -186,10 +187,12 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
+    Selection1 = {}
   elseif chord == 'backspace' then
     if Selection1.line then
       Text.delete_selection()
       schedule_save()
+      Selection1 = {}
       return
     end
     local before
@@ -228,10 +231,12 @@ function Text.keychord_pressed(chord)
     assert(Text.le1(Screen_top1, Cursor1))
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
+    Selection1 = {}
   elseif chord == 'delete' then
     if Selection1.line then
       Text.delete_selection()
       schedule_save()
+      Selection1 = {}
       return
     end
     local before
@@ -264,6 +269,7 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
+    Selection1 = {}
   --== shortcuts that move the cursor
   elseif chord == 'left' then
     if Selection1.line then

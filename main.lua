@@ -407,6 +407,9 @@ function App.textinput(t)
     Text.textinput(t)
   end
   schedule_save()
+  if not App.shift_down() then
+    Selection1 = {}
+  end
 end
 
 function App.keychord_pressed(chord)
@@ -438,15 +441,19 @@ function App.keychord_pressed(chord)
     Search_term = ''
     Search_backup = {cursor={line=Cursor1.line, pos=Cursor1.pos}, screen_top={line=Screen_top1.line, pos=Screen_top1.pos}}
     assert(Search_text == nil)
+    Selection1 = {}
   elseif chord == 'C-=' then
     initialize_font_settings(Font_height+2)
     Text.redraw_all()
+    Selection1 = {}
   elseif chord == 'C--' then
     initialize_font_settings(Font_height-2)
     Text.redraw_all()
+    Selection1 = {}
   elseif chord == 'C-0' then
     initialize_font_settings(20)
     Text.redraw_all()
+    Selection1 = {}
   elseif chord == 'C-z' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local event = undo_event()
@@ -459,6 +466,7 @@ function App.keychord_pressed(chord)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save()
     end
+    Selection1 = {}
   elseif chord == 'C-y' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local event = redo_event()
@@ -471,6 +479,7 @@ function App.keychord_pressed(chord)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save()
     end
+    Selection1 = {}
   -- clipboard
   elseif chord == 'C-c' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
@@ -478,6 +487,7 @@ function App.keychord_pressed(chord)
     if s then
       App.setClipboardText(s)
     end
+    Selection1 = {}
   elseif chord == 'C-x' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     local s = Text.cut_selection()
@@ -485,6 +495,7 @@ function App.keychord_pressed(chord)
       App.setClipboardText(s)
     end
     schedule_save()
+    Selection1 = {}
   elseif chord == 'C-v' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
@@ -506,6 +517,7 @@ function App.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
+    Selection1 = {}
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
@@ -553,7 +565,4 @@ function App.keychord_pressed(chord)
 end
 
 function App.keyreleased(key, scancode)
-  if not App.shift_down() then
-    Selection1 = {}
-  end
 end

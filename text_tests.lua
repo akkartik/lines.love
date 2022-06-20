@@ -186,6 +186,28 @@ function test_click_on_wrapping_line_containing_non_ascii()
   check_eq(Cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
 end
 
+function test_select_text()
+  io.write('\ntest_select_text')
+  -- display a line of text
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc def'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- select a letter
+  App.fake_key_press('lshift')
+  App.run_after_keychord('S-right')
+  App.fake_key_release('lshift')
+  App.keyreleased('lshift')
+  -- selection persists even after shift is released
+  check_eq(Selection1.line, 1, 'F - test_select_text/selection:line')
+  check_eq(Selection1.pos, 1, 'F - test_select_text/selection:pos')
+  check_eq(Cursor1.line, 1, 'F - test_select_text/cursor:line')
+  check_eq(Cursor1.pos, 2, 'F - test_select_text/cursor:pos')
+end
+
 function test_edit_after_click_resets_selection()
   io.write('\ntest_edit_after_click_resets_selection')
   -- display a line of text
