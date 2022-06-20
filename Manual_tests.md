@@ -8,5 +8,6 @@ record those here.
 Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 * All strings are UTF-8. Bytes within them are not characters. I try to label
-  byte offsets as _offset, and character positions as _pos. For example,
-  string.sub should never use a _pos to substring, only an _offset.
+  byte offsets with the suffix `_offset`, and character positions as `_pos`.
+  For example, `string.sub` should never use a `_pos` to substring, only an
+  `_offset`.
