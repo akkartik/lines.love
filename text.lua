@@ -137,14 +137,12 @@ function Text.compute_fragments(line, line_width)
   end
 end
 
+-- don't depend on state of Selection1; use keychord_pressed for that
 function Text.textinput(t)
   if App.mouse_down(1) then return end
   assert(not App.ctrl_down())
   if App.alt_down() then return end
   assert(not App.cmd_down())
-  if Selection1.line then
-    Text.delete_selection()
-  end
   local before = snapshot(Cursor1.line)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   Text.insert_at_cursor(t)
@@ -177,7 +175,6 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
-    Selection1 = {}
   elseif chord == 'tab' then
     local before = snapshot(Cursor1.line)
 --?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
@@ -189,12 +186,10 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
-    Selection1 = {}
   elseif chord == 'backspace' then
     if Selection1.line then
       Text.delete_selection()
       schedule_save()
-      Selection1 = {}
       return
     end
     local before
@@ -233,12 +228,10 @@ function Text.keychord_pressed(chord)
     assert(Text.le1(Screen_top1, Cursor1))
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
-    Selection1 = {}
   elseif chord == 'delete' then
     if Selection1.line then
       Text.delete_selection()
       schedule_save()
-      Selection1 = {}
       return
     end
     local before
@@ -271,14 +264,11 @@ function Text.keychord_pressed(chord)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
-    Selection1 = {}
   --== shortcuts that move the cursor
   elseif chord == 'left' then
     Text.left()
-    Selection1 = {}
   elseif chord == 'right' then
     Text.right()
-    Selection1 = {}
   elseif chord == 'S-left' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
@@ -292,10 +282,8 @@ function Text.keychord_pressed(chord)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
     Text.word_left()
-    Selection1 = {}
   elseif chord == 'M-right' then
     Text.word_right()
-    Selection1 = {}
   elseif chord == 'M-S-left' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
@@ -308,10 +296,8 @@ function Text.keychord_pressed(chord)
     Text.word_right()
   elseif chord == 'home' then
     Cursor1.pos = 1
-    Selection1 = {}
   elseif chord == 'end' then
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
-    Selection1 = {}
   elseif chord == 'S-home' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
@@ -324,10 +310,8 @@ function Text.keychord_pressed(chord)
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'up' then
     Text.up()
-    Selection1 = {}
   elseif chord == 'down' then
     Text.down()
-    Selection1 = {}
   elseif chord == 'S-up' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
@@ -340,10 +324,8 @@ function Text.keychord_pressed(chord)
     Text.down()
   elseif chord == 'pageup' then
     Text.pageup()
-    Selection1 = {}
   elseif chord == 'pagedown' then
     Text.pagedown()
-    Selection1 = {}
   elseif chord == 'S-pageup' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
@@ -354,6 +336,9 @@ function Text.keychord_pressed(chord)
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
     Text.pagedown()
+  end
+  if Selection1.line and not App.shift_down() then
+    Text.delete_selection()
   end
 end
 
