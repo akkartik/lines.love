@@ -172,6 +172,7 @@ function Text.keychord_pressed(chord)
     local before_line = Cursor1.line
     local before = snapshot(before_line)
     Text.insert_return()
+    Selection1 = {}
     if (Cursor_y + Line_height) > App.screen.height then
       Text.snap_cursor_to_bottom_of_screen()
     end
