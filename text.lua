@@ -272,14 +272,10 @@ function Text.keychord_pressed(chord)
     Selection1 = {}
   --== shortcuts that move the cursor
   elseif chord == 'left' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.left()
   elseif chord == 'right' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.right()
   elseif chord == 'S-left' then
     if Selection1.line == nil then
@@ -293,14 +289,10 @@ function Text.keychord_pressed(chord)
     Text.right()
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.word_left()
   elseif chord == 'M-right' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.word_right()
   elseif chord == 'M-S-left' then
     if Selection1.line == nil then
@@ -313,14 +305,10 @@ function Text.keychord_pressed(chord)
     end
     Text.word_right()
   elseif chord == 'home' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Cursor1.pos = 1
   elseif chord == 'end' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'S-home' then
     if Selection1.line == nil then
@@ -333,14 +321,10 @@ function Text.keychord_pressed(chord)
     end
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   elseif chord == 'up' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.up()
   elseif chord == 'down' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.down()
   elseif chord == 'S-up' then
     if Selection1.line == nil then
@@ -353,14 +337,10 @@ function Text.keychord_pressed(chord)
     end
     Text.down()
   elseif chord == 'pageup' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.pageup()
   elseif chord == 'pagedown' then
-    if Selection1.line then
-      Selection1 = {}
-    end
+    Selection1 = {}
     Text.pagedown()
   elseif chord == 'S-pageup' then
     if Selection1.line == nil then
