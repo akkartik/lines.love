@@ -1317,3 +1317,25 @@ function test_undo_delete_text()
   y = y + Line_height
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
 end
+
+function test_undo_restores_selection()
+  io.write('\ntest_undo_restores_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- delete selected text
+  App.run_after_textinput('x')
+  check_eq(Lines[1].data, 'xbc', 'F - test_undo_restores_selection/baseline')
+  check_nil(Selection1.line, 'F - test_undo_restores_selection/baseline:selection')
+  -- undo
+  App.run_after_keychord('C-z')
+  -- selection is restored
+  check_eq(Selection1.line, 1, 'F - test_undo_restores_selection/line')
+  check_eq(Selection1.pos, 2, 'F - test_undo_restores_selection/pos')
+end
