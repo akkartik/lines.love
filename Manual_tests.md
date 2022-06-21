@@ -11,3 +11,7 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
   byte offsets with the suffix `_offset`, and character positions as `_pos`.
   For example, `string.sub` should never use a `_pos` to substring, only an
   `_offset`.
+
+* Some ADT/interface support would be helpful in keeping per-line state in
+  sync. Any change to line data should clear line `fragments` and
+  `screen_line_starting_pos`.

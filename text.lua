@@ -355,6 +355,9 @@ function Text.insert_return()
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
   Lines[Cursor1.line].fragments = nil
+  Lines[Cursor1.line].screen_line_starting_pos = nil
+  Lines[Cursor1.line+1].fragments = nil
+  Lines[Cursor1.line+1].screen_line_starting_pos = nil
   Cursor1.line = Cursor1.line+1
   Cursor1.pos = 1
 end
@@ -410,7 +413,7 @@ end
 
 function Text.up()
   assert(Lines[Cursor1.line].mode == 'text')
---?   print('up', Cursor1.pos, Screen_top1.pos)
+--?   print('up', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
   local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
   if screen_line_starting_pos == 1 then
 --?     print('cursor is at first screen line of its line')
