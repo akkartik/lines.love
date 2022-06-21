@@ -410,6 +410,9 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
+  if Selection1.line and not App.shift_down() and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' then
+    Text.delete_selection()
+  end
   if Search_term then
     if chord == 'escape' then
       Search_term = nil

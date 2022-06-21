@@ -261,6 +261,44 @@ function test_copy_does_not_reset_selection()
   check(Selection1.line, 'F - test_copy_does_not_reset_selection')
 end
 
+function test_cut()
+  io.write('\ntest_cut')
+  -- display a line of text with some part selected
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- press a key
+  App.run_after_keychord('C-x')
+  check_eq(App.clipboard, 'a', 'F - test_cut/clipboard')
+  -- selected text is deleted
+  check_eq(Lines[1].data, 'bc', 'F - test_cut/data')
+end
+
+function test_paste_replaces_selection()
+  io.write('\ntest_paste_replaces_selection')
+  -- display a line of text with a selection
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc', 'def'}
+  Line_width = 75
+  Cursor1 = {line=2, pos=1}
+  Selection1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- set clipboard
+  App.clipboard = 'xyz'
+  -- paste selection
+  App.run_after_keychord('C-v')
+  -- selection is reset since shift key is not pressed
+  -- selection includes the newline, so it's also deleted
+  check_eq(Lines[1].data, 'xyzdef', 'F - test_paste_replaces_selection')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}

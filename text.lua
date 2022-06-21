@@ -142,9 +142,6 @@ function Text.textinput(t)
   assert(not App.ctrl_down())
   if App.alt_down() then return end
   assert(not App.cmd_down())
-  if Selection1.line then
-    Text.delete_selection()
-  end
   local before = snapshot(Cursor1.line)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   Text.insert_at_cursor(t)
