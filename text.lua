@@ -296,8 +296,10 @@ function Text.keychord_pressed(chord)
     Text.word_right()
   elseif chord == 'home' then
     Cursor1.pos = 1
+    Selection1 = {}
   elseif chord == 'end' then
     Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+    Selection1 = {}
   elseif chord == 'S-home' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
