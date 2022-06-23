@@ -226,6 +226,10 @@ function App.draw()
     icon = icon.line_width,
     onpress1 = function() Line_width_hover = App.getTime() end,
   })
+  if Line_width_hover then
+    love.graphics.setColor(0.7,0.7,0.7)
+    love.graphics.line(Line_width,Margin_top+2, Line_width,App.screen.height)
+  end
 
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1
