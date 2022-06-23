@@ -530,7 +530,8 @@ end
 function test_pagedown_skips_drawings()
   io.write('\ntest_pagedown_skips_drawings')
   -- some lines of text with a drawing intermixed
-  App.screen.init{width=50, height=80}
+  local drawing_width = 50
+  App.screen.init{width=Margin_left+drawing_width, height=80}
   Lines = load_array{'abc',               -- height 15
                      '```lines', '```',   -- height 25
                      'def',               -- height 15
@@ -540,7 +541,7 @@ function test_pagedown_skips_drawings()
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
-  local drawing_height = Drawing_padding_height + App.screen.width / 2  -- default
+  local drawing_height = Drawing_padding_height + drawing_width/2  -- default
   -- initially the screen displays the first line and the drawing
   -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
   App.draw()

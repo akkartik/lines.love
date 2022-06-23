@@ -8,13 +8,13 @@ require 'drawing_tests'
 -- into 256 parts.
 function Drawing.draw(line)
   local pmx,pmy = App.mouse_x(), App.mouse_y()
-  if pmx < Margin_left+Line_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
+  if pmx < Line_width and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     love.graphics.setColor(0.75,0.75,0.75)
-    love.graphics.rectangle('line', Margin_left,line.y, Line_width,Drawing.pixels(line.h))
+    love.graphics.rectangle('line', Margin_left,line.y, Line_width-Margin_left,Drawing.pixels(line.h))
     if icon[Current_drawing_mode] then
-      icon[Current_drawing_mode](Margin_left+Line_width-22, line.y+4)
+      icon[Current_drawing_mode](Line_width-22, line.y+4)
     else
-      icon[Previous_drawing_mode](Margin_left+Line_width-22, line.y+4)
+      icon[Previous_drawing_mode](Line_width-22, line.y+4)
     end
 
     if App.mouse_down(1) and love.keyboard.isDown('h') then
@@ -204,7 +204,7 @@ end
 
 function Drawing.in_drawing(drawing, x,y)
   if drawing.y == nil then return false end  -- outside current page
-  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Margin_left and x < Margin_left+Line_width
+  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Margin_left and x < Line_width
 end
 
 function Drawing.mouse_pressed(drawing, x,y, button)
@@ -685,10 +685,10 @@ function Drawing.near(point, x,y)
 end
 
 function Drawing.pixels(n)  -- parts to pixels
-  return math.floor(n*Line_width/256)
+  return math.floor(n*(Line_width-Margin_left)/256)
 end
 function Drawing.coord(n)  -- pixels to parts
-  return math.floor(n*256/Line_width)
+  return math.floor(n*256/(Line_width-Margin_left))
 end
 
 function table.find(h, x)
