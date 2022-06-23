@@ -201,7 +201,6 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Text.clear_cache(Lines[Cursor1.line])
         Cursor1.pos = Cursor1.pos-1
       end
     elseif Cursor1.line > 1 then
@@ -212,7 +211,6 @@ function Text.keychord_pressed(chord)
         -- join lines
         Cursor1.pos = utf8.len(Lines[Cursor1.line-1].data)+1
         Lines[Cursor1.line-1].data = Lines[Cursor1.line-1].data..Lines[Cursor1.line].data
-        Text.clear_cache(Lines[Cursor1.line-1])
         table.remove(Lines, Cursor1.line)
       end
       Cursor1.line = Cursor1.line-1
@@ -223,6 +221,7 @@ function Text.keychord_pressed(chord)
       Screen_top1 = Text.to1(top2)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
+    Text.clear_cache(Lines[Cursor1.line])
     assert(Text.le1(Screen_top1, Cursor1))
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
@@ -247,7 +246,6 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Text.clear_cache(Lines[Cursor1.line])
         -- no change to Cursor1.pos
       end
     elseif Cursor1.line < #Lines then
@@ -256,10 +254,10 @@ function Text.keychord_pressed(chord)
       else
         -- join lines
         Lines[Cursor1.line].data = Lines[Cursor1.line].data..Lines[Cursor1.line+1].data
-        Text.clear_cache(Lines[Cursor1.line])
         table.remove(Lines, Cursor1.line+1)
       end
     end
+    Text.clear_cache(Lines[Cursor1.line])
     schedule_save()
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   --== shortcuts that move the cursor
