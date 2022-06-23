@@ -135,8 +135,7 @@ function Text.delete_selection_without_undo()
   Cursor1.pos = minp
   Selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
-  Lines[minl].fragments = nil
-  Lines[minl].screen_line_starting_pos = nil
+  Text.clear_cache(Lines[minl])
   local min_offset = Text.offset(Lines[minl].data, minp)
   local max_offset = Text.offset(Lines[maxl].data, maxp)
   if minl == maxl then

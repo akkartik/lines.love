@@ -155,8 +155,7 @@ end
 function Text.insert_at_cursor(t)
   local byte_offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)..t..string.sub(Lines[Cursor1.line].data, byte_offset)
-  Lines[Cursor1.line].fragments = nil
-  Lines[Cursor1.line].screen_line_starting_pos = nil
+  Text.clear_cache(Lines[Cursor1.line])
   Cursor1.pos = Cursor1.pos+1
 end
 
@@ -202,8 +201,7 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Lines[Cursor1.line].fragments = nil
-        Lines[Cursor1.line].screen_line_starting_pos = nil
+        Text.clear_cache(Lines[Cursor1.line])
         Cursor1.pos = Cursor1.pos-1
       end
     elseif Cursor1.line > 1 then
@@ -214,8 +212,7 @@ function Text.keychord_pressed(chord)
         -- join lines
         Cursor1.pos = utf8.len(Lines[Cursor1.line-1].data)+1
         Lines[Cursor1.line-1].data = Lines[Cursor1.line-1].data..Lines[Cursor1.line].data
-        Lines[Cursor1.line-1].fragments = nil
-        Lines[Cursor1.line-1].screen_line_starting_pos = nil
+        Text.clear_cache(Lines[Cursor1.line-1])
         table.remove(Lines, Cursor1.line)
       end
       Cursor1.line = Cursor1.line-1
@@ -250,8 +247,7 @@ function Text.keychord_pressed(chord)
         else
           Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_start-1)
         end
-        Lines[Cursor1.line].fragments = nil
-        Lines[Cursor1.line].screen_line_starting_pos = nil
+        Text.clear_cache(Lines[Cursor1.line])
         -- no change to Cursor1.pos
       end
     elseif Cursor1.line < #Lines then
@@ -260,8 +256,7 @@ function Text.keychord_pressed(chord)
       else
         -- join lines
         Lines[Cursor1.line].data = Lines[Cursor1.line].data..Lines[Cursor1.line+1].data
-        Lines[Cursor1.line].fragments = nil
-        Lines[Cursor1.line].screen_line_starting_pos = nil
+        Text.clear_cache(Lines[Cursor1.line])
         table.remove(Lines, Cursor1.line+1)
       end
     end
@@ -354,10 +349,8 @@ function Text.insert_return()
   local byte_offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
   table.insert(Lines, Cursor1.line+1, {mode='text', data=string.sub(Lines[Cursor1.line].data, byte_offset)})
   Lines[Cursor1.line].data = string.sub(Lines[Cursor1.line].data, 1, byte_offset-1)
-  Lines[Cursor1.line].fragments = nil
-  Lines[Cursor1.line].screen_line_starting_pos = nil
-  Lines[Cursor1.line+1].fragments = nil
-  Lines[Cursor1.line+1].screen_line_starting_pos = nil
+  Text.clear_cache(Lines[Cursor1.line])
+  Text.clear_cache(Lines[Cursor1.line+1])
   Cursor1.line = Cursor1.line+1
   Cursor1.pos = 1
 end
@@ -883,9 +876,13 @@ function Text.redraw_all()
 --?   print('clearing fragments')
   for _,line in ipairs(Lines) do
     line.y = nil
-    line.fragments = nil
-    line.screen_line_starting_pos = nil
+    Text.clear_cache(line)
   end
+end
+
+function Text.clear_cache(line)
+  line.fragments = nil
+  line.screen_line_starting_pos = nil
 end
 
 return Text
