@@ -15,3 +15,8 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 * Some ADT/interface support would be helpful in keeping per-line state in
   sync. Any change to line data should clear line `fragments` and
   `screen_line_starting_pos`.
+
+* Some inputs get processed in love.textinput and some in love.keypressed.
+  Several bugs have arisen due to destructive interference between the two for
+  some key chord. I wish I could guarantee that the two sets are disjoint. But
+  perhaps I'm not thinking about this right.
