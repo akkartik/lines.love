@@ -414,7 +414,7 @@ function App.textinput(t)
 end
 
 function App.keychord_pressed(chord)
-  if Selection1.line and not App.shift_down() and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' then
+  if Selection1.line and not App.shift_down() and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
     Text.delete_selection()
   end
   if Search_term then

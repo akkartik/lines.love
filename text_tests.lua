@@ -208,6 +208,24 @@ function test_select_text()
   check_eq(Cursor1.pos, 2, 'F - test_select_text/cursor:pos')
 end
 
+function test_cursor_movement_without_shift_resets_selection()
+  io.write('\ntest_cursor_movement_without_shift_resets_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- press an arrow key without shift
+  App.run_after_keychord('right')
+  -- no change to data, selection is reset
+  check_nil(Selection1.line, 'F - test_cursor_movement_without_shift_resets_selection')
+  check_eq(Lines[1].data, 'abc', 'F - test_cursor_movement_without_shift_resets_selection/data')
+end
+
 function test_edit_after_click_resets_selection()
   io.write('\ntest_edit_after_click_resets_selection')
   -- display a line of text

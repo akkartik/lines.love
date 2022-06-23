@@ -49,6 +49,10 @@ function App.cmd_down()
   return App.modifier_down('lgui') or App.modifier_down('rgui')
 end
 
+function App.is_cursor_movement(key)
+  return array.find({'left', 'right', 'up', 'down', 'home', 'end', 'pageup', 'pagedown'}, key)
+end
+
 array = {}
 
 function array.find(arr, elem)
