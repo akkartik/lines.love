@@ -133,6 +133,10 @@ function Text.delete_selection_without_undo()
   -- update Cursor1 and Selection1
   Cursor1.line = minl
   Cursor1.pos = minp
+  if Text.lt1(Cursor1, Screen_top1) then
+    Screen_top1.line = Cursor1.line
+    _,Screen_top1.pos = Text.pos_at_start_of_cursor_screen_line()
+  end
   Selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
   Text.clear_cache(Lines[minl])

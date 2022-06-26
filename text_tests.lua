@@ -317,6 +317,31 @@ function test_paste_replaces_selection()
   check_eq(Lines[1].data, 'xyzdef', 'F - test_paste_replaces_selection')
 end
 
+function test_deleting_selection_may_scroll()
+  io.write('\ntest_deleting_selection_may_scroll')
+  -- display lines 2/3/4
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Line_width = App.screen.width
+  Cursor1 = {line=3, pos=2}
+  Screen_top1 = {line=2, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'def', 'F - test_deleting_selection_may_scroll/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'ghi', 'F - test_deleting_selection_may_scroll/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'jkl', 'F - test_deleting_selection_may_scroll/baseline/screen:3')
+  -- set up a selection starting above the currently displayed page
+  Selection1 = {line=1, pos=2}
+  -- delete selection
+  App.run_after_keychord('backspace')
+  -- page scrolls up
+  check_eq(Screen_top1.line, 1, 'F - test_deleting_selection_may_scroll')
+  check_eq(Lines[1].data, 'ahi', 'F - test_deleting_selection_may_scroll/data')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
