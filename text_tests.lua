@@ -261,6 +261,28 @@ function test_edit_deletes_selection()
   check_eq(Lines[1].data, 'xbc', 'F - test_edit_deletes_selection')
 end
 
+function test_edit_with_shift_key_deletes_selection()
+  io.write('\ntest_edit_with_shift_key_deletes_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=80, height=80}
+  Lines = load_array{'abc'}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Selection1 = {line=1, pos=2}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  -- mimic precise keypresses for a capital letter
+  App.fake_key_press('lshift')
+  App.keypressed('d')
+  App.textinput('D')
+  App.keyreleased('d')
+  App.fake_key_release('lshift')
+  -- selected text is deleted and replaced with the key
+  check_nil(Selection1.line, 'F - test_edit_with_shift_key_deletes_selection')
+  check_eq(Lines[1].data, 'Dbc', 'F - test_edit_with_shift_key_deletes_selection/data')
+end
+
 function test_copy_does_not_reset_selection()
   io.write('\ntest_copy_does_not_reset_selection')
   -- display a line of text with a selection

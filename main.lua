@@ -413,8 +413,12 @@ function App.textinput(t)
   schedule_save()
 end
 
-function App.keychord_pressed(chord)
-  if Selection1.line and not App.shift_down() and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
+function App.keychord_pressed(chord, key)
+  if Selection1.line and
+      -- printable character created using shift key => delete selection
+      -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
+      (not App.shift_down() or utf8.len(key) == 1) and
+      chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
     Text.delete_selection()
   end
   if Search_term then
