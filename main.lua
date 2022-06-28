@@ -552,6 +552,7 @@ function App.keychord_pressed(chord, key)
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
         local byte_offset = Text.offset(p.name, len-1)
+        if len == 1 then byte_offset = 0 end
         p.name = string.sub(p.name, 1, byte_offset)
         record_undo_event({before=before, after=snapshot(Lines.current_drawing_index)})
       end
