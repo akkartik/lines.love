@@ -139,8 +139,7 @@ end
 
 function Text.textinput(t)
   if App.mouse_down(1) then return end
-  assert(not App.ctrl_down())
-  if App.alt_down() or App.cmd_down() then return end
+  if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
   local before = snapshot(Cursor1.line)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   Text.insert_at_cursor(t)
