@@ -161,6 +161,55 @@ function test_draw_wrapping_text_containing_non_ascii()
   App.screen.check(y, 'm ad', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
 end
 
+function test_click_on_wrapping_line()
+  io.write('\ntest_click_on_wrapping_line')
+  -- display a wrapping line
+  App.screen.init{width=80, height=80}
+                  --  12345678901234
+  Lines = load_array{"madam I'm adam"}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'madam ', 'F - test_click_on_wrapping_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line/baseline/screen:2')
+  y = y + Line_height
+  -- click past end of second screen line
+  App.draw()
+  App.run_after_mouse_click(App.screen.width-2,y-2, 1)
+  -- cursor moves to end of screen line
+  check_eq(Cursor1.line, 1, 'F - test_click_on_wrapping_line/cursor:line')
+  check_eq(Cursor1.pos, 13, 'F - test_click_on_wrapping_line/cursor:pos')
+end
+
+function test_click_past_end_of_wrapping_line()
+  io.write('\ntest_click_past_end_of_wrapping_line')
+  -- display a wrapping line
+  App.screen.init{width=80, height=80}
+                  --  12345678901234
+  Lines = load_array{"madam I'm adam"}
+  Line_width = 75
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'madam ', 'F - test_click_past_end_of_wrapping_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, "I'm ada", 'F - test_click_past_end_of_wrapping_line/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'm', 'F - test_click_past_end_of_wrapping_line/baseline/screen:3')
+  y = y + Line_height
+  -- click past the end of it
+  App.draw()
+  App.run_after_mouse_click(App.screen.width-2,y-2, 1)
+  -- cursor moves to end of line
+  check_eq(Cursor1.pos, 15, 'F - test_click_past_end_of_wrapping_line/cursor')  -- one more than the number of UTF-8 code-points
+end
+
 function test_click_on_wrapping_line_containing_non_ascii()
   io.write('\ntest_click_on_wrapping_line_containing_non_ascii')
   -- display a wrapping line containing non-ASCII
