@@ -683,7 +683,7 @@ function Text.to_pos_on_line(line, mx, my)
       -- On all wrapped screen lines but the final one, clicks past end of
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
-      if screen_line_index < #line.screen_line_starting_pos and mx > Line_width then
+      if screen_line_index < #line.screen_line_starting_pos and mx > Text.screen_line_width(line, screen_line_index) then
 --?         print('past end of non-final line; return')
         return line.screen_line_starting_pos[screen_line_index+1]-1
       end
@@ -709,6 +709,21 @@ end
 --  line_starting_pos = 1 + 3 + 3 = 7
 --  nearest_cursor_pos('gh', mx) = 2
 --  Cursor1.pos = 7 + 2 - 1 = 8
+
+function Text.screen_line_width(line, i)
+  local start_pos = line.screen_line_starting_pos[i]
+  local start_offset = Text.offset(line.data, start_pos)
+  local screen_line
+  if i < #line.screen_line_starting_pos then
+    local past_end_pos = line.screen_line_starting_pos[i+1]
+    local past_end_offset = Text.offset(line.data, past_end_pos)
+    screen_line = string.sub(line.data, start_offset, past_end_offset-1)
+  else
+    screen_line = string.sub(line.data, start_pos)
+  end
+  local screen_line_text = App.newText(love.graphics.getFont(), screen_line)
+  return App.width(screen_line_text)
+end
 
 function Text.nearest_cursor_pos(line, x)  -- x includes left margin
   if x == 0 then

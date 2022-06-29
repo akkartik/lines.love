@@ -235,6 +235,28 @@ function test_click_on_wrapping_line_containing_non_ascii()
   check_eq(Cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
 end
 
+function test_click_past_end_of_word_wrapping_line()
+  io.write('\ntest_click_past_end_of_word_wrapping_line')
+  -- display a long line wrapping at a word boundary on a screen of more realistic length
+  App.screen.init{width=200, height=80}
+                   -- 0        1         2
+                   -- 123456789012345678901
+  Lines = load_array{'the quick brown fox jumped over the lazy dog'}
+  Line_width = 160
+  Cursor1 = {line=1, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'the quick brown fox ', 'F - test_click_past_end_of_word_wrapping_line/baseline/screen:1')
+  y = y + Line_height
+  -- click past the end of the screen line but within Line_width
+  App.draw()
+  App.run_after_mouse_click(Line_width-2,y-2, 1)
+  -- cursor moves to end of screen line
+  check_eq(Cursor1.pos, 20, 'F - test_click_past_end_of_word_wrapping_line/cursor')
+end
+
 function test_select_text()
   io.write('\ntest_select_text')
   -- display a line of text
