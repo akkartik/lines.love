@@ -683,7 +683,7 @@ function Text.to_pos_on_line(line, mx, my)
       -- On all wrapped screen lines but the final one, clicks past end of
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
-      if mx > Line_width and screen_line_index < #line.screen_line_starting_pos then
+      if screen_line_index < #line.screen_line_starting_pos and mx > Line_width then
 --?         print('past end of non-final line; return')
         return line.screen_line_starting_pos[screen_line_index+1]-1
       end
