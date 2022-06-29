@@ -1152,6 +1152,124 @@ function test_typing_on_bottom_line_scrolls_down()
   App.screen.check(y, 'l', 'F - test_typing_on_bottom_line_scrolls_down/screen:3')
 end
 
+function test_left_arrow_scrolls_up_in_wrapped_line()
+  io.write('\ntest_left_arrow_scrolls_up_in_wrapped_line')
+  -- display lines starting from second screen line of a line
+  App.screen.init{width=Margin_left+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Screen_top1 = {line=3, pos=5}
+  Screen_bottom1 = {}
+  -- cursor is at top of screen
+  Cursor1 = {line=3, pos=5}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'jkl', 'F - test_left_arrow_scrolls_up_in_wrapped_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'mno', 'F - test_left_arrow_scrolls_up_in_wrapped_line/baseline/screen:2')
+  -- after hitting the left arrow the screen scrolls up to first screen line
+  App.run_after_keychord('left')
+  y = Margin_top
+  App.screen.check(y, 'ghi ', 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'jkl', 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'mno', 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen:3')
+  check_eq(Screen_top1.line, 3, 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen_top')
+  check_eq(Screen_top1.pos, 1, 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_left_arrow_scrolls_up_in_wrapped_line/cursor:line')
+  check_eq(Cursor1.pos, 4, 'F - test_left_arrow_scrolls_up_in_wrapped_line/cursor:pos')
+end
+
+function test_right_arrow_scrolls_down_in_wrapped_line()
+  io.write('\ntest_right_arrow_scrolls_down_in_wrapped_line')
+  -- display the first three lines with the cursor on the bottom line
+  App.screen.init{width=Margin_left+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  -- cursor is at bottom right of screen
+  Cursor1 = {line=3, pos=5}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'abc', 'F - test_right_arrow_scrolls_down_in_wrapped_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'def', 'F - test_right_arrow_scrolls_down_in_wrapped_line/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'ghi ', 'F - test_right_arrow_scrolls_down_in_wrapped_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
+  -- after hitting the right arrow the screen scrolls down by one line
+  App.run_after_keychord('right')
+  check_eq(Screen_top1.line, 2, 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_right_arrow_scrolls_down_in_wrapped_line/cursor:line')
+  check_eq(Cursor1.pos, 6, 'F - test_right_arrow_scrolls_down_in_wrapped_line/cursor:pos')
+  y = Margin_top
+  App.screen.check(y, 'def', 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'ghi ', 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'jkl', 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen:3')
+end
+
+function test_home_scrolls_up_in_wrapped_line()
+  io.write('\ntest_home_scrolls_up_in_wrapped_line')
+  -- display lines starting from second screen line of a line
+  App.screen.init{width=Margin_left+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Screen_top1 = {line=3, pos=5}
+  Screen_bottom1 = {}
+  -- cursor is at top of screen
+  Cursor1 = {line=3, pos=5}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'jkl', 'F - test_home_scrolls_up_in_wrapped_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'mno', 'F - test_home_scrolls_up_in_wrapped_line/baseline/screen:2')
+  -- after hitting home the screen scrolls up to first screen line
+  App.run_after_keychord('home')
+  y = Margin_top
+  App.screen.check(y, 'ghi ', 'F - test_home_scrolls_up_in_wrapped_line/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'jkl', 'F - test_home_scrolls_up_in_wrapped_line/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'mno', 'F - test_home_scrolls_up_in_wrapped_line/screen:3')
+  check_eq(Screen_top1.line, 3, 'F - test_home_scrolls_up_in_wrapped_line/screen_top')
+  check_eq(Screen_top1.pos, 1, 'F - test_home_scrolls_up_in_wrapped_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_home_scrolls_up_in_wrapped_line/cursor:line')
+  check_eq(Cursor1.pos, 1, 'F - test_home_scrolls_up_in_wrapped_line/cursor:pos')
+end
+
+function test_end_scrolls_down_in_wrapped_line()
+  io.write('\ntest_end_scrolls_down_in_wrapped_line')
+  -- display the first three lines with the cursor on the bottom line
+  App.screen.init{width=Margin_left+30, height=60}
+  Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Line_width = App.screen.width
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  -- cursor is at bottom right of screen
+  Cursor1 = {line=3, pos=5}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, 'abc', 'F - test_end_scrolls_down_in_wrapped_line/baseline/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'def', 'F - test_end_scrolls_down_in_wrapped_line/baseline/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'ghi ', 'F - test_end_scrolls_down_in_wrapped_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
+  -- after hitting end the screen scrolls down by one line
+  App.run_after_keychord('end')
+  check_eq(Screen_top1.line, 2, 'F - test_end_scrolls_down_in_wrapped_line/screen_top')
+  check_eq(Cursor1.line, 3, 'F - test_end_scrolls_down_in_wrapped_line/cursor:line')
+  check_eq(Cursor1.pos, 8, 'F - test_end_scrolls_down_in_wrapped_line/cursor:pos')
+  y = Margin_top
+  App.screen.check(y, 'def', 'F - test_end_scrolls_down_in_wrapped_line/screen:1')
+  y = y + Line_height
+  App.screen.check(y, 'ghi ', 'F - test_end_scrolls_down_in_wrapped_line/screen:2')
+  y = y + Line_height
+  App.screen.check(y, 'jkl', 'F - test_end_scrolls_down_in_wrapped_line/screen:3')
+end
+
 function test_position_cursor_on_recently_edited_wrapping_line()
   -- draw a line wrapping over 2 screen lines
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')

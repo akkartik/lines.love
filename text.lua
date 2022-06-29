@@ -294,21 +294,21 @@ function Text.keychord_pressed(chord)
     end
     Text.word_right()
   elseif chord == 'home' then
-    Cursor1.pos = 1
+    Text.start_of_line()
     Selection1 = {}
   elseif chord == 'end' then
-    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+    Text.end_of_line()
     Selection1 = {}
   elseif chord == 'S-home' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Cursor1.pos = 1
+    Text.start_of_line()
   elseif chord == 'S-end' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+    Text.end_of_line()
   elseif chord == 'up' then
     Text.up()
     Selection1 = {}
@@ -499,6 +499,22 @@ function Text.down()
 --?   print('=>', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos, Screen_bottom1.line, Screen_bottom1.pos)
 end
 
+function Text.start_of_line()
+  Cursor1.pos = 1
+  if Text.lt1(Cursor1, Screen_top1) then
+    Screen_top1 = {line=Cursor1.line, pos=Cursor1.pos}  -- copy
+  end
+end
+
+function Text.end_of_line()
+  Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
+  local _,botpos = Text.pos_at_start_of_cursor_screen_line()
+  local botline1 = {line=Cursor1.line, pos=botpos}
+  if Text.lt1(Screen_bottom1, botline1) then
+    Text.snap_cursor_to_bottom_of_screen()
+  end
+end
+
 function Text.word_left()
   while true do
     Text.left()
@@ -537,9 +553,11 @@ function Text.left()
         break
       end
     end
-    if Cursor1.line < Screen_top1.line then
-      Screen_top1.line = Cursor1.line
-    end
+  end
+  if Text.lt1(Cursor1, Screen_top1) then
+    local top2 = Text.to2(Screen_top1)
+    top2 = Text.previous_screen_line(top2)
+    Screen_top1 = Text.to1(top2)
   end
 end
 
@@ -557,9 +575,11 @@ function Text.right()
         break
       end
     end
-    if Cursor1.line > Screen_bottom1.line then
-      Screen_top1.line = Cursor1.line
-    end
+  end
+  local _,botpos = Text.pos_at_start_of_cursor_screen_line()
+  local botline1 = {line=Cursor1.line, pos=botpos}
+  if Text.lt1(Screen_bottom1, botline1) then
+    Text.snap_cursor_to_bottom_of_screen()
   end
 end
 
