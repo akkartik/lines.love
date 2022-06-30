@@ -323,7 +323,9 @@ end
 
 -- make sure to save before quitting
 function love.quit()
-  save_to_disk(Lines, Filename)
+  if Next_save then
+    save_to_disk(Lines, Filename)
+  end
 end
 
 function App.mousepressed(x,y, mouse_button)
