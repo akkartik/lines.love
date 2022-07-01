@@ -326,7 +326,7 @@ end
 
 function App.mousepressed(x,y, mouse_button)
   if Search_term then return end
---?   print('press')
+--?   print('press', Selection1.line, Selection1.pos)
   propagate_to_button_handlers(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
@@ -345,7 +345,8 @@ function App.mousepressed(x,y, mouse_button)
         Old_selection1 = Selection1
         Mousepress_shift = App.shift_down()
         Selection1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
---?         print('selection')
+--?         print('selection', Selection1.line, Selection1.pos)
+        break
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
@@ -353,6 +354,7 @@ function App.mousepressed(x,y, mouse_button)
         Lines.current_drawing = line
         Drawing.before = snapshot(line_index)
         Drawing.mouse_pressed(line, x,y, button)
+        break
       end
     end
   end
@@ -374,7 +376,7 @@ function App.mousereleased(x,y, button)
         if Text.in_line(line_index,line, x,y) then
 --?           print('reset selection')
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
---?           print(Cursor1.line, Cursor1.pos)
+--?           print('cursor', Cursor1.line, Cursor1.pos)
           if Mousepress_shift then
             if Old_selection1.line == nil then
               Selection1 = Old_cursor1
@@ -383,10 +385,11 @@ function App.mousereleased(x,y, button)
             end
           end
           Old_cursor1, Old_selection1, Mousepress_shift = nil
+          break
         end
       end
     end
---?     print('select:', Selection1.line, Selection1.pos)
+--?     print('selection:', Selection1.line, Selection1.pos)
   end
 end
 
