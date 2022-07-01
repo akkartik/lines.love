@@ -178,7 +178,6 @@ function test_click_on_wrapping_line()
   App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line/baseline/screen:2')
   y = y + Line_height
   -- click past end of second screen line
-  App.draw()
   App.run_after_mouse_click(App.screen.width-2,y-2, 1)
   -- cursor moves to end of screen line
   check_eq(Cursor1.line, 1, 'F - test_click_on_wrapping_line/cursor:line')
@@ -204,7 +203,6 @@ function test_click_past_end_of_wrapping_line()
   App.screen.check(y, 'm', 'F - test_click_past_end_of_wrapping_line/baseline/screen:3')
   y = y + Line_height
   -- click past the end of it
-  App.draw()
   App.run_after_mouse_click(App.screen.width-2,y-2, 1)
   -- cursor moves to end of line
   check_eq(Cursor1.pos, 15, 'F - test_click_past_end_of_wrapping_line/cursor')  -- one more than the number of UTF-8 code-points
@@ -229,7 +227,6 @@ function test_click_on_wrapping_line_containing_non_ascii()
   App.screen.check(y, 'm', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:3')
   y = y + Line_height
   -- click past the end of it
-  App.draw()
   App.run_after_mouse_click(App.screen.width-2,y-2, 1)
   -- cursor moves to end of line
   check_eq(Cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
@@ -251,7 +248,6 @@ function test_click_past_end_of_word_wrapping_line()
   App.screen.check(y, 'the quick brown fox ', 'F - test_click_past_end_of_word_wrapping_line/baseline/screen:1')
   y = y + Line_height
   -- click past the end of the screen line but within Line_width
-  App.draw()
   App.run_after_mouse_click(Line_width-2,y-2, 1)
   -- cursor moves to end of screen line
   check_eq(Cursor1.pos, 20, 'F - test_click_past_end_of_word_wrapping_line/cursor')
