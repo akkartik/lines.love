@@ -102,20 +102,34 @@ function App.initialize(arg)
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
-  initialize_font_settings(20)
-
-  initialize_window_geometry()
-
   love.graphics.setBackgroundColor(1,1,1)
+
+  if love.filesystem.getInfo('config') then
+    load_settings()
+  else
+    load_defaults()
+  end
 
   if #arg > 0 then
     Filename = arg[1]
-  end
-  Lines = load_from_disk(Filename)
-  for i,line in ipairs(Lines) do
-    if line.mode == 'text' then
-      Cursor1.line = i
-      break
+    Lines = load_from_disk(Filename)
+    Screen_top1 = {line=1, pos=1}
+    Cursor1 = {line=1, pos=1}
+    for i,line in ipairs(Lines) do
+      if line.mode == 'text' then
+        Cursor1.line = i
+        break
+      end
+    end
+  else
+    Lines = load_from_disk(Filename)
+    if Lines[Cursor1.line].mode ~= 'text' then
+      for i,line in ipairs(Lines) do
+        if line.mode == 'text' then
+          Cursor1.line = i
+          break
+        end
+      end
     end
   end
   love.window.setTitle('lines.love - '..Filename)
@@ -128,7 +142,23 @@ function App.initialize(arg)
     jit.off()
     jit.flush()
   end
-end  -- App.initialize
+end
+
+function load_settings()
+  local settings = json.decode(love.filesystem.read('config'))
+  love.window.setPosition(settings.x, settings.y, settings.displayindex)
+  App.screen.width, App.screen.height = settings.width, settings.height
+  love.window.setMode(App.screen.width, App.screen.height)
+  Filename = settings.filename
+  initialize_font_settings(settings.font_height)
+  Screen_top1 = settings.screen_top
+  Cursor1 = settings.cursor
+end
+
+function load_defaults()
+  initialize_font_settings(20)
+  initialize_window_geometry()
+end
 
 function initialize_window_geometry()
   -- maximize window
@@ -182,6 +212,7 @@ function App.draw()
   Button_handlers = {}
   love.graphics.setColor(0, 0, 0)
 
+--?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos)
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1
   local y = Margin_top
@@ -220,12 +251,12 @@ function App.draw()
         Drawing.draw(line)
         y = y + Drawing.pixels(line.h) + Drawing_padding_bottom
       else
---?         print('text')
         line.starty = y
         line.startpos = 1
         if line_index == Screen_top1.line then
           line.startpos = Screen_top1.pos
         end
+--?         print('text.draw', y, line_index)
         y, Screen_bottom1.pos = Text.draw(line, line_index)
         y = y + Line_height
 --?         print('=> y', y)
