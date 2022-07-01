@@ -321,7 +321,9 @@ function love.quit()
   local settings = {
     x=x, y=y, displayindex=displayindex,
     width=App.screen.width, height=App.screen.height,
-    font_height=Font_height, filename=Filename, screen_top=Screen_top1, cursor=Cursor1}
+    font_height=Font_height,
+    filename=love.filesystem.getWorkingDirectory()..'/'..Filename,  -- '/' should work even on Windows
+    screen_top=Screen_top1, cursor=Cursor1}
   love.filesystem.write('config', json.encode(settings))
 end
 
