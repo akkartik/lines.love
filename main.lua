@@ -207,15 +207,6 @@ function App.draw()
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
   love.graphics.setColor(0, 0, 0)
 
-  -- some hysteresis while resizing
-  if Last_resize_time then
-    if App.getTime() - Last_resize_time < 0.1 then
-      return
-    else
-      Last_resize_time = nil
-    end
-  end
-
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1
   local y = Margin_top
