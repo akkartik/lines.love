@@ -112,6 +112,8 @@ function App.initialize(arg)
 
   initialize_font_settings(20)
 
+  love.graphics.setBackgroundColor(1,1,1)
+
   if #arg > 0 then
     Filename = arg[1]
   end
@@ -203,8 +205,6 @@ end
 
 function App.draw()
   Button_handlers = {}
-  love.graphics.setColor(1, 1, 1)
-  love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
   love.graphics.setColor(0, 0, 0)
 
   assert(Text.le1(Screen_top1, Cursor1))
