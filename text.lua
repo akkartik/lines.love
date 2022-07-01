@@ -11,17 +11,16 @@ require 'text_tests'
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
-function Text.draw(line, line_width, line_index)
+function Text.draw(line, line_index)
 --?   print('text.draw', line_index)
   love.graphics.setColor(0,0,0)
---?   love.graphics.line(Line_width,0, Line_width,App.screen.height)
   -- wrap long lines
   local x = Margin_left
   local y = line.starty
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
-    Text.compute_fragments(line, line_width)
+    Text.compute_fragments(line)
   end
   Text.populate_screen_line_starting_pos(line_index)
 --?   print('--')
@@ -31,8 +30,8 @@ function Text.draw(line, line_width, line_index)
     local frag_width = App.width(frag_text)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
---?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(line_width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
-    if x + frag_width > line_width then
+--?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(App.screen.width)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
+    if x + frag_width > App.screen.width then
       assert(x > Margin_left)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if Text.lt1(Screen_top1, {line=line_index, pos=pos}) then
@@ -81,7 +80,7 @@ function Text.draw(line, line_width, line_index)
   return y, screen_line_starting_pos
 end
 -- manual tests:
---  draw with small line_width of 100
+--  draw with small screen width of 100
 
 function Text.draw_cursor(x, y)
   -- blink every 0.5s
@@ -94,32 +93,32 @@ function Text.draw_cursor(x, y)
   Cursor_y = y+Line_height
 end
 
-function Text.compute_fragments(line, line_width)
---?   print('compute_fragments', line_width)
+function Text.compute_fragments(line)
+--?   print('compute_fragments', App.screen.width)
   line.fragments = {}
   local x = Margin_left
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_text = App.newText(love.graphics.getFont(), frag)
     local frag_width = App.width(frag_text)
---?     print('x: '..tostring(x)..'; '..tostring(line_width-x)..'px to go')
+--?     print('x: '..tostring(x)..'; '..tostring(App.screen.width-x)..'px to go')
 --?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
-    if x + frag_width > line_width then
-      while x + frag_width > line_width do
---?         print(x, frag, frag_width, line_width)
-        if x < 0.8*line_width then
---?           print(frag, x, frag_width, line_width)
+    if x + frag_width > App.screen.width then
+      while x + frag_width > App.screen.width do
+--?         print(x, frag, frag_width, App.screen.width)
+        if x < 0.8*App.screen.width then
+--?           print(frag, x, frag_width, App.screen.width)
           -- long word; chop it at some letter
           -- We're not going to reimplement TeX here.
-          local bpos = Text.nearest_pos_less_than(frag, line_width - x)
+          local bpos = Text.nearest_pos_less_than(frag, App.screen.width - x)
           assert(bpos > 0)  -- avoid infinite loop when window is too narrow
           local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
 --?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset)..' bytes')
           local frag1 = string.sub(frag, 1, boffset-1)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
           local frag1_width = App.width(frag1_text)
---?           print(frag, x, frag1_width, line_width)
-          assert(x + frag1_width <= line_width)
+--?           print(frag, x, frag1_width, App.screen.width)
+          assert(x + frag1_width <= App.screen.width)
 --?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
           table.insert(line.fragments, {data=frag1, text=frag1_text})
           frag = string.sub(frag, boffset)
@@ -668,9 +667,9 @@ end
 
 -- convert mx,my in pixels to schema-1 coordinates
 function Text.to_pos_on_line(line, mx, my)
---?   print('Text.to_pos_on_line', mx, my, 'width', Line_width)
+--?   print('Text.to_pos_on_line', mx, my, 'width', App.screen.width)
   if line.fragments == nil then
-    Text.compute_fragments(line, Line_width)
+    Text.compute_fragments(line)
   end
   assert(my >= line.starty)
   -- duplicate some logic from Text.draw
@@ -895,7 +894,7 @@ function Text.populate_screen_line_starting_pos(line_index)
   end
   -- duplicate some logic from Text.draw
   if line.fragments == nil then
-    Text.compute_fragments(line, Line_width)
+    Text.compute_fragments(line)
   end
   line.screen_line_starting_pos = {1}
   local x = Margin_left
@@ -905,7 +904,7 @@ function Text.populate_screen_line_starting_pos(line_index)
     -- render fragment
     local frag_width = App.width(frag_text)
 --?     print(x, pos, frag, frag_width)
-    if x + frag_width > Line_width then
+    if x + frag_width > App.screen.width then
       x = Margin_left
       table.insert(line.screen_line_starting_pos, pos)
 --?       print('new screen line:', #line.screen_line_starting_pos, pos)

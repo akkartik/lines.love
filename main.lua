@@ -111,7 +111,6 @@ function App.initialize(arg)
   end
 
   initialize_font_settings(20)
---?   Line_width = 80
 
   if #arg > 0 then
     Filename = arg[1]
@@ -170,7 +169,6 @@ end
 function App.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
-  Line_width = math.min(40*App.width(Em), App.screen.width-50)
   Text.redraw_all()
   Last_resize_time = App.getTime()
 end
@@ -181,10 +179,6 @@ function initialize_font_settings(font_height)
   Line_height = math.floor(font_height*1.3)
 
   Em = App.newText(love.graphics.getFont(), 'm')
-
-  -- maximum width available to either text or drawings, in pixels
-  -- readable text width is 50-75 chars
-  Line_width = math.min(40*App.width(Em), App.screen.width-50)
 end
 
 function App.filedropped(file)
@@ -211,8 +205,6 @@ function App.draw()
   Button_handlers = {}
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 0, 0, App.screen.width-1, App.screen.height-1)
---?   love.graphics.setColor(0, 1, 0)
---?   love.graphics.line(Line_width,0, Line_width,App.screen.height)
   love.graphics.setColor(0, 0, 0)
 
   -- some hysteresis while resizing
@@ -268,7 +260,7 @@ function App.draw()
         if line_index == Screen_top1.line then
           line.startpos = Screen_top1.pos
         end
-        y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
+        y, Screen_bottom1.pos = Text.draw(line, line_index)
         y = y + Line_height
 --?         print('=> y', y)
       end
