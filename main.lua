@@ -20,7 +20,8 @@ function App.initialize_globals()
 -- a text is a table with:
 --    mode = 'text',
 --    string data,
---    a (y) coord in pixels (updated while painting screen),
+--    startpos, the index of data the line starts rendering from (if currently on screen), can only be >1 for topmost line on screen
+--    starty, the y coord in pixels
 --    some cached data that's blown away and recomputed when data changes:
 --      fragments: snippets of rendered love.graphics.Text, guaranteed to not wrap
 --      screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
@@ -275,7 +276,11 @@ function App.draw()
         y = y + Drawing.pixels(line.h) + Drawing_padding_bottom
       else
 --?         print('text')
-        line.y = y
+        line.starty = y
+        line.startpos = 1
+        if line_index == Screen_top1.line then
+          line.startpos = Screen_top1.pos
+        end
         y, Screen_bottom1.pos = Text.draw(line, Line_width, line_index)
         y = y + Line_height
 --?         print('=> y', y)

@@ -17,7 +17,7 @@ function Text.draw(line, line_width, line_index)
 --?   love.graphics.line(Line_width,0, Line_width,App.screen.height)
   -- wrap long lines
   local x = Margin_left
-  local y = line.y
+  local y = line.starty
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
@@ -659,11 +659,11 @@ function Text.snap_cursor_to_bottom_of_screen()
 end
 
 function Text.in_line(line_index,line, x,y)
-  if line.y == nil then return false end  -- outside current page
+  if line.starty == nil then return false end  -- outside current page
   if x < Margin_left then return false end
-  if y < line.y then return false end
+  if y < line.starty then return false end
   Text.populate_screen_line_starting_pos(line_index)
-  return y < line.y + #line.screen_line_starting_pos * Line_height
+  return y < line.starty + Line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line, line.startpos) + 1)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
@@ -672,11 +672,13 @@ function Text.to_pos_on_line(line, mx, my)
   if line.fragments == nil then
     Text.compute_fragments(line, Line_width)
   end
-  assert(my >= line.y)
+  assert(my >= line.starty)
   -- duplicate some logic from Text.draw
-  local y = line.y
-  for screen_line_index,screen_line_starting_pos in ipairs(line.screen_line_starting_pos) do
-      local screen_line_starting_byte_offset = Text.offset(line.data, screen_line_starting_pos)
+  local y = line.starty
+  local start_screen_line_index = Text.screen_line_index(line, line.startpos)
+  for screen_line_index = start_screen_line_index,#line.screen_line_starting_pos do
+    local screen_line_starting_pos = line.screen_line_starting_pos[screen_line_index]
+    local screen_line_starting_byte_offset = Text.offset(line.data, screen_line_starting_pos)
 --?     print('iter', y, screen_line_index, screen_line_starting_pos, string.sub(line.data, screen_line_starting_byte_offset))
     local nexty = y + Line_height
     if my < nexty then
@@ -723,6 +725,14 @@ function Text.screen_line_width(line, i)
   end
   local screen_line_text = App.newText(love.graphics.getFont(), screen_line)
   return App.width(screen_line_text)
+end
+
+function Text.screen_line_index(line, pos)
+  for i = #line.screen_line_starting_pos,1,-1 do
+    if line.screen_line_starting_pos[i] <= pos then
+      return i
+    end
+  end
 end
 
 function Text.nearest_cursor_pos(line, x)  -- x includes left margin
@@ -909,7 +919,8 @@ end
 function Text.redraw_all()
 --?   print('clearing fragments')
   for _,line in ipairs(Lines) do
-    line.y = nil
+    line.starty = nil
+    line.startpos = nil
     Text.clear_cache(line)
   end
 end

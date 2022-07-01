@@ -184,6 +184,27 @@ function test_click_on_wrapping_line()
   check_eq(Cursor1.pos, 13, 'F - test_click_on_wrapping_line/cursor:pos')
 end
 
+function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
+  io.write('\ntest_click_on_wrapping_line_rendered_from_partway_at_top_of_screen')
+  -- display a wrapping line from its second screen line
+  App.screen.init{width=80, height=80}
+                  --  12345678901234
+  Lines = load_array{"madam I'm adam"}
+  Line_width = 75
+  Cursor1 = {line=1, pos=8}
+  Screen_top1 = {line=1, pos=7}
+  Screen_bottom1 = {}
+  App.draw()
+  local y = Margin_top
+  App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/baseline/screen:2')
+  y = y + Line_height
+  -- click past end of second screen line
+  App.run_after_mouse_click(App.screen.width-2,y-2, 1)
+  -- cursor moves to end of screen line
+  check_eq(Cursor1.line, 1, 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/cursor:line')
+  check_eq(Cursor1.pos, 13, 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/cursor:pos')
+end
+
 function test_click_past_end_of_wrapping_line()
   io.write('\ntest_click_past_end_of_wrapping_line')
   -- display a wrapping line
