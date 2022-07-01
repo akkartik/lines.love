@@ -78,6 +78,22 @@ function test_click_with_mouse()
   check_eq(Cursor1.line, 1, 'F - test_click_with_mouse/cursor')
 end
 
+function test_click_with_mouse_on_empty_line()
+  io.write('\ntest_click_with_mouse_on_empty_line')
+  -- display two lines with the first one empty
+  App.screen.init{width=50, height=80}
+  Lines = load_array{'', 'def'}
+  Margin_right = 0; Margin_width = Margin_left
+  Cursor1 = {line=2, pos=1}
+  Screen_top1 = {line=1, pos=1}
+  Screen_bottom1 = {}
+  -- click on the empty line
+  App.draw()
+  App.run_after_mouse_click(Margin_left+8,Margin_top+5, 1)
+  -- cursor moves
+  check_eq(Cursor1.line, 1, 'F - test_click_with_mouse_on_empty_line/cursor')
+end
+
 function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}

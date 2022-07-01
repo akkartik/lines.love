@@ -239,7 +239,8 @@ function App.draw()
     if line_index >= Screen_top1.line then
       Screen_bottom1.line = line_index
       if line.mode == 'text' and line.data == '' then
-        line.y = y
+        line.starty = y
+        line.startpos = 1
         -- insert new drawing
         button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
