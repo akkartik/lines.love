@@ -96,9 +96,6 @@ Last_resize_time = nil
 -- blinking cursor
 Cursor_time = 0
 
--- line-width indicator
-Line_width_hover = nil
-
 end  -- App.initialize_globals
 
 function App.initialize(arg)
@@ -227,16 +224,6 @@ function App.draw()
     end
   end
 
-  -- line-width indicator
-  button('line-width', {x=Line_width-4,y=Margin_top-10, w=10,h=10, color={1,1,1},
-    icon = icon.line_width,
-    onpress1 = function() Line_width_hover = App.getTime() end,
-  })
-  if Line_width_hover then
-    love.graphics.setColor(0.7,0.7,0.7)
-    love.graphics.line(Line_width,Margin_top+2, Line_width,App.screen.height)
-  end
-
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1
   local y = Margin_top
@@ -306,18 +293,6 @@ function App.update(dt)
       Last_resize_time = nil
     end
   end
-  -- update Line_width with some hysteresis while the indicator is dragged
-  if Line_width_hover then
-    if App.getTime() - Line_width_hover > 0.1 then
-      Line_width = App.mouse_x()
-      Text.redraw_all()
-      if App.mouse_down(1) then
-        Line_width_hover = App.getTime()
-      else
-        Line_width_hover = nil
-      end
-    end
-  end
   Drawing.update(dt)
   if Next_save and Next_save < App.getTime() then
     save_to_disk(Lines, Filename)
@@ -342,11 +317,6 @@ function App.mousepressed(x,y, mouse_button)
   if Search_term then return end
   propagate_to_button_handlers(x,y, mouse_button)
 
-  -- we seem to sometimes get phantom clicks if the mouse moves down into text while adjusting line-width
-  if Line_width_hover then
-    Selection1 = {}
-    return
-  end
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line_index,line, x,y) then

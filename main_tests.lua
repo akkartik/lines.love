@@ -66,21 +66,3 @@ function test_drop_file_saves_previous()
   -- filesystem now contains a file called foo
   check_eq(App.filesystem['foo'], 'abc\ndef\n', 'F - test_drop_file_saves_previous')
 end
-
-function test_adjust_line_width()
-  io.write('\ntest_adjust_line_width')
-  Filename = 'foo'
-  App.screen.init{width=Margin_left+300, height=300}
-  Line_width = 256
-  App.draw()  -- initialize button
-  App.run_after_mouse_press(256, Margin_top-3, 1)
-  App.mouse_move(200, 37)
-  -- no change for some time
-  App.wait_fake_time(0.01)
-  App.update(0)
-  check_eq(Line_width, 256, 'F - test_adjust_line_width/early')
-  -- after 0.1s the change takes
-  App.wait_fake_time(0.1)
-  App.update(0)
-  check_eq(Line_width, 200, 'F - test_adjust_line_width')
-end
