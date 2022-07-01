@@ -147,10 +147,18 @@ function App.initialize(arg)
 end
 
 function load_settings()
+  -- maximize window to determine maximum allowable dimensions
+  love.window.setMode(0, 0)  -- maximize
+  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
+  --
   local settings = json.decode(love.filesystem.read('config'))
   love.window.setPosition(settings.x, settings.y, settings.displayindex)
+  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
+  App.screen.flags.resizable = true
+  App.screen.flags.minwidth = math.min(App.screen.width, 200)
+  App.screen.flags.minheight = math.min(App.screen.width, 200)
   App.screen.width, App.screen.height = settings.width, settings.height
-  love.window.setMode(App.screen.width, App.screen.height)
+  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
   Filename = settings.filename
   initialize_font_settings(settings.font_height)
   Screen_top1 = settings.screen_top
@@ -172,7 +180,7 @@ function initialize_window_geometry()
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.width, 200)
-  love.window.updateMode(App.screen.width, App.screen.height, App.screen.flags)
+  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
 end
 
 function App.resize(w, h)
