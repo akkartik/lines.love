@@ -52,6 +52,9 @@ Lines = {{mode='text', data=''}}
 --
 -- Most of the time we'll only persist positions in schema 1, translating to
 -- schema 2 when that's convenient.
+--
+-- Make sure these coordinates are never aliased, so that changing one causes
+-- action at a distance.
 Screen_top1 = {line=1, pos=1}  -- position of start of screen line at top of screen
 Cursor1 = {line=1, pos=1}  -- position of cursor
 Screen_bottom1 = {line=1, pos=1}  -- position of start of screen line at bottom of screen
@@ -187,6 +190,8 @@ function App.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Text.redraw_all()
+  Selection1 = {}  -- no support for shift drag while we're resizing
+  Text.tweak_screen_top_and_cursor()
   Last_resize_time = App.getTime()
 end
 
@@ -321,6 +326,7 @@ end
 
 function App.mousepressed(x,y, mouse_button)
   if Search_term then return end
+--?   print('press')
   propagate_to_button_handlers(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
@@ -354,6 +360,7 @@ end
 
 function App.mousereleased(x,y, button)
   if Search_term then return end
+--?   print('release')
   if Lines.current_drawing then
     Drawing.mouse_released(x,y, button)
     schedule_save()

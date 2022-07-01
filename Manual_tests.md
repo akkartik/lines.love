@@ -20,3 +20,6 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
   Several bugs have arisen due to destructive interference between the two for
   some key chord. I wish I could guarantee that the two sets are disjoint. But
   perhaps I'm not thinking about this right.
+
+* Like any high-level language, it's easy to accidentally alias two non-scalar
+  variables. I wish there was a way to require copy when assigning.

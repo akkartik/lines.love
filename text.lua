@@ -915,6 +915,41 @@ function Text.populate_screen_line_starting_pos(line_index)
   end
 end
 
+function Text.tweak_screen_top_and_cursor()
+--?   print('a', Selection1.line)
+  if Screen_top1.pos == 1 then return end
+  Text.populate_screen_line_starting_pos(Screen_top1.line)
+  local line = Lines[Screen_top1.line]
+  for i=2,#line.screen_line_starting_pos do
+    local pos = line.screen_line_starting_pos[i]
+    if pos == Screen_top1.pos then
+      break
+    end
+    if pos > Screen_top1.pos then
+      -- make sure screen top is at start of a screen line
+      local prev = line.screen_line_starting_pos[i-1]
+      if Screen_top1.pos - prev < pos - Screen_top1.pos then
+        Screen_top1.pos = prev
+      else
+        Screen_top1.pos = pos
+      end
+      break
+    end
+  end
+  -- make sure cursor is on screen
+  if Text.lt1(Cursor1, Screen_top1) then
+    Cursor1 = {line=Screen_top1.line, pos=Screen_top1.pos}
+  elseif Cursor1.line >= Screen_bottom1.line then
+--?     print('too low')
+    App.draw()
+    if Text.lt1(Screen_bottom1, Cursor1) then
+--?       print('tweak')
+      local line = Lines[Screen_bottom1.line]
+      Cursor1 = {line=Screen_bottom1.line, pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5)}
+    end
+  end
+end
+
 function Text.redraw_all()
 --?   print('clearing fragments')
   for _,line in ipairs(Lines) do
