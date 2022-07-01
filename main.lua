@@ -318,11 +318,15 @@ function love.quit()
   end
   -- save some important settings
   local x,y,displayindex = love.window.getPosition()
+  local filename = Filename
+  if filename:sub(1,1) ~= '/' then
+    filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
+  end
   local settings = {
     x=x, y=y, displayindex=displayindex,
     width=App.screen.width, height=App.screen.height,
     font_height=Font_height,
-    filename=love.filesystem.getWorkingDirectory()..'/'..Filename,  -- '/' should work even on Windows
+    filename=filename,
     screen_top=Screen_top1, cursor=Cursor1}
   love.filesystem.write('config', json.encode(settings))
 end

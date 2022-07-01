@@ -23,3 +23,11 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
 * Like any high-level language, it's easy to accidentally alias two non-scalar
   variables. I wish there was a way to require copy when assigning.
+
+### Todo list
+
+* Initializing settings:
+    - from previous session
+        - Filename as absolute path
+        - Filename as relative path
+    - from defaults
