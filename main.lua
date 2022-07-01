@@ -264,11 +264,18 @@ function schedule_save()
   end
 end
 
--- make sure to save before quitting
 function love.quit()
+  -- make sure to save before quitting
   if Next_save then
     save_to_disk(Lines, Filename)
   end
+  -- save some important settings
+  local x,y,displayindex = love.window.getPosition()
+  local settings = {
+    x=x, y=y, displayindex=displayindex,
+    width=App.screen.width, height=App.screen.height,
+    font_height=Font_height, filename=Filename, screen_top=Screen_top1, cursor=Cursor1}
+  love.filesystem.write('config', json.encode(settings))
 end
 
 function App.mousepressed(x,y, mouse_button)
