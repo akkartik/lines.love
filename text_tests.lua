@@ -4,6 +4,7 @@ function test_initial_state()
   io.write('\ntest_initial_state')
   App.screen.init{width=120, height=60}
   Lines = load_array{}
+  Margin_right = 0; Margin_width = Margin_left
   App.draw()
   check_eq(#Lines, 1, 'F - test_initial_state/#lines')
   check_eq(Cursor1.line, 1, 'F - test_initial_state/cursor:line')
@@ -16,6 +17,7 @@ function test_click_to_create_drawing()
   io.write('\ntest_click_to_create_drawing')
   App.screen.init{width=120, height=60}
   Lines = load_array{}
+  Margin_right = 0; Margin_width = Margin_left
   App.draw()
   App.run_after_mouse_click(8,Margin_top+8, 1)
   -- cursor skips drawing to always remain on text
@@ -28,6 +30,7 @@ function test_backspace_to_delete_drawing()
   -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
   App.screen.init{width=120, height=60}
   Lines = load_array{'```lines', '```', ''}
+  Margin_right = 0; Margin_width = Margin_left
   -- cursor is on text as always (outside tests this will get initialized correctly)
   Cursor1.line = 2
   -- backspacing deletes the drawing
@@ -40,6 +43,7 @@ function test_insert_first_character()
   io.write('\ntest_insert_first_character')
   App.screen.init{width=120, height=60}
   Lines = load_array{}
+  Margin_right = 0; Margin_width = Margin_left
   App.draw()
   App.run_after_textinput('a')
   local y = Margin_top
@@ -51,6 +55,7 @@ function test_press_ctrl()
   -- press ctrl while the cursor is on text
   App.screen.init{width=50, height=80}
   Lines = load_array{''}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -62,6 +67,7 @@ function test_click_with_mouse()
   -- display two lines with cursor on one of them
   App.screen.init{width=50, height=80}
   Lines = load_array{'abc', 'def'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -76,6 +82,7 @@ function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -92,6 +99,7 @@ function test_draw_wrapping_text()
   io.write('\ntest_draw_wrapping_text')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'defgh', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -108,6 +116,7 @@ function test_draw_word_wrapping_text()
   io.write('\ntest_draw_word_wrapping_text')
   App.screen.init{width=60, height=60}
   Lines = load_array{'abc def ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -125,6 +134,7 @@ function test_draw_text_wrapping_within_word()
   io.write('\ntest_draw_text_wrapping_within_word')
   App.screen.init{width=60, height=60}
   Lines = load_array{'abcd e fghijk', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -142,6 +152,7 @@ function test_draw_wrapping_text_containing_non_ascii()
   io.write('\ntest_draw_wrapping_text_containing_non_ascii')
   App.screen.init{width=60, height=60}
   Lines = load_array{'madam I’m adam', 'xyz'}  -- notice the non-ASCII apostrophe
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -160,6 +171,7 @@ function test_click_on_wrapping_line()
   App.screen.init{width=75, height=80}
                   --  12345678901234
   Lines = load_array{"madam I'm adam"}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -182,6 +194,7 @@ function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
   App.screen.init{width=75, height=80}
                   --  12345678901234
   Lines = load_array{"madam I'm adam"}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=8}
   Screen_top1 = {line=1, pos=7}
   Screen_bottom1 = {}
@@ -202,6 +215,7 @@ function test_click_past_end_of_wrapping_line()
   App.screen.init{width=75, height=80}
                   --  12345678901234
   Lines = load_array{"madam I'm adam"}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -225,6 +239,7 @@ function test_click_on_wrapping_line_containing_non_ascii()
   App.screen.init{width=75, height=80}
                   --  12345678901234
   Lines = load_array{'madam I’m adam'}  -- notice the non-ASCII apostrophe
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -249,6 +264,7 @@ function test_click_past_end_of_word_wrapping_line()
                    -- 0        1         2
                    -- 123456789012345678901
   Lines = load_array{'the quick brown fox jumped over the lazy dog'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -267,6 +283,7 @@ function test_select_text()
   -- display a line of text
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc def'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -288,6 +305,7 @@ function test_cursor_movement_without_shift_resets_selection()
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
@@ -305,6 +323,7 @@ function test_edit_after_click_resets_selection()
   -- display a line of text
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -322,6 +341,7 @@ function test_edit_deletes_selection()
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
@@ -338,6 +358,7 @@ function test_edit_with_shift_key_deletes_selection()
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
@@ -359,6 +380,7 @@ function test_copy_does_not_reset_selection()
   -- display a line of text with a selection
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
@@ -376,6 +398,7 @@ function test_cut()
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
@@ -393,6 +416,7 @@ function test_paste_replaces_selection()
   -- display a line of text with a selection
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc', 'def'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Selection1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
@@ -412,6 +436,7 @@ function test_deleting_selection_may_scroll()
   -- display lines 2/3/4
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=2}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -435,6 +460,7 @@ function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -456,6 +482,7 @@ function test_insert_newline()
   -- display a few lines
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -484,6 +511,7 @@ function test_insert_newline_at_start_of_line()
   -- display a line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -500,6 +528,7 @@ function test_insert_from_clipboard()
   -- display a few lines
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -528,6 +557,7 @@ function test_move_cursor_using_mouse()
   io.write('\ntest_move_cursor_using_mouse')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -544,6 +574,7 @@ function test_select_text_using_mouse()
   io.write('\ntest_select_text_using_mouse')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -563,6 +594,7 @@ function test_select_text_using_mouse_and_shift()
   io.write('\ntest_select_text_using_mouse_and_shift')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -586,6 +618,7 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   io.write('\ntest_select_text_repeatedly_using_mouse_and_shift')
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -615,6 +648,7 @@ function test_cut_without_selection()
   -- display a few lines
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -630,6 +664,7 @@ function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
   Lines = load_array{'abc', 'def', 'ghi'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -658,6 +693,7 @@ function test_pagedown_skips_drawings()
                      '```lines', '```',   -- height 25
                      'def',               -- height 15
                      'ghi'}               -- height 15
+  Margin_right = 0; Margin_width = Margin_left
   check_eq(Lines[2].mode, 'drawing', 'F - test_pagedown_skips_drawings/baseline/lines')
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
@@ -682,6 +718,7 @@ function test_pagedown_often_shows_start_of_wrapping_line()
   -- draw a few lines ending in part of a wrapping line
   App.screen.init{width=50, height=60}
   Lines = load_array{'abc', 'def ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -711,6 +748,7 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   -- draw a few lines starting from a very long wrapping line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def ghi jkl mno pqr stu vwx yza bcd efg hij', 'XYZ'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -737,6 +775,7 @@ function test_down_arrow_moves_cursor()
   io.write('\ntest_down_arrow_moves_cursor')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -766,6 +805,7 @@ function test_down_arrow_scrolls_down_by_one_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -793,6 +833,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -821,6 +862,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -848,6 +890,7 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   io.write('\ntest_page_down_followed_by_down_arrow_does_not_scroll_screen_up')
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -881,6 +924,7 @@ function test_up_arrow_moves_cursor()
   -- display the first 3 lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=1}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -909,6 +953,7 @@ function test_up_arrow_scrolls_up_by_one_line()
   -- display the lines 2/3/4 with the cursor on line 2
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -936,6 +981,7 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=6}
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
@@ -963,6 +1009,7 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   -- display lines starting just after a long line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -992,6 +1039,7 @@ function test_up_arrow_scrolls_up_to_empty_line()
   -- display a screenful of text with an empty line just above it outside the screen
   App.screen.init{width=120, height=60}
   Lines = load_array{'', 'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -1018,6 +1066,7 @@ function test_pageup()
   io.write('\ntest_pageup')
   App.screen.init{width=120, height=45}
   Lines = load_array{'abc', 'def', 'ghi'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -1042,6 +1091,7 @@ function test_pageup_scrolls_up_by_screen_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -1070,6 +1120,7 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   -- display a few lines starting from the middle of a line (Cursor1.pos > 1)
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=5}
   Screen_top1 = {line=2, pos=5}
   Screen_bottom1 = {}
@@ -1096,6 +1147,7 @@ function test_enter_on_bottom_line_scrolls_down()
   -- display a few lines with cursor on bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=2}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -1124,6 +1176,7 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   -- display just the bottom line on screen
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=4, pos=2}
   Screen_top1 = {line=4, pos=1}
   Screen_bottom1 = {}
@@ -1146,6 +1199,7 @@ function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bot
   -- display just an empty bottom line on screen
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', ''}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -1164,6 +1218,7 @@ function test_typing_on_bottom_line_scrolls_down()
   -- display a few lines with cursor on bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -1194,6 +1249,7 @@ function test_left_arrow_scrolls_up_in_wrapped_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
   -- cursor is at top of screen
@@ -1222,6 +1278,7 @@ function test_right_arrow_scrolls_down_in_wrapped_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
   -- cursor is at bottom right of screen
@@ -1251,6 +1308,7 @@ function test_home_scrolls_up_in_wrapped_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
   -- cursor is at top of screen
@@ -1279,6 +1337,7 @@ function test_end_scrolls_down_in_wrapped_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
   -- cursor is at bottom right of screen
@@ -1308,6 +1367,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
   App.screen.init{width=100, height=200}
   Lines = load_array{'abc def ghi jkl mno pqr ', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=25}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -1341,6 +1401,7 @@ function test_backspace_can_scroll_up()
   -- display the lines 2/3/4 with the cursor on line 2
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Screen_top1 = {line=2, pos=1}
   Screen_bottom1 = {}
@@ -1368,6 +1429,7 @@ function test_backspace_can_scroll_up_screen_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=3, pos=5}
   Screen_top1 = {line=3, pos=5}
   Screen_bottom1 = {}
@@ -1395,6 +1457,7 @@ function test_backspace_past_line_boundary()
   -- position cursor at start of a (non-first) line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   -- backspace joins with previous line
   App.run_after_keychord('backspace')
@@ -1409,6 +1472,7 @@ function test_backspace_over_selection()
   -- select just one character within a line with cursor before selection
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   -- backspace deletes the selected character, even though it's after the cursor
@@ -1426,6 +1490,7 @@ function test_backspace_over_selection_reverse()
   -- select just one character within a line with cursor after selection
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=1, pos=1}
   -- backspace deletes the selected character
@@ -1443,6 +1508,7 @@ function test_backspace_over_multiple_lines()
   -- select just one character within a line with cursor after selection
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=4, pos=2}
   -- backspace deletes the region and joins the remaining portions of lines on either side
@@ -1461,6 +1527,7 @@ function test_backspace_to_end_of_line()
   -- select region from cursor to end of line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=2}
   Selection1 = {line=1, pos=4}
   -- backspace deletes rest of line without joining to any other line
@@ -1479,6 +1546,7 @@ function test_backspace_to_start_of_line()
   -- select region from cursor to start of line
   App.screen.init{width=Margin_left+30, height=60}
   Lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=1}
   Selection1 = {line=2, pos=3}
   -- backspace deletes beginning of line without joining to any other line
@@ -1496,6 +1564,7 @@ function test_undo_insert_text()
   io.write('\ntest_undo_insert_text')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'def', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=4}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -1530,6 +1599,7 @@ function test_undo_delete_text()
   io.write('\ntest_undo_delete_text')
   App.screen.init{width=120, height=60}
   Lines = load_array{'abc', 'defg', 'xyz'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=2, pos=5}
   Screen_top1 = {line=1, pos=1}
   Screen_bottom1 = {}
@@ -1567,6 +1637,7 @@ function test_undo_restores_selection()
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
   Lines = load_array{'abc'}
+  Margin_right = 0; Margin_width = Margin_left
   Cursor1 = {line=1, pos=1}
   Selection1 = {line=1, pos=2}
   Screen_top1 = {line=1, pos=1}

@@ -73,6 +73,8 @@ Em = App.newText(love.graphics.getFont(), 'm')
 
 Margin_top = 15
 Margin_left = 25
+Margin_right = 25
+Margin_width = Margin_left + Margin_right
 
 Drawing_padding_top = 10
 Drawing_padding_bottom = 10
