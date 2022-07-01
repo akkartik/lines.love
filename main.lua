@@ -102,9 +102,9 @@ function App.initialize(arg)
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
-  initialize_window_geometry()
-
   initialize_font_settings(20)
+
+  initialize_window_geometry()
 
   love.graphics.setBackgroundColor(1,1,1)
 
@@ -135,7 +135,7 @@ function initialize_window_geometry()
   love.window.setMode(0, 0)  -- maximize
   App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
   -- shrink slightly to account for window decoration
-  App.screen.width = App.screen.width-100
+  App.screen.width = 40*App.width(Em)
   App.screen.height = App.screen.height-100
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
