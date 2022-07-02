@@ -36,16 +36,6 @@ $ path/to/love path/to/lines/directory /path/to/file/to/edit
 On a graphical desktop you can also drag and drop a file icon on to the
 lines.love window.
 
-You can also configure the size of the window on the commandline. For example:
-
-```sh
-$ path/to/love path/to/lines.love -geometry 640x480+10+10 path/to/file/to/edit
-```
-
-The syntax of the geometry parameter is {width}x{height}+{x}+{y} which will
-position the top-left corner of the window at co-ordinate (x,y). The geometry
-parameter must come before the file to edit.
-
 ## Keyboard shortcuts
 
 While editing text:
