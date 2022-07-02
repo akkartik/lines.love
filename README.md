@@ -88,6 +88,11 @@ here.
   uses separate shortcuts for regular polygons. `ctrl+3` for triangles,
   `ctrl+4` for squares, etc.
 
+## Associated tools
+
+* https://codeberg.org/akkartik/lines2md exports lines.love files to Markdown
+  and (non-editable) SVG.
+
 ## Feedback
 
 [Most appreciated.](http://akkartik.name/contact)
