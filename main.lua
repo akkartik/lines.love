@@ -128,7 +128,7 @@ function App.initialize(arg)
     end
   else
     Lines = load_from_disk(Filename)
-    if Lines[Cursor1.line].mode ~= 'text' then
+    if Cursor1.line > #Lines or Lines[Cursor1.line].mode ~= 'text' then
       for i,line in ipairs(Lines) do
         if line.mode == 'text' then
           Cursor1.line = i
