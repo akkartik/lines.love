@@ -529,12 +529,15 @@ end
 
 function Text.word_right()
   while true do
-    Text.right()
+    Text.right_without_scroll()
     if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
     local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
     if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then  -- TODO: other space characters
       break
     end
+  end
+  if Text.cursor_past_screen_bottom() then
+    Text.snap_cursor_to_bottom_of_screen()
   end
 end
 
@@ -561,6 +564,13 @@ function Text.left()
 end
 
 function Text.right()
+  Text.right_without_scroll()
+  if Text.cursor_past_screen_bottom() then
+    Text.snap_cursor_to_bottom_of_screen()
+  end
+end
+
+function Text.right_without_scroll()
   assert(Lines[Cursor1.line].mode == 'text')
   if Cursor1.pos <= utf8.len(Lines[Cursor1.line].data) then
     Cursor1.pos = Cursor1.pos+1
@@ -574,9 +584,6 @@ function Text.right()
         break
       end
     end
-  end
-  if Text.cursor_past_screen_bottom() then
-    Text.snap_cursor_to_bottom_of_screen()
   end
 end
 
@@ -620,6 +627,7 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
   end
 end
 
+-- should never modify Cursor1
 function Text.snap_cursor_to_bottom_of_screen()
   local top2 = Text.to2(Cursor1)
   top2.screen_pos = 1  -- start of screen line
