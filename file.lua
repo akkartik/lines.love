@@ -30,6 +30,9 @@ end
 
 function save_to_disk(lines, filename)
   local outfile = App.open_for_writing(filename)
+  if outfile == nil then
+    error('failed to write to "'..filename..'"')
+  end
   for _,line in ipairs(lines) do
     if line.mode == 'drawing' then
       store_drawing(outfile, line)
