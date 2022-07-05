@@ -420,6 +420,7 @@ end
 
 function App.keychord_pressed(chord, key)
   if Selection1.line and
+      not Lines.current_drawing and
       -- printable character created using shift key => delete selection
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
