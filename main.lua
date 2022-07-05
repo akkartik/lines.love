@@ -533,11 +533,6 @@ function App.keychord_pressed(chord, key)
       record_undo_event({before=before, after=snapshot(drawing_index)})
       schedule_save()
     end
-  elseif chord == 'escape' and App.mouse_down(1) then
-    local _,drawing = Drawing.current_drawing()
-    if drawing then
-      drawing.pending = {}
-    end
   elseif chord == 'escape' and not App.mouse_down(1) then
     for _,line in ipairs(Lines) do
       if line.mode == 'drawing' then

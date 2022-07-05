@@ -118,6 +118,28 @@ function test_draw_circle()
   check_eq(center.y, 36, 'F - test_draw_circle/center:y')
 end
 
+function test_cancel_stroke()
+  io.write('\ntest_cancel_stroke')
+  -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
+  Filename = 'foo'
+  App.screen.init{width=Margin_width+256, height=300}  -- drawing coordinates 1:1 with pixels
+  Lines = load_array{'```lines', '```', ''}
+  Current_drawing_mode = 'line'
+  App.draw()
+  check_eq(#Lines, 2, 'F - test_cancel_stroke/baseline/#lines')
+  check_eq(Lines[1].mode, 'drawing', 'F - test_cancel_stroke/baseline/mode')
+  check_eq(Lines[1].y, Margin_top+Drawing_padding_top, 'F - test_cancel_stroke/baseline/y')
+  check_eq(Lines[1].h, 128, 'F - test_cancel_stroke/baseline/y')
+  check_eq(#Lines[1].shapes, 0, 'F - test_cancel_stroke/baseline/#shapes')
+  -- start drawing a line
+  App.run_after_mouse_press(Margin_left+5, Margin_top+Drawing_padding_top+6, 1)
+  -- cancel
+  App.run_after_keychord('escape')
+  App.run_after_mouse_release(Margin_left+35, Margin_top+Drawing_padding_top+36, 1)
+  local drawing = Lines[1]
+  check_eq(#drawing.shapes, 0, 'F - test_cancel_stroke/#shapes')
+end
+
 function test_keys_do_not_affect_shape_when_mouse_up()
   io.write('\ntest_keys_do_not_affect_shape_when_mouse_up')
   -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)

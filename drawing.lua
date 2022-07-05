@@ -287,7 +287,9 @@ function Drawing.mouse_released(x,y, button)
   elseif Lines.current_drawing then
     local drawing = Lines.current_drawing
     if drawing.pending then
-      if drawing.pending.mode == 'freehand' then
+      if drawing.pending.mode == nil then
+        -- nothing pending
+      elseif drawing.pending.mode == 'freehand' then
         -- the last point added during update is good enough
         table.insert(drawing.shapes, drawing.pending)
       elseif drawing.pending.mode == 'line' then
@@ -540,6 +542,9 @@ function Drawing.keychord_pressed(chord)
     if drawing then
       drawing.show_help = true
     end
+  elseif chord == 'escape' and App.mouse_down(1) then
+    local _,drawing = Drawing.current_drawing()
+    drawing.pending = {}
   end
 end
 
