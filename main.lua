@@ -517,8 +517,7 @@ function App.keychord_pressed(chord, key)
         Text.insert_at_cursor(c)
       end
     end
-    App.draw()
-    if Cursor_y >= App.screen.height - Line_height then
+    if Text.cursor_past_screen_bottom() then
       Text.snap_cursor_to_bottom_of_screen()
     end
     schedule_save()

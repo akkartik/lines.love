@@ -509,7 +509,7 @@ function Text.end_of_line()
   Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   local _,botpos = Text.pos_at_start_of_cursor_screen_line()
   local botline1 = {line=Cursor1.line, pos=botpos}
-  if Text.lt1(Screen_bottom1, botline1) then
+  if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen()
   end
 end
@@ -575,9 +575,7 @@ function Text.right()
       end
     end
   end
-  local _,botpos = Text.pos_at_start_of_cursor_screen_line()
-  local botline1 = {line=Cursor1.line, pos=botpos}
-  if Text.lt1(Screen_bottom1, botline1) then
+  if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen()
   end
 end
@@ -941,13 +939,23 @@ function Text.tweak_screen_top_and_cursor()
     Cursor1 = {line=Screen_top1.line, pos=Screen_top1.pos}
   elseif Cursor1.line >= Screen_bottom1.line then
 --?     print('too low')
-    App.draw()
-    if Text.lt1(Screen_bottom1, Cursor1) then
+    if Text.cursor_past_screen_bottom() then
 --?       print('tweak')
       local line = Lines[Screen_bottom1.line]
       Cursor1 = {line=Screen_bottom1.line, pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5)}
     end
   end
+end
+
+-- slightly expensive since it redraws the screen
+function Text.cursor_past_screen_bottom()
+  App.draw()
+  return Cursor_y >= App.screen.height - Line_height
+  -- this approach is cheaper and almost works, except on the final screen
+  -- where file ends above bottom of screen
+--?   local _,botpos = Text.pos_at_start_of_cursor_screen_line()
+--?   local botline1 = {line=Cursor1.line, pos=botpos}
+--?   return Text.lt1(Screen_bottom1, botline1)
 end
 
 function Text.redraw_all()
