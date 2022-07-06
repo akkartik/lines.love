@@ -384,6 +384,8 @@ function App.mousereleased(x,y, button)
 --?           print('reset selection')
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
 --?           print('cursor', Cursor1.line, Cursor1.pos)
+          -- ensure cursor is immediately visible
+          Cursor_time = 0
           if Mousepress_shift then
             if Old_selection1.line == nil then
               Selection1 = Old_cursor1
