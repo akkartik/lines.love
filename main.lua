@@ -341,8 +341,8 @@ function App.mousepressed(x,y, mouse_button)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line_index,line, x,y) then
-        -- delicate dance between cursor, selection and old cursor
-        -- manual tests:
+        -- delicate dance between cursor, selection and old cursor/selection
+        -- scenarios:
         --  regular press+release: sets cursor, clears selection
         --  shift press+release:
         --    sets selection to old cursor if not set otherwise leaves it untouched
@@ -396,6 +396,9 @@ function App.mousereleased(x,y, button)
             end
           end
           Old_cursor1, Old_selection1, Mousepress_shift = nil
+          if eq(Cursor1, Selection1) then
+            Selection1 = {}
+          end
           break
         end
       end

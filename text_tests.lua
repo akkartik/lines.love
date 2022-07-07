@@ -76,6 +76,7 @@ function test_click_with_mouse()
   App.run_after_mouse_click(Margin_left+8,Margin_top+5, 1)
   -- cursor moves
   check_eq(Cursor1.line, 1, 'F - test_click_with_mouse/cursor')
+  check_nil(Selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_on_empty_line()
@@ -332,24 +333,6 @@ function test_cursor_movement_without_shift_resets_selection()
   -- no change to data, selection is reset
   check_nil(Selection1.line, 'F - test_cursor_movement_without_shift_resets_selection')
   check_eq(Lines[1].data, 'abc', 'F - test_cursor_movement_without_shift_resets_selection/data')
-end
-
-function test_edit_after_click_resets_selection()
-  io.write('\ntest_edit_after_click_resets_selection')
-  -- display a line of text
-  App.screen.init{width=75, height=80}
-  Lines = load_array{'abc'}
-  Margin_right = 0; Margin_width = Margin_left
-  Cursor1 = {line=1, pos=1}
-  Screen_top1 = {line=1, pos=1}
-  Screen_bottom1 = {}
-  App.draw()
-  -- click past the end of it and hit enter
-  App.run_after_mouse_click(Margin_left+40,Margin_top+5, 1)
-  check(Selection1.line, 'F - test_edit_after_click_resets_selection/baseline')
-  App.run_after_keychord('return')
-  -- selection is reset since shift key is not pressed
-  check_nil(Selection1.line, 'F - test_edit_after_click_resets_selection')
 end
 
 function test_edit_deletes_selection()
