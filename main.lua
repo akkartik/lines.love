@@ -191,7 +191,7 @@ function App.resize(w, h)
   App.screen.width, App.screen.height = w, h
   Text.redraw_all()
   Selection1 = {}  -- no support for shift drag while we're resizing
-  Text.tweak_screen_top_and_cursor()
+  Text.tweak_screen_top_and_cursor(Margin_left, App.screen.height-Margin_right)
   Last_resize_time = App.getTime()
 end
 
@@ -272,7 +272,7 @@ function App.draw()
         line.startpos = Screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, Screen_bottom1.pos = Text.draw(line, line_index)
+      y, Screen_bottom1.pos = Text.draw(line, line_index, line.starty, Margin_left, App.screen.width-Margin_right)
       y = y + Line_height
 --?       print('=> y', y)
     end

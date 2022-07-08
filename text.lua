@@ -11,12 +11,12 @@ require 'text_tests'
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
-function Text.draw(line, line_index)
+function Text.draw(line, line_index, top, left, right)
 --?   print('text.draw', line_index)
   love.graphics.setColor(0,0,0)
   -- wrap long lines
-  local x = Margin_left
-  local y = line.starty
+  local x = left
+  local y = top
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
@@ -30,9 +30,9 @@ function Text.draw(line, line_index)
     local frag_width = App.width(frag_text)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
---?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(App.screen.width-Margin_right)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
-    if x + frag_width > App.screen.width-Margin_right then
-      assert(x > Margin_left)  -- no overfull lines
+--?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(Screen_top1.line)..'; '..s(pos)..' vs '..s(Screen_top1.pos)..'; bottom: '..s(Screen_bottom1.line)..'/'..s(Screen_bottom1.pos))
+    if x + frag_width > right then
+      assert(x > left)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if Text.lt1(Screen_top1, {line=line_index, pos=pos}) then
         y = y + Line_height
@@ -43,7 +43,7 @@ function Text.draw(line, line_index)
         screen_line_starting_pos = pos
 --?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
       end
-      x = Margin_left
+      x = left
     end
 --?     print('checking to draw', pos, Screen_top1.pos)
     -- don't draw text above screen top
@@ -917,7 +917,7 @@ function Text.populate_screen_line_starting_pos(line)
   end
 end
 
-function Text.tweak_screen_top_and_cursor()
+function Text.tweak_screen_top_and_cursor(left, right)
 --?   print('a', Selection1.line)
   if Screen_top1.pos == 1 then return end
   local line = Lines[Screen_top1.line]
