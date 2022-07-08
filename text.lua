@@ -456,7 +456,7 @@ end
 function Text.down(left, right)
   assert(Lines[Cursor1.line].mode == 'text')
 --?   print('down', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos, Screen_bottom1.line, Screen_bottom1.pos)
-  if Text.cursor_at_final_screen_line() then
+  if Text.cursor_at_final_screen_line(left, right) then
     -- line is done, skip to next text line
 --?     print('cursor at final screen line of its line')
     local new_cursor_line = Cursor1.line
@@ -598,7 +598,7 @@ function Text.pos_at_start_of_cursor_screen_line(left, right)
   assert(false)
 end
 
-function Text.cursor_at_final_screen_line()
+function Text.cursor_at_final_screen_line(left, right)
   Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
   local screen_lines = Lines[Cursor1.line].screen_line_starting_pos
 --?   print(screen_lines[#screen_lines], Cursor1.pos)
