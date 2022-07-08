@@ -56,7 +56,7 @@ function Text.search_next()
   end
   if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
     Screen_top1.line = Cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line()
+    local _, pos = Text.pos_at_start_of_cursor_screen_line(Margin_left, App.screen.width-Margin_right)
     Screen_top1.pos = pos
   end
 end
@@ -96,7 +96,7 @@ function Text.search_previous()
   end
   if Text.lt1(Cursor1, Screen_top1) or Text.lt1(Screen_bottom1, Cursor1) then
     Screen_top1.line = Cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line()
+    local _, pos = Text.pos_at_start_of_cursor_screen_line(Margin_left, App.screen.width-Margin_right)
     Screen_top1.pos = pos
   end
 end

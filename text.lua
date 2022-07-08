@@ -405,7 +405,7 @@ end
 function Text.up(left, right)
   assert(Lines[Cursor1.line].mode == 'text')
 --?   print('up', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
-  local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
+  local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(left, right)
   if screen_line_starting_pos == 1 then
 --?     print('cursor is at first screen line of its line')
     -- line is done; skip to previous text line
@@ -482,7 +482,7 @@ function Text.down(left, right)
       scroll_down = true
     end
 --?     print('cursor is NOT at final screen line of its line')
-    local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
+    local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(left, right)
     new_screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos[screen_line_index+1]
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
     local new_screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
@@ -507,7 +507,7 @@ end
 
 function Text.end_of_line(left, right)
   Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
-  local _,botpos = Text.pos_at_start_of_cursor_screen_line()
+  local _,botpos = Text.pos_at_start_of_cursor_screen_line(left, right)
   local botline1 = {line=Cursor1.line, pos=botpos}
   if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen()
@@ -587,7 +587,7 @@ function Text.right_without_scroll()
   end
 end
 
-function Text.pos_at_start_of_cursor_screen_line()
+function Text.pos_at_start_of_cursor_screen_line(left, right)
   Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
   for i=#Lines[Cursor1.line].screen_line_starting_pos,1,-1 do
     local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
@@ -959,7 +959,7 @@ function Text.cursor_past_screen_bottom()
   return Cursor_y >= App.screen.height - Line_height
   -- this approach is cheaper and almost works, except on the final screen
   -- where file ends above bottom of screen
---?   local _,botpos = Text.pos_at_start_of_cursor_screen_line()
+--?   local _,botpos = Text.pos_at_start_of_cursor_screen_line(left, right)
 --?   local botline1 = {line=Cursor1.line, pos=botpos}
 --?   return Text.lt1(Screen_bottom1, botline1)
 end
