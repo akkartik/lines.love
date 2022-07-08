@@ -260,43 +260,43 @@ function Text.keychord_pressed(chord)
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
-    Text.left()
+    Text.left(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'right' then
-    Text.right()
+    Text.right(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'S-left' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.left()
+    Text.left(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'S-right' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.right()
+    Text.right(Margin_left, App.screen.width-Margin_right)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
-    Text.word_left()
+    Text.word_left(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'M-right' then
-    Text.word_right()
+    Text.word_right(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'M-S-left' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.word_left()
+    Text.word_left(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'M-S-right' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.word_right()
+    Text.word_right(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'home' then
     Text.start_of_line()
     Selection1 = {}
   elseif chord == 'end' then
-    Text.end_of_line()
+    Text.end_of_line(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'S-home' then
     if Selection1.line == nil then
@@ -307,39 +307,39 @@ function Text.keychord_pressed(chord)
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.end_of_line()
+    Text.end_of_line(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'up' then
-    Text.up()
+    Text.up(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'down' then
-    Text.down()
+    Text.down(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'S-up' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.up()
+    Text.up(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'S-down' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.down()
+    Text.down(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'pageup' then
-    Text.pageup()
+    Text.pageup(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'pagedown' then
-    Text.pagedown()
+    Text.pagedown(Margin_left, App.screen.width-Margin_right)
     Selection1 = {}
   elseif chord == 'S-pageup' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.pageup()
+    Text.pageup(Margin_left, App.screen.width-Margin_right)
   elseif chord == 'S-pagedown' then
     if Selection1.line == nil then
       Selection1 = {line=Cursor1.line, pos=Cursor1.pos}
     end
-    Text.pagedown()
+    Text.pagedown(Margin_left, App.screen.width-Margin_right)
   end
 end
 
@@ -353,7 +353,7 @@ function Text.insert_return()
   Cursor1.pos = 1
 end
 
-function Text.pageup()
+function Text.pageup(left, right)
 --?   print('pageup')
   -- duplicate some logic from love.draw
   local top2 = Text.to2(Screen_top1)
@@ -377,7 +377,7 @@ function Text.pageup()
 --?   print('pageup end')
 end
 
-function Text.pagedown()
+function Text.pagedown(left, right)
 --?   print('pagedown')
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
@@ -402,7 +402,7 @@ function Text.pagedown()
 --?   print('pagedown end')
 end
 
-function Text.up()
+function Text.up(left, right)
   assert(Lines[Cursor1.line].mode == 'text')
 --?   print('up', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
   local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line()
@@ -453,7 +453,7 @@ function Text.up()
   end
 end
 
-function Text.down()
+function Text.down(left, right)
   assert(Lines[Cursor1.line].mode == 'text')
 --?   print('down', Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   if Text.cursor_at_final_screen_line() then
@@ -505,7 +505,7 @@ function Text.start_of_line()
   end
 end
 
-function Text.end_of_line()
+function Text.end_of_line(left, right)
   Cursor1.pos = utf8.len(Lines[Cursor1.line].data) + 1
   local _,botpos = Text.pos_at_start_of_cursor_screen_line()
   local botline1 = {line=Cursor1.line, pos=botpos}
@@ -514,9 +514,9 @@ function Text.end_of_line()
   end
 end
 
-function Text.word_left()
+function Text.word_left(left, right)
   while true do
-    Text.left()
+    Text.left(left, right)
     if Cursor1.pos == 1 then break end
     assert(Cursor1.pos > 1)
     local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
@@ -527,7 +527,7 @@ function Text.word_left()
   end
 end
 
-function Text.word_right()
+function Text.word_right(left, right)
   while true do
     Text.right_without_scroll()
     if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
@@ -541,7 +541,7 @@ function Text.word_right()
   end
 end
 
-function Text.left()
+function Text.left(left, right)
   assert(Lines[Cursor1.line].mode == 'text')
   if Cursor1.pos > 1 then
     Cursor1.pos = Cursor1.pos-1
@@ -563,7 +563,7 @@ function Text.left()
   end
 end
 
-function Text.right()
+function Text.right(left, right)
   Text.right_without_scroll()
   if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen()
