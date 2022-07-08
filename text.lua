@@ -429,7 +429,7 @@ function Text.up(left, right)
         end
         local screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, screen_line_starting_pos)
         local s = string.sub(Lines[Cursor1.line].data, screen_line_starting_byte_offset)
-        Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+        Cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x, left) - 1
         break
       end
     end
@@ -448,7 +448,7 @@ function Text.up(left, right)
     end
     local new_screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
-    Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+    Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x, left) - 1
 --?     print('cursor pos is now '..tostring(Cursor1.pos))
   end
 end
@@ -464,7 +464,7 @@ function Text.down(left, right)
       new_cursor_line = new_cursor_line+1
       if Lines[new_cursor_line].mode == 'text' then
         Cursor1.line = new_cursor_line
-        Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x)
+        Cursor1.pos = Text.nearest_cursor_pos(Lines[Cursor1.line].data, Cursor_x, left)
 --?         print(Cursor1.pos)
         break
       end
@@ -487,7 +487,7 @@ function Text.down(left, right)
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
     local new_screen_line_starting_byte_offset = Text.offset(Lines[Cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(Lines[Cursor1.line].data, new_screen_line_starting_byte_offset)
-    Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x) - 1
+    Cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, Cursor_x, left) - 1
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
     if scroll_down then
 --?       print('scroll up preserving cursor')
@@ -694,8 +694,8 @@ function Text.to_pos_on_line(line, mx, my, left, right)
         return line.screen_line_starting_pos[screen_line_index+1]-1
       end
       local s = string.sub(line.data, screen_line_starting_byte_offset)
---?       print('return', mx, Text.nearest_cursor_pos(s, mx), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1)
-      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx) - 1
+--?       print('return', mx, Text.nearest_cursor_pos(s, mx, left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, left) - 1)
+      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, left) - 1
     end
     y = nexty
   end
@@ -739,12 +739,14 @@ function Text.screen_line_index(line, pos)
   end
 end
 
-function Text.nearest_cursor_pos(line, x)  -- x includes left margin
+-- convert x pixel coordinate to pos
+-- oblivious to wrapping
+function Text.nearest_cursor_pos(line, x, left)
   if x == 0 then
     return 1
   end
   local len = utf8.len(line)
-  local max_x = Margin_left+Text.x(line, len+1)
+  local max_x = left+Text.x(line, len+1)
   if x > max_x then
     return len+1
   end
@@ -756,8 +758,8 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
       return leftpos
     end
     local curr = math.floor((leftpos+rightpos)/2)
-    local currxmin = Margin_left+Text.x(line, curr)
-    local currxmax = Margin_left+Text.x(line, curr+1)
+    local currxmin = left+Text.x(line, curr)
+    local currxmax = left+Text.x(line, curr+1)
 --?     print('nearest', x, leftpos, rightpos, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       if x-currxmin < currxmax-x then
