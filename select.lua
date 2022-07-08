@@ -96,7 +96,7 @@ function Text.to_pos(x,y, left, right)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y, left, right) then
-        return line_index, Text.to_pos_on_line(line, x,y)
+        return line_index, Text.to_pos_on_line(line, x,y, left, right)
       end
     end
   end

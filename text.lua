@@ -672,8 +672,7 @@ function Text.in_line(line, x,y, left,right)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
-function Text.to_pos_on_line(line, mx, my)
---?   print('Text.to_pos_on_line', mx, my, 'width', App.screen.width-Margin_right)
+function Text.to_pos_on_line(line, mx, my, left, right)
   if line.fragments == nil then
     Text.compute_fragments(line)
   end
@@ -948,7 +947,7 @@ function Text.tweak_screen_top_and_cursor(left, right)
       local line = Lines[Screen_bottom1.line]
       Cursor1 = {
           line=Screen_bottom1.line,
-          pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5),
+          pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5, left, right),
       }
     end
   end

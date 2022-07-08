@@ -353,7 +353,7 @@ function App.mousepressed(x,y, mouse_button)
         Mousepress_shift = App.shift_down()
         Selection1 = {
             line=line_index,
-            pos=Text.to_pos_on_line(line, x, y),
+            pos=Text.to_pos_on_line(line, x, y, Margin_left, App.screen.width-Margin_right),
         }
 --?         print('selection', Selection1.line, Selection1.pos)
         break
@@ -389,7 +389,7 @@ function App.mousereleased(x,y, button)
 --?           print('reset selection')
           Cursor1 = {
               line=line_index,
-              pos=Text.to_pos_on_line(line, x, y),
+              pos=Text.to_pos_on_line(line, x, y, Margin_left, App.screen.width-Margin_right),
           }
 --?           print('cursor', Cursor1.line, Cursor1.pos)
           if Mousepress_shift then
