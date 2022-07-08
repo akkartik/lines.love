@@ -8,13 +8,13 @@ local utf8 = require 'utf8'
 -- and {line=line_index, pos=bpos}.
 -- apos must be less than bpos. However Selection1 and Cursor1 can be in any order.
 -- Result: positions spos,epos between apos,bpos.
-function Text.clip_selection(line_index, apos, bpos)
+function Text.clip_selection(line_index, apos, bpos, left, right)
   if Selection1.line == nil then return nil,nil end
   -- min,max = sorted(Selection1,Cursor1)
   local minl,minp = Selection1.line,Selection1.pos
   local maxl,maxp
   if App.mouse_down(1) then
-    maxl,maxp = Text.mouse_pos()
+    maxl,maxp = Text.mouse_pos(left, right)
   else
     maxl,maxp = Cursor1.line,Cursor1.pos
   end
@@ -78,13 +78,13 @@ function Text.draw_highlight(line, x,y, pos, lo,hi)
 end
 
 -- inefficient for some reason, so don't do it on every frame
-function Text.mouse_pos()
+function Text.mouse_pos(left, right)
   local time = love.timer.getTime()
   if Recent_mouse.time and Recent_mouse.time > time-0.1 then
     return Recent_mouse.line, Recent_mouse.pos
   end
   Recent_mouse.time = time
-  local line,pos = Text.to_pos(App.mouse_x(), App.mouse_y())
+  local line,pos = Text.to_pos(App.mouse_x(), App.mouse_y(), left, right)
   if line then
     Recent_mouse.line = line
     Recent_mouse.pos = pos
@@ -92,7 +92,7 @@ function Text.mouse_pos()
   return Recent_mouse.line, Recent_mouse.pos
 end
 
-function Text.to_pos(x,y)
+function Text.to_pos(x,y, left, right)
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y) then
@@ -102,22 +102,22 @@ function Text.to_pos(x,y)
   end
 end
 
-function Text.cut_selection()
+function Text.cut_selection(left, right)
   if Selection1.line == nil then return end
   local result = Text.selection()
-  Text.delete_selection()
+  Text.delete_selection(left, right)
   return result
 end
 
-function Text.delete_selection()
+function Text.delete_selection(left, right)
   if Selection1.line == nil then return end
   local minl,maxl = minmax(Selection1.line, Cursor1.line)
   local before = snapshot(minl, maxl)
-  Text.delete_selection_without_undo()
+  Text.delete_selection_without_undo(left, right)
   record_undo_event({before=before, after=snapshot(Cursor1.line)})
 end
 
-function Text.delete_selection_without_undo()
+function Text.delete_selection_without_undo(left, right)
   if Selection1.line == nil then return end
   -- min,max = sorted(Selection1,Cursor1)
   local minl,minp = Selection1.line,Selection1.pos

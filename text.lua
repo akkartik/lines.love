@@ -49,7 +49,7 @@ function Text.draw(line, line_index, top, left, right)
     -- don't draw text above screen top
     if Text.le1(Screen_top1, {line=line_index, pos=pos}) then
       if Selection1.line then
-        local lo, hi = Text.clip_selection(line_index, pos, pos+frag_len)
+        local lo, hi = Text.clip_selection(line_index, pos, pos+frag_len, left, right)
         Text.draw_highlight(line, x,y, pos, lo,hi)
       end
 --?       print('drawing '..frag)
@@ -184,7 +184,7 @@ function Text.keychord_pressed(chord)
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'backspace' then
     if Selection1.line then
-      Text.delete_selection()
+      Text.delete_selection(Margin_left, App.screen.width-Margin_right)
       schedule_save()
       return
     end
@@ -225,7 +225,7 @@ function Text.keychord_pressed(chord)
     record_undo_event({before=before, after=snapshot(Cursor1.line)})
   elseif chord == 'delete' then
     if Selection1.line then
-      Text.delete_selection()
+      Text.delete_selection(Margin_left, App.screen.width-Margin_right)
       schedule_save()
       return
     end

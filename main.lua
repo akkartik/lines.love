@@ -434,7 +434,7 @@ function App.keychord_pressed(chord, key)
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
       chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
-    Text.delete_selection()
+    Text.delete_selection(Margin_left, App.screen.width-Margin_right)
   end
   if Search_term then
     if chord == 'escape' then
@@ -506,7 +506,7 @@ function App.keychord_pressed(chord, key)
     end
   elseif chord == 'C-x' then
     for _,line in ipairs(Lines) do line.y = nil end  -- just in case we scroll
-    local s = Text.cut_selection()
+    local s = Text.cut_selection(Margin_left, App.screen.width-Margin_right)
     if s then
       App.setClipboardText(s)
     end
