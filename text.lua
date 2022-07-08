@@ -214,7 +214,7 @@ function Text.keychord_pressed(chord)
       Cursor1.line = Cursor1.line-1
     end
     if Text.lt1(Cursor1, Screen_top1) then
-      local top2 = Text.to2(Screen_top1)
+      local top2 = Text.to2(Screen_top1, Margin_left, App.screen.width-Margin_right)
       top2 = Text.previous_screen_line(top2, Margin_left, App.screen.width-Margin_right)
       Screen_top1 = Text.to1(top2)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
@@ -356,7 +356,7 @@ end
 function Text.pageup(left, right)
 --?   print('pageup')
   -- duplicate some logic from love.draw
-  local top2 = Text.to2(Screen_top1)
+  local top2 = Text.to2(Screen_top1, left, right)
 --?   print(App.screen.height)
   local y = App.screen.height - Line_height
   while y >= Margin_top do
@@ -382,7 +382,7 @@ function Text.pagedown(left, right)
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
   -- However, only do this if it makes forward progress.
-  local top2 = Text.to2(Screen_bottom1)
+  local top2 = Text.to2(Screen_bottom1, left, right)
   if top2.screen_line > 1 then
     top2.screen_line = math.max(top2.screen_line-10, 1)
   end
@@ -557,7 +557,7 @@ function Text.left(left, right)
     end
   end
   if Text.lt1(Cursor1, Screen_top1) then
-    local top2 = Text.to2(Screen_top1)
+    local top2 = Text.to2(Screen_top1, left, right)
     top2 = Text.previous_screen_line(top2, left, right)
     Screen_top1 = Text.to1(top2)
   end
@@ -629,7 +629,7 @@ end
 
 -- should never modify Cursor1
 function Text.snap_cursor_to_bottom_of_screen(left, right)
-  local top2 = Text.to2(Cursor1)
+  local top2 = Text.to2(Cursor1, left, right)
   top2.screen_pos = 1  -- start of screen line
 --?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
   local y = App.screen.height - Line_height
@@ -818,7 +818,7 @@ function Text.x(s, pos)
   return App.width(text_before)
 end
 
-function Text.to2(pos1)
+function Text.to2(pos1, left, right)
   if Lines[pos1.line].mode == 'drawing' then
     return {line=pos1.line, screen_line=1, screen_pos=1}
   end
