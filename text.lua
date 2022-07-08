@@ -22,7 +22,7 @@ function Text.draw(line, line_index, top, left, right)
   if line.fragments == nil then
     Text.compute_fragments(line)
   end
-  Text.populate_screen_line_starting_pos(line)
+  Text.populate_screen_line_starting_pos(line, left, right)
 --?   print('--')
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
@@ -143,7 +143,7 @@ function Text.textinput(t)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   Text.insert_at_cursor(t)
   if Cursor_y >= App.screen.height - Line_height then
-    Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
+    Text.populate_screen_line_starting_pos(Lines[Cursor1.line], Margin_left, App.screen.width-Margin_right)
     Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.width-Margin_right)
 --?     print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   end
@@ -176,7 +176,7 @@ function Text.keychord_pressed(chord)
 --?     print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     Text.insert_at_cursor('\t')
     if Cursor_y >= App.screen.height - Line_height then
-      Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
+      Text.populate_screen_line_starting_pos(Lines[Cursor1.line], Margin_left, App.screen.width-Margin_right)
       Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.width-Margin_right)
 --?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     end
@@ -415,7 +415,7 @@ function Text.up(left, right)
       if Lines[new_cursor_line].mode == 'text' then
 --?         print('found previous text line')
         Cursor1.line = new_cursor_line
-        Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
+        Text.populate_screen_line_starting_pos(Lines[Cursor1.line], left, right)
         -- previous text line found, pick its final screen line
 --?         print('has multiple screen lines')
         local screen_line_starting_pos = Lines[Cursor1.line].screen_line_starting_pos
@@ -588,7 +588,7 @@ function Text.right_without_scroll()
 end
 
 function Text.pos_at_start_of_cursor_screen_line(left, right)
-  Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
+  Text.populate_screen_line_starting_pos(Lines[Cursor1.line], left, right)
   for i=#Lines[Cursor1.line].screen_line_starting_pos,1,-1 do
     local spos = Lines[Cursor1.line].screen_line_starting_pos[i]
     if spos <= Cursor1.pos then
@@ -599,7 +599,7 @@ function Text.pos_at_start_of_cursor_screen_line(left, right)
 end
 
 function Text.cursor_at_final_screen_line(left, right)
-  Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
+  Text.populate_screen_line_starting_pos(Lines[Cursor1.line], left, right)
   local screen_lines = Lines[Cursor1.line].screen_line_starting_pos
 --?   print(screen_lines[#screen_lines], Cursor1.pos)
   return screen_lines[#screen_lines] <= Cursor1.pos
@@ -667,7 +667,7 @@ function Text.in_line(line, x,y, left,right)
   if line.starty == nil then return false end  -- outside current page
   if x < left then return false end
   if y < line.starty then return false end
-  Text.populate_screen_line_starting_pos(line)
+  Text.populate_screen_line_starting_pos(line, left, right)
   return y < line.starty + Line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line, line.startpos) + 1)
 end
 
@@ -823,7 +823,7 @@ function Text.to2(pos1, left, right)
     return {line=pos1.line, screen_line=1, screen_pos=1}
   end
   local result = {line=pos1.line, screen_line=1}
-  Text.populate_screen_line_starting_pos(Lines[pos1.line])
+  Text.populate_screen_line_starting_pos(Lines[pos1.line], left, right)
   for i=#Lines[pos1.line].screen_line_starting_pos,1,-1 do
     local spos = Lines[pos1.line].screen_line_starting_pos[i]
     if spos <= pos1.pos then
@@ -888,12 +888,12 @@ function Text.previous_screen_line(pos2, left, right)
     return {line=pos2.line-1, screen_line=1, screen_pos=1}
   else
     local l = Lines[pos2.line-1]
-    Text.populate_screen_line_starting_pos(Lines[pos2.line-1])
+    Text.populate_screen_line_starting_pos(Lines[pos2.line-1], left, right)
     return {line=pos2.line-1, screen_line=#Lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
   end
 end
 
-function Text.populate_screen_line_starting_pos(line)
+function Text.populate_screen_line_starting_pos(line, left, right)
   if line.screen_line_starting_pos then
     return
   end
@@ -902,14 +902,14 @@ function Text.populate_screen_line_starting_pos(line)
     Text.compute_fragments(line)
   end
   line.screen_line_starting_pos = {1}
-  local x = Margin_left
+  local x = left
   local pos = 1
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = App.width(frag_text)
-    if x + frag_width > App.screen.width-Margin_right then
-      x = Margin_left
+    if x + frag_width > right then
+      x = left
       table.insert(line.screen_line_starting_pos, pos)
     end
     x = x + frag_width
@@ -922,7 +922,7 @@ function Text.tweak_screen_top_and_cursor(left, right)
 --?   print('a', Selection1.line)
   if Screen_top1.pos == 1 then return end
   local line = Lines[Screen_top1.line]
-  Text.populate_screen_line_starting_pos(line)
+  Text.populate_screen_line_starting_pos(line, left, right)
   for i=2,#line.screen_line_starting_pos do
     local pos = line.screen_line_starting_pos[i]
     if pos == Screen_top1.pos then
