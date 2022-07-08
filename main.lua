@@ -225,8 +225,8 @@ end
 
 function App.draw()
   Button_handlers = {}
-  love.graphics.setColor(0, 0, 0)
 
+  love.graphics.setColor(0, 0, 0)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos)
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1
