@@ -372,7 +372,7 @@ function Text.pageup(left, right)
   Screen_top1 = Text.to1(top2)
   Cursor1.line = Screen_top1.line
   Cursor1.pos = Screen_top1.pos
-  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(left, right)
 --?   print(Cursor1.line, Cursor1.pos, Screen_top1.line, Screen_top1.pos)
 --?   print('pageup end')
 end
@@ -396,7 +396,7 @@ function Text.pagedown(left, right)
 --?   print('setting top to', Screen_top1.line, Screen_top1.pos)
   Cursor1.line = Screen_top1.line
   Cursor1.pos = Screen_top1.pos
-  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(left, right)
 --?   print('top now', Screen_top1.line)
   Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 --?   print('pagedown end')
@@ -605,7 +605,7 @@ function Text.cursor_at_final_screen_line(left, right)
   return screen_lines[#screen_lines] <= Cursor1.pos
 end
 
-function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary()
+function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(left, right)
   local y = Margin_top
   while Cursor1.line <= #Lines do
     if Lines[Cursor1.line].mode == 'text' then
