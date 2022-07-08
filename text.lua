@@ -663,9 +663,9 @@ function Text.snap_cursor_to_bottom_of_screen()
   Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
 
-function Text.in_line(line, x,y)
+function Text.in_line(line, x,y, left,right)
   if line.starty == nil then return false end  -- outside current page
-  if x < Margin_left then return false end
+  if x < left then return false end
   if y < line.starty then return false end
   Text.populate_screen_line_starting_pos(line)
   return y < line.starty + Line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line, line.startpos) + 1)

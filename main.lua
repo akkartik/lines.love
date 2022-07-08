@@ -338,7 +338,7 @@ function App.mousepressed(x,y, mouse_button)
 
   for line_index,line in ipairs(Lines) do
     if line.mode == 'text' then
-      if Text.in_line(line, x,y) then
+      if Text.in_line(line, x,y, Margin_left, App.screen.width-Margin_right) then
         -- delicate dance between cursor, selection and old cursor/selection
         -- scenarios:
         --  regular press+release: sets cursor, clears selection
@@ -382,7 +382,7 @@ function App.mousereleased(x,y, button)
   else
     for line_index,line in ipairs(Lines) do
       if line.mode == 'text' then
-        if Text.in_line(line, x,y) then
+        if Text.in_line(line, x,y, Margin_left, App.screen.width-Margin_right) then
 --?           print('reset selection')
           Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
 --?           print('cursor', Cursor1.line, Cursor1.pos)
