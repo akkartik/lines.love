@@ -351,7 +351,10 @@ function App.mousepressed(x,y, mouse_button)
         Old_cursor1 = Cursor1
         Old_selection1 = Selection1
         Mousepress_shift = App.shift_down()
-        Selection1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
+        Selection1 = {
+            line=line_index,
+            pos=Text.to_pos_on_line(line, x, y),
+        }
 --?         print('selection', Selection1.line, Selection1.pos)
         break
       end
@@ -384,7 +387,10 @@ function App.mousereleased(x,y, button)
       if line.mode == 'text' then
         if Text.in_line(line, x,y, Margin_left, App.screen.width-Margin_right) then
 --?           print('reset selection')
-          Cursor1 = {line=line_index, pos=Text.to_pos_on_line(line, x, y)}
+          Cursor1 = {
+              line=line_index,
+              pos=Text.to_pos_on_line(line, x, y),
+          }
 --?           print('cursor', Cursor1.line, Cursor1.pos)
           if Mousepress_shift then
             if Old_selection1.line == nil then

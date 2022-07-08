@@ -946,7 +946,10 @@ function Text.tweak_screen_top_and_cursor(left, right)
     if Text.cursor_past_screen_bottom() then
 --?       print('tweak')
       local line = Lines[Screen_bottom1.line]
-      Cursor1 = {line=Screen_bottom1.line, pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5)}
+      Cursor1 = {
+          line=Screen_bottom1.line,
+          pos=Text.to_pos_on_line(line, App.screen.width-5, App.screen.height-5),
+      }
     end
   end
 end
