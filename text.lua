@@ -749,17 +749,17 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
   if x > max_x then
     return len+1
   end
-  local left, right = 1, len+1
+  local leftpos, rightpos = 1, len+1
 --?   print('-- nearest', x)
   while true do
---?     print('nearest', x, '^'..line..'$', left, right)
-    if left == right then
-      return left
+--?     print('nearest', x, '^'..line..'$', leftpos, rightpos)
+    if leftpos == rightpos then
+      return leftpos
     end
-    local curr = math.floor((left+right)/2)
+    local curr = math.floor((leftpos+rightpos)/2)
     local currxmin = Margin_left+Text.x(line, curr)
     local currxmax = Margin_left+Text.x(line, curr+1)
---?     print('nearest', x, left, right, curr, currxmin, currxmax)
+--?     print('nearest', x, leftpos, rightpos, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       if x-currxmin < currxmax-x then
         return curr
@@ -767,13 +767,13 @@ function Text.nearest_cursor_pos(line, x)  -- x includes left margin
         return curr+1
       end
     end
-    if left >= right-1 then
-      return right
+    if leftpos >= rightpos-1 then
+      return rightpos
     end
     if currxmin > x then
-      right = curr
+      rightpos = curr
     else
-      left = curr
+      leftpos = curr
     end
   end
   assert(false)
