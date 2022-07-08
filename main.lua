@@ -232,51 +232,49 @@ function App.draw()
   Cursor_y = -1
   local y = Margin_top
 --?   print('== draw')
-  for line_index,line in ipairs(Lines) do
+  for line_index = Screen_top1.line,#Lines do
+    local line = Lines[line_index]
 --?     print('draw:', y, line_index, line)
     if y + Line_height > App.screen.height then break end
---?     print('a')
-    if line_index >= Screen_top1.line then
-      Screen_bottom1.line = line_index
-      if line.mode == 'text' and line.data == '' then
-        line.starty = y
-        line.startpos = 1
-        -- insert new drawing
-        button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
-          icon = icon.insert_drawing,
-          onpress1 = function()
-                       Drawing.before = snapshot(line_index-1, line_index)
-                       table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                       if Cursor1.line >= line_index then
-                         Cursor1.line = Cursor1.line+1
-                       end
-                       schedule_save()
-                       record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
+    Screen_bottom1.line = line_index
+    if line.mode == 'text' and line.data == '' then
+      line.starty = y
+      line.startpos = 1
+      -- insert new drawing
+      button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
+        icon = icon.insert_drawing,
+        onpress1 = function()
+                     Drawing.before = snapshot(line_index-1, line_index)
+                     table.insert(Lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                     if Cursor1.line >= line_index then
+                       Cursor1.line = Cursor1.line+1
                      end
-        })
-        if Search_term == nil then
-          if line_index == Cursor1.line then
-            Text.draw_cursor(Margin_left, y)
-          end
+                     schedule_save()
+                     record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
+                   end
+      })
+      if Search_term == nil then
+        if line_index == Cursor1.line then
+          Text.draw_cursor(Margin_left, y)
         end
-        Screen_bottom1.pos = Screen_top1.pos
-        y = y + Line_height
-      elseif line.mode == 'drawing' then
-        y = y+Drawing_padding_top
-        line.y = y
-        Drawing.draw(line)
-        y = y + Drawing.pixels(line.h) + Drawing_padding_bottom
-      else
-        line.starty = y
-        line.startpos = 1
-        if line_index == Screen_top1.line then
-          line.startpos = Screen_top1.pos
-        end
---?         print('text.draw', y, line_index)
-        y, Screen_bottom1.pos = Text.draw(line, line_index)
-        y = y + Line_height
---?         print('=> y', y)
       end
+      Screen_bottom1.pos = Screen_top1.pos
+      y = y + Line_height
+    elseif line.mode == 'drawing' then
+      y = y+Drawing_padding_top
+      line.y = y
+      Drawing.draw(line)
+      y = y + Drawing.pixels(line.h) + Drawing_padding_bottom
+    else
+      line.starty = y
+      line.startpos = 1
+      if line_index == Screen_top1.line then
+        line.startpos = Screen_top1.pos
+      end
+--?       print('text.draw', y, line_index)
+      y, Screen_bottom1.pos = Text.draw(line, line_index)
+      y = y + Line_height
+--?       print('=> y', y)
     end
   end
   if Cursor_y == -1 then
