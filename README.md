@@ -40,6 +40,8 @@ found anything amiss: http://akkartik.name/contact
 
 * No support yet for Unicode graphemes spanning multiple codepoints.
 
+* No support yet for right-to-left languages.
+
 * Undo/redo may be sluggish in large files. Large files may grow sluggish in
   other ways. lines.love works well in all circumstances with files under
   50KB.
