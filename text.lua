@@ -215,7 +215,7 @@ function Text.keychord_pressed(chord)
     end
     if Text.lt1(Cursor1, Screen_top1) then
       local top2 = Text.to2(Screen_top1)
-      top2 = Text.previous_screen_line(top2)
+      top2 = Text.previous_screen_line(top2, Margin_left, App.screen.width-Margin_right)
       Screen_top1 = Text.to1(top2)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
@@ -367,7 +367,7 @@ function Text.pageup(left, right)
     elseif Lines[Screen_top1.line].mode == 'drawing' then
       y = y - Drawing_padding_height - Drawing.pixels(Lines[Screen_top1.line].h)
     end
-    top2 = Text.previous_screen_line(top2)
+    top2 = Text.previous_screen_line(top2, left, right)
   end
   Screen_top1 = Text.to1(top2)
   Cursor1.line = Screen_top1.line
@@ -558,7 +558,7 @@ function Text.left(left, right)
   end
   if Text.lt1(Cursor1, Screen_top1) then
     local top2 = Text.to2(Screen_top1)
-    top2 = Text.previous_screen_line(top2)
+    top2 = Text.previous_screen_line(top2, left, right)
     Screen_top1 = Text.to1(top2)
   end
 end
@@ -655,7 +655,7 @@ function Text.snap_cursor_to_bottom_of_screen(left, right)
 --?       print('skipping drawing of height', h)
       y = y - h
     end
-    top2 = Text.previous_screen_line(top2)
+    top2 = Text.previous_screen_line(top2, left, right)
   end
 --?   print('top2 finally:', top2.line, top2.screen_line, top2.screen_pos)
   Screen_top1 = Text.to1(top2)
@@ -879,7 +879,7 @@ function Text.offset(s, pos1)
   return result
 end
 
-function Text.previous_screen_line(pos2)
+function Text.previous_screen_line(pos2, left, right)
   if pos2.screen_line > 1 then
     return {line=pos2.line, screen_line=pos2.screen_line-1, screen_pos=1}
   elseif pos2.line == 1 then
