@@ -144,7 +144,7 @@ function Text.textinput(t)
   Text.insert_at_cursor(t)
   if Cursor_y >= App.screen.height - Line_height then
     Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
-    Text.snap_cursor_to_bottom_of_screen()
+    Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.width-Margin_right)
 --?     print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
   end
   record_undo_event({before=before, after=snapshot(Cursor1.line)})
@@ -167,7 +167,7 @@ function Text.keychord_pressed(chord)
     Text.insert_return()
     Selection1 = {}
     if (Cursor_y + Line_height) > App.screen.height then
-      Text.snap_cursor_to_bottom_of_screen()
+      Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.width-Margin_right)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
@@ -177,7 +177,7 @@ function Text.keychord_pressed(chord)
     Text.insert_at_cursor('\t')
     if Cursor_y >= App.screen.height - Line_height then
       Text.populate_screen_line_starting_pos(Lines[Cursor1.line])
-      Text.snap_cursor_to_bottom_of_screen()
+      Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.width-Margin_right)
 --?       print('=>', Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos, Screen_bottom1.line, Screen_bottom1.pos)
     end
     schedule_save()
@@ -472,7 +472,7 @@ function Text.down(left, right)
     if Cursor1.line > Screen_bottom1.line then
 --?       print('screen top before:', Screen_top1.line, Screen_top1.pos)
 --?       print('scroll up preserving cursor')
-      Text.snap_cursor_to_bottom_of_screen()
+      Text.snap_cursor_to_bottom_of_screen(left, right)
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
     end
   else
@@ -491,7 +491,7 @@ function Text.down(left, right)
 --?     print('cursor pos is now', Cursor1.line, Cursor1.pos)
     if scroll_down then
 --?       print('scroll up preserving cursor')
-      Text.snap_cursor_to_bottom_of_screen()
+      Text.snap_cursor_to_bottom_of_screen(left, right)
 --?       print('screen top after:', Screen_top1.line, Screen_top1.pos)
     end
   end
@@ -510,7 +510,7 @@ function Text.end_of_line(left, right)
   local _,botpos = Text.pos_at_start_of_cursor_screen_line(left, right)
   local botline1 = {line=Cursor1.line, pos=botpos}
   if Text.cursor_past_screen_bottom() then
-    Text.snap_cursor_to_bottom_of_screen()
+    Text.snap_cursor_to_bottom_of_screen(left, right)
   end
 end
 
@@ -537,7 +537,7 @@ function Text.word_right(left, right)
     end
   end
   if Text.cursor_past_screen_bottom() then
-    Text.snap_cursor_to_bottom_of_screen()
+    Text.snap_cursor_to_bottom_of_screen(left, right)
   end
 end
 
@@ -566,7 +566,7 @@ end
 function Text.right(left, right)
   Text.right_without_scroll()
   if Text.cursor_past_screen_bottom() then
-    Text.snap_cursor_to_bottom_of_screen()
+    Text.snap_cursor_to_bottom_of_screen(left, right)
   end
 end
 
@@ -623,12 +623,12 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 --?   print(y, App.screen.height, App.screen.height-Line_height)
   if y > App.screen.height - Line_height then
 --?     print('scroll up')
-    Text.snap_cursor_to_bottom_of_screen()
+    Text.snap_cursor_to_bottom_of_screen(left, right)
   end
 end
 
 -- should never modify Cursor1
-function Text.snap_cursor_to_bottom_of_screen()
+function Text.snap_cursor_to_bottom_of_screen(left, right)
   local top2 = Text.to2(Cursor1)
   top2.screen_pos = 1  -- start of screen line
 --?   print('cursor pos '..tostring(Cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')

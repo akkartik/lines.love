@@ -533,7 +533,7 @@ function App.keychord_pressed(chord, key)
       end
     end
     if Text.cursor_past_screen_bottom() then
-      Text.snap_cursor_to_bottom_of_screen()
+      Text.snap_cursor_to_bottom_of_screen(Margin_left, App.screen.height-Margin_right)
     end
     schedule_save()
     record_undo_event({before=before, after=snapshot(before_line, Cursor1.line)})
