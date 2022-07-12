@@ -519,9 +519,7 @@ function Text.word_left(left, right)
     Text.left(left, right)
     if Cursor1.pos == 1 then break end
     assert(Cursor1.pos > 1)
-    local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
-    assert(offset > 1)
-    if Lines[Cursor1.line].data:sub(offset-1,offset-1) == ' ' then
+    if Text.match(Lines[Cursor1.line].data, Cursor1.pos-1, '%s') then
       break
     end
   end
@@ -531,14 +529,22 @@ function Text.word_right(left, right)
   while true do
     Text.right_without_scroll()
     if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
-    local offset = Text.offset(Lines[Cursor1.line].data, Cursor1.pos)
-    if Lines[Cursor1.line].data:sub(offset,offset) == ' ' then  -- TODO: other space characters
+    if Text.match(Lines[Cursor1.line].data, Cursor1.pos, '%s') then
       break
     end
   end
   if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen(left, right)
   end
+end
+
+function Text.match(s, pos, pat)
+  local start_offset = Text.offset(s, pos)
+  assert(start_offset)
+  local end_offset = Text.offset(s, pos+1)
+  assert(end_offset > start_offset)
+  local curr = s:sub(start_offset, end_offset-1)
+  return curr:match(pat)
 end
 
 function Text.left(left, right)

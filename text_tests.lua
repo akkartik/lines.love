@@ -141,6 +141,17 @@ function test_skip_to_previous_word()
   check_eq(Cursor1.pos, 1, 'F - test_skip_to_previous_word')
 end
 
+function test_skip_past_tab_to_previous_word()
+  io.write('\ntest_skip_past_tab_to_previous_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def\tghi'}
+  Cursor1 = {line=1, pos=10}  -- within third word
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-left')
+  check_eq(Cursor1.pos, 9, 'F - test_skip_past_tab_to_previous_word')
+end
+
 function test_move_to_start_of_word_on_previous_line()
   io.write('\ntest_move_to_start_of_word_on_previous_line')
   App.screen.init{width=120, height=60}
@@ -173,6 +184,17 @@ function test_skip_to_next_word()
   App.draw()
   App.run_after_keychord('M-right')
   check_eq(Cursor1.pos, 8, 'F - test_skip_to_next_word')
+end
+
+function test_skip_past_tab_to_next_word()
+  io.write('\ntest_skip_past_tab_to_next_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc\tdef'}
+  Cursor1 = {line=1, pos=1}  -- at the space between words
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-right')
+  check_eq(Cursor1.pos, 4, 'F - test_skip_past_tab_to_next_word')
 end
 
 function test_move_past_end_of_word_on_next_line()
