@@ -9,7 +9,7 @@ require 'text_tests'
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
-function Text.draw(line, line_index, top, left, right)
+function Text.draw(State, line, line_index, top, left, right)
 --?   print('text.draw', line_index)
   App.color(Text_color)
   -- wrap long lines
@@ -28,13 +28,13 @@ function Text.draw(line, line_index, top, left, right)
     local frag_width = App.width(frag_text)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
---?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(Editor_state.screen_top1.line)..'; '..s(pos)..' vs '..s(Editor_state.screen_top1.pos)..'; bottom: '..s(Editor_state.screen_bottom1.line)..'/'..s(Editor_state.screen_bottom1.pos))
+--?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(State.screen_top1.line)..'; '..s(pos)..' vs '..s(State.screen_top1.pos)..'; bottom: '..s(State.screen_bottom1.line)..'/'..s(State.screen_bottom1.pos))
     if x + frag_width > right then
       assert(x > left)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
-      if Text.lt1(Editor_state.screen_top1, {line=line_index, pos=pos}) then
-        y = y + Editor_state.line_height
-        if y + Editor_state.line_height > App.screen.height then
+      if Text.lt1(State.screen_top1, {line=line_index, pos=pos}) then
+        y = y + State.line_height
+        if y + State.line_height > App.screen.height then
 --?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
           return y, screen_line_starting_pos
         end
@@ -43,10 +43,10 @@ function Text.draw(line, line_index, top, left, right)
       end
       x = left
     end
---?     print('checking to draw', pos, Editor_state.screen_top1.pos)
+--?     print('checking to draw', pos, State.screen_top1.pos)
     -- don't draw text above screen top
-    if Text.le1(Editor_state.screen_top1, {line=line_index, pos=pos}) then
-      if Editor_state.selection1.line then
+    if Text.le1(State.screen_top1, {line=line_index, pos=pos}) then
+      if State.selection1.line then
         local lo, hi = Text.clip_selection(line_index, pos, pos+frag_len, left, right)
         Text.draw_highlight(line, x,y, pos, lo,hi)
       end
@@ -54,25 +54,25 @@ function Text.draw(line, line_index, top, left, right)
       App.screen.draw(frag_text, x,y)
     end
     -- render cursor if necessary
-    if line_index == Editor_state.cursor1.line then
-      if pos <= Editor_state.cursor1.pos and pos + frag_len > Editor_state.cursor1.pos then
-        if Editor_state.search_term then
-          if Editor_state.lines[Editor_state.cursor1.line].data:sub(Editor_state.cursor1.pos, Editor_state.cursor1.pos+utf8.len(Editor_state.search_term)-1) == Editor_state.search_term then
-            local lo_px = Text.draw_highlight(line, x,y, pos, Editor_state.cursor1.pos, Editor_state.cursor1.pos+utf8.len(Editor_state.search_term))
+    if line_index == State.cursor1.line then
+      if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
+        if State.search_term then
+          if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
+            local lo_px = Text.draw_highlight(line, x,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
             App.color(Text_color)
-            love.graphics.print(Editor_state.search_term, x+lo_px,y)
+            love.graphics.print(State.search_term, x+lo_px,y)
           end
         else
-          Text.draw_cursor(x+Text.x(frag, Editor_state.cursor1.pos-pos+1), y)
+          Text.draw_cursor(State, x+Text.x(frag, State.cursor1.pos-pos+1), y)
         end
       end
     end
     x = x + frag_width
     pos = pos + frag_len
   end
-  if Editor_state.search_term == nil then
-    if line_index == Editor_state.cursor1.line and Editor_state.cursor1.pos == pos then
-      Text.draw_cursor(x, y)
+  if State.search_term == nil then
+    if line_index == State.cursor1.line and State.cursor1.pos == pos then
+      Text.draw_cursor(State, x, y)
     end
   end
   return y, screen_line_starting_pos
@@ -80,15 +80,15 @@ end
 -- manual tests:
 --  draw with small screen width of 100
 
-function Text.draw_cursor(x, y)
+function Text.draw_cursor(State, x, y)
   -- blink every 0.5s
   if math.floor(Cursor_time*2)%2 == 0 then
     App.color(Cursor_color)
-    love.graphics.rectangle('fill', x,y, 3,Editor_state.line_height)
+    love.graphics.rectangle('fill', x,y, 3,State.line_height)
     App.color(Text_color)
   end
-  Editor_state.cursor_x = x
-  Editor_state.cursor_y = y+Editor_state.line_height
+  State.cursor_x = x
+  State.cursor_y = y+State.line_height
 end
 
 function Text.compute_fragments(line, left, right)

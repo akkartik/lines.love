@@ -1,7 +1,7 @@
 -- helpers for the search bar (C-f)
 
-function Text.draw_search_bar()
-  local h = Editor_state.line_height+2
+function Text.draw_search_bar(State)
+  local h = State.line_height+2
   local y = App.screen.height-h
   love.graphics.setColor(0.9,0.9,0.9)
   love.graphics.rectangle('fill', 0, y-10, App.screen.width-1, h+8)
@@ -12,12 +12,12 @@ function Text.draw_search_bar()
   love.graphics.setColor(0.6,0.6,0.6)
   love.graphics.rectangle('line', 20, y-6, App.screen.width-40, h+2, 2,2)
   App.color(Text_color)
-  App.screen.print(Editor_state.search_term, 25,y-5)
+  App.screen.print(State.search_term, 25,y-5)
   App.color(Cursor_color)
-  if Editor_state.search_text == nil then
-    Editor_state.search_text = App.newText(love.graphics.getFont(), Editor_state.search_term)
+  if State.search_text == nil then
+    State.search_text = App.newText(love.graphics.getFont(), State.search_term)
   end
-  love.graphics.circle('fill', 25+App.width(Editor_state.search_text),y-5+h, 2)
+  love.graphics.circle('fill', 25+App.width(State.search_text),y-5+h, 2)
   App.color(Text_color)
 end
 

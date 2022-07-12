@@ -144,7 +144,7 @@ function edit.draw(State)
       })
       if State.search_term == nil then
         if line_index == State.cursor1.line then
-          Text.draw_cursor(State.margin_left, y)
+          Text.draw_cursor(State, State.margin_left, y)
         end
       end
       State.screen_bottom1.pos = State.screen_top1.pos
@@ -161,7 +161,7 @@ function edit.draw(State)
         line.startpos = State.screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, State.screen_bottom1.pos = Text.draw(line, line_index, line.starty, State.margin_left, App.screen.width-State.margin_right)
+      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty, State.margin_left, App.screen.width-State.margin_right)
       y = y + State.line_height
 --?       print('=> y', y)
     end
@@ -171,7 +171,7 @@ function edit.draw(State)
   end
 --?   print('screen bottom: '..tostring(State.screen_bottom1.pos)..' in '..tostring(State.lines[State.screen_bottom1.line].data))
   if State.search_term then
-    Text.draw_search_bar()
+    Text.draw_search_bar(State)
   end
 end
 
