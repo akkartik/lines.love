@@ -402,7 +402,7 @@ function edit.keychord_pressed(State, chord, key)
     local drawing_index, drawing = Drawing.current_drawing()
     if drawing_index then
       local before = snapshot(drawing_index)
-      Drawing.keychord_pressed(chord)
+      Drawing.keychord_pressed(State, chord)
       record_undo_event({before=before, after=snapshot(drawing_index)})
       schedule_save()
     end

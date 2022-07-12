@@ -372,11 +372,11 @@ function Drawing.mouse_released(x,y, button)
   end
 end
 
-function Drawing.keychord_pressed(chord)
+function Drawing.keychord_pressed(State, chord)
   if chord == 'C-p' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'freehand'
+    State.current_drawing_mode = 'freehand'
   elseif App.mouse_down(1) and chord == 'l' then
-    Editor_state.current_drawing_mode = 'line'
+    State.current_drawing_mode = 'line'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -387,9 +387,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'line'
+    State.current_drawing_mode = 'line'
   elseif App.mouse_down(1) and chord == 'm' then
-    Editor_state.current_drawing_mode = 'manhattan'
+    State.current_drawing_mode = 'manhattan'
     local drawing = Drawing.select_drawing_at_mouse()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -402,11 +402,11 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'manhattan'
+    State.current_drawing_mode = 'manhattan'
   elseif chord == 'C-g' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'polygon'
+    State.current_drawing_mode = 'polygon'
   elseif App.mouse_down(1) and chord == 'g' then
-    Editor_state.current_drawing_mode = 'polygon'
+    State.current_drawing_mode = 'polygon'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -421,9 +421,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'polygon'
   elseif chord == 'C-r' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'rectangle'
+    State.current_drawing_mode = 'rectangle'
   elseif App.mouse_down(1) and chord == 'r' then
-    Editor_state.current_drawing_mode = 'rectangle'
+    State.current_drawing_mode = 'rectangle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -438,9 +438,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'rectangle'
   elseif chord == 'C-s' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'square'
+    State.current_drawing_mode = 'square'
   elseif App.mouse_down(1) and chord == 's' then
-    Editor_state.current_drawing_mode = 'square'
+    State.current_drawing_mode = 'square'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -458,30 +458,30 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'square'
-  elseif App.mouse_down(1) and chord == 'p' and Editor_state.current_drawing_mode == 'polygon' then
+  elseif App.mouse_down(1) and chord == 'p' and State.current_drawing_mode == 'polygon' then
     local _,drawing = Drawing.current_drawing()
-    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-State.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
-  elseif App.mouse_down(1) and chord == 'p' and (Editor_state.current_drawing_mode == 'rectangle' or Editor_state.current_drawing_mode == 'square') then
+  elseif App.mouse_down(1) and chord == 'p' and (State.current_drawing_mode == 'rectangle' or State.current_drawing_mode == 'square') then
     local _,drawing = Drawing.current_drawing()
-    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-State.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     while #drawing.pending.vertices >= 2 do
       table.remove(drawing.pending.vertices)
     end
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-o' and not App.mouse_down(1) then
-    Editor_state.current_drawing_mode = 'circle'
-  elseif App.mouse_down(1) and chord == 'a' and Editor_state.current_drawing_mode == 'circle' then
+    State.current_drawing_mode = 'circle'
+  elseif App.mouse_down(1) and chord == 'a' and State.current_drawing_mode == 'circle' then
     local _,drawing = Drawing.current_drawing()
     drawing.pending.mode = 'arc'
-    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-State.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
   elseif App.mouse_down(1) and chord == 'o' then
-    Editor_state.current_drawing_mode = 'circle'
+    State.current_drawing_mode = 'circle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -494,26 +494,26 @@ function Drawing.keychord_pressed(chord)
   elseif chord == 'C-u' and not App.mouse_down(1) then
     local drawing_index,drawing,i,p = Drawing.select_point_at_mouse()
     if drawing then
-      if Editor_state.previous_drawing_mode == nil then
-        Editor_state.previous_drawing_mode = Editor_state.current_drawing_mode
+      if State.previous_drawing_mode == nil then
+        State.previous_drawing_mode = State.current_drawing_mode
       end
-      Editor_state.current_drawing_mode = 'move'
-      drawing.pending = {mode=Editor_state.current_drawing_mode, target_point=p, target_point_index=i}
-      Editor_state.lines.current_drawing_index = drawing_index
-      Editor_state.lines.current_drawing = drawing
+      State.current_drawing_mode = 'move'
+      drawing.pending = {mode=State.current_drawing_mode, target_point=p, target_point_index=i}
+      State.lines.current_drawing_index = drawing_index
+      State.lines.current_drawing = drawing
     end
   elseif chord == 'C-n' and not App.mouse_down(1) then
     local drawing_index,drawing,point_index,p = Drawing.select_point_at_mouse()
     if drawing then
-      if Editor_state.previous_drawing_mode == nil then
+      if State.previous_drawing_mode == nil then
         -- don't clobber
-        Editor_state.previous_drawing_mode = Editor_state.current_drawing_mode
+        State.previous_drawing_mode = State.current_drawing_mode
       end
-      Editor_state.current_drawing_mode = 'name'
+      State.current_drawing_mode = 'name'
       p.name = ''
-      drawing.pending = {mode=Editor_state.current_drawing_mode, target_point=point_index}
-      Editor_state.lines.current_drawing_index = drawing_index
-      Editor_state.lines.current_drawing = drawing
+      drawing.pending = {mode=State.current_drawing_mode, target_point=point_index}
+      State.lines.current_drawing_index = drawing_index
+      State.lines.current_drawing = drawing
     end
   elseif chord == 'C-d' and not App.mouse_down(1) then
     local _,drawing,i,p = Drawing.select_point_at_mouse()
