@@ -14,7 +14,7 @@ require 'icons'
 
 require 'main_tests'
 
--- run in both tests and a real run
+-- called both in tests and real run
 function App.initialize_globals()
 -- a line is either text or a drawing
 -- a text is a table with:
@@ -103,6 +103,7 @@ Cursor_time = 0
 
 end  -- App.initialize_globals
 
+-- called only for real run
 function App.initialize(arg)
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
