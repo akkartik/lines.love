@@ -1,7 +1,5 @@
 -- primitives for editing drawings
 Drawing = {}
-geom = require 'geom'
-
 require 'drawing_tests'
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
@@ -719,5 +717,3 @@ function table.find(h, x)
     end
   end
 end
-
-return Drawing

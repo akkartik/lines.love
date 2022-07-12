@@ -1,4 +1,4 @@
-local utf8 = require 'utf8'
+utf8 = require 'utf8'
 
 require 'app'
 require 'test'
@@ -6,9 +6,9 @@ require 'test'
 require 'keychord'
 require 'file'
 require 'button'
-local Text = require 'text'
-local Drawing = require 'drawing'
-local geom = require 'geom'
+require 'text'
+require 'drawing'
+require 'geom'
 require 'help'
 require 'icons'
 

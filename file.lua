@@ -1,6 +1,4 @@
 -- primitives for saving to file and loading from file
-Drawing = require 'drawing'
-
 function load_from_disk(filename)
   local infile = App.open_for_reading(filename)
   local result = load_from_file(infile)

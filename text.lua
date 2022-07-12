@@ -1,8 +1,6 @@
 -- text editor, particularly text drawing, horizontal wrap, vertical scrolling
 Text = {}
 
-local utf8 = require 'utf8'
-
 require 'search'
 require 'select'
 require 'undo'
@@ -1010,5 +1008,3 @@ function Text.clear_cache(line)
   line.fragments = nil
   line.screen_line_starting_pos = nil
 end
-
-return Text

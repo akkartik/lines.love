@@ -1,7 +1,5 @@
 -- helpers for selecting portions of text
 
-local utf8 = require 'utf8'
-
 -- Return any intersection of the region from Selection1 to Cursor1 (or
 -- current mouse, if mouse is pressed; or recent mouse if mouse is pressed and
 -- currently over a drawing) with the region between {line=line_index, pos=apos}
