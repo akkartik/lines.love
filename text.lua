@@ -515,9 +515,22 @@ function Text.end_of_line(left, right)
 end
 
 function Text.word_left(left, right)
+  -- skip some whitespace
+  while true do
+    if Cursor1.pos == 1 then
+      break
+    end
+    if Text.match(Lines[Cursor1.line].data, Cursor1.pos-1, '%S') then
+      break
+    end
+    Text.left(left, right)
+  end
+  -- skip some non-whitespace
   while true do
     Text.left(left, right)
-    if Cursor1.pos == 1 then break end
+    if Cursor1.pos == 1 then
+      break
+    end
     assert(Cursor1.pos > 1)
     if Text.match(Lines[Cursor1.line].data, Cursor1.pos-1, '%s') then
       break
@@ -526,9 +539,21 @@ function Text.word_left(left, right)
 end
 
 function Text.word_right(left, right)
+  -- skip some whitespace
+  while true do
+    if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then
+      break
+    end
+    if Text.match(Lines[Cursor1.line].data, Cursor1.pos, '%S') then
+      break
+    end
+    Text.right_without_scroll()
+  end
   while true do
     Text.right_without_scroll()
-    if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then break end
+    if Cursor1.pos > utf8.len(Lines[Cursor1.line].data) then
+      break
+    end
     if Text.match(Lines[Cursor1.line].data, Cursor1.pos, '%s') then
       break
     end
