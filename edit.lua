@@ -228,7 +228,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         State.lines.current_drawing_index = line_index
         State.lines.current_drawing = line
         Drawing.before = snapshot(line_index)
-        Drawing.mouse_pressed(line, x,y, mouse_button)
+        Drawing.mouse_pressed(State, line, x,y, mouse_button)
         break
       end
     end

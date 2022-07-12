@@ -207,24 +207,24 @@ function Drawing.in_drawing(drawing, x,y)
   return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Editor_state.margin_left and x < App.screen.width-Editor_state.margin_right
 end
 
-function Drawing.mouse_pressed(drawing, x,y, button)
-  if Editor_state.current_drawing_mode == 'freehand' then
-    drawing.pending = {mode=Editor_state.current_drawing_mode, points={{x=Drawing.coord(x-Editor_state.margin_left), y=Drawing.coord(y-drawing.y)}}}
-  elseif Editor_state.current_drawing_mode == 'line' or Editor_state.current_drawing_mode == 'manhattan' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Editor_state.current_drawing_mode, p1=j}
-  elseif Editor_state.current_drawing_mode == 'polygon' or Editor_state.current_drawing_mode == 'rectangle' or Editor_state.current_drawing_mode == 'square' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Editor_state.current_drawing_mode, vertices={j}}
-  elseif Editor_state.current_drawing_mode == 'circle' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Editor_state.current_drawing_mode, center=j}
-  elseif Editor_state.current_drawing_mode == 'move' then
+function Drawing.mouse_pressed(State, drawing, x,y, button)
+  if State.current_drawing_mode == 'freehand' then
+    drawing.pending = {mode=State.current_drawing_mode, points={{x=Drawing.coord(x-State.margin_left), y=Drawing.coord(y-drawing.y)}}}
+  elseif State.current_drawing_mode == 'line' or State.current_drawing_mode == 'manhattan' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=State.current_drawing_mode, p1=j}
+  elseif State.current_drawing_mode == 'polygon' or State.current_drawing_mode == 'rectangle' or State.current_drawing_mode == 'square' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=State.current_drawing_mode, vertices={j}}
+  elseif State.current_drawing_mode == 'circle' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=State.current_drawing_mode, center=j}
+  elseif State.current_drawing_mode == 'move' then
     -- all the action is in mouse_released
-  elseif Editor_state.current_drawing_mode == 'name' then
+  elseif State.current_drawing_mode == 'name' then
     -- nothing
   else
-    print(Editor_state.current_drawing_mode)
+    print(State.current_drawing_mode)
     assert(false)
   end
 end
