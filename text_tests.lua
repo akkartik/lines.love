@@ -62,6 +62,131 @@ function test_press_ctrl()
   App.run_after_keychord('C-m')
 end
 
+function test_move_left()
+  io.write('\ntest_move_left')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'a'}
+  Cursor1 = {line=1, pos=2}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('left')
+  check_eq(Cursor1.pos, 1, 'F - test_move_left')
+end
+
+function test_move_right()
+  io.write('\ntest_move_right')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'a'}
+  Cursor1 = {line=1, pos=1}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('right')
+  check_eq(Cursor1.pos, 2, 'F - test_move_right')
+end
+
+function test_move_left_to_previous_line()
+  io.write('\ntest_move_left_to_previous_line')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def'}
+  Cursor1 = {line=2, pos=1}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('left')
+  check_eq(Cursor1.line, 1, 'F - test_move_left_to_previous_line/line')
+  check_eq(Cursor1.pos, 4, 'F - test_move_left_to_previous_line/pos')  -- past end of line
+end
+
+function test_move_right_to_next_line()
+  io.write('\ntest_move_right_to_next_line')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc', 'def'}
+  Cursor1 = {line=1, pos=4}  -- past end of line
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('right')
+  check_eq(Cursor1.line, 2, 'F - test_move_right_to_next_line/line')
+  check_eq(Cursor1.pos, 1, 'F - test_move_right_to_next_line/pos')
+end
+
+function test_move_to_start_of_word()
+  io.write('\ntest_move_to_start_of_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc'}
+  Cursor1 = {line=1, pos=3}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-left')
+  check_eq(Cursor1.pos, 1, 'F - test_move_to_start_of_word')
+end
+
+function test_move_to_start_of_previous_word()
+  io.write('\ntest_move_to_start_of_previous_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def'}
+  Cursor1 = {line=1, pos=4}  -- at the space between words
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-left')
+  check_eq(Cursor1.pos, 1, 'F - test_move_to_start_of_previous_word')
+end
+
+function test_skip_to_previous_word()
+  io.write('\ntest_skip_to_previous_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def'}
+  Cursor1 = {line=1, pos=5}  -- at the start of second word
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-left')
+  check_eq(Cursor1.pos, 1, 'F - test_skip_to_previous_word')
+end
+
+function test_move_to_start_of_word_on_previous_line()
+  io.write('\ntest_move_to_start_of_word_on_previous_line')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def', 'ghi'}
+  Cursor1 = {line=2, pos=1}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-left')
+  check_eq(Cursor1.line, 1, 'F - test_move_to_start_of_word_on_previous_line/line')
+  check_eq(Cursor1.pos, 5, 'F - test_move_to_start_of_word_on_previous_line/pos')
+end
+
+function test_move_past_end_of_word()
+  io.write('\ntest_move_past_end_of_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def'}
+  Cursor1 = {line=1, pos=1}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-right')
+  check_eq(Cursor1.pos, 4, 'F - test_move_past_end_of_word')
+end
+
+function test_skip_to_next_word()
+  io.write('\ntest_skip_to_next_word')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def'}
+  Cursor1 = {line=1, pos=4}  -- at the space between words
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-right')
+  check_eq(Cursor1.pos, 8, 'F - test_skip_to_next_word')
+end
+
+function test_move_past_end_of_word_on_next_line()
+  io.write('\ntest_move_past_end_of_word_on_next_line')
+  App.screen.init{width=120, height=60}
+  Lines = load_array{'abc def', 'ghi'}
+  Cursor1 = {line=1, pos=8}
+  Margin_right = 0; Margin_width = Margin_left
+  App.draw()
+  App.run_after_keychord('M-right')
+  check_eq(Cursor1.line, 2, 'F - test_move_past_end_of_word_on_next_line/line')
+  check_eq(Cursor1.pos, 4, 'F - test_move_past_end_of_word_on_next_line/pos')
+end
+
 function test_click_with_mouse()
   io.write('\ntest_click_with_mouse')
   -- display two lines with cursor on one of them
