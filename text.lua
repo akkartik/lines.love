@@ -134,18 +134,18 @@ function Text.compute_fragments(line, left, right)
   end
 end
 
-function Text.textinput(t)
+function Text.textinput(State, t)
   if App.mouse_down(1) then return end
   if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
-  local before = snapshot(Editor_state.cursor1.line)
---?   print(Editor_state.screen_top1.line, Editor_state.screen_top1.pos, Editor_state.cursor1.line, Editor_state.cursor1.pos, Editor_state.screen_bottom1.line, Editor_state.screen_bottom1.pos)
+  local before = snapshot(State.cursor1.line)
+--?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   Text.insert_at_cursor(t)
-  if Editor_state.cursor_y >= App.screen.height - Editor_state.line_height then
-    Text.populate_screen_line_starting_pos(Editor_state.lines[Editor_state.cursor1.line], Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Text.snap_cursor_to_bottom_of_screen(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
---?     print('=>', Editor_state.screen_top1.line, Editor_state.screen_top1.pos, Editor_state.cursor1.line, Editor_state.cursor1.pos, Editor_state.screen_bottom1.line, Editor_state.screen_bottom1.pos)
+  if State.cursor_y >= App.screen.height - State.line_height then
+    Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.margin_left, App.screen.width-State.margin_right)
+    Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
+--?     print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   end
-  record_undo_event({before=before, after=snapshot(Editor_state.cursor1.line)})
+  record_undo_event({before=before, after=snapshot(State.cursor1.line)})
 end
 
 function Text.insert_at_cursor(t)

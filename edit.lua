@@ -287,7 +287,7 @@ function edit.textinput(State, t)
     p.name = p.name..t
     record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
   else
-    Text.textinput(t)
+    Text.textinput(State, t)
   end
   schedule_save(State)
 end
