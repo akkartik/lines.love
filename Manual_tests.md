@@ -24,6 +24,10 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 * Like any high-level language, it's easy to accidentally alias two non-scalar
   variables. I wish there was a way to require copy when assigning.
 
+* My test harness automatically runs `test_*` methods -- but only at the
+  top-level. I wish there was a way to raise warnings if someone defines such
+  a function inside a dict somewhere.
+
 ### Todo list
 
 * Initializing settings:
