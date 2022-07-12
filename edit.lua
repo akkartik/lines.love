@@ -386,9 +386,9 @@ function edit.keychord_pressed(State, chord, key)
     for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
       if c == '\n' then
-        Text.insert_return()
+        Text.insert_return(State)
       else
-        Text.insert_at_cursor(c)
+        Text.insert_at_cursor(State, c)
       end
     end
     if Text.cursor_past_screen_bottom() then
