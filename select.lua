@@ -110,9 +110,9 @@ end
 function Text.delete_selection(State, left, right)
   if State.selection1.line == nil then return end
   local minl,maxl = minmax(State.selection1.line, State.cursor1.line)
-  local before = snapshot(minl, maxl)
+  local before = snapshot(State, minl, maxl)
   Text.delete_selection_without_undo(State, left, right)
-  record_undo_event({before=before, after=snapshot(State.cursor1.line)})
+  record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
 end
 
 function Text.delete_selection_without_undo(State, left, right)

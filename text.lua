@@ -137,7 +137,7 @@ end
 function Text.textinput(State, t)
   if App.mouse_down(1) then return end
   if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
-  local before = snapshot(State.cursor1.line)
+  local before = snapshot(State, State.cursor1.line)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   Text.insert_at_cursor(State, t)
   if State.cursor_y >= App.screen.height - State.line_height then
@@ -145,7 +145,7 @@ function Text.textinput(State, t)
     Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
 --?     print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   end
-  record_undo_event({before=before, after=snapshot(State.cursor1.line)})
+  record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
 end
 
 function Text.insert_at_cursor(State, t)
@@ -161,16 +161,16 @@ function Text.keychord_pressed(State, chord)
   --== shortcuts that mutate text
   if chord == 'return' then
     local before_line = State.cursor1.line
-    local before = snapshot(before_line)
+    local before = snapshot(State, before_line)
     Text.insert_return(State)
     State.selection1 = {}
     if (State.cursor_y + State.line_height) > App.screen.height then
       Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
     end
     schedule_save(State)
-    record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
+    record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
   elseif chord == 'tab' then
-    local before = snapshot(State.cursor1.line)
+    local before = snapshot(State, State.cursor1.line)
 --?     print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     Text.insert_at_cursor(State, '\t')
     if State.cursor_y >= App.screen.height - State.line_height then
@@ -179,7 +179,7 @@ function Text.keychord_pressed(State, chord)
 --?       print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     end
     schedule_save(State)
-    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
+    record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'backspace' then
     if State.selection1.line then
       Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
@@ -188,7 +188,7 @@ function Text.keychord_pressed(State, chord)
     end
     local before
     if State.cursor1.pos > 1 then
-      before = snapshot(State.cursor1.line)
+      before = snapshot(State, State.cursor1.line)
       local byte_start = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos-1)
       local byte_end = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
       if byte_start then
@@ -200,7 +200,7 @@ function Text.keychord_pressed(State, chord)
         State.cursor1.pos = State.cursor1.pos-1
       end
     elseif State.cursor1.line > 1 then
-      before = snapshot(State.cursor1.line-1, State.cursor1.line)
+      before = snapshot(State, State.cursor1.line-1, State.cursor1.line)
       if State.lines[State.cursor1.line-1].mode == 'drawing' then
         table.remove(State.lines, State.cursor1.line-1)
       else
@@ -220,7 +220,7 @@ function Text.keychord_pressed(State, chord)
     Text.clear_cache(State.lines[State.cursor1.line])
     assert(Text.le1(State.screen_top1, State.cursor1))
     schedule_save(State)
-    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
+    record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'delete' then
     if State.selection1.line then
       Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
@@ -229,9 +229,9 @@ function Text.keychord_pressed(State, chord)
     end
     local before
     if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
-      before = snapshot(State.cursor1.line)
+      before = snapshot(State, State.cursor1.line)
     else
-      before = snapshot(State.cursor1.line, State.cursor1.line+1)
+      before = snapshot(State, State.cursor1.line, State.cursor1.line+1)
     end
     if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
       local byte_start = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
@@ -255,7 +255,7 @@ function Text.keychord_pressed(State, chord)
     end
     Text.clear_cache(State.lines[State.cursor1.line])
     schedule_save(State)
-    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
+    record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
     Text.left(State, State.margin_left, App.screen.width-State.margin_right)

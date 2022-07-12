@@ -133,13 +133,13 @@ function edit.draw(State)
       button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
         icon = icon.insert_drawing,
         onpress1 = function()
-                     Drawing.before = snapshot(line_index-1, line_index)
+                     Drawing.before = snapshot(State, line_index-1, line_index)
                      table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                      if State.cursor1.line >= line_index then
                        State.cursor1.line = State.cursor1.line+1
                      end
                      schedule_save(State)
-                     record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
+                     record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
                    end
       })
       if State.search_term == nil then
@@ -227,7 +227,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
       if Drawing.in_drawing(line, x, y) then
         State.lines.current_drawing_index = line_index
         State.lines.current_drawing = line
-        Drawing.before = snapshot(line_index)
+        Drawing.before = snapshot(State, line_index)
         Drawing.mouse_pressed(State, line, x,y, mouse_button)
         break
       end
@@ -242,7 +242,7 @@ function edit.mouse_released(State, x,y, mouse_button)
     Drawing.mouse_released(State, x,y, mouse_button)
     schedule_save(State)
     if Drawing.before then
-      record_undo_event({before=Drawing.before, after=snapshot(State.lines.current_drawing_index)})
+      record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
       Drawing.before = nil
     end
   else
@@ -281,11 +281,11 @@ function edit.textinput(State, t)
     State.search_text = nil
     Text.search_next()
   elseif State.current_drawing_mode == 'name' then
-    local before = snapshot(State.lines.current_drawing_index)
+    local before = snapshot(State, State.lines.current_drawing_index)
     local drawing = State.lines.current_drawing
     local p = drawing.points[drawing.pending.target_point]
     p.name = p.name..t
-    record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
+    record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
   else
     Text.textinput(State, t)
   end
@@ -340,7 +340,7 @@ function edit.keychord_pressed(State, chord, key)
     Text.redraw_all()
   elseif chord == 'C-z' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    local event = undo_event()
+    local event = undo_event(State)
     if event then
       local src = event.before
       State.screen_top1 = deepcopy(src.screen_top)
@@ -352,7 +352,7 @@ function edit.keychord_pressed(State, chord, key)
     end
   elseif chord == 'C-y' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    local event = redo_event()
+    local event = redo_event(State)
     if event then
       local src = event.after
       State.screen_top1 = deepcopy(src.screen_top)
@@ -381,7 +381,7 @@ function edit.keychord_pressed(State, chord, key)
     -- We don't have a good sense of when to scroll, so we'll be conservative
     -- and sometimes scroll when we didn't quite need to.
     local before_line = State.cursor1.line
-    local before = snapshot(before_line)
+    local before = snapshot(State, before_line)
     local clipboard_data = App.getClipboardText()
     for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
@@ -395,15 +395,15 @@ function edit.keychord_pressed(State, chord, key)
       Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.height-State.margin_right)
     end
     schedule_save(State)
-    record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
+    record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
     local drawing_index, drawing = Drawing.current_drawing()
     if drawing_index then
-      local before = snapshot(drawing_index)
+      local before = snapshot(State, drawing_index)
       Drawing.keychord_pressed(State, chord)
-      record_undo_event({before=before, after=snapshot(drawing_index)})
+      record_undo_event(State, {before=before, after=snapshot(State, drawing_index)})
       schedule_save(State)
     end
   elseif chord == 'escape' and not App.mouse_down(1) then
@@ -417,18 +417,18 @@ function edit.keychord_pressed(State, chord, key)
       State.current_drawing_mode = State.previous_drawing_mode
       State.previous_drawing_mode = nil
     else
-      local before = snapshot(State.lines.current_drawing_index)
+      local before = snapshot(State, State.lines.current_drawing_index)
       local drawing = State.lines.current_drawing
       local p = drawing.points[drawing.pending.target_point]
       if chord == 'escape' then
         p.name = nil
-        record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
+        record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
         local byte_offset = Text.offset(p.name, len-1)
         if len == 1 then byte_offset = 0 end
         p.name = string.sub(p.name, 1, byte_offset)
-        record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
+        record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
       end
     end
     schedule_save(State)
