@@ -14,7 +14,13 @@ Editor_state = {}
 
 -- called both in tests and real run
 function App.initialize_globals()
-  return edit.initialize_globals()
+  edit.initialize_globals()
+
+  -- resize
+  Last_resize_time = nil
+
+  -- blinking cursor
+  Cursor_time = 0
 end
 
 -- called only for real run
@@ -144,6 +150,15 @@ function App.draw()
 end
 
 function App.update(dt)
+  Cursor_time = Cursor_time + dt
+  -- some hysteresis while resizing
+  if Last_resize_time then
+    if App.getTime() - Last_resize_time < 0.1 then
+      return
+    else
+      Last_resize_time = nil
+    end
+  end
   edit.update(dt)
 end
 
@@ -165,21 +180,26 @@ function love.quit()
 end
 
 function App.mousepressed(x,y, mouse_button)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.mouse_pressed(x,y, mouse_button)
 end
 
 function App.mousereleased(x,y, mouse_button)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.mouse_released(x,y, mouse_button)
 end
 
 function App.textinput(t)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.textinput(t)
 end
 
 function App.keychord_pressed(chord, key)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.keychord_pressed(chord, key)
 end
 
 function App.keyreleased(key, scancode)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.key_released(key, scancode)
 end
