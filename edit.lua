@@ -90,7 +90,7 @@ function edit.initialize_state()
 
     margin_top = 15,
     margin_left = 25,
-    margin_right = 25,
+    margin_right = 0,
     margin_width = nil,
 
     drawing_padding_top = 10,

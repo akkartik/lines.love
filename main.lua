@@ -60,6 +60,9 @@ function App.initialize(arg)
   end
   love.window.setTitle('lines.love - '..Editor_state.filename)
 
+  Editor_state.margin_right = 25
+  Editor_state.margin_width = Editor_state.margin_left + Editor_state.margin_right
+
   if #arg > 1 then
     print('ignoring commandline args after '..arg[1])
   end
