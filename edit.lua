@@ -299,7 +299,7 @@ function edit.keychord_pressed(State, chord, key)
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
       chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
-    Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
+    Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
   end
   if State.search_term then
     if chord == 'escape' then
@@ -365,13 +365,13 @@ function edit.keychord_pressed(State, chord, key)
   -- clipboard
   elseif chord == 'C-c' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    local s = Text.selection()
+    local s = Text.selection(State)
     if s then
       App.setClipboardText(s)
     end
   elseif chord == 'C-x' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    local s = Text.cut_selection(State.margin_left, App.screen.width-State.margin_right)
+    local s = Text.cut_selection(State, State.margin_left, App.screen.width-State.margin_right)
     if s then
       App.setClipboardText(s)
     end
