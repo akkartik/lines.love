@@ -43,7 +43,7 @@ function test_drop_file_saves_previous()
   -- initially editing a file called foo that hasn't been saved to filesystem yet
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.filename = 'foo'
-  schedule_save()
+  schedule_save(Editor_state)
   -- now drag a new file bar from the filesystem
   App.filesystem['bar'] = 'abc\ndef\nghi\n'
   local fake_dropped_file = {

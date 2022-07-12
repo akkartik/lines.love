@@ -138,7 +138,7 @@ function edit.draw(State)
                      if State.cursor1.line >= line_index then
                        State.cursor1.line = State.cursor1.line+1
                      end
-                     schedule_save()
+                     schedule_save(State)
                      record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
                    end
       })
@@ -183,9 +183,9 @@ function edit.update(State, dt)
   end
 end
 
-function schedule_save()
-  if Editor_state.next_save == nil then
-    Editor_state.next_save = App.getTime() + 3  -- short enough that you're likely to still remember what you did
+function schedule_save(State)
+  if State.next_save == nil then
+    State.next_save = App.getTime() + 3  -- short enough that you're likely to still remember what you did
   end
 end
 
@@ -240,7 +240,7 @@ function edit.mouse_released(State, x,y, mouse_button)
 --?   print('release')
   if State.lines.current_drawing then
     Drawing.mouse_released(State, x,y, mouse_button)
-    schedule_save()
+    schedule_save(State)
     if Drawing.before then
       record_undo_event({before=Drawing.before, after=snapshot(State.lines.current_drawing_index)})
       Drawing.before = nil
@@ -289,7 +289,7 @@ function edit.textinput(State, t)
   else
     Text.textinput(t)
   end
-  schedule_save()
+  schedule_save(State)
 end
 
 function edit.keychord_pressed(State, chord, key)
@@ -348,7 +348,7 @@ function edit.keychord_pressed(State, chord, key)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.after, event.before)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      schedule_save()
+      schedule_save(State)
     end
   elseif chord == 'C-y' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
@@ -360,7 +360,7 @@ function edit.keychord_pressed(State, chord, key)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.before, event.after)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      schedule_save()
+      schedule_save(State)
     end
   -- clipboard
   elseif chord == 'C-c' then
@@ -375,7 +375,7 @@ function edit.keychord_pressed(State, chord, key)
     if s then
       App.setClipboardText(s)
     end
-    schedule_save()
+    schedule_save(State)
   elseif chord == 'C-v' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
@@ -394,7 +394,7 @@ function edit.keychord_pressed(State, chord, key)
     if Text.cursor_past_screen_bottom() then
       Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.height-State.margin_right)
     end
-    schedule_save()
+    schedule_save(State)
     record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
@@ -404,7 +404,7 @@ function edit.keychord_pressed(State, chord, key)
       local before = snapshot(drawing_index)
       Drawing.keychord_pressed(State, chord)
       record_undo_event({before=before, after=snapshot(drawing_index)})
-      schedule_save()
+      schedule_save(State)
     end
   elseif chord == 'escape' and not App.mouse_down(1) then
     for _,line in ipairs(State.lines) do
@@ -431,7 +431,7 @@ function edit.keychord_pressed(State, chord, key)
         record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
       end
     end
-    schedule_save()
+    schedule_save(State)
   else
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(State, chord)

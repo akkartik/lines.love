@@ -167,7 +167,7 @@ function Text.keychord_pressed(State, chord)
     if (State.cursor_y + State.line_height) > App.screen.height then
       Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
     end
-    schedule_save()
+    schedule_save(State)
     record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
   elseif chord == 'tab' then
     local before = snapshot(State.cursor1.line)
@@ -178,12 +178,12 @@ function Text.keychord_pressed(State, chord)
       Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
 --?       print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     end
-    schedule_save()
+    schedule_save(State)
     record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   elseif chord == 'backspace' then
     if State.selection1.line then
       Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
-      schedule_save()
+      schedule_save(State)
       return
     end
     local before
@@ -219,12 +219,12 @@ function Text.keychord_pressed(State, chord)
     end
     Text.clear_cache(State.lines[State.cursor1.line])
     assert(Text.le1(State.screen_top1, State.cursor1))
-    schedule_save()
+    schedule_save(State)
     record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   elseif chord == 'delete' then
     if State.selection1.line then
       Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
-      schedule_save()
+      schedule_save(State)
       return
     end
     local before
@@ -254,7 +254,7 @@ function Text.keychord_pressed(State, chord)
       end
     end
     Text.clear_cache(State.lines[State.cursor1.line])
-    schedule_save()
+    schedule_save(State)
     record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
