@@ -152,7 +152,7 @@ function edit.draw(State)
     elseif line.mode == 'drawing' then
       y = y+State.drawing_padding_top
       line.y = y
-      Drawing.draw(line)
+      Drawing.draw(State, line)
       y = y + Drawing.pixels(line.h) + State.drawing_padding_bottom
     else
       line.starty = y

@@ -4,15 +4,15 @@ require 'drawing_tests'
 
 -- All drawings span 100% of some conceptual 'page width' and divide it up
 -- into 256 parts.
-function Drawing.draw(line)
+function Drawing.draw(State, line)
   local pmx,pmy = App.mouse_x(), App.mouse_y()
-  if pmx < App.screen.width-Editor_state.margin_right and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
+  if pmx < App.screen.width-State.margin_right and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     App.color(Icon_color)
-    love.graphics.rectangle('line', Editor_state.margin_left,line.y, App.screen.width-Editor_state.margin_width,Drawing.pixels(line.h))
-    if icon[Editor_state.current_drawing_mode] then
-      icon[Editor_state.current_drawing_mode](App.screen.width-Editor_state.margin_right-22, line.y+4)
+    love.graphics.rectangle('line', State.margin_left,line.y, App.screen.width-State.margin_width,Drawing.pixels(line.h))
+    if icon[State.current_drawing_mode] then
+      icon[State.current_drawing_mode](App.screen.width-State.margin_right-22, line.y+4)
     else
-      icon[Editor_state.previous_drawing_mode](App.screen.width-Editor_state.margin_right-22, line.y+4)
+      icon[State.previous_drawing_mode](App.screen.width-State.margin_right-22, line.y+4)
     end
 
     if App.mouse_down(1) and love.keyboard.isDown('h') then
@@ -26,7 +26,7 @@ function Drawing.draw(line)
     return
   end
 
-  local mx,my = Drawing.coord(pmx-Editor_state.margin_left), Drawing.coord(pmy-line.y)
+  local mx,my = Drawing.coord(pmx-State.margin_left), Drawing.coord(pmy-line.y)
 
   for _,shape in ipairs(line.shapes) do
     assert(shape)
@@ -35,38 +35,38 @@ function Drawing.draw(line)
     else
       App.color(Stroke_color)
     end
-    Drawing.draw_shape(Editor_state.margin_left,line.y, line, shape)
+    Drawing.draw_shape(State.margin_left,line.y, line, shape)
   end
   for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my) then
         App.color(Focus_stroke_color)
-        love.graphics.circle('line', Drawing.pixels(p.x)+Editor_state.margin_left,Drawing.pixels(p.y)+line.y, 4)
+        love.graphics.circle('line', Drawing.pixels(p.x)+State.margin_left,Drawing.pixels(p.y)+line.y, 4)
       else
         App.color(Stroke_color)
-        love.graphics.circle('fill', Drawing.pixels(p.x)+Editor_state.margin_left,Drawing.pixels(p.y)+line.y, 2)
+        love.graphics.circle('fill', Drawing.pixels(p.x)+State.margin_left,Drawing.pixels(p.y)+line.y, 2)
       end
       if p.name then
         -- TODO: clip
-        local x,y = Drawing.pixels(p.x)+Editor_state.margin_left+5, Drawing.pixels(p.y)+line.y+5
+        local x,y = Drawing.pixels(p.x)+State.margin_left+5, Drawing.pixels(p.y)+line.y+5
         love.graphics.print(p.name, x,y)
-        if Editor_state.current_drawing_mode == 'name' and i == line.pending.target_point then
+        if State.current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
           App.color(Current_name_background_color)
           local name_text
           -- TODO: avoid computing name width on every repaint
           if p.name == '' then
-            name_text = Editor_state.em
+            name_text = State.em
           else
             name_text = App.newText(love.graphics.getFont(), p.name)
           end
-          love.graphics.rectangle('fill', x,y, App.width(name_text), Editor_state.line_height)
+          love.graphics.rectangle('fill', x,y, App.width(name_text), State.line_height)
         end
       end
     end
   end
   App.color(Current_stroke_color)
-  Drawing.draw_pending_shape(Editor_state.margin_left,line.y, line)
+  Drawing.draw_pending_shape(State.margin_left,line.y, line)
 end
 
 function Drawing.draw_shape(left,top, drawing, shape)
