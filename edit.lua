@@ -176,7 +176,7 @@ function edit.draw(State)
 end
 
 function edit.update(State, dt)
-  Drawing.update(dt)
+  Drawing.update(State, dt)
   if State.next_save and State.next_save < App.getTime() then
     save_to_disk(State.lines, State.filename)
     State.next_save = nil

@@ -230,25 +230,25 @@ function Drawing.mouse_pressed(State, drawing, x,y, button)
 end
 
 -- a couple of operations on drawings need to constantly check the state of the mouse
-function Drawing.update()
-  if Editor_state.lines.current_drawing == nil then return end
-  local drawing = Editor_state.lines.current_drawing
+function Drawing.update(State)
+  if State.lines.current_drawing == nil then return end
+  local drawing = State.lines.current_drawing
   assert(drawing.mode == 'drawing')
   local x, y = App.mouse_x(), App.mouse_y()
   if App.mouse_down(1) then
     if Drawing.in_drawing(drawing, x,y) then
       if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-Editor_state.margin_left), y=Drawing.coord(App.mouse_y()-drawing.y)})
+        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-State.margin_left), y=Drawing.coord(App.mouse_y()-drawing.y)})
       elseif drawing.pending.mode == 'move' then
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         drawing.pending.target_point.x = mx
         drawing.pending.target_point.y = my
         Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
       end
     end
-  elseif Editor_state.current_drawing_mode == 'move' then
+  elseif State.current_drawing_mode == 'move' then
     if Drawing.in_drawing(drawing, x, y) then
-      local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+      local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
       Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
