@@ -363,20 +363,20 @@ function App.mousepressed(x,y, mouse_button)
         Lines.current_drawing_index = line_index
         Lines.current_drawing = line
         Drawing.before = snapshot(line_index)
-        Drawing.mouse_pressed(line, x,y, button)
+        Drawing.mouse_pressed(line, x,y, mouse_button)
         break
       end
     end
   end
 end
 
-function App.mousereleased(x,y, button)
+function App.mousereleased(x,y, mouse_button)
   if Search_term then return end
 --?   print('release')
   -- ensure cursor is visible immediately after it moves
   Cursor_time = 0
   if Lines.current_drawing then
-    Drawing.mouse_released(x,y, button)
+    Drawing.mouse_released(x,y, mouse_button)
     schedule_save()
     if Drawing.before then
       record_undo_event({before=Drawing.before, after=snapshot(Lines.current_drawing_index)})
