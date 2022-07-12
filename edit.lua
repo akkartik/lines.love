@@ -114,18 +114,18 @@ function edit.initialize_state()
   return result
 end  -- App.initialize_state
 
-function edit.draw()
+function edit.draw(State)
   App.color(Text_color)
---?   print(Editor_state.screen_top1.line, Editor_state.screen_top1.pos, Editor_state.cursor1.line, Editor_state.cursor1.pos)
-  assert(Text.le1(Editor_state.screen_top1, Editor_state.cursor1))
-  Editor_state.cursor_y = -1
-  local y = Editor_state.margin_top
+--?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
+  assert(Text.le1(State.screen_top1, State.cursor1))
+  State.cursor_y = -1
+  local y = State.margin_top
 --?   print('== draw')
-  for line_index = Editor_state.screen_top1.line,#Editor_state.lines do
-    local line = Editor_state.lines[line_index]
+  for line_index = State.screen_top1.line,#State.lines do
+    local line = State.lines[line_index]
 --?     print('draw:', y, line_index, line)
-    if y + Editor_state.line_height > App.screen.height then break end
-    Editor_state.screen_bottom1.line = line_index
+    if y + State.line_height > App.screen.height then break end
+    State.screen_bottom1.line = line_index
     if line.mode == 'text' and line.data == '' then
       line.starty = y
       line.startpos = 1
@@ -134,52 +134,52 @@ function edit.draw()
         icon = icon.insert_drawing,
         onpress1 = function()
                      Drawing.before = snapshot(line_index-1, line_index)
-                     table.insert(Editor_state.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                     if Editor_state.cursor1.line >= line_index then
-                       Editor_state.cursor1.line = Editor_state.cursor1.line+1
+                     table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                     if State.cursor1.line >= line_index then
+                       State.cursor1.line = State.cursor1.line+1
                      end
                      schedule_save()
                      record_undo_event({before=Drawing.before, after=snapshot(line_index-1, line_index+1)})
                    end
       })
-      if Editor_state.search_term == nil then
-        if line_index == Editor_state.cursor1.line then
-          Text.draw_cursor(Editor_state.margin_left, y)
+      if State.search_term == nil then
+        if line_index == State.cursor1.line then
+          Text.draw_cursor(State.margin_left, y)
         end
       end
-      Editor_state.screen_bottom1.pos = Editor_state.screen_top1.pos
-      y = y + Editor_state.line_height
+      State.screen_bottom1.pos = State.screen_top1.pos
+      y = y + State.line_height
     elseif line.mode == 'drawing' then
-      y = y+Editor_state.drawing_padding_top
+      y = y+State.drawing_padding_top
       line.y = y
       Drawing.draw(line)
-      y = y + Drawing.pixels(line.h) + Editor_state.drawing_padding_bottom
+      y = y + Drawing.pixels(line.h) + State.drawing_padding_bottom
     else
       line.starty = y
       line.startpos = 1
-      if line_index == Editor_state.screen_top1.line then
-        line.startpos = Editor_state.screen_top1.pos
+      if line_index == State.screen_top1.line then
+        line.startpos = State.screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, Editor_state.screen_bottom1.pos = Text.draw(line, line_index, line.starty, Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-      y = y + Editor_state.line_height
+      y, State.screen_bottom1.pos = Text.draw(line, line_index, line.starty, State.margin_left, App.screen.width-State.margin_right)
+      y = y + State.line_height
 --?       print('=> y', y)
     end
   end
-  if Editor_state.cursor_y == -1 then
-    Editor_state.cursor_y = App.screen.height
+  if State.cursor_y == -1 then
+    State.cursor_y = App.screen.height
   end
---?   print('screen bottom: '..tostring(Editor_state.screen_bottom1.pos)..' in '..tostring(Editor_state.lines[Editor_state.screen_bottom1.line].data))
-  if Editor_state.search_term then
+--?   print('screen bottom: '..tostring(State.screen_bottom1.pos)..' in '..tostring(State.lines[State.screen_bottom1.line].data))
+  if State.search_term then
     Text.draw_search_bar()
   end
 end
 
-function edit.update(dt)
+function edit.update(State, dt)
   Drawing.update(dt)
-  if Editor_state.next_save and Editor_state.next_save < App.getTime() then
-    save_to_disk(Editor_state.lines, Editor_state.filename)
-    Editor_state.next_save = nil
+  if State.next_save and State.next_save < App.getTime() then
+    save_to_disk(State.lines, State.filename)
+    State.next_save = nil
   end
 end
 
@@ -189,21 +189,21 @@ function schedule_save()
   end
 end
 
-function edit.quit()
+function edit.quit(State)
   -- make sure to save before quitting
-  if Editor_state.next_save then
-    save_to_disk(Editor_state.lines, Editor_state.filename)
+  if State.next_save then
+    save_to_disk(State.lines, State.filename)
   end
 end
 
-function edit.mouse_pressed(x,y, mouse_button)
-  if Editor_state.search_term then return end
---?   print('press', Editor_state.selection1.line, Editor_state.selection1.pos)
+function edit.mouse_pressed(State, x,y, mouse_button)
+  if State.search_term then return end
+--?   print('press', State.selection1.line, State.selection1.pos)
   propagate_to_button_handlers(x,y, mouse_button)
 
-  for line_index,line in ipairs(Editor_state.lines) do
+  for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(line, x,y, Editor_state.margin_left, App.screen.width-Editor_state.margin_right) then
+      if Text.in_line(line, x,y, State.margin_left, App.screen.width-State.margin_right) then
         -- delicate dance between cursor, selection and old cursor/selection
         -- scenarios:
         --  regular press+release: sets cursor, clears selection
@@ -213,20 +213,20 @@ function edit.mouse_pressed(x,y, mouse_button)
         --  press and hold to start a selection: sets selection on press, cursor on release
         --  press and hold, then press shift: ignore shift
         --    i.e. mousereleased should never look at shift state
-        Editor_state.old_cursor1 = Editor_state.cursor1
-        Editor_state.old_selection1 = Editor_state.selection1
-        Editor_state.mousepress_shift = App.shift_down()
-        Editor_state.selection1 = {
+        State.old_cursor1 = State.cursor1
+        State.old_selection1 = State.selection1
+        State.mousepress_shift = App.shift_down()
+        State.selection1 = {
             line=line_index,
-            pos=Text.to_pos_on_line(line, x, y, Editor_state.margin_left, App.screen.width-Editor_state.margin_right),
+            pos=Text.to_pos_on_line(line, x, y, State.margin_left, App.screen.width-State.margin_right),
         }
---?         print('selection', Editor_state.selection1.line, Editor_state.selection1.pos)
+--?         print('selection', State.selection1.line, State.selection1.pos)
         break
       end
     elseif line.mode == 'drawing' then
       if Drawing.in_drawing(line, x, y) then
-        Editor_state.lines.current_drawing_index = line_index
-        Editor_state.lines.current_drawing = line
+        State.lines.current_drawing_index = line_index
+        State.lines.current_drawing = line
         Drawing.before = snapshot(line_index)
         Drawing.mouse_pressed(line, x,y, mouse_button)
         break
@@ -235,152 +235,152 @@ function edit.mouse_pressed(x,y, mouse_button)
   end
 end
 
-function edit.mouse_released(x,y, mouse_button)
-  if Editor_state.search_term then return end
+function edit.mouse_released(State, x,y, mouse_button)
+  if State.search_term then return end
 --?   print('release')
-  if Editor_state.lines.current_drawing then
+  if State.lines.current_drawing then
     Drawing.mouse_released(x,y, mouse_button)
     schedule_save()
     if Drawing.before then
-      record_undo_event({before=Drawing.before, after=snapshot(Editor_state.lines.current_drawing_index)})
+      record_undo_event({before=Drawing.before, after=snapshot(State.lines.current_drawing_index)})
       Drawing.before = nil
     end
   else
-    for line_index,line in ipairs(Editor_state.lines) do
+    for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
-        if Text.in_line(line, x,y, Editor_state.margin_left, App.screen.width-Editor_state.margin_right) then
+        if Text.in_line(line, x,y, State.margin_left, App.screen.width-State.margin_right) then
 --?           print('reset selection')
-          Editor_state.cursor1 = {
+          State.cursor1 = {
               line=line_index,
-              pos=Text.to_pos_on_line(line, x, y, Editor_state.margin_left, App.screen.width-Editor_state.margin_right),
+              pos=Text.to_pos_on_line(line, x, y, State.margin_left, App.screen.width-State.margin_right),
           }
---?           print('cursor', Editor_state.cursor1.line, Editor_state.cursor1.pos)
-          if Editor_state.mousepress_shift then
-            if Editor_state.old_selection1.line == nil then
-              Editor_state.selection1 = Editor_state.old_cursor1
+--?           print('cursor', State.cursor1.line, State.cursor1.pos)
+          if State.mousepress_shift then
+            if State.old_selection1.line == nil then
+              State.selection1 = State.old_cursor1
             else
-              Editor_state.selection1 = Editor_state.old_selection1
+              State.selection1 = State.old_selection1
             end
           end
-          Editor_state.old_cursor1, Editor_state.old_selection1, Editor_state.mousepress_shift = nil
-          if eq(Editor_state.cursor1, Editor_state.selection1) then
-            Editor_state.selection1 = {}
+          State.old_cursor1, State.old_selection1, State.mousepress_shift = nil
+          if eq(State.cursor1, State.selection1) then
+            State.selection1 = {}
           end
           break
         end
       end
     end
---?     print('selection:', Editor_state.selection1.line, Editor_state.selection1.pos)
+--?     print('selection:', State.selection1.line, State.selection1.pos)
   end
 end
 
-function edit.textinput(t)
-  for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
-  if Editor_state.search_term then
-    Editor_state.search_term = Editor_state.search_term..t
-    Editor_state.search_text = nil
+function edit.textinput(State, t)
+  for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+  if State.search_term then
+    State.search_term = State.search_term..t
+    State.search_text = nil
     Text.search_next()
-  elseif Editor_state.current_drawing_mode == 'name' then
-    local before = snapshot(Editor_state.lines.current_drawing_index)
-    local drawing = Editor_state.lines.current_drawing
+  elseif State.current_drawing_mode == 'name' then
+    local before = snapshot(State.lines.current_drawing_index)
+    local drawing = State.lines.current_drawing
     local p = drawing.points[drawing.pending.target_point]
     p.name = p.name..t
-    record_undo_event({before=before, after=snapshot(Editor_state.lines.current_drawing_index)})
+    record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
   else
     Text.textinput(t)
   end
   schedule_save()
 end
 
-function edit.keychord_pressed(chord, key)
-  if Editor_state.selection1.line and
-      not Editor_state.lines.current_drawing and
+function edit.keychord_pressed(State, chord, key)
+  if State.selection1.line and
+      not State.lines.current_drawing and
       -- printable character created using shift key => delete selection
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
       chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
-    Text.delete_selection(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
   end
-  if Editor_state.search_term then
+  if State.search_term then
     if chord == 'escape' then
-      Editor_state.search_term = nil
-      Editor_state.search_text = nil
-      Editor_state.cursor1 = Editor_state.search_backup.cursor
-      Editor_state.screen_top1 = Editor_state.search_backup.screen_top
-      Editor_state.search_backup = nil
+      State.search_term = nil
+      State.search_text = nil
+      State.cursor1 = State.search_backup.cursor
+      State.screen_top1 = State.search_backup.screen_top
+      State.search_backup = nil
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     elseif chord == 'return' then
-      Editor_state.search_term = nil
-      Editor_state.search_text = nil
-      Editor_state.search_backup = nil
+      State.search_term = nil
+      State.search_text = nil
+      State.search_backup = nil
     elseif chord == 'backspace' then
-      local len = utf8.len(Editor_state.search_term)
-      local byte_offset = Text.offset(Editor_state.search_term, len)
-      Editor_state.search_term = string.sub(Editor_state.search_term, 1, byte_offset-1)
-      Editor_state.search_text = nil
+      local len = utf8.len(State.search_term)
+      local byte_offset = Text.offset(State.search_term, len)
+      State.search_term = string.sub(State.search_term, 1, byte_offset-1)
+      State.search_text = nil
     elseif chord == 'down' then
-      Editor_state.cursor1.pos = Editor_state.cursor1.pos+1
+      State.cursor1.pos = State.cursor1.pos+1
       Text.search_next()
     elseif chord == 'up' then
       Text.search_previous()
     end
     return
   elseif chord == 'C-f' then
-    Editor_state.search_term = ''
-    Editor_state.search_backup = {cursor={line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}, screen_top={line=Editor_state.screen_top1.line, pos=Editor_state.screen_top1.pos}}
-    assert(Editor_state.search_text == nil)
+    State.search_term = ''
+    State.search_backup = {cursor={line=State.cursor1.line, pos=State.cursor1.pos}, screen_top={line=State.screen_top1.line, pos=State.screen_top1.pos}}
+    assert(State.search_text == nil)
   elseif chord == 'C-=' then
-    initialize_font_settings(Editor_state.font_height+2)
+    initialize_font_settings(State.font_height+2)
     Text.redraw_all()
   elseif chord == 'C--' then
-    initialize_font_settings(Editor_state.font_height-2)
+    initialize_font_settings(State.font_height-2)
     Text.redraw_all()
   elseif chord == 'C-0' then
     initialize_font_settings(20)
     Text.redraw_all()
   elseif chord == 'C-z' then
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     local event = undo_event()
     if event then
       local src = event.before
-      Editor_state.screen_top1 = deepcopy(src.screen_top)
-      Editor_state.cursor1 = deepcopy(src.cursor)
-      Editor_state.selection1 = deepcopy(src.selection)
-      patch(Editor_state.lines, event.after, event.before)
+      State.screen_top1 = deepcopy(src.screen_top)
+      State.cursor1 = deepcopy(src.cursor)
+      State.selection1 = deepcopy(src.selection)
+      patch(State.lines, event.after, event.before)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save()
     end
   elseif chord == 'C-y' then
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     local event = redo_event()
     if event then
       local src = event.after
-      Editor_state.screen_top1 = deepcopy(src.screen_top)
-      Editor_state.cursor1 = deepcopy(src.cursor)
-      Editor_state.selection1 = deepcopy(src.selection)
-      patch(Editor_state.lines, event.before, event.after)
+      State.screen_top1 = deepcopy(src.screen_top)
+      State.cursor1 = deepcopy(src.cursor)
+      State.selection1 = deepcopy(src.selection)
+      patch(State.lines, event.before, event.after)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save()
     end
   -- clipboard
   elseif chord == 'C-c' then
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     local s = Text.selection()
     if s then
       App.setClipboardText(s)
     end
   elseif chord == 'C-x' then
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
-    local s = Text.cut_selection(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    local s = Text.cut_selection(State.margin_left, App.screen.width-State.margin_right)
     if s then
       App.setClipboardText(s)
     end
     schedule_save()
   elseif chord == 'C-v' then
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
     -- and sometimes scroll when we didn't quite need to.
-    local before_line = Editor_state.cursor1.line
+    local before_line = State.cursor1.line
     local before = snapshot(before_line)
     local clipboard_data = App.getClipboardText()
     for _,code in utf8.codes(clipboard_data) do
@@ -392,10 +392,10 @@ function edit.keychord_pressed(chord, key)
       end
     end
     if Text.cursor_past_screen_bottom() then
-      Text.snap_cursor_to_bottom_of_screen(Editor_state.margin_left, App.screen.height-Editor_state.margin_right)
+      Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.height-State.margin_right)
     end
     schedule_save()
-    record_undo_event({before=before, after=snapshot(before_line, Editor_state.cursor1.line)})
+    record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
@@ -407,36 +407,36 @@ function edit.keychord_pressed(chord, key)
       schedule_save()
     end
   elseif chord == 'escape' and not App.mouse_down(1) then
-    for _,line in ipairs(Editor_state.lines) do
+    for _,line in ipairs(State.lines) do
       if line.mode == 'drawing' then
         line.show_help = false
       end
     end
-  elseif Editor_state.current_drawing_mode == 'name' then
+  elseif State.current_drawing_mode == 'name' then
     if chord == 'return' then
-      Editor_state.current_drawing_mode = Editor_state.previous_drawing_mode
-      Editor_state.previous_drawing_mode = nil
+      State.current_drawing_mode = State.previous_drawing_mode
+      State.previous_drawing_mode = nil
     else
-      local before = snapshot(Editor_state.lines.current_drawing_index)
-      local drawing = Editor_state.lines.current_drawing
+      local before = snapshot(State.lines.current_drawing_index)
+      local drawing = State.lines.current_drawing
       local p = drawing.points[drawing.pending.target_point]
       if chord == 'escape' then
         p.name = nil
-        record_undo_event({before=before, after=snapshot(Editor_state.lines.current_drawing_index)})
+        record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
         local byte_offset = Text.offset(p.name, len-1)
         if len == 1 then byte_offset = 0 end
         p.name = string.sub(p.name, 1, byte_offset)
-        record_undo_event({before=before, after=snapshot(Editor_state.lines.current_drawing_index)})
+        record_undo_event({before=before, after=snapshot(State.lines.current_drawing_index)})
       end
     end
     schedule_save()
   else
-    for _,line in ipairs(Editor_state.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     Text.keychord_pressed(chord)
   end
 end
 
-function edit.key_released(key, scancode)
+function edit.key_released(State, key, scancode)
 end

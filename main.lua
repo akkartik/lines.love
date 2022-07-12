@@ -149,7 +149,7 @@ end
 
 function App.draw()
   Button_handlers = {}
-  edit.draw()
+  edit.draw(Editor_state)
 end
 
 function App.update(dt)
@@ -162,11 +162,11 @@ function App.update(dt)
       Last_resize_time = nil
     end
   end
-  edit.update(dt)
+  edit.update(Editor_state, dt)
 end
 
 function love.quit()
-  edit.quit()
+  edit.quit(Editor_state)
   -- save some important settings
   local x,y,displayindex = love.window.getPosition()
   local filename = Editor_state.filename
@@ -184,25 +184,25 @@ end
 
 function App.mousepressed(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_pressed(x,y, mouse_button)
+  return edit.mouse_pressed(Editor_state, x,y, mouse_button)
 end
 
 function App.mousereleased(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_released(x,y, mouse_button)
+  return edit.mouse_released(Editor_state, x,y, mouse_button)
 end
 
 function App.textinput(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.textinput(t)
+  return edit.textinput(Editor_state, t)
 end
 
 function App.keychord_pressed(chord, key)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.keychord_pressed(chord, key)
+  return edit.keychord_pressed(Editor_state, chord, key)
 end
 
 function App.keyreleased(key, scancode)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.key_released(key, scancode)
+  return edit.key_released(Editor_state, key, scancode)
 end
