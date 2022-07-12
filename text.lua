@@ -156,188 +156,188 @@ function Text.insert_at_cursor(t)
 end
 
 -- Don't handle any keys here that would trigger love.textinput above.
-function Text.keychord_pressed(chord)
---?   print('chord', chord, Editor_state.selection1.line, Editor_state.selection1.pos)
+function Text.keychord_pressed(State, chord)
+--?   print('chord', chord, State.selection1.line, State.selection1.pos)
   --== shortcuts that mutate text
   if chord == 'return' then
-    local before_line = Editor_state.cursor1.line
+    local before_line = State.cursor1.line
     local before = snapshot(before_line)
     Text.insert_return()
-    Editor_state.selection1 = {}
-    if (Editor_state.cursor_y + Editor_state.line_height) > App.screen.height then
-      Text.snap_cursor_to_bottom_of_screen(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    State.selection1 = {}
+    if (State.cursor_y + State.line_height) > App.screen.height then
+      Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
     end
     schedule_save()
-    record_undo_event({before=before, after=snapshot(before_line, Editor_state.cursor1.line)})
+    record_undo_event({before=before, after=snapshot(before_line, State.cursor1.line)})
   elseif chord == 'tab' then
-    local before = snapshot(Editor_state.cursor1.line)
---?     print(Editor_state.screen_top1.line, Editor_state.screen_top1.pos, Editor_state.cursor1.line, Editor_state.cursor1.pos, Editor_state.screen_bottom1.line, Editor_state.screen_bottom1.pos)
+    local before = snapshot(State.cursor1.line)
+--?     print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     Text.insert_at_cursor('\t')
-    if Editor_state.cursor_y >= App.screen.height - Editor_state.line_height then
-      Text.populate_screen_line_starting_pos(Editor_state.lines[Editor_state.cursor1.line], Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-      Text.snap_cursor_to_bottom_of_screen(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
---?       print('=>', Editor_state.screen_top1.line, Editor_state.screen_top1.pos, Editor_state.cursor1.line, Editor_state.cursor1.pos, Editor_state.screen_bottom1.line, Editor_state.screen_bottom1.pos)
+    if State.cursor_y >= App.screen.height - State.line_height then
+      Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.margin_left, App.screen.width-State.margin_right)
+      Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.width-State.margin_right)
+--?       print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     end
     schedule_save()
-    record_undo_event({before=before, after=snapshot(Editor_state.cursor1.line)})
+    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   elseif chord == 'backspace' then
-    if Editor_state.selection1.line then
-      Text.delete_selection(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    if State.selection1.line then
+      Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
       schedule_save()
       return
     end
     local before
-    if Editor_state.cursor1.pos > 1 then
-      before = snapshot(Editor_state.cursor1.line)
-      local byte_start = utf8.offset(Editor_state.lines[Editor_state.cursor1.line].data, Editor_state.cursor1.pos-1)
-      local byte_end = utf8.offset(Editor_state.lines[Editor_state.cursor1.line].data, Editor_state.cursor1.pos)
+    if State.cursor1.pos > 1 then
+      before = snapshot(State.cursor1.line)
+      local byte_start = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos-1)
+      local byte_end = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
       if byte_start then
         if byte_end then
-          Editor_state.lines[Editor_state.cursor1.line].data = string.sub(Editor_state.lines[Editor_state.cursor1.line].data, 1, byte_start-1)..string.sub(Editor_state.lines[Editor_state.cursor1.line].data, byte_end)
+          State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_start-1)..string.sub(State.lines[State.cursor1.line].data, byte_end)
         else
-          Editor_state.lines[Editor_state.cursor1.line].data = string.sub(Editor_state.lines[Editor_state.cursor1.line].data, 1, byte_start-1)
+          State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_start-1)
         end
-        Editor_state.cursor1.pos = Editor_state.cursor1.pos-1
+        State.cursor1.pos = State.cursor1.pos-1
       end
-    elseif Editor_state.cursor1.line > 1 then
-      before = snapshot(Editor_state.cursor1.line-1, Editor_state.cursor1.line)
-      if Editor_state.lines[Editor_state.cursor1.line-1].mode == 'drawing' then
-        table.remove(Editor_state.lines, Editor_state.cursor1.line-1)
+    elseif State.cursor1.line > 1 then
+      before = snapshot(State.cursor1.line-1, State.cursor1.line)
+      if State.lines[State.cursor1.line-1].mode == 'drawing' then
+        table.remove(State.lines, State.cursor1.line-1)
       else
         -- join lines
-        Editor_state.cursor1.pos = utf8.len(Editor_state.lines[Editor_state.cursor1.line-1].data)+1
-        Editor_state.lines[Editor_state.cursor1.line-1].data = Editor_state.lines[Editor_state.cursor1.line-1].data..Editor_state.lines[Editor_state.cursor1.line].data
-        table.remove(Editor_state.lines, Editor_state.cursor1.line)
+        State.cursor1.pos = utf8.len(State.lines[State.cursor1.line-1].data)+1
+        State.lines[State.cursor1.line-1].data = State.lines[State.cursor1.line-1].data..State.lines[State.cursor1.line].data
+        table.remove(State.lines, State.cursor1.line)
       end
-      Editor_state.cursor1.line = Editor_state.cursor1.line-1
+      State.cursor1.line = State.cursor1.line-1
     end
-    if Text.lt1(Editor_state.cursor1, Editor_state.screen_top1) then
-      local top2 = Text.to2(Editor_state.screen_top1, Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-      top2 = Text.previous_screen_line(top2, Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-      Editor_state.screen_top1 = Text.to1(top2)
+    if Text.lt1(State.cursor1, State.screen_top1) then
+      local top2 = Text.to2(State.screen_top1, State.margin_left, App.screen.width-State.margin_right)
+      top2 = Text.previous_screen_line(top2, State.margin_left, App.screen.width-State.margin_right)
+      State.screen_top1 = Text.to1(top2)
       Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
-    Text.clear_cache(Editor_state.lines[Editor_state.cursor1.line])
-    assert(Text.le1(Editor_state.screen_top1, Editor_state.cursor1))
+    Text.clear_cache(State.lines[State.cursor1.line])
+    assert(Text.le1(State.screen_top1, State.cursor1))
     schedule_save()
-    record_undo_event({before=before, after=snapshot(Editor_state.cursor1.line)})
+    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   elseif chord == 'delete' then
-    if Editor_state.selection1.line then
-      Text.delete_selection(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    if State.selection1.line then
+      Text.delete_selection(State.margin_left, App.screen.width-State.margin_right)
       schedule_save()
       return
     end
     local before
-    if Editor_state.cursor1.pos <= utf8.len(Editor_state.lines[Editor_state.cursor1.line].data) then
-      before = snapshot(Editor_state.cursor1.line)
+    if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
+      before = snapshot(State.cursor1.line)
     else
-      before = snapshot(Editor_state.cursor1.line, Editor_state.cursor1.line+1)
+      before = snapshot(State.cursor1.line, State.cursor1.line+1)
     end
-    if Editor_state.cursor1.pos <= utf8.len(Editor_state.lines[Editor_state.cursor1.line].data) then
-      local byte_start = utf8.offset(Editor_state.lines[Editor_state.cursor1.line].data, Editor_state.cursor1.pos)
-      local byte_end = utf8.offset(Editor_state.lines[Editor_state.cursor1.line].data, Editor_state.cursor1.pos+1)
+    if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
+      local byte_start = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
+      local byte_end = utf8.offset(State.lines[State.cursor1.line].data, State.cursor1.pos+1)
       if byte_start then
         if byte_end then
-          Editor_state.lines[Editor_state.cursor1.line].data = string.sub(Editor_state.lines[Editor_state.cursor1.line].data, 1, byte_start-1)..string.sub(Editor_state.lines[Editor_state.cursor1.line].data, byte_end)
+          State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_start-1)..string.sub(State.lines[State.cursor1.line].data, byte_end)
         else
-          Editor_state.lines[Editor_state.cursor1.line].data = string.sub(Editor_state.lines[Editor_state.cursor1.line].data, 1, byte_start-1)
+          State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_start-1)
         end
-        -- no change to Editor_state.cursor1.pos
+        -- no change to State.cursor1.pos
       end
-    elseif Editor_state.cursor1.line < #Editor_state.lines then
-      if Editor_state.lines[Editor_state.cursor1.line+1].mode == 'drawing' then
-        table.remove(Editor_state.lines, Editor_state.cursor1.line+1)
+    elseif State.cursor1.line < #State.lines then
+      if State.lines[State.cursor1.line+1].mode == 'drawing' then
+        table.remove(State.lines, State.cursor1.line+1)
       else
         -- join lines
-        Editor_state.lines[Editor_state.cursor1.line].data = Editor_state.lines[Editor_state.cursor1.line].data..Editor_state.lines[Editor_state.cursor1.line+1].data
-        table.remove(Editor_state.lines, Editor_state.cursor1.line+1)
+        State.lines[State.cursor1.line].data = State.lines[State.cursor1.line].data..State.lines[State.cursor1.line+1].data
+        table.remove(State.lines, State.cursor1.line+1)
       end
     end
-    Text.clear_cache(Editor_state.lines[Editor_state.cursor1.line])
+    Text.clear_cache(State.lines[State.cursor1.line])
     schedule_save()
-    record_undo_event({before=before, after=snapshot(Editor_state.cursor1.line)})
+    record_undo_event({before=before, after=snapshot(State.cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
-    Text.left(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.left(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'right' then
-    Text.right(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.right(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'S-left' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.left(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.left(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'S-right' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.right(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.right(State.margin_left, App.screen.width-State.margin_right)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
-    Text.word_left(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.word_left(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'M-right' then
-    Text.word_right(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.word_right(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'M-S-left' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_left(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.word_left(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'M-S-right' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_right(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.word_right(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'home' then
     Text.start_of_line()
-    Editor_state.selection1 = {}
+    State.selection1 = {}
   elseif chord == 'end' then
-    Text.end_of_line(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.end_of_line(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'S-home' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
     Text.start_of_line()
   elseif chord == 'S-end' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.end_of_line(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.end_of_line(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'up' then
-    Text.up(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.up(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'down' then
-    Text.down(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.down(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'S-up' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.up(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.up(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'S-down' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.down(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.down(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'pageup' then
-    Text.pageup(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.pageup(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'pagedown' then
-    Text.pagedown(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.selection1 = {}
+    Text.pagedown(State.margin_left, App.screen.width-State.margin_right)
+    State.selection1 = {}
   elseif chord == 'S-pageup' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pageup(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.pageup(State.margin_left, App.screen.width-State.margin_right)
   elseif chord == 'S-pagedown' then
-    if Editor_state.selection1.line == nil then
-      Editor_state.selection1 = {line=Editor_state.cursor1.line, pos=Editor_state.cursor1.pos}
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pagedown(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
+    Text.pagedown(State.margin_left, App.screen.width-State.margin_right)
   end
 end
 

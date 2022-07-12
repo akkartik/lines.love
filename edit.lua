@@ -434,7 +434,7 @@ function edit.keychord_pressed(State, chord, key)
     schedule_save()
   else
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    Text.keychord_pressed(chord)
+    Text.keychord_pressed(State, chord)
   end
 end
 
