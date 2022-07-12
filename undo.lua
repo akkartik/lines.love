@@ -7,27 +7,27 @@
 -- TODO: coalesce multiple similar operations
 
 function record_undo_event(data)
-  History[Next_history] = data
-  Next_history = Next_history+1
-  for i=Next_history,#History do
-    History[i] = nil
+  Editor_state.history[Editor_state.next_history] = data
+  Editor_state.next_history = Editor_state.next_history+1
+  for i=Editor_state.next_history,#Editor_state.history do
+    Editor_state.history[i] = nil
   end
 end
 
 function undo_event()
-  if Next_history > 1 then
---?     print('moving to history', Next_history-1)
-    Next_history = Next_history-1
-    local result = History[Next_history]
+  if Editor_state.next_history > 1 then
+--?     print('moving to history', Editor_state.next_history-1)
+    Editor_state.next_history = Editor_state.next_history-1
+    local result = Editor_state.history[Editor_state.next_history]
     return result
   end
 end
 
 function redo_event()
-  if Next_history <= #History then
---?     print('restoring history', Next_history+1)
-    local result = History[Next_history]
-    Next_history = Next_history+1
+  if Editor_state.next_history <= #Editor_state.history then
+--?     print('restoring history', Editor_state.next_history+1)
+    local result = Editor_state.history[Editor_state.next_history]
+    Editor_state.next_history = Editor_state.next_history+1
     return result
   end
 end
@@ -40,18 +40,18 @@ function snapshot(s,e)
   if e == nil then
     e = s
   end
-  assert(#Lines > 0)
+  assert(#Editor_state.lines > 0)
   if s < 1 then s = 1 end
-  if s > #Lines then s = #Lines end
+  if s > #Editor_state.lines then s = #Editor_state.lines end
   if e < 1 then e = 1 end
-  if e > #Lines then e = #Lines end
+  if e > #Editor_state.lines then e = #Editor_state.lines end
   -- compare with App.initialize_globals
   local event = {
-    screen_top=deepcopy(Screen_top1),
-    selection=deepcopy(Selection1),
-    cursor=deepcopy(Cursor1),
+    screen_top=deepcopy(Editor_state.screen_top1),
+    selection=deepcopy(Editor_state.selection1),
+    cursor=deepcopy(Editor_state.cursor1),
     current_drawing_mode=Drawing_mode,
-    previous_drawing_mode=Previous_drawing_mode,
+    previous_drawing_mode=Editor_state.previous_drawing_mode,
     lines={},
     start_line=s,
     end_line=e,
@@ -59,7 +59,7 @@ function snapshot(s,e)
   }
   -- deep copy lines without cached stuff like text fragments
   for i=s,e do
-    local line = Lines[i]
+    local line = Editor_state.lines[i]
     if line.mode == 'text' then
       table.insert(event.lines, {mode='text', data=line.data})
     elseif line.mode == 'drawing' then

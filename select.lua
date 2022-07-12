@@ -1,20 +1,20 @@
 -- helpers for selecting portions of text
 
--- Return any intersection of the region from Selection1 to Cursor1 (or
+-- Return any intersection of the region from Editor_state.selection1 to Editor_state.cursor1 (or
 -- current mouse, if mouse is pressed; or recent mouse if mouse is pressed and
 -- currently over a drawing) with the region between {line=line_index, pos=apos}
 -- and {line=line_index, pos=bpos}.
--- apos must be less than bpos. However Selection1 and Cursor1 can be in any order.
+-- apos must be less than bpos. However Editor_state.selection1 and Editor_state.cursor1 can be in any order.
 -- Result: positions spos,epos between apos,bpos.
 function Text.clip_selection(line_index, apos, bpos, left, right)
-  if Selection1.line == nil then return nil,nil end
-  -- min,max = sorted(Selection1,Cursor1)
-  local minl,minp = Selection1.line,Selection1.pos
+  if Editor_state.selection1.line == nil then return nil,nil end
+  -- min,max = sorted(Editor_state.selection1,Editor_state.cursor1)
+  local minl,minp = Editor_state.selection1.line,Editor_state.selection1.pos
   local maxl,maxp
   if App.mouse_down(1) then
     maxl,maxp = Text.mouse_pos(left, right)
   else
-    maxl,maxp = Cursor1.line,Cursor1.pos
+    maxl,maxp = Editor_state.cursor1.line,Editor_state.cursor1.pos
   end
   if minl > maxl then
     minl,maxl = maxl,minl
@@ -69,7 +69,7 @@ function Text.draw_highlight(line, x,y, pos, lo,hi)
     local text = App.newText(love.graphics.getFont(), s)
     local text_width = App.width(text)
     App.color(Highlight_color)
-    love.graphics.rectangle('fill', x+lo_px,y, text_width,Line_height)
+    love.graphics.rectangle('fill', x+lo_px,y, text_width,Editor_state.line_height)
     App.color(Text_color)
     return lo_px
   end
@@ -78,20 +78,20 @@ end
 -- inefficient for some reason, so don't do it on every frame
 function Text.mouse_pos(left, right)
   local time = love.timer.getTime()
-  if Recent_mouse.time and Recent_mouse.time > time-0.1 then
-    return Recent_mouse.line, Recent_mouse.pos
+  if Editor_state.recent_mouse.time and Editor_state.recent_mouse.time > time-0.1 then
+    return Editor_state.recent_mouse.line, Editor_state.recent_mouse.pos
   end
-  Recent_mouse.time = time
+  Editor_state.recent_mouse.time = time
   local line,pos = Text.to_pos(App.mouse_x(), App.mouse_y(), left, right)
   if line then
-    Recent_mouse.line = line
-    Recent_mouse.pos = pos
+    Editor_state.recent_mouse.line = line
+    Editor_state.recent_mouse.pos = pos
   end
-  return Recent_mouse.line, Recent_mouse.pos
+  return Editor_state.recent_mouse.line, Editor_state.recent_mouse.pos
 end
 
 function Text.to_pos(x,y, left, right)
-  for line_index,line in ipairs(Lines) do
+  for line_index,line in ipairs(Editor_state.lines) do
     if line.mode == 'text' then
       if Text.in_line(line, x,y, left, right) then
         return line_index, Text.to_pos_on_line(line, x,y, left, right)
@@ -101,25 +101,25 @@ function Text.to_pos(x,y, left, right)
 end
 
 function Text.cut_selection(left, right)
-  if Selection1.line == nil then return end
+  if Editor_state.selection1.line == nil then return end
   local result = Text.selection()
   Text.delete_selection(left, right)
   return result
 end
 
 function Text.delete_selection(left, right)
-  if Selection1.line == nil then return end
-  local minl,maxl = minmax(Selection1.line, Cursor1.line)
+  if Editor_state.selection1.line == nil then return end
+  local minl,maxl = minmax(Editor_state.selection1.line, Editor_state.cursor1.line)
   local before = snapshot(minl, maxl)
   Text.delete_selection_without_undo(left, right)
-  record_undo_event({before=before, after=snapshot(Cursor1.line)})
+  record_undo_event({before=before, after=snapshot(Editor_state.cursor1.line)})
 end
 
 function Text.delete_selection_without_undo(left, right)
-  if Selection1.line == nil then return end
-  -- min,max = sorted(Selection1,Cursor1)
-  local minl,minp = Selection1.line,Selection1.pos
-  local maxl,maxp = Cursor1.line,Cursor1.pos
+  if Editor_state.selection1.line == nil then return end
+  -- min,max = sorted(Editor_state.selection1,Editor_state.cursor1)
+  local minl,minp = Editor_state.selection1.line,Editor_state.selection1.pos
+  local maxl,maxp = Editor_state.cursor1.line,Editor_state.cursor1.pos
   if minl > maxl then
     minl,maxl = maxl,minl
     minp,maxp = maxp,minp
@@ -128,36 +128,36 @@ function Text.delete_selection_without_undo(left, right)
       minp,maxp = maxp,minp
     end
   end
-  -- update Cursor1 and Selection1
-  Cursor1.line = minl
-  Cursor1.pos = minp
-  if Text.lt1(Cursor1, Screen_top1) then
-    Screen_top1.line = Cursor1.line
-    _,Screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(left, right)
+  -- update Editor_state.cursor1 and Editor_state.selection1
+  Editor_state.cursor1.line = minl
+  Editor_state.cursor1.pos = minp
+  if Text.lt1(Editor_state.cursor1, Editor_state.screen_top1) then
+    Editor_state.screen_top1.line = Editor_state.cursor1.line
+    _,Editor_state.screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(left, right)
   end
-  Selection1 = {}
+  Editor_state.selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
-  Text.clear_cache(Lines[minl])
-  local min_offset = Text.offset(Lines[minl].data, minp)
-  local max_offset = Text.offset(Lines[maxl].data, maxp)
+  Text.clear_cache(Editor_state.lines[minl])
+  local min_offset = Text.offset(Editor_state.lines[minl].data, minp)
+  local max_offset = Text.offset(Editor_state.lines[maxl].data, maxp)
   if minl == maxl then
 --?     print('minl == maxl')
-    Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..Lines[minl].data:sub(max_offset)
+    Editor_state.lines[minl].data = Editor_state.lines[minl].data:sub(1, min_offset-1)..Editor_state.lines[minl].data:sub(max_offset)
     return
   end
   assert(minl < maxl)
-  local rhs = Lines[maxl].data:sub(max_offset)
+  local rhs = Editor_state.lines[maxl].data:sub(max_offset)
   for i=maxl,minl+1,-1 do
-    table.remove(Lines, i)
+    table.remove(Editor_state.lines, i)
   end
-  Lines[minl].data = Lines[minl].data:sub(1, min_offset-1)..rhs
+  Editor_state.lines[minl].data = Editor_state.lines[minl].data:sub(1, min_offset-1)..rhs
 end
 
 function Text.selection()
-  if Selection1.line == nil then return end
-  -- min,max = sorted(Selection1,Cursor1)
-  local minl,minp = Selection1.line,Selection1.pos
-  local maxl,maxp = Cursor1.line,Cursor1.pos
+  if Editor_state.selection1.line == nil then return end
+  -- min,max = sorted(Editor_state.selection1,Editor_state.cursor1)
+  local minl,minp = Editor_state.selection1.line,Editor_state.selection1.pos
+  local maxl,maxp = Editor_state.cursor1.line,Editor_state.cursor1.pos
   if minl > maxl then
     minl,maxl = maxl,minl
     minp,maxp = maxp,minp
@@ -166,18 +166,18 @@ function Text.selection()
       minp,maxp = maxp,minp
     end
   end
-  local min_offset = Text.offset(Lines[minl].data, minp)
-  local max_offset = Text.offset(Lines[maxl].data, maxp)
+  local min_offset = Text.offset(Editor_state.lines[minl].data, minp)
+  local max_offset = Text.offset(Editor_state.lines[maxl].data, maxp)
   if minl == maxl then
-    return Lines[minl].data:sub(min_offset, max_offset-1)
+    return Editor_state.lines[minl].data:sub(min_offset, max_offset-1)
   end
   assert(minl < maxl)
-  local result = {Lines[minl].data:sub(min_offset)}
+  local result = {Editor_state.lines[minl].data:sub(min_offset)}
   for i=minl+1,maxl-1 do
-    if Lines[i].mode == 'text' then
-      table.insert(result, Lines[i].data)
+    if Editor_state.lines[i].mode == 'text' then
+      table.insert(result, Editor_state.lines[i].data)
     end
   end
-  table.insert(result, Lines[maxl].data:sub(1, max_offset-1))
+  table.insert(result, Editor_state.lines[maxl].data:sub(1, max_offset-1))
   return table.concat(result, '\n')
 end

@@ -6,13 +6,13 @@ require 'drawing_tests'
 -- into 256 parts.
 function Drawing.draw(line)
   local pmx,pmy = App.mouse_x(), App.mouse_y()
-  if pmx < App.screen.width-Margin_right and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
+  if pmx < App.screen.width-Editor_state.margin_right and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
     App.color(Icon_color)
-    love.graphics.rectangle('line', Margin_left,line.y, App.screen.width-Margin_width,Drawing.pixels(line.h))
-    if icon[Current_drawing_mode] then
-      icon[Current_drawing_mode](App.screen.width-Margin_right-22, line.y+4)
+    love.graphics.rectangle('line', Editor_state.margin_left,line.y, App.screen.width-Editor_state.margin_width,Drawing.pixels(line.h))
+    if icon[Editor_state.current_drawing_mode] then
+      icon[Editor_state.current_drawing_mode](App.screen.width-Editor_state.margin_right-22, line.y+4)
     else
-      icon[Previous_drawing_mode](App.screen.width-Margin_right-22, line.y+4)
+      icon[Editor_state.previous_drawing_mode](App.screen.width-Editor_state.margin_right-22, line.y+4)
     end
 
     if App.mouse_down(1) and love.keyboard.isDown('h') then
@@ -26,7 +26,7 @@ function Drawing.draw(line)
     return
   end
 
-  local mx,my = Drawing.coord(pmx-Margin_left), Drawing.coord(pmy-line.y)
+  local mx,my = Drawing.coord(pmx-Editor_state.margin_left), Drawing.coord(pmy-line.y)
 
   for _,shape in ipairs(line.shapes) do
     assert(shape)
@@ -35,38 +35,38 @@ function Drawing.draw(line)
     else
       App.color(Stroke_color)
     end
-    Drawing.draw_shape(Margin_left,line.y, line, shape)
+    Drawing.draw_shape(Editor_state.margin_left,line.y, line, shape)
   end
   for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my) then
         App.color(Focus_stroke_color)
-        love.graphics.circle('line', Drawing.pixels(p.x)+Margin_left,Drawing.pixels(p.y)+line.y, 4)
+        love.graphics.circle('line', Drawing.pixels(p.x)+Editor_state.margin_left,Drawing.pixels(p.y)+line.y, 4)
       else
         App.color(Stroke_color)
-        love.graphics.circle('fill', Drawing.pixels(p.x)+Margin_left,Drawing.pixels(p.y)+line.y, 2)
+        love.graphics.circle('fill', Drawing.pixels(p.x)+Editor_state.margin_left,Drawing.pixels(p.y)+line.y, 2)
       end
       if p.name then
         -- TODO: clip
-        local x,y = Drawing.pixels(p.x)+Margin_left+5, Drawing.pixels(p.y)+line.y+5
+        local x,y = Drawing.pixels(p.x)+Editor_state.margin_left+5, Drawing.pixels(p.y)+line.y+5
         love.graphics.print(p.name, x,y)
-        if Current_drawing_mode == 'name' and i == line.pending.target_point then
+        if Editor_state.current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
           App.color(Current_name_background_color)
           local name_text
           -- TODO: avoid computing name width on every repaint
           if p.name == '' then
-            name_text = Em
+            name_text = Editor_state.em
           else
             name_text = App.newText(love.graphics.getFont(), p.name)
           end
-          love.graphics.rectangle('fill', x,y, App.width(name_text), Line_height)
+          love.graphics.rectangle('fill', x,y, App.width(name_text), Editor_state.line_height)
         end
       end
     end
   end
   App.color(Current_stroke_color)
-  Drawing.draw_pending_shape(Margin_left,line.y, line)
+  Drawing.draw_pending_shape(Editor_state.margin_left,line.y, line)
 end
 
 function Drawing.draw_shape(left,top, drawing, shape)
@@ -204,51 +204,51 @@ end
 
 function Drawing.in_drawing(drawing, x,y)
   if drawing.y == nil then return false end  -- outside current page
-  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Margin_left and x < App.screen.width-Margin_right
+  return y >= drawing.y and y < drawing.y + Drawing.pixels(drawing.h) and x >= Editor_state.margin_left and x < App.screen.width-Editor_state.margin_right
 end
 
 function Drawing.mouse_pressed(drawing, x,y, button)
-  if Current_drawing_mode == 'freehand' then
-    drawing.pending = {mode=Current_drawing_mode, points={{x=Drawing.coord(x-Margin_left), y=Drawing.coord(y-drawing.y)}}}
-  elseif Current_drawing_mode == 'line' or Current_drawing_mode == 'manhattan' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Current_drawing_mode, p1=j}
-  elseif Current_drawing_mode == 'polygon' or Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Current_drawing_mode, vertices={j}}
-  elseif Current_drawing_mode == 'circle' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y))
-    drawing.pending = {mode=Current_drawing_mode, center=j}
-  elseif Current_drawing_mode == 'move' then
+  if Editor_state.current_drawing_mode == 'freehand' then
+    drawing.pending = {mode=Editor_state.current_drawing_mode, points={{x=Drawing.coord(x-Editor_state.margin_left), y=Drawing.coord(y-drawing.y)}}}
+  elseif Editor_state.current_drawing_mode == 'line' or Editor_state.current_drawing_mode == 'manhattan' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Editor_state.current_drawing_mode, p1=j}
+  elseif Editor_state.current_drawing_mode == 'polygon' or Editor_state.current_drawing_mode == 'rectangle' or Editor_state.current_drawing_mode == 'square' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Editor_state.current_drawing_mode, vertices={j}}
+  elseif Editor_state.current_drawing_mode == 'circle' then
+    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y))
+    drawing.pending = {mode=Editor_state.current_drawing_mode, center=j}
+  elseif Editor_state.current_drawing_mode == 'move' then
     -- all the action is in mouse_released
-  elseif Current_drawing_mode == 'name' then
+  elseif Editor_state.current_drawing_mode == 'name' then
     -- nothing
   else
-    print(Current_drawing_mode)
+    print(Editor_state.current_drawing_mode)
     assert(false)
   end
 end
 
 -- a couple of operations on drawings need to constantly check the state of the mouse
 function Drawing.update()
-  if Lines.current_drawing == nil then return end
-  local drawing = Lines.current_drawing
+  if Editor_state.lines.current_drawing == nil then return end
+  local drawing = Editor_state.lines.current_drawing
   assert(drawing.mode == 'drawing')
   local x, y = App.mouse_x(), App.mouse_y()
   if App.mouse_down(1) then
     if Drawing.in_drawing(drawing, x,y) then
       if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-Margin_left), y=Drawing.coord(App.mouse_y()-drawing.y)})
+        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-Editor_state.margin_left), y=Drawing.coord(App.mouse_y()-drawing.y)})
       elseif drawing.pending.mode == 'move' then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         drawing.pending.target_point.x = mx
         drawing.pending.target_point.y = my
         Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
       end
     end
-  elseif Current_drawing_mode == 'move' then
+  elseif Editor_state.current_drawing_mode == 'move' then
     if Drawing.in_drawing(drawing, x, y) then
-      local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+      local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
       Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
@@ -277,15 +277,15 @@ function Drawing.relax_constraints(drawing, p)
 end
 
 function Drawing.mouse_released(x,y, button)
-  if Current_drawing_mode == 'move' then
-    Current_drawing_mode = Previous_drawing_mode
-    Previous_drawing_mode = nil
-    if Lines.current_drawing then
-      Lines.current_drawing.pending = {}
-      Lines.current_drawing = nil
+  if Editor_state.current_drawing_mode == 'move' then
+    Editor_state.current_drawing_mode = Editor_state.previous_drawing_mode
+    Editor_state.previous_drawing_mode = nil
+    if Editor_state.lines.current_drawing then
+      Editor_state.lines.current_drawing.pending = {}
+      Editor_state.lines.current_drawing = nil
     end
-  elseif Lines.current_drawing then
-    local drawing = Lines.current_drawing
+  elseif Editor_state.lines.current_drawing then
+    local drawing = Editor_state.lines.current_drawing
     if drawing.pending then
       if drawing.pending.mode == nil then
         -- nothing pending
@@ -294,14 +294,14 @@ function Drawing.mouse_released(x,y, button)
         Drawing.smoothen(drawing.pending)
         table.insert(drawing.shapes, drawing.pending)
       elseif drawing.pending.mode == 'line' then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           drawing.pending.p2 = Drawing.insert_point(drawing.points, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'manhattan' then
         local p1 = drawing.points[drawing.pending.p1]
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
             drawing.pending.p2 = Drawing.insert_point(drawing.points, mx, p1.y)
@@ -309,11 +309,11 @@ function Drawing.mouse_released(x,y, button)
             drawing.pending.p2 = Drawing.insert_point(drawing.points, p1.x, my)
           end
           local p2 = drawing.points[drawing.pending.p2]
-          App.mouse_move(Margin_left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
+          App.mouse_move(Editor_state.margin_left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'polygon' then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, mx,my))
           table.insert(drawing.shapes, drawing.pending)
@@ -321,7 +321,7 @@ function Drawing.mouse_released(x,y, button)
       elseif drawing.pending.mode == 'rectangle' then
         assert(#drawing.pending.vertices <= 2)
         if #drawing.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+          local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
           if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
@@ -336,7 +336,7 @@ function Drawing.mouse_released(x,y, button)
       elseif drawing.pending.mode == 'square' then
         assert(#drawing.pending.vertices <= 2)
         if #drawing.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+          local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
           if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
@@ -347,14 +347,14 @@ function Drawing.mouse_released(x,y, button)
           end
         end
       elseif drawing.pending.mode == 'circle' then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           local center = drawing.points[drawing.pending.center]
           drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'arc' then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           local center = drawing.points[drawing.pending.center]
           drawing.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, drawing.pending.end_angle)
@@ -366,17 +366,17 @@ function Drawing.mouse_released(x,y, button)
         print(drawing.pending.mode)
         assert(false)
       end
-      Lines.current_drawing.pending = {}
-      Lines.current_drawing = nil
+      Editor_state.lines.current_drawing.pending = {}
+      Editor_state.lines.current_drawing = nil
     end
   end
 end
 
 function Drawing.keychord_pressed(chord)
   if chord == 'C-p' and not App.mouse_down(1) then
-    Current_drawing_mode = 'freehand'
+    Editor_state.current_drawing_mode = 'freehand'
   elseif App.mouse_down(1) and chord == 'l' then
-    Current_drawing_mode = 'line'
+    Editor_state.current_drawing_mode = 'line'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -387,9 +387,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'line'
   elseif chord == 'C-l' and not App.mouse_down(1) then
-    Current_drawing_mode = 'line'
+    Editor_state.current_drawing_mode = 'line'
   elseif App.mouse_down(1) and chord == 'm' then
-    Current_drawing_mode = 'manhattan'
+    Editor_state.current_drawing_mode = 'manhattan'
     local drawing = Drawing.select_drawing_at_mouse()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -402,11 +402,11 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'manhattan'
   elseif chord == 'C-m' and not App.mouse_down(1) then
-    Current_drawing_mode = 'manhattan'
+    Editor_state.current_drawing_mode = 'manhattan'
   elseif chord == 'C-g' and not App.mouse_down(1) then
-    Current_drawing_mode = 'polygon'
+    Editor_state.current_drawing_mode = 'polygon'
   elseif App.mouse_down(1) and chord == 'g' then
-    Current_drawing_mode = 'polygon'
+    Editor_state.current_drawing_mode = 'polygon'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -421,9 +421,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'polygon'
   elseif chord == 'C-r' and not App.mouse_down(1) then
-    Current_drawing_mode = 'rectangle'
+    Editor_state.current_drawing_mode = 'rectangle'
   elseif App.mouse_down(1) and chord == 'r' then
-    Current_drawing_mode = 'rectangle'
+    Editor_state.current_drawing_mode = 'rectangle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -438,9 +438,9 @@ function Drawing.keychord_pressed(chord)
     end
     drawing.pending.mode = 'rectangle'
   elseif chord == 'C-s' and not App.mouse_down(1) then
-    Current_drawing_mode = 'square'
+    Editor_state.current_drawing_mode = 'square'
   elseif App.mouse_down(1) and chord == 's' then
-    Current_drawing_mode = 'square'
+    Editor_state.current_drawing_mode = 'square'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
@@ -458,30 +458,30 @@ function Drawing.keychord_pressed(chord)
       drawing.pending.vertices = {drawing.pending.center}
     end
     drawing.pending.mode = 'square'
-  elseif App.mouse_down(1) and chord == 'p' and Current_drawing_mode == 'polygon' then
+  elseif App.mouse_down(1) and chord == 'p' and Editor_state.current_drawing_mode == 'polygon' then
     local _,drawing = Drawing.current_drawing()
-    local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
-  elseif App.mouse_down(1) and chord == 'p' and (Current_drawing_mode == 'rectangle' or Current_drawing_mode == 'square') then
+  elseif App.mouse_down(1) and chord == 'p' and (Editor_state.current_drawing_mode == 'rectangle' or Editor_state.current_drawing_mode == 'square') then
     local _,drawing = Drawing.current_drawing()
-    local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local j = Drawing.insert_point(drawing.points, mx,my)
     while #drawing.pending.vertices >= 2 do
       table.remove(drawing.pending.vertices)
     end
     table.insert(drawing.pending.vertices, j)
   elseif chord == 'C-o' and not App.mouse_down(1) then
-    Current_drawing_mode = 'circle'
-  elseif App.mouse_down(1) and chord == 'a' and Current_drawing_mode == 'circle' then
+    Editor_state.current_drawing_mode = 'circle'
+  elseif App.mouse_down(1) and chord == 'a' and Editor_state.current_drawing_mode == 'circle' then
     local _,drawing = Drawing.current_drawing()
     drawing.pending.mode = 'arc'
-    local mx,my = Drawing.coord(App.mouse_x()-Margin_left), Drawing.coord(App.mouse_y()-drawing.y)
+    local mx,my = Drawing.coord(App.mouse_x()-Editor_state.margin_left), Drawing.coord(App.mouse_y()-drawing.y)
     local center = drawing.points[drawing.pending.center]
     drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
   elseif App.mouse_down(1) and chord == 'o' then
-    Current_drawing_mode = 'circle'
+    Editor_state.current_drawing_mode = 'circle'
     local _,drawing = Drawing.current_drawing()
     if drawing.pending.mode == 'freehand' then
       drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
@@ -494,26 +494,26 @@ function Drawing.keychord_pressed(chord)
   elseif chord == 'C-u' and not App.mouse_down(1) then
     local drawing_index,drawing,i,p = Drawing.select_point_at_mouse()
     if drawing then
-      if Previous_drawing_mode == nil then
-        Previous_drawing_mode = Current_drawing_mode
+      if Editor_state.previous_drawing_mode == nil then
+        Editor_state.previous_drawing_mode = Editor_state.current_drawing_mode
       end
-      Current_drawing_mode = 'move'
-      drawing.pending = {mode=Current_drawing_mode, target_point=p, target_point_index=i}
-      Lines.current_drawing_index = drawing_index
-      Lines.current_drawing = drawing
+      Editor_state.current_drawing_mode = 'move'
+      drawing.pending = {mode=Editor_state.current_drawing_mode, target_point=p, target_point_index=i}
+      Editor_state.lines.current_drawing_index = drawing_index
+      Editor_state.lines.current_drawing = drawing
     end
   elseif chord == 'C-n' and not App.mouse_down(1) then
     local drawing_index,drawing,point_index,p = Drawing.select_point_at_mouse()
     if drawing then
-      if Previous_drawing_mode == nil then
+      if Editor_state.previous_drawing_mode == nil then
         -- don't clobber
-        Previous_drawing_mode = Current_drawing_mode
+        Editor_state.previous_drawing_mode = Editor_state.current_drawing_mode
       end
-      Current_drawing_mode = 'name'
+      Editor_state.current_drawing_mode = 'name'
       p.name = ''
-      drawing.pending = {mode=Current_drawing_mode, target_point=point_index}
-      Lines.current_drawing_index = drawing_index
-      Lines.current_drawing = drawing
+      drawing.pending = {mode=Editor_state.current_drawing_mode, target_point=point_index}
+      Editor_state.lines.current_drawing_index = drawing_index
+      Editor_state.lines.current_drawing = drawing
     end
   elseif chord == 'C-d' and not App.mouse_down(1) then
     local _,drawing,i,p = Drawing.select_point_at_mouse()
@@ -599,7 +599,7 @@ end
 
 function Drawing.current_drawing()
   local x, y = App.mouse_x(), App.mouse_y()
-  for drawing_index,drawing in ipairs(Lines) do
+  for drawing_index,drawing in ipairs(Editor_state.lines) do
     if drawing.mode == 'drawing' then
       if Drawing.in_drawing(drawing, x,y) then
         return drawing_index,drawing
@@ -610,11 +610,11 @@ function Drawing.current_drawing()
 end
 
 function Drawing.select_shape_at_mouse()
-  for _,drawing in ipairs(Lines) do
+  for _,drawing in ipairs(Editor_state.lines) do
     if drawing.mode == 'drawing' then
       local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         for i,shape in ipairs(drawing.shapes) do
           assert(shape)
           if geom.on_shape(mx,my, drawing, shape) then
@@ -627,11 +627,11 @@ function Drawing.select_shape_at_mouse()
 end
 
 function Drawing.select_point_at_mouse()
-  for drawing_index,drawing in ipairs(Lines) do
+  for drawing_index,drawing in ipairs(Editor_state.lines) do
     if drawing.mode == 'drawing' then
       local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
-        local mx,my = Drawing.coord(x-Margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
         for i,point in ipairs(drawing.points) do
           assert(point)
           if Drawing.near(point, mx,my) then
@@ -644,7 +644,7 @@ function Drawing.select_point_at_mouse()
 end
 
 function Drawing.select_drawing_at_mouse()
-  for _,drawing in ipairs(Lines) do
+  for _,drawing in ipairs(Editor_state.lines) do
     if drawing.mode == 'drawing' then
       local x, y = App.mouse_x(), App.mouse_y()
       if Drawing.in_drawing(drawing, x,y) then
@@ -700,14 +700,14 @@ end
 function Drawing.near(point, x,y)
   local px,py = Drawing.pixels(x),Drawing.pixels(y)
   local cx,cy = Drawing.pixels(point.x), Drawing.pixels(point.y)
-  return (cx-px)*(cx-px) + (cy-py)*(cy-py) < Margin_left
+  return (cx-px)*(cx-px) + (cy-py)*(cy-py) < Editor_state.margin_left
 end
 
 function Drawing.pixels(n)  -- parts to pixels
-  return math.floor(n*(App.screen.width-Margin_width)/256)
+  return math.floor(n*(App.screen.width-Editor_state.margin_width)/256)
 end
 function Drawing.coord(n)  -- pixels to parts
-  return math.floor(n*256/(App.screen.width-Margin_width))
+  return math.floor(n*256/(App.screen.width-Editor_state.margin_width))
 end
 
 function table.find(h, x)

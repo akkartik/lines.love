@@ -14,7 +14,7 @@ Editor_state = {}
 
 -- called both in tests and real run
 function App.initialize_globals()
-  edit.initialize_globals()
+  Editor_state = edit.initialize_state()
 
   -- resize
   Last_resize_time = nil
@@ -37,28 +37,28 @@ function App.initialize(arg)
   end
 
   if #arg > 0 then
-    Filename = arg[1]
-    Lines = load_from_disk(Filename)
-    Screen_top1 = {line=1, pos=1}
-    Cursor1 = {line=1, pos=1}
-    for i,line in ipairs(Lines) do
+    Editor_state.filename = arg[1]
+    Editor_state.lines = load_from_disk(Editor_state.filename)
+    Editor_state.screen_top1 = {line=1, pos=1}
+    Editor_state.cursor1 = {line=1, pos=1}
+    for i,line in ipairs(Editor_state.lines) do
       if line.mode == 'text' then
-        Cursor1.line = i
+        Editor_state.cursor1.line = i
         break
       end
     end
   else
-    Lines = load_from_disk(Filename)
-    if Cursor1.line > #Lines or Lines[Cursor1.line].mode ~= 'text' then
-      for i,line in ipairs(Lines) do
+    Editor_state.lines = load_from_disk(Editor_state.filename)
+    if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
+      for i,line in ipairs(Editor_state.lines) do
         if line.mode == 'text' then
-          Cursor1.line = i
+          Editor_state.cursor1.line = i
           break
         end
       end
     end
   end
-  love.window.setTitle('lines.love - '..Filename)
+  love.window.setTitle('lines.love - '..Editor_state.filename)
 
   if #arg > 1 then
     print('ignoring commandline args after '..arg[1])
@@ -83,10 +83,10 @@ function load_settings()
   App.screen.flags.minheight = math.min(App.screen.width, 200)
   App.screen.width, App.screen.height = settings.width, settings.height
   love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
-  Filename = settings.filename
+  Editor_state.filename = settings.filename
   initialize_font_settings(settings.font_height)
-  Screen_top1 = settings.screen_top
-  Cursor1 = settings.cursor
+  Editor_state.screen_top1 = settings.screen_top
+  Editor_state.cursor1 = settings.cursor
 end
 
 function load_defaults()
@@ -99,7 +99,7 @@ function initialize_window_geometry()
   love.window.setMode(0, 0)  -- maximize
   App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
   -- shrink slightly to account for window decoration
-  App.screen.width = 40*App.width(Em)
+  App.screen.width = 40*App.width(Editor_state.em)
   App.screen.height = App.screen.height-100
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
@@ -111,37 +111,37 @@ function App.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Text.redraw_all()
-  Selection1 = {}  -- no support for shift drag while we're resizing
-  Text.tweak_screen_top_and_cursor(Margin_left, App.screen.height-Margin_right)
+  Editor_state.selection1 = {}  -- no support for shift drag while we're resizing
+  Text.tweak_screen_top_and_cursor(Editor_state.margin_left, App.screen.height-Editor_state.margin_right)
   Last_resize_time = App.getTime()
 end
 
 function initialize_font_settings(font_height)
-  Font_height = font_height
-  love.graphics.setFont(love.graphics.newFont(Font_height))
-  Line_height = math.floor(font_height*1.3)
+  Editor_state.font_height = font_height
+  love.graphics.setFont(love.graphics.newFont(Editor_state.font_height))
+  Editor_state.line_height = math.floor(font_height*1.3)
 
-  Em = App.newText(love.graphics.getFont(), 'm')
+  Editor_state.em = App.newText(love.graphics.getFont(), 'm')
 end
 
 function App.filedropped(file)
   -- first make sure to save edits on any existing file
-  if Next_save then
-    save_to_disk(Lines, Filename)
+  if Editor_state.next_save then
+    save_to_disk(Editor_state.lines, Editor_state.filename)
   end
   -- clear the slate for the new file
   App.initialize_globals()  -- in particular, forget all undo history
-  Filename = file:getFilename()
+  Editor_state.filename = file:getFilename()
   file:open('r')
-  Lines = load_from_file(file)
+  Editor_state.lines = load_from_file(file)
   file:close()
-  for i,line in ipairs(Lines) do
+  for i,line in ipairs(Editor_state.lines) do
     if line.mode == 'text' then
-      Cursor1.line = i
+      Editor_state.cursor1.line = i
       break
     end
   end
-  love.window.setTitle('Text with Lines - '..Filename)
+  love.window.setTitle('Text with Editor_state.lines - '..Editor_state.filename)
 end
 
 function App.draw()
@@ -166,16 +166,16 @@ function love.quit()
   edit.quit()
   -- save some important settings
   local x,y,displayindex = love.window.getPosition()
-  local filename = Filename
+  local filename = Editor_state.filename
   if filename:sub(1,1) ~= '/' then
     filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
   end
   local settings = {
     x=x, y=y, displayindex=displayindex,
     width=App.screen.width, height=App.screen.height,
-    font_height=Font_height,
+    font_height=Editor_state.font_height,
     filename=filename,
-    screen_top=Screen_top1, cursor=Cursor1}
+    screen_top=Editor_state.screen_top1, cursor=Editor_state.cursor1}
   love.filesystem.write('config', json.encode(settings))
 end
 
