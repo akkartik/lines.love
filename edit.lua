@@ -1,3 +1,15 @@
+-- some constants people might like to tweak
+Text_color = {r=0, g=0, b=0}
+Cursor_color = {r=1, g=0, b=0}
+Stroke_color = {r=0, g=0, b=0}
+Current_stroke_color = {r=0.7, g=0.7, b=0.7}  -- in process of being drawn
+Current_name_background_color = {r=1, g=0, b=0, a=0.1}  -- name currently being edited
+Focus_stroke_color = {r=1, g=0, b=0}  -- what mouse is hovering over
+Highlight_color = {r=0.7, g=0.7, b=0.9}  -- selected text
+Icon_color = {r=0.7, g=0.7, b=0.7}  -- color of current mode icon in drawings
+Help_color = {r=0, g=0.5, b=0}
+Help_background_color = {r=0, g=0.5, b=0, a=0.1}
+
 utf8 = require 'utf8'
 
 require 'file'
@@ -102,7 +114,7 @@ end  -- App.initialize_globals
 function edit.draw()
   Button_handlers = {}
 
-  love.graphics.setColor(0, 0, 0)
+  App.color(Text_color)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos)
   assert(Text.le1(Screen_top1, Cursor1))
   Cursor_y = -1

@@ -11,14 +11,14 @@ function Text.draw_search_bar()
   love.graphics.rectangle('fill', 20, y-6, App.screen.width-40, h+2, 2,2)
   love.graphics.setColor(0.6,0.6,0.6)
   love.graphics.rectangle('line', 20, y-6, App.screen.width-40, h+2, 2,2)
-  love.graphics.setColor(0,0,0)
+  App.color(Text_color)
   App.screen.print(Search_term, 25,y-5)
-  love.graphics.setColor(1,0,0)
+  App.color(Cursor_color)
   if Search_text == nil then
     Search_text = App.newText(love.graphics.getFont(), Search_term)
   end
   love.graphics.circle('fill', 25+App.width(Search_text),y-5+h, 2)
-  love.graphics.setColor(0,0,0)
+  App.color(Text_color)
 end
 
 function Text.search_next()

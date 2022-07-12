@@ -157,6 +157,10 @@ function App.screen.print(msg, x,y)
   end
 end
 
+function App.color(color)
+  love.graphics.setColor(color.r, color.g, color.b, color.a)
+end
+
 App.time = 1
 function App.getTime()
   return App.time

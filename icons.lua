@@ -1,25 +1,10 @@
 icon = {}
 
-function icon.line_width(x, y)
-  love.graphics.setColor(0.7,0.7,0.7)
-  love.graphics.line(x+0,y+0, x+9,y+0)
-  love.graphics.line(x+0,y+1, x+9,y+1)
-  love.graphics.line(x+0,y+2, x+9,y+2)
-  love.graphics.line(x+0,y+3, x+9,y+3)
-  love.graphics.line(x+0,y+4, x+9,y+4)
-  love.graphics.line(x+0,y+5, x+9,y+5)
-  love.graphics.line(x+1,y+6, x+8,y+6)
-  love.graphics.line(x+2,y+7, x+7,y+7)
-  love.graphics.line(x+3,y+8, x+6,y+8)
-  love.graphics.line(x+4,y+9, x+5,y+9)
-end
-
 function icon.insert_drawing(x, y)
-  love.graphics.setColor(0.7,0.7,0.7)
+  App.color(Icon_color)
   love.graphics.rectangle('line', x,y, 12,12)
   love.graphics.line(4,y+6, 16,y+6)
   love.graphics.line(10,y, 10,y+12)
-  love.graphics.setColor(0, 0, 0)
 end
 
 function icon.freehand(x, y)

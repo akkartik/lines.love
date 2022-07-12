@@ -11,7 +11,7 @@ require 'text_tests'
 --  position of start of final screen line drawn
 function Text.draw(line, line_index, top, left, right)
 --?   print('text.draw', line_index)
-  love.graphics.setColor(0,0,0)
+  App.color(Text_color)
   -- wrap long lines
   local x = left
   local y = top
@@ -59,7 +59,7 @@ function Text.draw(line, line_index, top, left, right)
         if Search_term then
           if Lines[Cursor1.line].data:sub(Cursor1.pos, Cursor1.pos+utf8.len(Search_term)-1) == Search_term then
             local lo_px = Text.draw_highlight(line, x,y, pos, Cursor1.pos, Cursor1.pos+utf8.len(Search_term))
-            love.graphics.setColor(0,0,0)
+            App.color(Text_color)
             love.graphics.print(Search_term, x+lo_px,y)
           end
         else
@@ -83,9 +83,9 @@ end
 function Text.draw_cursor(x, y)
   -- blink every 0.5s
   if math.floor(Cursor_time*2)%2 == 0 then
-    love.graphics.setColor(1,0,0)
+    App.color(Cursor_color)
     love.graphics.rectangle('fill', x,y, 3,Line_height)
-    love.graphics.setColor(0,0,0)
+    App.color(Text_color)
   end
   Cursor_x = x
   Cursor_y = y+Line_height

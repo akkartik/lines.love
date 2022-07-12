@@ -7,7 +7,7 @@ require 'drawing_tests'
 function Drawing.draw(line)
   local pmx,pmy = App.mouse_x(), App.mouse_y()
   if pmx < App.screen.width-Margin_right and pmy > line.y and pmy < line.y+Drawing.pixels(line.h) then
-    love.graphics.setColor(0.75,0.75,0.75)
+    App.color(Icon_color)
     love.graphics.rectangle('line', Margin_left,line.y, App.screen.width-Margin_width,Drawing.pixels(line.h))
     if icon[Current_drawing_mode] then
       icon[Current_drawing_mode](App.screen.width-Margin_right-22, line.y+4)
@@ -31,19 +31,19 @@ function Drawing.draw(line)
   for _,shape in ipairs(line.shapes) do
     assert(shape)
     if geom.on_shape(mx,my, line, shape) then
-      love.graphics.setColor(1,0,0)
+      App.color(Focus_stroke_color)
     else
-      love.graphics.setColor(0,0,0)
+      App.color(Stroke_color)
     end
     Drawing.draw_shape(Margin_left,line.y, line, shape)
   end
   for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my) then
-        love.graphics.setColor(1,0,0)
+        App.color(Focus_stroke_color)
         love.graphics.circle('line', Drawing.pixels(p.x)+Margin_left,Drawing.pixels(p.y)+line.y, 4)
       else
-        love.graphics.setColor(0,0,0)
+        App.color(Stroke_color)
         love.graphics.circle('fill', Drawing.pixels(p.x)+Margin_left,Drawing.pixels(p.y)+line.y, 2)
       end
       if p.name then
@@ -52,7 +52,7 @@ function Drawing.draw(line)
         love.graphics.print(p.name, x,y)
         if Current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
-          love.graphics.setColor(1,0,0,0.1)
+          App.color(Current_name_background_color)
           local name_text
           -- TODO: avoid computing name width on every repaint
           if p.name == '' then
@@ -65,7 +65,7 @@ function Drawing.draw(line)
       end
     end
   end
-  love.graphics.setColor(0.75,0.75,0.75)
+  App.color(Current_stroke_color)
   Drawing.draw_pending_shape(Margin_left,line.y, line)
 end
 

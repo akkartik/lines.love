@@ -1,5 +1,5 @@
 function draw_help_without_mouse_pressed(drawing)
-  love.graphics.setColor(0,0.5,0)
+  App.color(Help_color)
   local y = drawing.y+10
   love.graphics.print("Things you can do:", Margin_left+30,y)
   y = y + Line_height
@@ -45,12 +45,12 @@ function draw_help_without_mouse_pressed(drawing)
   y = y + Line_height
   love.graphics.print("Press 'esc' now to hide this message", Margin_left+30,y)
   y = y + Line_height
-  love.graphics.setColor(0,0.5,0, 0.1)
+  App.color(Help_background_color)
   love.graphics.rectangle('fill', Margin_left,drawing.y, App.screen.width-Margin_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(drawing)
-  love.graphics.setColor(0,0.5,0)
+  App.color(Help_color)
   local y = drawing.y+10
   love.graphics.print("You're currently drawing a "..current_shape(drawing.pending), Margin_left+30,y)
   y = y + Line_height
@@ -124,7 +124,7 @@ function draw_help_with_mouse_pressed(drawing)
     love.graphics.print("* Press 's' to switch to drawing squares", Margin_left+30,y)
     y = y + Line_height
   end
-  love.graphics.setColor(0,0.5,0, 0.1)
+  App.color(Help_background_color)
   love.graphics.rectangle('fill', Margin_left,drawing.y, App.screen.width-Margin_width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
 end
 
