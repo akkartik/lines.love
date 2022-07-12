@@ -239,7 +239,7 @@ function edit.mouse_released(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print('release')
   if State.lines.current_drawing then
-    Drawing.mouse_released(x,y, mouse_button)
+    Drawing.mouse_released(State, x,y, mouse_button)
     schedule_save()
     if Drawing.before then
       record_undo_event({before=Drawing.before, after=snapshot(State.lines.current_drawing_index)})

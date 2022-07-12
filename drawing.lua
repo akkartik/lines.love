@@ -276,16 +276,16 @@ function Drawing.relax_constraints(drawing, p)
   end
 end
 
-function Drawing.mouse_released(x,y, button)
-  if Editor_state.current_drawing_mode == 'move' then
-    Editor_state.current_drawing_mode = Editor_state.previous_drawing_mode
-    Editor_state.previous_drawing_mode = nil
-    if Editor_state.lines.current_drawing then
-      Editor_state.lines.current_drawing.pending = {}
-      Editor_state.lines.current_drawing = nil
+function Drawing.mouse_released(State, x,y, button)
+  if State.current_drawing_mode == 'move' then
+    State.current_drawing_mode = State.previous_drawing_mode
+    State.previous_drawing_mode = nil
+    if State.lines.current_drawing then
+      State.lines.current_drawing.pending = {}
+      State.lines.current_drawing = nil
     end
-  elseif Editor_state.lines.current_drawing then
-    local drawing = Editor_state.lines.current_drawing
+  elseif State.lines.current_drawing then
+    local drawing = State.lines.current_drawing
     if drawing.pending then
       if drawing.pending.mode == nil then
         -- nothing pending
@@ -294,14 +294,14 @@ function Drawing.mouse_released(x,y, button)
         Drawing.smoothen(drawing.pending)
         table.insert(drawing.shapes, drawing.pending)
       elseif drawing.pending.mode == 'line' then
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           drawing.pending.p2 = Drawing.insert_point(drawing.points, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'manhattan' then
         local p1 = drawing.points[drawing.pending.p1]
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
             drawing.pending.p2 = Drawing.insert_point(drawing.points, mx, p1.y)
@@ -309,11 +309,11 @@ function Drawing.mouse_released(x,y, button)
             drawing.pending.p2 = Drawing.insert_point(drawing.points, p1.x, my)
           end
           local p2 = drawing.points[drawing.pending.p2]
-          App.mouse_move(Editor_state.margin_left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
+          App.mouse_move(State.margin_left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'polygon' then
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, mx,my))
           table.insert(drawing.shapes, drawing.pending)
@@ -321,7 +321,7 @@ function Drawing.mouse_released(x,y, button)
       elseif drawing.pending.mode == 'rectangle' then
         assert(#drawing.pending.vertices <= 2)
         if #drawing.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+          local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
           if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
@@ -336,7 +336,7 @@ function Drawing.mouse_released(x,y, button)
       elseif drawing.pending.mode == 'square' then
         assert(#drawing.pending.vertices <= 2)
         if #drawing.pending.vertices == 2 then
-          local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+          local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
           if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
@@ -347,14 +347,14 @@ function Drawing.mouse_released(x,y, button)
           end
         end
       elseif drawing.pending.mode == 'circle' then
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           local center = drawing.points[drawing.pending.center]
           drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'arc' then
-        local mx,my = Drawing.coord(x-Editor_state.margin_left), Drawing.coord(y-drawing.y)
+        local mx,my = Drawing.coord(x-State.margin_left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           local center = drawing.points[drawing.pending.center]
           drawing.pending.end_angle = geom.angle_with_hint(center.x,center.y, mx,my, drawing.pending.end_angle)
@@ -366,8 +366,8 @@ function Drawing.mouse_released(x,y, button)
         print(drawing.pending.mode)
         assert(false)
       end
-      Editor_state.lines.current_drawing.pending = {}
-      Editor_state.lines.current_drawing = nil
+      State.lines.current_drawing.pending = {}
+      State.lines.current_drawing = nil
     end
   end
 end
