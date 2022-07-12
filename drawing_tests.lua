@@ -9,7 +9,7 @@ function test_creating_drawing_saves()
   Editor_state.lines = load_array{}
   edit.draw(Editor_state)
   -- click on button to create drawing
-  App.run_after_mouse_click(8,Editor_state.margin_top+8, 1)
+  edit.run_after_mouse_click(Editor_state, 8,Editor_state.margin_top+8, 1)
   -- file not immediately saved
   App.update(0.01)
   check_nil(App.filesystem['foo'], 'F - test_creating_drawing_saves/early')
@@ -34,8 +34,8 @@ function test_draw_line()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_line/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_line/baseline/#shapes')
   -- draw a line
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_line/#shapes')
   check_eq(#drawing.points, 2, 'F - test_draw_line/#points')
@@ -77,8 +77,8 @@ function test_draw_horizontal_line()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_horizontal_line/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_horizontal_line/baseline/#shapes')
   -- draw a line that is more horizontal than vertical
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_horizontal_line/#shapes')
   check_eq(#drawing.points, 2, 'F - test_draw_horizontal_line/#points')
@@ -105,9 +105,9 @@ function test_draw_circle()
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_circle/baseline/#shapes')
   -- draw a circle
   App.mouse_move(Editor_state.margin_left+4, Editor_state.margin_top+Editor_state.drawing_padding_top+4)  -- hover on drawing
-  App.run_after_keychord('C-o')
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35+30, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 'C-o')
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35+30, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_circle/#shapes')
   check_eq(#drawing.points, 1, 'F - test_draw_circle/#points')
@@ -132,10 +132,10 @@ function test_cancel_stroke()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_cancel_stroke/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_cancel_stroke/baseline/#shapes')
   -- start drawing a line
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
   -- cancel
-  App.run_after_keychord('escape')
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 'escape')
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 0, 'F - test_cancel_stroke/#shapes')
 end
@@ -149,7 +149,7 @@ function test_keys_do_not_affect_shape_when_mouse_up()
   edit.draw(Editor_state)
   -- hover over drawing and press 'o' without holding mouse
   App.mouse_move(Editor_state.margin_left+4, Editor_state.margin_top+Editor_state.drawing_padding_top+4)  -- hover on drawing
-  App.run_after_keychord('o')
+  edit.run_after_keychord(Editor_state, 'o')
   -- no change to drawing mode
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_keys_do_not_affect_shape_when_mouse_up/drawing_mode')
   -- no change to text either because we didn't run the textinput event
@@ -169,9 +169,9 @@ function test_draw_circle_mid_stroke()
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_circle_mid_stroke/baseline/#shapes')
   -- draw a circle
   App.mouse_move(Editor_state.margin_left+4, Editor_state.margin_top+Editor_state.drawing_padding_top+4)  -- hover on drawing
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_keychord('o')
-  App.run_after_mouse_release(Editor_state.margin_left+35+30, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 'o')
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35+30, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_circle_mid_stroke/#shapes')
   check_eq(#drawing.points, 1, 'F - test_draw_circle_mid_stroke/#points')
@@ -195,10 +195,10 @@ function test_draw_arc()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_arc/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_arc/baseline/#shapes')
   -- draw an arc
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   App.mouse_move(Editor_state.margin_left+35+30, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('a')  -- arc mode
-  App.run_after_mouse_release(Editor_state.margin_left+35+50, Editor_state.margin_top+Editor_state.drawing_padding_top+36+50, 1)  -- 45°
+  edit.run_after_keychord(Editor_state, 'a')  -- arc mode
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35+50, Editor_state.margin_top+Editor_state.drawing_padding_top+36+50, 1)  -- 45°
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_arc/#shapes')
   check_eq(#drawing.points, 1, 'F - test_draw_arc/#points')
@@ -225,13 +225,13 @@ function test_draw_polygon()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_polygon/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_polygon/baseline/#shapes')
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_keychord('g')  -- polygon mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_keychord(Editor_state, 'g')  -- polygon mode
   -- second point
   App.mouse_move(Editor_state.margin_left+65, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('p')  -- add point
+  edit.run_after_keychord(Editor_state, 'p')  -- add point
   -- final point
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_polygon/#shapes')
   check_eq(#drawing.points, 3, 'F - test_draw_polygon/vertices')
@@ -262,16 +262,16 @@ function test_draw_rectangle()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_rectangle/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_rectangle/baseline/#shapes')
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_keychord('r')  -- rectangle mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 'r')  -- rectangle mode
   -- second point/first edge
   App.mouse_move(Editor_state.margin_left+42, Editor_state.margin_top+Editor_state.drawing_padding_top+45)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   -- override second point/first edge
   App.mouse_move(Editor_state.margin_left+75, Editor_state.margin_top+Editor_state.drawing_padding_top+76)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   -- release (decides 'thickness' of rectangle perpendicular to first edge)
-  App.run_after_mouse_release(Editor_state.margin_left+15, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+15, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_rectangle/#shapes')
   check_eq(#drawing.points, 5, 'F - test_draw_rectangle/#points')  -- currently includes every point added
@@ -305,14 +305,14 @@ function test_draw_rectangle_intermediate()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_rectangle_intermediate/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_rectangle_intermediate/baseline/#shapes')
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_keychord('r')  -- rectangle mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 'r')  -- rectangle mode
   -- second point/first edge
   App.mouse_move(Editor_state.margin_left+42, Editor_state.margin_top+Editor_state.drawing_padding_top+45)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   -- override second point/first edge
   App.mouse_move(Editor_state.margin_left+75, Editor_state.margin_top+Editor_state.drawing_padding_top+76)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.points, 3, 'F - test_draw_rectangle_intermediate/#points')  -- currently includes every point added
   local pending = drawing.pending
@@ -340,16 +340,16 @@ function test_draw_square()
   check_eq(Editor_state.lines[1].h, 128, 'F - test_draw_square/baseline/y')
   check_eq(#Editor_state.lines[1].shapes, 0, 'F - test_draw_square/baseline/#shapes')
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_keychord('s')  -- square mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_keychord(Editor_state, 's')  -- square mode
   -- second point/first edge
   App.mouse_move(Editor_state.margin_left+42, Editor_state.margin_top+Editor_state.drawing_padding_top+45)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   -- override second point/first edge
   App.mouse_move(Editor_state.margin_left+65, Editor_state.margin_top+Editor_state.drawing_padding_top+66)
-  App.run_after_keychord('p')
+  edit.run_after_keychord(Editor_state, 'p')
   -- release (decides which side of first edge to draw square on)
-  App.run_after_mouse_release(Editor_state.margin_left+15, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+15, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_square/#shapes')
   check_eq(#drawing.points, 5, 'F - test_draw_square/#points')  -- currently includes every point added
@@ -378,8 +378,8 @@ function test_name_point()
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
   -- draw a line
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_name_point/baseline/#shapes')
   check_eq(#drawing.points, 2, 'F - test_name_point/baseline/#points')
@@ -392,14 +392,14 @@ function test_name_point()
   check_eq(p2.y, 36, 'F - test_name_point/baseline/p2:y')
   check_nil(p2.name, 'F - test_name_point/baseline/p2:name')
   -- enter 'name' mode without moving the mouse
-  App.run_after_keychord('C-n')
+  edit.run_after_keychord(Editor_state, 'C-n')
   check_eq(Editor_state.current_drawing_mode, 'name', 'F - test_name_point/mode:1')
-  App.run_after_textinput('A')
+  edit.run_after_textinput(Editor_state, 'A')
   check_eq(p2.name, 'A', 'F - test_name_point')
   -- still in 'name' mode
   check_eq(Editor_state.current_drawing_mode, 'name', 'F - test_name_point/mode:2')
   -- exit 'name' mode
-  App.run_after_keychord('return')
+  edit.run_after_keychord(Editor_state, 'return')
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_name_point/mode:3')
   check_eq(p2.name, 'A', 'F - test_name_point')
   -- wait until save
@@ -419,8 +419,8 @@ function test_move_point()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_move_point/baseline/#shapes')
   check_eq(#drawing.points, 2, 'F - test_move_point/baseline/#points')
@@ -442,7 +442,7 @@ function test_move_point()
   check_eq(p2.y, 36, 'F - test_move_point/save/y')
   edit.draw(Editor_state)
   -- enter 'move' mode without moving the mouse
-  App.run_after_keychord('C-u')
+  edit.run_after_keychord(Editor_state, 'C-u')
   check_eq(Editor_state.current_drawing_mode, 'move', 'F - test_move_point/mode:1')
   -- point is lifted
   check_eq(drawing.pending.mode, 'move', 'F - test_move_point/mode:2')
@@ -454,7 +454,7 @@ function test_move_point()
   check_eq(p2.x, 26, 'F - test_move_point/x')
   check_eq(p2.y, 44, 'F - test_move_point/y')
   -- exit 'move' mode
-  App.run_after_mouse_click(Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44, 1)
+  edit.run_after_mouse_click(Editor_state, Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44, 1)
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_move_point/mode:3')
   check_eq(drawing.pending, {}, 'F - test_move_point/pending')
   -- wait until save
@@ -475,15 +475,15 @@ function test_move_point_on_manhattan_line()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'manhattan'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+46, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+46, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_move_point_on_manhattan_line/baseline/#shapes')
   check_eq(#drawing.points, 2, 'F - test_move_point_on_manhattan_line/baseline/#points')
   check_eq(drawing.shapes[1].mode, 'manhattan', 'F - test_move_point_on_manhattan_line/baseline/shape:1')
   edit.draw(Editor_state)
   -- enter 'move' mode
-  App.run_after_keychord('C-u')
+  edit.run_after_keychord(Editor_state, 'C-u')
   check_eq(Editor_state.current_drawing_mode, 'move', 'F - test_move_point_on_manhattan_line/mode:1')
   -- move point
   App.mouse_move(Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44)
@@ -500,17 +500,17 @@ function test_delete_lines_at_point()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 2, 'F - test_delete_lines_at_point/baseline/#shapes')
   check_eq(drawing.shapes[1].mode, 'line', 'F - test_delete_lines_at_point/baseline/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_lines_at_point/baseline/shape:2')
   -- hover on the common point and delete
   App.mouse_move(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('C-d')
+  edit.run_after_keychord(Editor_state, 'C-d')
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_lines_at_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_delete_lines_at_point/shape:2')
   -- wait for some time
@@ -528,17 +528,17 @@ function test_delete_line_under_mouse_pointer()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 2, 'F - test_delete_line_under_mouse_pointer/baseline/#shapes')
   check_eq(drawing.shapes[1].mode, 'line', 'F - test_delete_line_under_mouse_pointer/baseline/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_line_under_mouse_pointer/baseline/shape:2')
   -- hover on one of the lines and delete
   App.mouse_move(Editor_state.margin_left+25, Editor_state.margin_top+Editor_state.drawing_padding_top+26)
-  App.run_after_keychord('C-d')
+  edit.run_after_keychord(Editor_state, 'C-d')
   -- only that line is deleted
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_line_under_mouse_pointer/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_delete_line_under_mouse_pointer/shape:2')
@@ -552,23 +552,23 @@ function test_delete_point_from_polygon()
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_keychord('g')  -- polygon mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_keychord(Editor_state, 'g')  -- polygon mode
   -- second point
   App.mouse_move(Editor_state.margin_left+65, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('p')  -- add point
+  edit.run_after_keychord(Editor_state, 'p')  -- add point
   -- third point
   App.mouse_move(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26)
-  App.run_after_keychord('p')  -- add point
+  edit.run_after_keychord(Editor_state, 'p')  -- add point
   -- fourth point
-  App.run_after_mouse_release(Editor_state.margin_left+14, Editor_state.margin_top+Editor_state.drawing_padding_top+16, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+14, Editor_state.margin_top+Editor_state.drawing_padding_top+16, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_delete_point_from_polygon/baseline/#shapes')
   check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/baseline/mode')
   check_eq(#drawing.shapes[1].vertices, 4, 'F - test_delete_point_from_polygon/baseline/vertices')
   -- hover on a point and delete
   App.mouse_move(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+26)
-  App.run_after_keychord('C-d')
+  edit.run_after_keychord(Editor_state, 'C-d')
   -- just the one point is deleted
   check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/shape')
   check_eq(#drawing.shapes[1].vertices, 3, 'F - test_delete_point_from_polygon/vertices')
@@ -582,20 +582,20 @@ function test_delete_point_from_polygon()
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
   -- first point
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_keychord('g')  -- polygon mode
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_keychord(Editor_state, 'g')  -- polygon mode
   -- second point
   App.mouse_move(Editor_state.margin_left+65, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('p')  -- add point
+  edit.run_after_keychord(Editor_state, 'p')  -- add point
   -- third point
-  App.run_after_mouse_release(Editor_state.margin_left+14, Editor_state.margin_top+Editor_state.drawing_padding_top+16, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+14, Editor_state.margin_top+Editor_state.drawing_padding_top+16, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_delete_point_from_polygon/baseline/#shapes')
   check_eq(drawing.shapes[1].mode, 'polygon', 'F - test_delete_point_from_polygon/baseline/mode')
   check_eq(#drawing.shapes[1].vertices, 3, 'F - test_delete_point_from_polygon/baseline/vertices')
   -- hover on a point and delete
   App.mouse_move(Editor_state.margin_left+65, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('C-d')
+  edit.run_after_keychord(Editor_state, 'C-d')
   -- there's < 3 points left, so the whole polygon is deleted
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_point_from_polygon')
 end
@@ -609,8 +609,8 @@ function test_undo_name_point()
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
   -- draw a line
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_undo_name_point/baseline/#shapes')
   check_eq(#drawing.points, 2, 'F - test_undo_name_point/baseline/#points')
@@ -624,14 +624,14 @@ function test_undo_name_point()
   check_nil(p2.name, 'F - test_undo_name_point/baseline/p2:name')
   check_eq(#Editor_state.history, 1, 'F - test_undo_name_point/baseline/history:1')
   -- enter 'name' mode without moving the mouse
-  App.run_after_keychord('C-n')
-  App.run_after_textinput('A')
-  App.run_after_keychord('return')
+  edit.run_after_keychord(Editor_state, 'C-n')
+  edit.run_after_textinput(Editor_state, 'A')
+  edit.run_after_keychord(Editor_state, 'return')
   check_eq(p2.name, 'A', 'F - test_undo_name_point/baseline')
   check_eq(#Editor_state.history, 3, 'F - test_undo_name_point/baseline/history:2')
   check_eq(Editor_state.next_history, 4, 'F - test_undo_name_point/baseline/next_history')
   -- undo
-  App.run_after_keychord('C-z')
+  edit.run_after_keychord(Editor_state, 'C-z')
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 3, 'F - test_undo_name_point/next_history')
@@ -653,8 +653,8 @@ function test_undo_move_point()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_undo_move_point/baseline/#shapes')
   check_eq(#drawing.points, 2, 'F - test_undo_move_point/baseline/#points')
@@ -667,18 +667,18 @@ function test_undo_move_point()
   check_eq(p2.y, 36, 'F - test_undo_move_point/baseline/p2:y')
   check_nil(p2.name, 'F - test_undo_move_point/baseline/p2:name')
   -- move p2
-  App.run_after_keychord('C-u')
+  edit.run_after_keychord(Editor_state, 'C-u')
   App.mouse_move(Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44)
   App.update(0.05)
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(p2.x, 26, 'F - test_undo_move_point/x')
   check_eq(p2.y, 44, 'F - test_undo_move_point/y')
   -- exit 'move' mode
-  App.run_after_mouse_click(Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44, 1)
+  edit.run_after_mouse_click(Editor_state, Editor_state.margin_left+26, Editor_state.margin_top+Editor_state.drawing_padding_top+44, 1)
   check_eq(Editor_state.next_history, 4, 'F - test_undo_move_point/next_history')
   -- undo
-  App.run_after_keychord('C-z')
-  App.run_after_keychord('C-z')  -- bug: need to undo twice
+  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z')  -- bug: need to undo twice
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 2, 'F - test_undo_move_point/next_history')
@@ -702,21 +702,21 @@ function test_undo_delete_point()
   Editor_state.lines = load_array{'```lines', '```', ''}
   Editor_state.current_drawing_mode = 'line'
   edit.draw(Editor_state)
-  App.run_after_mouse_press(Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_press(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
-  App.run_after_mouse_release(Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+5, Editor_state.margin_top+Editor_state.drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+55, Editor_state.margin_top+Editor_state.drawing_padding_top+26, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 2, 'F - test_undo_delete_point/baseline/#shapes')
   check_eq(drawing.shapes[1].mode, 'line', 'F - test_undo_delete_point/baseline/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_undo_delete_point/baseline/shape:2')
   -- hover on the common point and delete
   App.mouse_move(Editor_state.margin_left+35, Editor_state.margin_top+Editor_state.drawing_padding_top+36)
-  App.run_after_keychord('C-d')
+  edit.run_after_keychord(Editor_state, 'C-d')
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_undo_delete_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_undo_delete_point/shape:2')
   -- undo
-  App.run_after_keychord('C-z')
+  edit.run_after_keychord(Editor_state, 'C-z')
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 3, 'F - test_undo_move_point/next_history')

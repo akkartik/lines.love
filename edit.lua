@@ -440,3 +440,46 @@ end
 
 function edit.key_released(State, key, scancode)
 end
+
+--== copy some App methods for tests
+
+-- all textinput events are also keypresses
+-- TODO: handle chords of multiple keys
+function edit.run_after_textinput(State, t)
+  edit.keychord_pressed(State, t)
+  edit.textinput(State, t)
+  edit.key_released(State, t)
+  App.screen.contents = {}
+  edit.draw(State)
+end
+
+-- not all keys are textinput
+function edit.run_after_keychord(State, chord)
+  edit.keychord_pressed(State, chord)
+  edit.key_released(State, chord)
+  App.screen.contents = {}
+  edit.draw(State)
+end
+
+function edit.run_after_mouse_click(State, x,y, button)
+  App.fake_mouse_press(x,y, button)
+  edit.mouse_pressed(State, x,y, button)
+  App.fake_mouse_release(x,y, button)
+  edit.mouse_released(State, x,y, button)
+  App.screen.contents = {}
+  edit.draw(State)
+end
+
+function edit.run_after_mouse_press(State, x,y, button)
+  App.fake_mouse_press(x,y, button)
+  edit.mouse_pressed(State, x,y, button)
+  App.screen.contents = {}
+  edit.draw(State)
+end
+
+function edit.run_after_mouse_release(State, x,y, button)
+  App.fake_mouse_release(x,y, button)
+  edit.mouse_released(State, x,y, button)
+  App.screen.contents = {}
+  edit.draw(State)
+end
