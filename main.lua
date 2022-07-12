@@ -2,12 +2,15 @@ utf8 = require 'utf8'
 
 require 'app'
 require 'test'
+
 require 'keychord'
+require 'button'
 
 require 'main_tests'
 
 -- delegate most business logic to a layer that can be reused by other projects
 require 'edit'
+Editor_state = {}
 
 -- called both in tests and real run
 function App.initialize_globals()
@@ -136,6 +139,7 @@ function App.filedropped(file)
 end
 
 function App.draw()
+  Button_handlers = {}
   edit.draw()
 end
 

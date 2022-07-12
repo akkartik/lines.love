@@ -13,7 +13,6 @@ Help_background_color = {r=0, g=0.5, b=0, a=0.1}
 utf8 = require 'utf8'
 
 require 'file'
-require 'button'
 require 'text'
 require 'drawing'
 require 'geom'
@@ -112,8 +111,6 @@ Cursor_time = 0
 end  -- App.initialize_globals
 
 function edit.draw()
-  Button_handlers = {}
-
   App.color(Text_color)
 --?   print(Screen_top1.line, Screen_top1.pos, Cursor1.line, Cursor1.pos)
   assert(Text.le1(Screen_top1, Cursor1))
