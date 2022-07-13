@@ -241,13 +241,17 @@ function Drawing.update(State)
   if State.lines.current_drawing == nil then return end
   local drawing = State.lines.current_drawing
   assert(drawing.mode == 'drawing')
+  if drawing.y == nil then
+    return  -- first draw?
+  end
   local pmx, pmy = App.mouse_x(), App.mouse_y()
+  local mx = Drawing.coord(pmx-State.left, State.width)
+  local my = Drawing.coord(pmy-drawing.y, State.width)
   if App.mouse_down(1) then
     if Drawing.in_drawing(drawing, pmx,pmy, State.left,State.right) then
       if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(pmx-State.left, State.width), y=Drawing.coord(pmy-drawing.y, State.width)})
+        table.insert(drawing.pending.points, {x=mx, y=my})
       elseif drawing.pending.mode == 'move' then
-        local mx,my = Drawing.coord(pmx-State.left, State.width), Drawing.coord(pmy-drawing.y, State.width)
         drawing.pending.target_point.x = mx
         drawing.pending.target_point.y = my
         Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
@@ -255,7 +259,6 @@ function Drawing.update(State)
     end
   elseif State.current_drawing_mode == 'move' then
     if Drawing.in_drawing(drawing, pmx, pmy, State.left,State.right) then
-      local mx,my = Drawing.coord(pmx-State.left, State.width), Drawing.coord(pmy-drawing.y, State.width)
       drawing.pending.target_point.x = mx
       drawing.pending.target_point.y = my
       Drawing.relax_constraints(drawing, drawing.pending.target_point_index)
