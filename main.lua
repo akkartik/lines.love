@@ -122,6 +122,8 @@ function App.resize(w, h)
   App.screen.width, App.screen.height = w, h
   Text.redraw_all(Editor_state)
   Editor_state.selection1 = {}  -- no support for shift drag while we're resizing
+  Editor_state.right = App.screen.width-Margin_right
+  Editor_state.width = Editor_state.right-Editor_state.left
   Text.tweak_screen_top_and_cursor(Editor_state, Editor_state.left, Editor_state.right)
   Last_resize_time = App.getTime()
 end
