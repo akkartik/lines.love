@@ -39,8 +39,8 @@ function Drawing.draw(State, line)
     Drawing.draw_shape(line, shape, line.y, State.left,State.right)
   end
 
-  local px = function(x) return Drawing.pixels(x, State.width)+State.left end
-  local py = function(y) return Drawing.pixels(y, State.width)+line.y end
+  local function px(x) return Drawing.pixels(x, State.width)+State.left end
+  local function py(y) return Drawing.pixels(y, State.width)+line.y end
   for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my, State.width) then
@@ -75,8 +75,8 @@ end
 
 function Drawing.draw_shape(drawing, shape, top, left,right)
   local width = right-left
-  local px = function(x) return Drawing.pixels(x, width)+left end
-  local py = function(y) return Drawing.pixels(y, width)+top end
+  local function px(x) return Drawing.pixels(x, width)+left end
+  local function py(y) return Drawing.pixels(y, width)+top end
   if shape.mode == 'freehand' then
     local prev = nil
     for _,point in ipairs(shape.points) do
@@ -119,8 +119,8 @@ end
 function Drawing.draw_pending_shape(drawing, top, left,right)
   local width = right-left
   local pmx,pmy = App.mouse_x(), App.mouse_y()
-  local px = function(x) return Drawing.pixels(x, width)+left end
-  local py = function(y) return Drawing.pixels(y, width)+top end
+  local function px(x) return Drawing.pixels(x, width)+left end
+  local function py(y) return Drawing.pixels(y, width)+top end
   local mx = Drawing.coord(pmx-left, width)
   local my = Drawing.coord(pmy-top, width)
   local shape = drawing.pending
