@@ -10,6 +10,10 @@ Icon_color = {r=0.7, g=0.7, b=0.7}  -- color of current mode icon in drawings
 Help_color = {r=0, g=0.5, b=0}
 Help_background_color = {r=0, g=0.5, b=0, a=0.1}
 
+Margin_top = 15
+Margin_left = 25
+Margin_right = 25
+
 utf8 = require 'utf8'
 
 require 'file'
@@ -22,7 +26,7 @@ require 'icons'
 edit = {}
 
 -- run in both tests and a real run
-function edit.initialize_state()
+function edit.initialize_state(top, left, right)  -- currently always draws to bottom of screen
   local result = {
     -- a line is either text or a drawing
     -- a text is a table with:
@@ -88,10 +92,10 @@ function edit.initialize_state()
     -- widest possible character width
     em = App.newText(love.graphics.getFont(), 'm'),
 
-    margin_top = 15,
-    margin_left = 25,
-    margin_right = 0,
-    margin_width = nil,
+    top = top,
+    left = left,
+    right = right,
+    width = right-left,
 
     drawing_padding_top = 10,
     drawing_padding_bottom = 10,
@@ -109,7 +113,6 @@ function edit.initialize_state()
     search_text = nil,
     search_backup = nil,  -- stuff to restore when cancelling search
   }
-  result.margin_width = result.margin_left + result.margin_right
   result.drawing_padding_height = result.drawing_padding_top + result.drawing_padding_bottom
   return result
 end  -- App.initialize_state
@@ -119,7 +122,7 @@ function edit.draw(State)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
   assert(Text.le1(State.screen_top1, State.cursor1))
   State.cursor_y = -1
-  local y = State.margin_top
+  local y = State.top
 --?   print('== draw')
   for line_index = State.screen_top1.line,#State.lines do
     local line = State.lines[line_index]
@@ -144,7 +147,7 @@ function edit.draw(State)
       })
       if State.search_term == nil then
         if line_index == State.cursor1.line then
-          Text.draw_cursor(State, State.margin_left, y)
+          Text.draw_cursor(State, State.left, y)
         end
       end
       State.screen_bottom1.pos = State.screen_top1.pos
@@ -161,7 +164,7 @@ function edit.draw(State)
         line.startpos = State.screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty, State.margin_left, App.screen.width-State.margin_right)
+      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty, State.left, State.right)
       y = y + State.line_height
 --?       print('=> y', y)
     end
@@ -203,7 +206,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
 
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(State, line, x,y, State.margin_left, App.screen.width-State.margin_right) then
+      if Text.in_line(State, line, x,y, State.left, State.right) then
         -- delicate dance between cursor, selection and old cursor/selection
         -- scenarios:
         --  regular press+release: sets cursor, clears selection
@@ -218,7 +221,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         State.mousepress_shift = App.shift_down()
         State.selection1 = {
             line=line_index,
-            pos=Text.to_pos_on_line(State, line, x, y, State.margin_left, App.screen.width-State.margin_right),
+            pos=Text.to_pos_on_line(State, line, x, y, State.left, State.right),
         }
 --?         print('selection', State.selection1.line, State.selection1.pos)
         break
@@ -248,11 +251,11 @@ function edit.mouse_released(State, x,y, mouse_button)
   else
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
-        if Text.in_line(State, line, x,y, State.margin_left, App.screen.width-State.margin_right) then
+        if Text.in_line(State, line, x,y, State.left, State.right) then
 --?           print('reset selection')
           State.cursor1 = {
               line=line_index,
-              pos=Text.to_pos_on_line(State, line, x, y, State.margin_left, App.screen.width-State.margin_right),
+              pos=Text.to_pos_on_line(State, line, x, y, State.left, State.right),
           }
 --?           print('cursor', State.cursor1.line, State.cursor1.pos)
           if State.mousepress_shift then
@@ -299,7 +302,7 @@ function edit.keychord_pressed(State, chord, key)
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
       chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
-    Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.delete_selection(State, State.left, State.right)
   end
   if State.search_term then
     if chord == 'escape' then
@@ -371,7 +374,7 @@ function edit.keychord_pressed(State, chord, key)
     end
   elseif chord == 'C-x' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
-    local s = Text.cut_selection(State, State.margin_left, App.screen.width-State.margin_right)
+    local s = Text.cut_selection(State, State.left, State.right)
     if s then
       App.setClipboardText(s)
     end
@@ -392,7 +395,7 @@ function edit.keychord_pressed(State, chord, key)
       end
     end
     if Text.cursor_past_screen_bottom(State) then
-      Text.snap_cursor_to_bottom_of_screen(State, State.margin_left, App.screen.height-State.margin_right)
+      Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})

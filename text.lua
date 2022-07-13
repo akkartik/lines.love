@@ -141,8 +141,8 @@ function Text.textinput(State, t)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   Text.insert_at_cursor(State, t)
   if State.cursor_y >= App.screen.height - State.line_height then
-    Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.margin_left, App.screen.width-State.margin_right)
-    Text.snap_cursor_to_bottom_of_screen(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.left, State.right)
+    Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
 --?     print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   end
   record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
@@ -165,7 +165,7 @@ function Text.keychord_pressed(State, chord)
     Text.insert_return(State)
     State.selection1 = {}
     if (State.cursor_y + State.line_height) > App.screen.height then
-      Text.snap_cursor_to_bottom_of_screen(State, State.margin_left, App.screen.width-State.margin_right)
+      Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
@@ -174,15 +174,15 @@ function Text.keychord_pressed(State, chord)
 --?     print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     Text.insert_at_cursor(State, '\t')
     if State.cursor_y >= App.screen.height - State.line_height then
-      Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.margin_left, App.screen.width-State.margin_right)
-      Text.snap_cursor_to_bottom_of_screen(State, State.margin_left, App.screen.width-State.margin_right)
+      Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.left, State.right)
+      Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
 --?       print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     end
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'backspace' then
     if State.selection1.line then
-      Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
+      Text.delete_selection(State, State.left, State.right)
       schedule_save(State)
       return
     end
@@ -212,8 +212,8 @@ function Text.keychord_pressed(State, chord)
       State.cursor1.line = State.cursor1.line-1
     end
     if Text.lt1(State.cursor1, State.screen_top1) then
-      local top2 = Text.to2(State, State.screen_top1, State.margin_left, App.screen.width-State.margin_right)
-      top2 = Text.previous_screen_line(State, top2, State.margin_left, App.screen.width-State.margin_right)
+      local top2 = Text.to2(State, State.screen_top1, State.left, State.right)
+      top2 = Text.previous_screen_line(State, top2, State.left, State.right)
       State.screen_top1 = Text.to1(State, top2)
       Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
@@ -223,7 +223,7 @@ function Text.keychord_pressed(State, chord)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'delete' then
     if State.selection1.line then
-      Text.delete_selection(State, State.margin_left, App.screen.width-State.margin_right)
+      Text.delete_selection(State, State.left, State.right)
       schedule_save(State)
       return
     end
@@ -258,43 +258,43 @@ function Text.keychord_pressed(State, chord)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
-    Text.left(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.left(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'right' then
-    Text.right(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.right(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'S-left' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.left(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.left(State, State.left, State.right)
   elseif chord == 'S-right' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.right(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.right(State, State.left, State.right)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
-    Text.word_left(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.word_left(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'M-right' then
-    Text.word_right(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.word_right(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'M-S-left' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_left(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.word_left(State, State.left, State.right)
   elseif chord == 'M-S-right' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_right(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.word_right(State, State.left, State.right)
   elseif chord == 'home' then
     Text.start_of_line(State)
     State.selection1 = {}
   elseif chord == 'end' then
-    Text.end_of_line(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.end_of_line(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'S-home' then
     if State.selection1.line == nil then
@@ -305,39 +305,39 @@ function Text.keychord_pressed(State, chord)
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.end_of_line(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.end_of_line(State, State.left, State.right)
   elseif chord == 'up' then
-    Text.up(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.up(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'down' then
-    Text.down(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.down(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'S-up' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.up(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.up(State, State.left, State.right)
   elseif chord == 'S-down' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.down(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.down(State, State.left, State.right)
   elseif chord == 'pageup' then
-    Text.pageup(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.pageup(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'pagedown' then
-    Text.pagedown(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.pagedown(State, State.left, State.right)
     State.selection1 = {}
   elseif chord == 'S-pageup' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pageup(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.pageup(State, State.left, State.right)
   elseif chord == 'S-pagedown' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pagedown(State, State.margin_left, App.screen.width-State.margin_right)
+    Text.pagedown(State, State.left, State.right)
   end
 end
 
@@ -357,7 +357,7 @@ function Text.pageup(State, left, right)
   local top2 = Text.to2(State, State.screen_top1, left, right)
 --?   print(App.screen.height)
   local y = App.screen.height - State.line_height
-  while y >= State.margin_top do
+  while y >= State.top do
 --?     print(y, top2.line, top2.screen_line, top2.screen_pos)
     if State.screen_top1.line == 1 and State.screen_top1.pos == 1 then break end
     if State.lines[State.screen_top1.line].mode == 'text' then
@@ -635,7 +635,7 @@ function Text.cursor_at_final_screen_line(State, left, right)
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State, left, right)
-  local y = State.margin_top
+  local y = State.top
   while State.cursor1.line <= #State.lines do
     if State.lines[State.cursor1.line].mode == 'text' then
       break
@@ -668,7 +668,7 @@ function Text.snap_cursor_to_bottom_of_screen(State, left, right)
     if top2.line == 1 and top2.screen_line == 1 then break end
     if top2.screen_line > 1 or State.lines[top2.line-1].mode == 'text' then
       local h = State.line_height
-      if y - h < State.margin_top then
+      if y - h < State.top then
         break
       end
       y = y - h
@@ -678,7 +678,7 @@ function Text.snap_cursor_to_bottom_of_screen(State, left, right)
       -- We currently can't draw partial drawings, so either skip it entirely
       -- or not at all.
       local h = State.drawing_padding_height + Drawing.pixels(State.lines[top2.line-1].h)
-      if y - h < State.margin_top then
+      if y - h < State.top then
         break
       end
 --?       print('skipping drawing of height', h)

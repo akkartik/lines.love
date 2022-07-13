@@ -3,6 +3,7 @@
 function test_initial_state()
   io.write('\ntest_initial_state')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{}
   edit.draw(Editor_state)
   check_eq(#Editor_state.lines, 1, 'F - test_initial_state/#lines')
@@ -15,9 +16,10 @@ end
 function test_click_to_create_drawing()
   io.write('\ntest_click_to_create_drawing')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{}
   edit.draw(Editor_state)
-  edit.run_after_mouse_click(Editor_state, 8,Editor_state.margin_top+8, 1)
+  edit.run_after_mouse_click(Editor_state, 8,Editor_state.top+8, 1)
   -- cursor skips drawing to always remain on text
   check_eq(#Editor_state.lines, 2, 'F - test_click_to_create_drawing/#lines')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_click_to_create_drawing/cursor')
@@ -27,6 +29,7 @@ function test_backspace_to_delete_drawing()
   io.write('\ntest_backspace_to_delete_drawing')
   -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'```lines', '```', ''}
   -- cursor is on text as always (outside tests this will get initialized correctly)
   Editor_state.cursor1.line = 2
@@ -39,10 +42,11 @@ end
 function test_insert_first_character()
   io.write('\ntest_insert_first_character')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{}
   edit.draw(Editor_state)
   edit.run_after_textinput(Editor_state, 'a')
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'a', 'F - test_insert_first_character/screen:1')
 end
 
@@ -50,6 +54,7 @@ function test_press_ctrl()
   io.write('\ntest_press_ctrl')
   -- press ctrl while the cursor is on text
   App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{''}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -60,6 +65,7 @@ end
 function test_move_left()
   io.write('\ntest_move_left')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'a'}
   Editor_state.cursor1 = {line=1, pos=2}
   edit.draw(Editor_state)
@@ -70,6 +76,7 @@ end
 function test_move_right()
   io.write('\ntest_move_right')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'a'}
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
@@ -80,6 +87,7 @@ end
 function test_move_left_to_previous_line()
   io.write('\ntest_move_left_to_previous_line')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
@@ -91,6 +99,7 @@ end
 function test_move_right_to_next_line()
   io.write('\ntest_move_right_to_next_line')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.cursor1 = {line=1, pos=4}  -- past end of line
   edit.draw(Editor_state)
@@ -102,6 +111,7 @@ end
 function test_move_to_start_of_word()
   io.write('\ntest_move_to_start_of_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=3}
   edit.draw(Editor_state)
@@ -112,6 +122,7 @@ end
 function test_move_to_start_of_previous_word()
   io.write('\ntest_move_to_start_of_previous_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def'}
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
@@ -122,6 +133,7 @@ end
 function test_skip_to_previous_word()
   io.write('\ntest_skip_to_previous_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def'}
   Editor_state.cursor1 = {line=1, pos=5}  -- at the start of second word
   edit.draw(Editor_state)
@@ -132,6 +144,7 @@ end
 function test_skip_past_tab_to_previous_word()
   io.write('\ntest_skip_past_tab_to_previous_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def\tghi'}
   Editor_state.cursor1 = {line=1, pos=10}  -- within third word
   edit.draw(Editor_state)
@@ -142,6 +155,7 @@ end
 function test_skip_multiple_spaces_to_previous_word()
   io.write('\ntest_skip_multiple_spaces_to_previous_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc  def'}
   Editor_state.cursor1 = {line=1, pos=6}  -- at the start of second word
   edit.draw(Editor_state)
@@ -152,6 +166,7 @@ end
 function test_move_to_start_of_word_on_previous_line()
   io.write('\ntest_move_to_start_of_word_on_previous_line')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def', 'ghi'}
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
@@ -163,6 +178,7 @@ end
 function test_move_past_end_of_word()
   io.write('\ntest_move_past_end_of_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def'}
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
@@ -173,6 +189,7 @@ end
 function test_skip_to_next_word()
   io.write('\ntest_skip_to_next_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def'}
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
@@ -183,6 +200,7 @@ end
 function test_skip_past_tab_to_next_word()
   io.write('\ntest_skip_past_tab_to_next_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc\tdef'}
   Editor_state.cursor1 = {line=1, pos=1}  -- at the space between words
   edit.draw(Editor_state)
@@ -193,6 +211,7 @@ end
 function test_skip_multiple_spaces_to_next_word()
   io.write('\ntest_skip_multiple_spaces_to_next_word')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc  def'}
   Editor_state.cursor1 = {line=1, pos=4}  -- at the start of second word
   edit.draw(Editor_state)
@@ -203,6 +222,7 @@ end
 function test_move_past_end_of_word_on_next_line()
   io.write('\ntest_move_past_end_of_word_on_next_line')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def', 'ghi'}
   Editor_state.cursor1 = {line=1, pos=8}
   edit.draw(Editor_state)
@@ -215,13 +235,14 @@ function test_click_with_mouse()
   io.write('\ntest_click_with_mouse')
   -- display two lines with cursor on one of them
   App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- click on the other line
   edit.draw(Editor_state)
-  edit.run_after_mouse_click(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
@@ -231,13 +252,14 @@ function test_click_with_mouse_on_empty_line()
   io.write('\ntest_click_with_mouse_on_empty_line')
   -- display two lines with the first one empty
   App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'', 'def'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- click on the empty line
   edit.draw(Editor_state)
-  edit.run_after_mouse_click(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_empty_line/cursor')
 end
@@ -245,12 +267,13 @@ end
 function test_draw_text()
   io.write('\ntest_draw_text')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_draw_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_draw_text/screen:2')
@@ -261,12 +284,13 @@ end
 function test_draw_wrapping_text()
   io.write('\ntest_draw_wrapping_text')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'defgh', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_draw_wrapping_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_draw_wrapping_text/screen:2')
@@ -277,12 +301,13 @@ end
 function test_draw_word_wrapping_text()
   io.write('\ntest_draw_word_wrapping_text')
   App.screen.init{width=60, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def ghi', 'jkl'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc ', 'F - test_draw_word_wrapping_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def ', 'F - test_draw_word_wrapping_text/screen:2')
@@ -294,12 +319,13 @@ function test_draw_text_wrapping_within_word()
   -- arrange a screen line that needs to be split within a word
   io.write('\ntest_draw_text_wrapping_within_word')
   App.screen.init{width=60, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abcd e fghijk', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abcd ', 'F - test_draw_text_wrapping_within_word/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'e fghi', 'F - test_draw_text_wrapping_within_word/screen:2')
@@ -311,12 +337,13 @@ function test_draw_wrapping_text_containing_non_ascii()
   -- draw a long line containing non-ASCII
   io.write('\ntest_draw_wrapping_text_containing_non_ascii')
   App.screen.init{width=60, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'madam I’m adam', 'xyz'}  -- notice the non-ASCII apostrophe
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'mada', 'F - test_draw_wrapping_text_containing_non_ascii/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'm I’', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
@@ -328,13 +355,14 @@ function test_click_on_wrapping_line()
   io.write('\ntest_click_on_wrapping_line')
   -- display a wrapping line
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
                   --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'madam ', 'F - test_click_on_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line/baseline/screen:2')
@@ -350,13 +378,14 @@ function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
   io.write('\ntest_click_on_wrapping_line_rendered_from_partway_at_top_of_screen')
   -- display a wrapping line from its second screen line
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
                   --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
   Editor_state.cursor1 = {line=1, pos=8}
   Editor_state.screen_top1 = {line=1, pos=7}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/baseline/screen:2')
   y = y + Editor_state.line_height
   -- click past end of second screen line
@@ -370,13 +399,14 @@ function test_click_past_end_of_wrapping_line()
   io.write('\ntest_click_past_end_of_wrapping_line')
   -- display a wrapping line
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
                   --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'madam ', 'F - test_click_past_end_of_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, "I'm ada", 'F - test_click_past_end_of_wrapping_line/baseline/screen:2')
@@ -393,13 +423,14 @@ function test_click_on_wrapping_line_containing_non_ascii()
   io.write('\ntest_click_on_wrapping_line_containing_non_ascii')
   -- display a wrapping line containing non-ASCII
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
                   --  12345678901234
   Editor_state.lines = load_array{'madam I’m adam'}  -- notice the non-ASCII apostrophe
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'madam ', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'I’m ada', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:2')
@@ -416,6 +447,7 @@ function test_click_past_end_of_word_wrapping_line()
   io.write('\ntest_click_past_end_of_word_wrapping_line')
   -- display a long line wrapping at a word boundary on a screen of more realistic length
   App.screen.init{width=160, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
                    -- 0        1         2
                    -- 123456789012345678901
   Editor_state.lines = load_array{'the quick brown fox jumped over the lazy dog'}
@@ -423,7 +455,7 @@ function test_click_past_end_of_word_wrapping_line()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'the quick brown fox ', 'F - test_click_past_end_of_word_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
   -- click past the end of the screen line
@@ -436,6 +468,7 @@ function test_select_text()
   io.write('\ntest_select_text')
   -- display a line of text
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -457,6 +490,7 @@ function test_cursor_movement_without_shift_resets_selection()
   io.write('\ntest_cursor_movement_without_shift_resets_selection')
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -474,6 +508,7 @@ function test_edit_deletes_selection()
   io.write('\ntest_edit_deletes_selection')
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -490,6 +525,7 @@ function test_edit_with_shift_key_deletes_selection()
   io.write('\ntest_edit_with_shift_key_deletes_selection')
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -511,6 +547,7 @@ function test_copy_does_not_reset_selection()
   io.write('\ntest_copy_does_not_reset_selection')
   -- display a line of text with a selection
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -528,6 +565,7 @@ function test_cut()
   io.write('\ntest_cut')
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -545,6 +583,7 @@ function test_paste_replaces_selection()
   io.write('\ntest_paste_replaces_selection')
   -- display a line of text with a selection
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.selection1 = {line=1, pos=1}
@@ -564,12 +603,13 @@ function test_deleting_selection_may_scroll()
   io.write('\ntest_deleting_selection_may_scroll')
   -- display lines 2/3/4
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=3, pos=2}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_deleting_selection_may_scroll/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_deleting_selection_may_scroll/baseline/screen:2')
@@ -587,6 +627,7 @@ end
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=2, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -596,7 +637,7 @@ function test_edit_wrapping_text()
   edit.run_after_textinput(Editor_state, 'h')
   edit.run_after_textinput(Editor_state, 'i')
   edit.run_after_textinput(Editor_state, 'j')
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_edit_wrapping_text/screen:2')
@@ -607,13 +648,14 @@ end
 function test_insert_newline()
   io.write('\ntest_insert_newline')
   -- display a few lines
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_insert_newline/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_insert_newline/baseline/screen:2')
@@ -624,7 +666,7 @@ function test_insert_newline()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_insert_newline/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_insert_newline/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_insert_newline/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'a', 'F - test_insert_newline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'bc', 'F - test_insert_newline/screen:2')
@@ -635,7 +677,8 @@ end
 function test_insert_newline_at_start_of_line()
   io.write('\ntest_insert_newline_at_start_of_line')
   -- display a line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -651,13 +694,14 @@ end
 function test_insert_from_clipboard()
   io.write('\ntest_insert_from_clipboard')
   -- display a few lines
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_insert_from_clipboard/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/baseline/screen:2')
@@ -669,7 +713,7 @@ function test_insert_from_clipboard()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_insert_from_clipboard/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_insert_from_clipboard/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_insert_from_clipboard/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'axy', 'F - test_insert_from_clipboard/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'zbc', 'F - test_insert_from_clipboard/screen:2')
@@ -680,13 +724,14 @@ end
 function test_move_cursor_using_mouse()
   io.write('\ntest_move_cursor_using_mouse')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   Editor_state.selection1 = {}
   edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
@@ -696,6 +741,7 @@ end
 function test_select_text_using_mouse()
   io.write('\ntest_select_text_using_mouse')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -703,9 +749,9 @@ function test_select_text_using_mouse()
   Editor_state.selection1 = {}
   edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
   -- press and hold on first location
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- drag and release somewhere else
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+Editor_state.line_height+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
   check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
@@ -715,6 +761,7 @@ end
 function test_select_text_using_mouse_and_shift()
   io.write('\ntest_select_text_using_mouse_and_shift')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -722,12 +769,12 @@ function test_select_text_using_mouse_and_shift()
   Editor_state.selection1 = {}
   edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
   -- click on first location
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- hold down shift and click somewhere else
   App.fake_key_press('lshift')
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+5, 1)
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+Editor_state.line_height+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
   App.fake_key_release('lshift')
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse_and_shift/selection:line')
   check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse_and_shift/selection:pos')
@@ -738,6 +785,7 @@ end
 function test_select_text_repeatedly_using_mouse_and_shift()
   io.write('\ntest_select_text_repeatedly_using_mouse_and_shift')
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -745,16 +793,16 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   Editor_state.selection1 = {}
   edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
   -- click on first location
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- hold down shift and click on a second location
   App.fake_key_press('lshift')
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+5, 1)
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+Editor_state.line_height+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
   -- hold down shift and click at a third location
   App.fake_key_press('lshift')
-  edit.run_after_mouse_press(Editor_state, Editor_state.margin_left+20,Editor_state.margin_top+5, 1)
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+Editor_state.line_height+5, 1)
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height+5, 1)
   App.fake_key_release('lshift')
   -- selection is between first and third location. forget the second location, not the first.
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
@@ -766,7 +814,8 @@ end
 function test_cut_without_selection()
   io.write('\ntest_cut_without_selection')
   -- display a few lines
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -782,13 +831,14 @@ end
 function test_pagedown()
   io.write('\ntest_pagedown')
   App.screen.init{width=120, height=45}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- initially the first two lines are displayed
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_pagedown/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_pagedown/baseline/screen:2')
@@ -796,7 +846,7 @@ function test_pagedown()
   edit.run_after_keychord(Editor_state, 'pagedown')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_pagedown/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_pagedown/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_pagedown/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_pagedown/screen:2')
@@ -806,7 +856,8 @@ function test_pagedown_skips_drawings()
   io.write('\ntest_pagedown_skips_drawings')
   -- some lines of text with a drawing intermixed
   local drawing_width = 50
-  App.screen.init{width=Editor_state.margin_left+drawing_width, height=80}
+  App.screen.init{width=Editor_state.left+drawing_width, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc',               -- height 15
                      '```lines', '```',   -- height 25
                      'def',               -- height 15
@@ -819,14 +870,14 @@ function test_pagedown_skips_drawings()
   -- initially the screen displays the first line and the drawing
   -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_pagedown_skips_drawings/baseline/screen:1')
   -- after pagedown the screen draws the drawing up top
   -- 15px margin + 10px margin + 25px drawing + 10px margin + 15px line3 = 75px < screen height 80px
   edit.run_after_keychord(Editor_state, 'pagedown')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_pagedown_skips_drawings/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_pagedown_skips_drawings/cursor')
-  y = Editor_state.margin_top + drawing_height
+  y = Editor_state.top + drawing_height
   App.screen.check(y, 'def', 'F - test_pagedown_skips_drawings/screen:1')
 end
 
@@ -834,12 +885,13 @@ function test_pagedown_often_shows_start_of_wrapping_line()
   io.write('\ntest_pagedown_often_shows_start_of_wrapping_line')
   -- draw a few lines ending in part of a wrapping line
   App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def ghi jkl', 'mno'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_pagedown_often_shows_start_of_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def ', 'F - test_pagedown_often_shows_start_of_wrapping_line/baseline/screen:2')
@@ -851,7 +903,7 @@ function test_pagedown_often_shows_start_of_wrapping_line()
   check_eq(Editor_state.screen_top1.pos, 1, 'F - test_pagedown_often_shows_start_of_wrapping_line/screen_top:pos')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_pagedown_often_shows_start_of_wrapping_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_pagedown_often_shows_start_of_wrapping_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def ', 'F - test_pagedown_often_shows_start_of_wrapping_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'F - test_pagedown_often_shows_start_of_wrapping_line/screen:2')
@@ -862,13 +914,14 @@ end
 function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   io.write('\ntest_pagedown_can_start_from_middle_of_long_wrapping_line')
   -- draw a few lines starting from a very long wrapping line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def ghi jkl mno pqr stu vwx yza bcd efg hij', 'XYZ'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/baseline/screen:2')
@@ -878,7 +931,7 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   edit.run_after_keychord(Editor_state, 'pagedown')
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen_top:line')
   check_eq(Editor_state.screen_top1.pos, 9, 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen_top:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghi ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl m', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:2')
@@ -889,13 +942,14 @@ end
 function test_down_arrow_moves_cursor()
   io.write('\ntest_down_arrow_moves_cursor')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- initially the first three lines are displayed
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/baseline/screen:2')
@@ -906,7 +960,7 @@ function test_down_arrow_moves_cursor()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_down_arrow_moves_cursor/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_down_arrow_moves_cursor/cursor')
   -- the screen is unchanged
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_down_arrow_moves_cursor/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_moves_cursor/screen:2')
@@ -918,12 +972,13 @@ function test_down_arrow_scrolls_down_by_one_line()
   io.write('\ntest_down_arrow_scrolls_down_by_one_line')
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/baseline/screen:2')
@@ -933,7 +988,7 @@ function test_down_arrow_scrolls_down_by_one_line()
   edit.run_after_keychord(Editor_state, 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_line/screen_top')
   check_eq(Editor_state.cursor1.line, 4, 'F - test_down_arrow_scrolls_down_by_one_line/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_down_arrow_scrolls_down_by_one_line/screen:2')
@@ -944,13 +999,14 @@ end
 function test_down_arrow_scrolls_down_by_one_screen_line()
   io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_screen_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line/baseline/screen:2')
@@ -961,7 +1017,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:2')
@@ -972,13 +1028,14 @@ end
 function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word()
   io.write('\ntest_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:2')
@@ -989,7 +1046,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghijk', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:2')
@@ -999,13 +1056,14 @@ end
 
 function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   io.write('\ntest_page_down_followed_by_down_arrow_does_not_scroll_screen_up')
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
@@ -1021,7 +1079,7 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   check_eq(Editor_state.screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'l', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
@@ -1033,12 +1091,13 @@ function test_up_arrow_moves_cursor()
   io.write('\ntest_up_arrow_moves_cursor')
   -- display the first 3 lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/baseline/screen:2')
@@ -1049,7 +1108,7 @@ function test_up_arrow_moves_cursor()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_up_arrow_moves_cursor/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_up_arrow_moves_cursor/cursor')
   -- the screen is unchanged
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_up_arrow_moves_cursor/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_moves_cursor/screen:2')
@@ -1061,12 +1120,13 @@ function test_up_arrow_scrolls_up_by_one_line()
   io.write('\ntest_up_arrow_scrolls_up_by_one_line')
   -- display the lines 2/3/4 with the cursor on line 2
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_by_one_line/baseline/screen:2')
@@ -1076,7 +1136,7 @@ function test_up_arrow_scrolls_up_by_one_line()
   edit.run_after_keychord(Editor_state, 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_line/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_up_arrow_scrolls_up_by_one_line/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_by_one_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_by_one_line/screen:2')
@@ -1087,19 +1147,20 @@ end
 function test_up_arrow_scrolls_up_by_one_screen_line()
   io.write('\ntest_up_arrow_scrolls_up_by_one_screen_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.cursor1 = {line=3, pos=6}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_by_one_screen_line/baseline/screen:2')
   -- after hitting the up arrow the screen scrolls up to first screen line
   edit.run_after_keychord(Editor_state, 'up')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghi ', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_by_one_screen_line/screen:2')
@@ -1114,13 +1175,14 @@ end
 function test_up_arrow_scrolls_up_to_final_screen_line()
   io.write('\ntest_up_arrow_scrolls_up_to_final_screen_line')
   -- display lines starting just after a long line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:2')
@@ -1128,7 +1190,7 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   App.screen.check(y, 'mno', 'F - test_up_arrow_scrolls_up_to_final_screen_line/baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up to final screen line of previous line
   edit.run_after_keychord(Editor_state, 'up')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_up_arrow_scrolls_up_to_final_screen_line/screen:2')
@@ -1144,12 +1206,13 @@ function test_up_arrow_scrolls_up_to_empty_line()
   io.write('\ntest_up_arrow_scrolls_up_to_empty_line')
   -- display a screenful of text with an empty line just above it outside the screen
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'', 'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_up_arrow_scrolls_up_to_empty_line/baseline/screen:2')
@@ -1159,7 +1222,7 @@ function test_up_arrow_scrolls_up_to_empty_line()
   edit.run_after_keychord(Editor_state, 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_up_arrow_scrolls_up_to_empty_line/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_up_arrow_scrolls_up_to_empty_line/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   -- empty first line
   y = y + Editor_state.line_height
   App.screen.check(y, 'abc', 'F - test_up_arrow_scrolls_up_to_empty_line/screen:2')
@@ -1170,13 +1233,14 @@ end
 function test_pageup()
   io.write('\ntest_pageup')
   App.screen.init{width=120, height=45}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   -- initially the last two lines are displayed
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_pageup/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_pageup/baseline/screen:2')
@@ -1184,7 +1248,7 @@ function test_pageup()
   edit.run_after_keychord(Editor_state, 'pageup')
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_pageup/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_pageup/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_pageup/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_pageup/screen:2')
@@ -1193,13 +1257,14 @@ end
 function test_pageup_scrolls_up_by_screen_line()
   io.write('\ntest_pageup_scrolls_up_by_screen_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'ghi', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_by_screen_line/baseline/screen:2')
@@ -1210,7 +1275,7 @@ function test_pageup_scrolls_up_by_screen_line()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_pageup_scrolls_up_by_screen_line/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_pageup_scrolls_up_by_screen_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_pageup_scrolls_up_by_screen_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_by_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_by_screen_line/screen:2')
@@ -1221,13 +1286,14 @@ end
 function test_pageup_scrolls_up_from_middle_screen_line()
   io.write('\ntest_pageup_scrolls_up_from_middle_screen_line')
   -- display a few lines starting from the middle of a line (Editor_state.cursor1.pos > 1)
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def', 'ghi jkl', 'mno'}
   Editor_state.cursor1 = {line=2, pos=5}
   Editor_state.screen_top1 = {line=2, pos=5}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_pageup_scrolls_up_from_middle_screen_line/baseline/screen:3')  -- line wrapping includes trailing whitespace
@@ -1236,7 +1302,7 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_pageup_scrolls_up_from_middle_screen_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc ', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_pageup_scrolls_up_from_middle_screen_line/screen:2')
@@ -1247,13 +1313,14 @@ end
 function test_enter_on_bottom_line_scrolls_down()
   io.write('\ntest_enter_on_bottom_line_scrolls_down')
   -- display a few lines with cursor on bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=3, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/baseline/screen:2')
@@ -1264,7 +1331,7 @@ function test_enter_on_bottom_line_scrolls_down()
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_enter_on_bottom_line_scrolls_down/screen_top')
   check_eq(Editor_state.cursor1.line, 4, 'F - test_enter_on_bottom_line_scrolls_down/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_enter_on_bottom_line_scrolls_down/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_enter_on_bottom_line_scrolls_down/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'g', 'F - test_enter_on_bottom_line_scrolls_down/screen:2')
@@ -1275,20 +1342,21 @@ end
 function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   io.write('\ntest_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom')
   -- display just the bottom line on screen
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=4, pos=2}
   Editor_state.screen_top1 = {line=4, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/baseline/screen:1')
   -- after hitting the enter key the screen does not scroll down
   edit.run_after_keychord(Editor_state, 'return')
   check_eq(Editor_state.screen_top1.line, 4, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen_top')
   check_eq(Editor_state.cursor1.line, 5, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'j', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'kl', 'F - test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:2')
@@ -1297,7 +1365,8 @@ end
 function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   io.write('\ntest_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom')
   -- display just an empty bottom line on screen
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', ''}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
@@ -1308,20 +1377,21 @@ function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bot
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'a', 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen:1')
 end
 
 function test_typing_on_bottom_line_scrolls_down()
   io.write('\ntest_typing_on_bottom_line_scrolls_down')
   -- display a few lines with cursor on bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=3, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:2')
@@ -1334,7 +1404,7 @@ function test_typing_on_bottom_line_scrolls_down()
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_typing_on_bottom_line_scrolls_down/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_typing_on_bottom_line_scrolls_down/cursor:line')
   check_eq(Editor_state.cursor1.pos, 7, 'F - test_typing_on_bottom_line_scrolls_down/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_typing_on_bottom_line_scrolls_down/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghijk', 'F - test_typing_on_bottom_line_scrolls_down/screen:2')
@@ -1345,20 +1415,21 @@ end
 function test_left_arrow_scrolls_up_in_wrapped_line()
   io.write('\ntest_left_arrow_scrolls_up_in_wrapped_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   -- cursor is at top of screen
   Editor_state.cursor1 = {line=3, pos=5}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_left_arrow_scrolls_up_in_wrapped_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_left_arrow_scrolls_up_in_wrapped_line/baseline/screen:2')
   -- after hitting the left arrow the screen scrolls up to first screen line
   edit.run_after_keychord(Editor_state, 'left')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghi ', 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'F - test_left_arrow_scrolls_up_in_wrapped_line/screen:2')
@@ -1373,14 +1444,15 @@ end
 function test_right_arrow_scrolls_down_in_wrapped_line()
   io.write('\ntest_right_arrow_scrolls_down_in_wrapped_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- cursor is at bottom right of screen
   Editor_state.cursor1 = {line=3, pos=5}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_right_arrow_scrolls_down_in_wrapped_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_right_arrow_scrolls_down_in_wrapped_line/baseline/screen:2')
@@ -1391,7 +1463,7 @@ function test_right_arrow_scrolls_down_in_wrapped_line()
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_right_arrow_scrolls_down_in_wrapped_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, 'F - test_right_arrow_scrolls_down_in_wrapped_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'F - test_right_arrow_scrolls_down_in_wrapped_line/screen:2')
@@ -1402,20 +1474,21 @@ end
 function test_home_scrolls_up_in_wrapped_line()
   io.write('\ntest_home_scrolls_up_in_wrapped_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   -- cursor is at top of screen
   Editor_state.cursor1 = {line=3, pos=5}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_home_scrolls_up_in_wrapped_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_home_scrolls_up_in_wrapped_line/baseline/screen:2')
   -- after hitting home the screen scrolls up to first screen line
   edit.run_after_keychord(Editor_state, 'home')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghi ', 'F - test_home_scrolls_up_in_wrapped_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'F - test_home_scrolls_up_in_wrapped_line/screen:2')
@@ -1430,14 +1503,15 @@ end
 function test_end_scrolls_down_in_wrapped_line()
   io.write('\ntest_end_scrolls_down_in_wrapped_line')
   -- display the first three lines with the cursor on the bottom line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- cursor is at bottom right of screen
   Editor_state.cursor1 = {line=3, pos=5}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_end_scrolls_down_in_wrapped_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_end_scrolls_down_in_wrapped_line/baseline/screen:2')
@@ -1448,7 +1522,7 @@ function test_end_scrolls_down_in_wrapped_line()
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_end_scrolls_down_in_wrapped_line/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_end_scrolls_down_in_wrapped_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 8, 'F - test_end_scrolls_down_in_wrapped_line/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_end_scrolls_down_in_wrapped_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'F - test_end_scrolls_down_in_wrapped_line/screen:2')
@@ -1460,12 +1534,13 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   -- draw a line wrapping over 2 screen lines
   io.write('\ntest_position_cursor_on_recently_edited_wrapping_line')
   App.screen.init{width=100, height=200}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc def ghi jkl mno pqr ', 'xyz'}
   Editor_state.cursor1 = {line=1, pos=25}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:2')
@@ -1476,14 +1551,14 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   edit.run_after_textinput(Editor_state, 't')
   edit.run_after_textinput(Editor_state, 'u')
   check_eq(Editor_state.cursor1.pos, 28, 'F - test_move_cursor_using_mouse/cursor:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl mno pqr ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
-  edit.run_after_mouse_release(Editor_state, Editor_state.margin_left+8,Editor_state.margin_top+Editor_state.line_height*2+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height*2+5, 1)
   -- cursor should move
   check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Editor_state.cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
@@ -1493,12 +1568,13 @@ function test_backspace_can_scroll_up()
   io.write('\ntest_backspace_can_scroll_up')
   -- display the lines 2/3/4 with the cursor on line 2
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_backspace_can_scroll_up/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/baseline/screen:2')
@@ -1508,7 +1584,7 @@ function test_backspace_can_scroll_up()
   edit.run_after_keychord(Editor_state, 'backspace')
   check_eq(Editor_state.screen_top1.line, 1, 'F - test_backspace_can_scroll_up/screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_backspace_can_scroll_up/cursor')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abcdef', 'F - test_backspace_can_scroll_up/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_backspace_can_scroll_up/screen:2')
@@ -1519,19 +1595,21 @@ end
 function test_backspace_can_scroll_up_screen_line()
   io.write('\ntest_backspace_can_scroll_up_screen_line')
   -- display lines starting from second screen line of a line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Editor_state.cursor1 = {line=3, pos=5}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'jkl', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/baseline/screen:2')
   -- after hitting backspace the screen scrolls up by one screen line
   edit.run_after_keychord(Editor_state, 'backspace')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'ghijk', 'F - test_backspace_can_scroll_up_screen_line/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'l', 'F - test_backspace_can_scroll_up_screen_line/screen:2')
@@ -1546,7 +1624,9 @@ end
 function test_backspace_past_line_boundary()
   io.write('\ntest_backspace_past_line_boundary')
   -- position cursor at start of a (non-first) line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.cursor1 = {line=2, pos=1}
   -- backspace joins with previous line
@@ -1560,7 +1640,9 @@ end
 function test_backspace_over_selection()
   io.write('\ntest_backspace_over_selection')
   -- select just one character within a line with cursor before selection
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
@@ -1577,7 +1659,9 @@ end
 function test_backspace_over_selection_reverse()
   io.write('\ntest_backspace_over_selection_reverse')
   -- select just one character within a line with cursor after selection
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=1}
@@ -1594,7 +1678,9 @@ end
 function test_backspace_over_multiple_lines()
   io.write('\ntest_backspace_over_multiple_lines')
   -- select just one character within a line with cursor after selection
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=4, pos=2}
@@ -1612,7 +1698,9 @@ end
 function test_backspace_to_end_of_line()
   io.write('\ntest_backspace_to_end_of_line')
   -- select region from cursor to end of line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=4}
@@ -1630,7 +1718,9 @@ end
 function test_backspace_to_start_of_line()
   io.write('\ntest_backspace_to_start_of_line')
   -- select region from cursor to start of line
-  App.screen.init{width=Editor_state.margin_left+30, height=60}
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.selection1 = {line=2, pos=3}
@@ -1648,6 +1738,7 @@ end
 function test_undo_insert_text()
   io.write('\ntest_undo_insert_text')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Editor_state.cursor1 = {line=2, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -1659,7 +1750,7 @@ function test_undo_insert_text()
   check_eq(Editor_state.cursor1.pos, 5, 'F - test_undo_insert_text/baseline/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_undo_insert_text/baseline/selection:line')
   check_nil(Editor_state.selection1.pos, 'F - test_undo_insert_text/baseline/selection:pos')
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'defg', 'F - test_undo_insert_text/baseline/screen:2')
@@ -1671,7 +1762,7 @@ function test_undo_insert_text()
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_undo_insert_text/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_undo_insert_text/selection:line')
   check_nil(Editor_state.selection1.pos, 'F - test_undo_insert_text/selection:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_undo_insert_text/screen:2')
@@ -1682,6 +1773,7 @@ end
 function test_undo_delete_text()
   io.write('\ntest_undo_delete_text')
   App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc', 'defg', 'xyz'}
   Editor_state.cursor1 = {line=2, pos=5}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -1692,7 +1784,7 @@ function test_undo_delete_text()
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_undo_delete_text/baseline/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_undo_delete_text/baseline/selection:line')
   check_nil(Editor_state.selection1.pos, 'F - test_undo_delete_text/baseline/selection:pos')
-  local y = Editor_state.margin_top
+  local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/baseline/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_undo_delete_text/baseline/screen:2')
@@ -1707,7 +1799,7 @@ function test_undo_delete_text()
   check_nil(Editor_state.selection1.pos, 'F - test_undo_delete_text/selection:pos')
 --?   check_eq(Editor_state.selection1.line, 2, 'F - test_undo_delete_text/selection:line')
 --?   check_eq(Editor_state.selection1.pos, 4, 'F - test_undo_delete_text/selection:pos')
-  y = Editor_state.margin_top
+  y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'defg', 'F - test_undo_delete_text/screen:2')
@@ -1719,6 +1811,7 @@ function test_undo_restores_selection()
   io.write('\ntest_undo_restores_selection')
   -- display a line of text with some part selected
   App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
   Editor_state.lines = load_array{'abc'}
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}

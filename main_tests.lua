@@ -1,8 +1,8 @@
 function test_resize_window()
   io.write('\ntest_resize_window')
   Editor_state.filename = 'foo'
-  App.screen.init{width=Editor_state.margin_left+300, height=300}
-  check_eq(App.screen.width, Editor_state.margin_left+300, 'F - test_resize_window/baseline/width')
+  App.screen.init{width=Editor_state.left+300, height=300}
+  check_eq(App.screen.width, Editor_state.left+300, 'F - test_resize_window/baseline/width')
   check_eq(App.screen.height, 300, 'F - test_resize_window/baseline/height')
   App.resize(200, 400)
   check_eq(App.screen.width, 200, 'F - test_resize_window/width')
@@ -12,7 +12,7 @@ end
 
 function test_drop_file()
   io.write('\ntest_drop_file')
-  App.screen.init{width=Editor_state.margin_left+300, height=300}
+  App.screen.init{width=Editor_state.left+300, height=300}
   App.filesystem['foo'] = 'abc\ndef\nghi\n'
   local fake_dropped_file = {
     opened = false,
@@ -39,7 +39,7 @@ end
 
 function test_drop_file_saves_previous()
   io.write('\ntest_drop_file_saves_previous')
-  App.screen.init{width=Editor_state.margin_left+300, height=300}
+  App.screen.init{width=Editor_state.left+300, height=300}
   -- initially editing a file called foo that hasn't been saved to filesystem yet
   Editor_state.lines = load_array{'abc', 'def'}
   Editor_state.filename = 'foo'
