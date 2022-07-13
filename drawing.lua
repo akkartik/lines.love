@@ -245,7 +245,7 @@ function Drawing.update(State)
   if App.mouse_down(1) then
     if Drawing.in_drawing(drawing, pmx,pmy, State.left,State.right) then
       if drawing.pending.mode == 'freehand' then
-        table.insert(drawing.pending.points, {x=Drawing.coord(App.mouse_x()-State.left, State.width), y=Drawing.coord(App.mouse_y()-drawing.y, State.width)})
+        table.insert(drawing.pending.points, {x=Drawing.coord(pmx-State.left, State.width), y=Drawing.coord(pmy-drawing.y, State.width)})
       elseif drawing.pending.mode == 'move' then
         local mx,my = Drawing.coord(pmx-State.left, State.width), Drawing.coord(pmy-drawing.y, State.width)
         drawing.pending.target_point.x = mx
