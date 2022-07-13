@@ -643,6 +643,7 @@ function test_undo_name_point()
   check_eq(p2.y, 36, 'F - test_undo_name_point/baseline/p2:y')
   check_nil(p2.name, 'F - test_undo_name_point/baseline/p2:name')
   check_eq(#Editor_state.history, 1, 'F - test_undo_name_point/baseline/history:1')
+--?   print('a', Editor_state.lines.current_drawing)
   -- enter 'name' mode without moving the mouse
   edit.run_after_keychord(Editor_state, 'C-n')
   edit.run_after_textinput(Editor_state, 'A')
@@ -650,6 +651,7 @@ function test_undo_name_point()
   check_eq(p2.name, 'A', 'F - test_undo_name_point/baseline')
   check_eq(#Editor_state.history, 3, 'F - test_undo_name_point/baseline/history:2')
   check_eq(Editor_state.next_history, 4, 'F - test_undo_name_point/baseline/next_history')
+--?   print('b', Editor_state.lines.current_drawing)
   -- undo
   edit.run_after_keychord(Editor_state, 'C-z')
   local drawing = Editor_state.lines[1]
