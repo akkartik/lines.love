@@ -41,7 +41,7 @@ function Drawing.draw(State, line)
     if p.deleted == nil then
       if Drawing.near(p, mx,my) then
         App.color(Focus_stroke_color)
-        love.graphics.circle('line', Drawing.pixels(p.x)+State.left,Drawing.pixels(p.y)+line.y, 4)
+        love.graphics.circle('line', Drawing.pixels(p.x)+State.left,Drawing.pixels(p.y)+line.y, Same_point_distance)
       else
         App.color(Stroke_color)
         love.graphics.circle('fill', Drawing.pixels(p.x)+State.left,Drawing.pixels(p.y)+line.y, 2)
@@ -706,7 +706,7 @@ end
 function Drawing.near(point, x,y)
   local px,py = Drawing.pixels(x),Drawing.pixels(y)
   local cx,cy = Drawing.pixels(point.x), Drawing.pixels(point.y)
-  return (cx-px)*(cx-px) + (cy-py)*(cy-py) < Editor_state.left
+  return (cx-px)*(cx-px) + (cy-py)*(cy-py) < Same_point_distance*Same_point_distance
 end
 
 function Drawing.pixels(n)  -- parts to pixels

@@ -14,6 +14,8 @@ Margin_top = 15
 Margin_left = 25
 Margin_right = 25
 
+Same_point_distance = 4  -- pixel distance at which two points are considered the same
+
 utf8 = require 'utf8'
 
 require 'file'
