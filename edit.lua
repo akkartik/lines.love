@@ -399,7 +399,7 @@ function edit.keychord_pressed(State, chord, key)
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     -- DON'T reset line.y here
-    local drawing_index, drawing = Drawing.current_drawing()
+    local drawing_index, drawing = Drawing.current_drawing(State)
     if drawing_index then
       local before = snapshot(State, drawing_index)
       Drawing.keychord_pressed(State, chord)
