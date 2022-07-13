@@ -211,13 +211,13 @@ function Drawing.mouse_pressed(State, drawing, x,y, button)
   if State.current_drawing_mode == 'freehand' then
     drawing.pending = {mode=State.current_drawing_mode, points={{x=Drawing.coord(x-State.left), y=Drawing.coord(y-drawing.y)}}}
   elseif State.current_drawing_mode == 'line' or State.current_drawing_mode == 'manhattan' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
+    local j = Drawing.find_or_insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=State.current_drawing_mode, p1=j}
   elseif State.current_drawing_mode == 'polygon' or State.current_drawing_mode == 'rectangle' or State.current_drawing_mode == 'square' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
+    local j = Drawing.find_or_insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=State.current_drawing_mode, vertices={j}}
   elseif State.current_drawing_mode == 'circle' then
-    local j = Drawing.insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
+    local j = Drawing.find_or_insert_point(drawing.points, Drawing.coord(x-State.left), Drawing.coord(y-drawing.y))
     drawing.pending = {mode=State.current_drawing_mode, center=j}
   elseif State.current_drawing_mode == 'move' then
     -- all the action is in mouse_released
@@ -296,7 +296,7 @@ function Drawing.mouse_released(State, x,y, button)
       elseif drawing.pending.mode == 'line' then
         local mx,my = Drawing.coord(x-State.left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
-          drawing.pending.p2 = Drawing.insert_point(drawing.points, mx,my)
+          drawing.pending.p2 = Drawing.find_or_insert_point(drawing.points, mx,my)
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'manhattan' then
@@ -304,9 +304,9 @@ function Drawing.mouse_released(State, x,y, button)
         local mx,my = Drawing.coord(x-State.left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           if math.abs(mx-p1.x) > math.abs(my-p1.y) then
-            drawing.pending.p2 = Drawing.insert_point(drawing.points, mx, p1.y)
+            drawing.pending.p2 = Drawing.find_or_insert_point(drawing.points, mx, p1.y)
           else
-            drawing.pending.p2 = Drawing.insert_point(drawing.points, p1.x, my)
+            drawing.pending.p2 = Drawing.find_or_insert_point(drawing.points, p1.x, my)
           end
           local p2 = drawing.points[drawing.pending.p2]
           App.mouse_move(State.left+Drawing.pixels(p2.x), drawing.y+Drawing.pixels(p2.y))
@@ -315,7 +315,7 @@ function Drawing.mouse_released(State, x,y, button)
       elseif drawing.pending.mode == 'polygon' then
         local mx,my = Drawing.coord(x-State.left), Drawing.coord(y-drawing.y)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
-          table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, mx,my))
+          table.insert(drawing.pending.vertices, Drawing.find_or_insert_point(drawing.points, mx,my))
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'rectangle' then
@@ -326,8 +326,8 @@ function Drawing.mouse_released(State, x,y, button)
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
             local thirdx,thirdy, fourthx,fourthy = Drawing.complete_rectangle(first.x,first.y, second.x,second.y, mx,my)
-            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, thirdx,thirdy))
-            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, fourthx,fourthy))
+            table.insert(drawing.pending.vertices, Drawing.find_or_insert_point(drawing.points, thirdx,thirdy))
+            table.insert(drawing.pending.vertices, Drawing.find_or_insert_point(drawing.points, fourthx,fourthy))
             table.insert(drawing.shapes, drawing.pending)
           end
         else
@@ -341,8 +341,8 @@ function Drawing.mouse_released(State, x,y, button)
             local first = drawing.points[drawing.pending.vertices[1]]
             local second = drawing.points[drawing.pending.vertices[2]]
             local thirdx,thirdy, fourthx,fourthy = Drawing.complete_square(first.x,first.y, second.x,second.y, mx,my)
-            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, thirdx,thirdy))
-            table.insert(drawing.pending.vertices, Drawing.insert_point(drawing.points, fourthx,fourthy))
+            table.insert(drawing.pending.vertices, Drawing.find_or_insert_point(drawing.points, thirdx,thirdy))
+            table.insert(drawing.pending.vertices, Drawing.find_or_insert_point(drawing.points, fourthx,fourthy))
             table.insert(drawing.shapes, drawing.pending)
           end
         end
@@ -379,7 +379,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'line'
     local _,drawing = Drawing.current_drawing(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+      drawing.pending.p1 = Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
       drawing.pending.p1 = drawing.pending.vertices[1]
     elseif drawing.pending.mode == 'circle' or drawing.pending.mode == 'arc' then
@@ -392,7 +392,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'manhattan'
     local drawing = Drawing.select_drawing_at_mouse(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.p1 = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+      drawing.pending.p1 = Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'line' then
       -- do nothing
     elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
@@ -409,7 +409,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'polygon'
     local _,drawing = Drawing.current_drawing(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+      drawing.pending.vertices = {Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
@@ -426,7 +426,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'rectangle'
     local _,drawing = Drawing.current_drawing(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+      drawing.pending.vertices = {Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
@@ -443,7 +443,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'square'
     local _,drawing = Drawing.current_drawing(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.vertices = {Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
+      drawing.pending.vertices = {Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)}
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       if drawing.pending.vertices == nil then
         drawing.pending.vertices = {drawing.pending.p1}
@@ -461,12 +461,12 @@ function Drawing.keychord_pressed(State, chord)
   elseif App.mouse_down(1) and chord == 'p' and State.current_drawing_mode == 'polygon' then
     local _,drawing = Drawing.current_drawing(State)
     local mx,my = Drawing.coord(App.mouse_x()-State.left), Drawing.coord(App.mouse_y()-drawing.y)
-    local j = Drawing.insert_point(drawing.points, mx,my)
+    local j = Drawing.find_or_insert_point(drawing.points, mx,my)
     table.insert(drawing.pending.vertices, j)
   elseif App.mouse_down(1) and chord == 'p' and (State.current_drawing_mode == 'rectangle' or State.current_drawing_mode == 'square') then
     local _,drawing = Drawing.current_drawing(State)
     local mx,my = Drawing.coord(App.mouse_x()-State.left), Drawing.coord(App.mouse_y()-drawing.y)
-    local j = Drawing.insert_point(drawing.points, mx,my)
+    local j = Drawing.find_or_insert_point(drawing.points, mx,my)
     while #drawing.pending.vertices >= 2 do
       table.remove(drawing.pending.vertices)
     end
@@ -484,7 +484,7 @@ function Drawing.keychord_pressed(State, chord)
     State.current_drawing_mode = 'circle'
     local _,drawing = Drawing.current_drawing(State)
     if drawing.pending.mode == 'freehand' then
-      drawing.pending.center = Drawing.insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
+      drawing.pending.center = Drawing.find_or_insert_point(drawing.points, drawing.pending.points[1].x, drawing.pending.points[1].y)
     elseif drawing.pending.mode == 'line' or drawing.pending.mode == 'manhattan' then
       drawing.pending.center = drawing.pending.p1
     elseif drawing.pending.mode == 'polygon' or drawing.pending.mode == 'rectangle' or drawing.pending.mode == 'square' then
@@ -688,6 +688,12 @@ function Drawing.smoothen(shape)
 end
 
 function Drawing.insert_point(points, x,y)
+  table.insert(points, {x=x, y=y})
+  return #points
+end
+
+function Drawing.find_or_insert_point(points, x,y)
+  -- check if UI would snap the two points together
   for i,point in ipairs(points) do
     if Drawing.near(point, x,y) then
       return i
