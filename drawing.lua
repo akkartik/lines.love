@@ -16,13 +16,13 @@ function Drawing.draw(State, line)
     end
 
     if App.mouse_down(1) and love.keyboard.isDown('h') then
-      draw_help_with_mouse_pressed(line)
+      draw_help_with_mouse_pressed(State, line)
       return
     end
   end
 
   if line.show_help then
-    draw_help_without_mouse_pressed(line)
+    draw_help_without_mouse_pressed(State, line)
     return
   end
 
