@@ -521,11 +521,11 @@ function Text.word_left(State, left, right)
     if Text.match(State.lines[State.cursor1.line].data, State.cursor1.pos-1, '%S') then
       break
     end
-    Text.left(left, right)
+    Text.left(State, left, right)
   end
   -- skip some non-whitespace
   while true do
-    Text.left(left, right)
+    Text.left(State, left, right)
     if State.cursor1.pos == 1 then
       break
     end
@@ -545,10 +545,10 @@ function Text.word_right(State, left, right)
     if Text.match(State.lines[State.cursor1.line].data, State.cursor1.pos, '%S') then
       break
     end
-    Text.right_without_scroll()
+    Text.right_without_scroll(State)
   end
   while true do
-    Text.right_without_scroll()
+    Text.right_without_scroll(State)
     if State.cursor1.pos > utf8.len(State.lines[State.cursor1.line].data) then
       break
     end
@@ -570,46 +570,46 @@ function Text.match(s, pos, pat)
   return curr:match(pat)
 end
 
-function Text.left(left, right)
-  assert(Editor_state.lines[Editor_state.cursor1.line].mode == 'text')
-  if Editor_state.cursor1.pos > 1 then
-    Editor_state.cursor1.pos = Editor_state.cursor1.pos-1
+function Text.left(State, left, right)
+  assert(State.lines[State.cursor1.line].mode == 'text')
+  if State.cursor1.pos > 1 then
+    State.cursor1.pos = State.cursor1.pos-1
   else
-    local new_cursor_line = Editor_state.cursor1.line
+    local new_cursor_line = State.cursor1.line
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
-      if Editor_state.lines[new_cursor_line].mode == 'text' then
-        Editor_state.cursor1.line = new_cursor_line
-        Editor_state.cursor1.pos = utf8.len(Editor_state.lines[Editor_state.cursor1.line].data) + 1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1.line = new_cursor_line
+        State.cursor1.pos = utf8.len(State.lines[State.cursor1.line].data) + 1
         break
       end
     end
   end
-  if Text.lt1(Editor_state.cursor1, Editor_state.screen_top1) then
-    local top2 = Text.to2(Editor_state.screen_top1, left, right)
+  if Text.lt1(State.cursor1, State.screen_top1) then
+    local top2 = Text.to2(State.screen_top1, left, right)
     top2 = Text.previous_screen_line(top2, left, right)
-    Editor_state.screen_top1 = Text.to1(top2)
+    State.screen_top1 = Text.to1(top2)
   end
 end
 
-function Text.right(left, right)
-  Text.right_without_scroll()
+function Text.right(State, left, right)
+  Text.right_without_scroll(State)
   if Text.cursor_past_screen_bottom() then
     Text.snap_cursor_to_bottom_of_screen(left, right)
   end
 end
 
-function Text.right_without_scroll()
-  assert(Editor_state.lines[Editor_state.cursor1.line].mode == 'text')
-  if Editor_state.cursor1.pos <= utf8.len(Editor_state.lines[Editor_state.cursor1.line].data) then
-    Editor_state.cursor1.pos = Editor_state.cursor1.pos+1
+function Text.right_without_scroll(State)
+  assert(State.lines[State.cursor1.line].mode == 'text')
+  if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
+    State.cursor1.pos = State.cursor1.pos+1
   else
-    local new_cursor_line = Editor_state.cursor1.line
-    while new_cursor_line <= #Editor_state.lines-1 do
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line <= #State.lines-1 do
       new_cursor_line = new_cursor_line+1
-      if Editor_state.lines[new_cursor_line].mode == 'text' then
-        Editor_state.cursor1.line = new_cursor_line
-        Editor_state.cursor1.pos = 1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1.line = new_cursor_line
+        State.cursor1.pos = 1
         break
       end
     end
