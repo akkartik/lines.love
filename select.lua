@@ -93,8 +93,8 @@ end
 function Text.to_pos(State, x,y, left, right)
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(line, x,y, left, right) then
-        return line_index, Text.to_pos_on_line(line, x,y, left, right)
+      if Text.in_line(State, line, x,y, left, right) then
+        return line_index, Text.to_pos_on_line(State, line, x,y, left, right)
       end
     end
   end

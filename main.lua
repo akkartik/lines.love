@@ -113,9 +113,9 @@ end
 function App.resize(w, h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
-  Text.redraw_all()
+  Text.redraw_all(Editor_state)
   Editor_state.selection1 = {}  -- no support for shift drag while we're resizing
-  Text.tweak_screen_top_and_cursor(Editor_state.margin_left, App.screen.height-Editor_state.margin_right)
+  Text.tweak_screen_top_and_cursor(Editor_state, Editor_state.margin_left, App.screen.height-Editor_state.margin_right)
   Last_resize_time = App.getTime()
 end
 

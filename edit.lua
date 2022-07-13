@@ -203,7 +203,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
 
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(line, x,y, State.margin_left, App.screen.width-State.margin_right) then
+      if Text.in_line(State, line, x,y, State.margin_left, App.screen.width-State.margin_right) then
         -- delicate dance between cursor, selection and old cursor/selection
         -- scenarios:
         --  regular press+release: sets cursor, clears selection
@@ -218,7 +218,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         State.mousepress_shift = App.shift_down()
         State.selection1 = {
             line=line_index,
-            pos=Text.to_pos_on_line(line, x, y, State.margin_left, App.screen.width-State.margin_right),
+            pos=Text.to_pos_on_line(State, line, x, y, State.margin_left, App.screen.width-State.margin_right),
         }
 --?         print('selection', State.selection1.line, State.selection1.pos)
         break
@@ -248,11 +248,11 @@ function edit.mouse_released(State, x,y, mouse_button)
   else
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
-        if Text.in_line(line, x,y, State.margin_left, App.screen.width-State.margin_right) then
+        if Text.in_line(State, line, x,y, State.margin_left, App.screen.width-State.margin_right) then
 --?           print('reset selection')
           State.cursor1 = {
               line=line_index,
-              pos=Text.to_pos_on_line(line, x, y, State.margin_left, App.screen.width-State.margin_right),
+              pos=Text.to_pos_on_line(State, line, x, y, State.margin_left, App.screen.width-State.margin_right),
           }
 --?           print('cursor', State.cursor1.line, State.cursor1.pos)
           if State.mousepress_shift then
@@ -308,7 +308,7 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = State.search_backup.cursor
       State.screen_top1 = State.search_backup.screen_top
       State.search_backup = nil
-      Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     elseif chord == 'return' then
       State.search_term = nil
       State.search_text = nil
@@ -331,13 +331,13 @@ function edit.keychord_pressed(State, chord, key)
     assert(State.search_text == nil)
   elseif chord == 'C-=' then
     initialize_font_settings(State.font_height+2)
-    Text.redraw_all()
+    Text.redraw_all(State)
   elseif chord == 'C--' then
     initialize_font_settings(State.font_height-2)
-    Text.redraw_all()
+    Text.redraw_all(State)
   elseif chord == 'C-0' then
     initialize_font_settings(20)
-    Text.redraw_all()
+    Text.redraw_all(State)
   elseif chord == 'C-z' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
     local event = undo_event(State)
@@ -347,7 +347,7 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = deepcopy(src.cursor)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.after, event.before)
-      Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save(State)
     end
   elseif chord == 'C-y' then
@@ -359,7 +359,7 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = deepcopy(src.cursor)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.before, event.after)
-      Text.redraw_all()  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
       schedule_save(State)
     end
   -- clipboard
