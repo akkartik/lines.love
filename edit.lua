@@ -164,7 +164,7 @@ function edit.draw(State)
         line.startpos = State.screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty, State.left, State.right)
+      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty)
       y = y + State.line_height
 --?       print('=> y', y)
     end

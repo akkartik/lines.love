@@ -9,18 +9,18 @@ require 'text_tests'
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
-function Text.draw(State, line, line_index, top, left, right)
+function Text.draw(State, line, line_index, top)
 --?   print('text.draw', line_index)
   App.color(Text_color)
   -- wrap long lines
-  local x = left
+  local x = State.left
   local y = top
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
-    Text.compute_fragments(line, left, right)
+    Text.compute_fragments(line, State.left, State.right)
   end
-  Text.populate_screen_line_starting_pos(line, left, right)
+  Text.populate_screen_line_starting_pos(line, State.left, State.right)
 --?   print('--')
   for _, f in ipairs(line.fragments) do
     local frag, frag_text = f.data, f.text
@@ -29,8 +29,8 @@ function Text.draw(State, line, line_index, top, left, right)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(State.screen_top1.line)..'; '..s(pos)..' vs '..s(State.screen_top1.pos)..'; bottom: '..s(State.screen_bottom1.line)..'/'..s(State.screen_bottom1.pos))
-    if x + frag_width > right then
-      assert(x > left)  -- no overfull lines
+    if x + frag_width > State.right then
+      assert(x > State.left)  -- no overfull lines
       -- update y only after drawing the first screen line of screen top
       if Text.lt1(State.screen_top1, {line=line_index, pos=pos}) then
         y = y + State.line_height
@@ -41,13 +41,13 @@ function Text.draw(State, line, line_index, top, left, right)
         screen_line_starting_pos = pos
 --?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
       end
-      x = left
+      x = State.left
     end
 --?     print('checking to draw', pos, State.screen_top1.pos)
     -- don't draw text above screen top
     if Text.le1(State.screen_top1, {line=line_index, pos=pos}) then
       if State.selection1.line then
-        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len, left, right)
+        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, x,y, pos, lo,hi)
       end
 --?       print('drawing '..frag)
@@ -351,10 +351,10 @@ function Text.insert_return(State)
   State.cursor1.pos = 1
 end
 
-function Text.pageup(State, left, right)
+function Text.pageup(State)
 --?   print('pageup')
   -- duplicate some logic from love.draw
-  local top2 = Text.to2(State, State.screen_top1, left, right)
+  local top2 = Text.to2(State, State.screen_top1)
 --?   print(App.screen.height)
   local y = App.screen.height - State.line_height
   while y >= State.top do
@@ -365,22 +365,22 @@ function Text.pageup(State, left, right)
     elseif State.lines[State.screen_top1.line].mode == 'drawing' then
       y = y - State.drawing_padding_height - Drawing.pixels(State.lines[State.screen_top1.line].h)
     end
-    top2 = Text.previous_screen_line(State, top2, left, right)
+    top2 = Text.previous_screen_line(State, top2)
   end
   State.screen_top1 = Text.to1(State, top2)
   State.cursor1.line = State.screen_top1.line
   State.cursor1.pos = State.screen_top1.pos
-  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State, left, right)
+  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
 --?   print(State.cursor1.line, State.cursor1.pos, State.screen_top1.line, State.screen_top1.pos)
 --?   print('pageup end')
 end
 
-function Text.pagedown(State, left, right)
+function Text.pagedown(State)
 --?   print('pagedown')
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
   -- However, only do this if it makes forward progress.
-  local top2 = Text.to2(State, State.screen_bottom1, left, right)
+  local top2 = Text.to2(State, State.screen_bottom1)
   if top2.screen_line > 1 then
     top2.screen_line = math.max(top2.screen_line-10, 1)
   end
@@ -394,16 +394,16 @@ function Text.pagedown(State, left, right)
 --?   print('setting top to', State.screen_top1.line, State.screen_top1.pos)
   State.cursor1.line = State.screen_top1.line
   State.cursor1.pos = State.screen_top1.pos
-  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State, left, right)
+  Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
 --?   print('top now', State.screen_top1.line)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 --?   print('pagedown end')
 end
 
-function Text.up(State, left, right)
+function Text.up(State)
   assert(State.lines[State.cursor1.line].mode == 'text')
 --?   print('up', State.cursor1.line, State.cursor1.pos, State.screen_top1.line, State.screen_top1.pos)
-  local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(State, left, right)
+  local screen_line_index,screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(State)
   if screen_line_starting_pos == 1 then
 --?     print('cursor is at first screen line of its line')
     -- line is done; skip to previous text line
@@ -413,7 +413,7 @@ function Text.up(State, left, right)
       if State.lines[new_cursor_line].mode == 'text' then
 --?         print('found previous text line')
         State.cursor1.line = new_cursor_line
-        Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], left, right)
+        Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.left, State.right)
         -- previous text line found, pick its final screen line
 --?         print('has multiple screen lines')
         local screen_line_starting_pos = State.lines[State.cursor1.line].screen_line_starting_pos
@@ -427,7 +427,7 @@ function Text.up(State, left, right)
         end
         local screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, screen_line_starting_pos)
         local s = string.sub(State.lines[State.cursor1.line].data, screen_line_starting_byte_offset)
-        State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, left) - 1
+        State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
         break
       end
     end
@@ -446,15 +446,15 @@ function Text.up(State, left, right)
     end
     local new_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(State.lines[State.cursor1.line].data, new_screen_line_starting_byte_offset)
-    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, left) - 1
+    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
 --?     print('cursor pos is now '..tostring(State.cursor1.pos))
   end
 end
 
-function Text.down(State, left, right)
+function Text.down(State)
   assert(State.lines[State.cursor1.line].mode == 'text')
 --?   print('down', State.cursor1.line, State.cursor1.pos, State.screen_top1.line, State.screen_top1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
-  if Text.cursor_at_final_screen_line(State, left, right) then
+  if Text.cursor_at_final_screen_line(State) then
     -- line is done, skip to next text line
 --?     print('cursor at final screen line of its line')
     local new_cursor_line = State.cursor1.line
@@ -462,7 +462,7 @@ function Text.down(State, left, right)
       new_cursor_line = new_cursor_line+1
       if State.lines[new_cursor_line].mode == 'text' then
         State.cursor1.line = new_cursor_line
-        State.cursor1.pos = Text.nearest_cursor_pos(State.lines[State.cursor1.line].data, State.cursor_x, left)
+        State.cursor1.pos = Text.nearest_cursor_pos(State.lines[State.cursor1.line].data, State.cursor_x, State.left)
 --?         print(State.cursor1.pos)
         break
       end
@@ -470,7 +470,7 @@ function Text.down(State, left, right)
     if State.cursor1.line > State.screen_bottom1.line then
 --?       print('screen top before:', State.screen_top1.line, State.screen_top1.pos)
 --?       print('scroll up preserving cursor')
-      Text.snap_cursor_to_bottom_of_screen(State, left, right)
+      Text.snap_cursor_to_bottom_of_screen(State)
 --?       print('screen top after:', State.screen_top1.line, State.screen_top1.pos)
     end
   else
@@ -480,16 +480,16 @@ function Text.down(State, left, right)
       scroll_down = true
     end
 --?     print('cursor is NOT at final screen line of its line')
-    local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(State, left, right)
+    local screen_line_index, screen_line_starting_pos = Text.pos_at_start_of_cursor_screen_line(State)
     new_screen_line_starting_pos = State.lines[State.cursor1.line].screen_line_starting_pos[screen_line_index+1]
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
     local new_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(State.lines[State.cursor1.line].data, new_screen_line_starting_byte_offset)
-    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, left) - 1
+    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
 --?     print('cursor pos is now', State.cursor1.line, State.cursor1.pos)
     if scroll_down then
 --?       print('scroll up preserving cursor')
-      Text.snap_cursor_to_bottom_of_screen(State, left, right)
+      Text.snap_cursor_to_bottom_of_screen(State)
 --?       print('screen top after:', State.screen_top1.line, State.screen_top1.pos)
     end
   end
@@ -503,16 +503,16 @@ function Text.start_of_line(State)
   end
 end
 
-function Text.end_of_line(State, left, right)
+function Text.end_of_line(State)
   State.cursor1.pos = utf8.len(State.lines[State.cursor1.line].data) + 1
-  local _,botpos = Text.pos_at_start_of_cursor_screen_line(State, left, right)
+  local _,botpos = Text.pos_at_start_of_cursor_screen_line(State)
   local botline1 = {line=State.cursor1.line, pos=botpos}
   if Text.cursor_past_screen_bottom(State) then
-    Text.snap_cursor_to_bottom_of_screen(State, left, right)
+    Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
 
-function Text.word_left(State, left, right)
+function Text.word_left(State)
   -- skip some whitespace
   while true do
     if State.cursor1.pos == 1 then
@@ -521,11 +521,11 @@ function Text.word_left(State, left, right)
     if Text.match(State.lines[State.cursor1.line].data, State.cursor1.pos-1, '%S') then
       break
     end
-    Text.left(State, left, right)
+    Text.left(State)
   end
   -- skip some non-whitespace
   while true do
-    Text.left(State, left, right)
+    Text.left(State)
     if State.cursor1.pos == 1 then
       break
     end
@@ -536,7 +536,7 @@ function Text.word_left(State, left, right)
   end
 end
 
-function Text.word_right(State, left, right)
+function Text.word_right(State)
   -- skip some whitespace
   while true do
     if State.cursor1.pos > utf8.len(State.lines[State.cursor1.line].data) then
@@ -557,7 +557,7 @@ function Text.word_right(State, left, right)
     end
   end
   if Text.cursor_past_screen_bottom(State) then
-    Text.snap_cursor_to_bottom_of_screen(State, left, right)
+    Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
 
@@ -570,7 +570,7 @@ function Text.match(s, pos, pat)
   return curr:match(pat)
 end
 
-function Text.left(State, left, right)
+function Text.left(State)
   assert(State.lines[State.cursor1.line].mode == 'text')
   if State.cursor1.pos > 1 then
     State.cursor1.pos = State.cursor1.pos-1
@@ -586,16 +586,16 @@ function Text.left(State, left, right)
     end
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
-    local top2 = Text.to2(State, State.screen_top1, left, right)
-    top2 = Text.previous_screen_line(State, top2, left, right)
+    local top2 = Text.to2(State, State.screen_top1)
+    top2 = Text.previous_screen_line(State, top2)
     State.screen_top1 = Text.to1(State, top2)
   end
 end
 
-function Text.right(State, left, right)
+function Text.right(State)
   Text.right_without_scroll(State)
   if Text.cursor_past_screen_bottom(State) then
-    Text.snap_cursor_to_bottom_of_screen(State, left, right)
+    Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
 
@@ -616,8 +616,8 @@ function Text.right_without_scroll(State)
   end
 end
 
-function Text.pos_at_start_of_cursor_screen_line(State, left, right)
-  Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], left, right)
+function Text.pos_at_start_of_cursor_screen_line(State)
+  Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.left, State.right)
   for i=#State.lines[State.cursor1.line].screen_line_starting_pos,1,-1 do
     local spos = State.lines[State.cursor1.line].screen_line_starting_pos[i]
     if spos <= State.cursor1.pos then
@@ -627,14 +627,14 @@ function Text.pos_at_start_of_cursor_screen_line(State, left, right)
   assert(false)
 end
 
-function Text.cursor_at_final_screen_line(State, left, right)
-  Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], left, right)
+function Text.cursor_at_final_screen_line(State)
+  Text.populate_screen_line_starting_pos(State.lines[State.cursor1.line], State.left, State.right)
   local screen_lines = State.lines[State.cursor1.line].screen_line_starting_pos
 --?   print(screen_lines[#screen_lines], State.cursor1.pos)
   return screen_lines[#screen_lines] <= State.cursor1.pos
 end
 
-function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State, left, right)
+function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
   local y = State.top
   while State.cursor1.line <= #State.lines do
     if State.lines[State.cursor1.line].mode == 'text' then
@@ -652,13 +652,13 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 --?   print(y, App.screen.height, App.screen.height-State.line_height)
   if y > App.screen.height - State.line_height then
 --?     print('scroll up')
-    Text.snap_cursor_to_bottom_of_screen(State, left, right)
+    Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
 
 -- should never modify State.cursor1
-function Text.snap_cursor_to_bottom_of_screen(State, left, right)
-  local top2 = Text.to2(State, State.cursor1, left, right)
+function Text.snap_cursor_to_bottom_of_screen(State)
+  local top2 = Text.to2(State, State.cursor1)
   top2.screen_pos = 1  -- start of screen line
 --?   print('cursor pos '..tostring(State.cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
   local y = App.screen.height - State.line_height
@@ -684,7 +684,7 @@ function Text.snap_cursor_to_bottom_of_screen(State, left, right)
 --?       print('skipping drawing of height', h)
       y = y - h
     end
-    top2 = Text.previous_screen_line(State, top2, left, right)
+    top2 = Text.previous_screen_line(State, top2)
   end
 --?   print('top2 finally:', top2.line, top2.screen_line, top2.screen_pos)
   State.screen_top1 = Text.to1(State, top2)
@@ -692,18 +692,18 @@ function Text.snap_cursor_to_bottom_of_screen(State, left, right)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
 
-function Text.in_line(State, line, x,y, left,right)
+function Text.in_line(State, line, x,y)
   if line.starty == nil then return false end  -- outside current page
-  if x < left then return false end
+  if x < State.left then return false end
   if y < line.starty then return false end
-  Text.populate_screen_line_starting_pos(line, left, right)
+  Text.populate_screen_line_starting_pos(line, State.left, State.right)
   return y < line.starty + State.line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line, line.startpos) + 1)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
-function Text.to_pos_on_line(State, line, mx, my, left, right)
+function Text.to_pos_on_line(State, line, mx, my)
   if line.fragments == nil then
-    Text.compute_fragments(line, left, right)
+    Text.compute_fragments(line, State.left, State.right)
   end
   assert(my >= line.starty)
   -- duplicate some logic from Text.draw
@@ -723,8 +723,8 @@ function Text.to_pos_on_line(State, line, mx, my, left, right)
         return line.screen_line_starting_pos[screen_line_index+1]-1
       end
       local s = string.sub(line.data, screen_line_starting_byte_offset)
---?       print('return', mx, Text.nearest_cursor_pos(s, mx, left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, left) - 1)
-      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, left) - 1
+--?       print('return', mx, Text.nearest_cursor_pos(s, mx, State.left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, State.left) - 1)
+      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, State.left) - 1
     end
     y = nexty
   end
@@ -833,12 +833,12 @@ function Text.x(s, pos)
   return App.width(text_before)
 end
 
-function Text.to2(State, pos1, left, right)
+function Text.to2(State, pos1)
   if State.lines[pos1.line].mode == 'drawing' then
     return {line=pos1.line, screen_line=1, screen_pos=1}
   end
   local result = {line=pos1.line, screen_line=1}
-  Text.populate_screen_line_starting_pos(State.lines[pos1.line], left, right)
+  Text.populate_screen_line_starting_pos(State.lines[pos1.line], State.left, State.right)
   for i=#State.lines[pos1.line].screen_line_starting_pos,1,-1 do
     local spos = State.lines[pos1.line].screen_line_starting_pos[i]
     if spos <= pos1.pos then
@@ -893,7 +893,7 @@ function Text.offset(s, pos1)
   return result
 end
 
-function Text.previous_screen_line(State, pos2, left, right)
+function Text.previous_screen_line(State, pos2)
   if pos2.screen_line > 1 then
     return {line=pos2.line, screen_line=pos2.screen_line-1, screen_pos=1}
   elseif pos2.line == 1 then
@@ -902,7 +902,7 @@ function Text.previous_screen_line(State, pos2, left, right)
     return {line=pos2.line-1, screen_line=1, screen_pos=1}
   else
     local l = State.lines[pos2.line-1]
-    Text.populate_screen_line_starting_pos(State.lines[pos2.line-1], left, right)
+    Text.populate_screen_line_starting_pos(State.lines[pos2.line-1], State.left, State.right)
     return {line=pos2.line-1, screen_line=#State.lines[pos2.line-1].screen_line_starting_pos, screen_pos=1}
   end
 end
@@ -933,11 +933,11 @@ function Text.populate_screen_line_starting_pos(line, left, right)
 end
 
 -- resize helper
-function Text.tweak_screen_top_and_cursor(State, left, right)
+function Text.tweak_screen_top_and_cursor(State)
 --?   print('a', State.selection1.line)
   if State.screen_top1.pos == 1 then return end
   local line = State.lines[State.screen_top1.line]
-  Text.populate_screen_line_starting_pos(line, left, right)
+  Text.populate_screen_line_starting_pos(line, State.left, State.right)
   for i=2,#line.screen_line_starting_pos do
     local pos = line.screen_line_starting_pos[i]
     if pos == State.screen_top1.pos then
@@ -964,7 +964,7 @@ function Text.tweak_screen_top_and_cursor(State, left, right)
       local line = State.lines[State.screen_bottom1.line]
       State.cursor1 = {
           line=State.screen_bottom1.line,
-          pos=Text.to_pos_on_line(State, line, App.screen.width-5, App.screen.height-5, left, right),
+          pos=Text.to_pos_on_line(State, line, App.screen.width-5, App.screen.height-5),
       }
     end
   end
@@ -976,7 +976,7 @@ function Text.cursor_past_screen_bottom(State)
   return State.cursor_y >= App.screen.height - State.line_height
   -- this approach is cheaper and almost works, except on the final screen
   -- where file ends above bottom of screen
---?   local _,botpos = Text.pos_at_start_of_cursor_screen_line(State, left, right)
+--?   local _,botpos = Text.pos_at_start_of_cursor_screen_line(State)
 --?   local botline1 = {line=State.cursor1.line, pos=botpos}
 --?   return Text.lt1(State.screen_bottom1, botline1)
 end

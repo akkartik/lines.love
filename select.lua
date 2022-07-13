@@ -6,13 +6,13 @@
 -- and {line=line_index, pos=bpos}.
 -- apos must be less than bpos. However State.selection1 and State.cursor1 can be in any order.
 -- Result: positions spos,epos between apos,bpos.
-function Text.clip_selection(State, line_index, apos, bpos, left, right)
+function Text.clip_selection(State, line_index, apos, bpos)
   if State.selection1.line == nil then return nil,nil end
   -- min,max = sorted(State.selection1,State.cursor1)
   local minl,minp = State.selection1.line,State.selection1.pos
   local maxl,maxp
   if App.mouse_down(1) then
-    maxl,maxp = Text.mouse_pos(State, left, right)
+    maxl,maxp = Text.mouse_pos(State)
   else
     maxl,maxp = State.cursor1.line,State.cursor1.pos
   end
@@ -76,13 +76,13 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
 end
 
 -- inefficient for some reason, so don't do it on every frame
-function Text.mouse_pos(State, left, right)
+function Text.mouse_pos(State)
   local time = love.timer.getTime()
   if State.recent_mouse.time and State.recent_mouse.time > time-0.1 then
     return State.recent_mouse.line, State.recent_mouse.pos
   end
   State.recent_mouse.time = time
-  local line,pos = Text.to_pos(State, App.mouse_x(), App.mouse_y(), left, right)
+  local line,pos = Text.to_pos(State, App.mouse_x(), App.mouse_y())
   if line then
     State.recent_mouse.line = line
     State.recent_mouse.pos = pos
@@ -90,32 +90,32 @@ function Text.mouse_pos(State, left, right)
   return State.recent_mouse.line, State.recent_mouse.pos
 end
 
-function Text.to_pos(State, x,y, left, right)
+function Text.to_pos(State, x,y)
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(State, line, x,y, left, right) then
-        return line_index, Text.to_pos_on_line(State, line, x,y, left, right)
+      if Text.in_line(State, line, x,y) then
+        return line_index, Text.to_pos_on_line(State, line, x,y)
       end
     end
   end
 end
 
-function Text.cut_selection(State, left, right)
+function Text.cut_selection(State)
   if State.selection1.line == nil then return end
   local result = Text.selection(State)
-  Text.delete_selection(State, left, right)
+  Text.delete_selection(State)
   return result
 end
 
-function Text.delete_selection(State, left, right)
+function Text.delete_selection(State)
   if State.selection1.line == nil then return end
   local minl,maxl = minmax(State.selection1.line, State.cursor1.line)
   local before = snapshot(State, minl, maxl)
-  Text.delete_selection_without_undo(State, left, right)
+  Text.delete_selection_without_undo(State)
   record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
 end
 
-function Text.delete_selection_without_undo(State, left, right)
+function Text.delete_selection_without_undo(State)
   if State.selection1.line == nil then return end
   -- min,max = sorted(State.selection1,State.cursor1)
   local minl,minp = State.selection1.line,State.selection1.pos
@@ -133,7 +133,7 @@ function Text.delete_selection_without_undo(State, left, right)
   State.cursor1.pos = minp
   if Text.lt1(State.cursor1, State.screen_top1) then
     State.screen_top1.line = State.cursor1.line
-    _,State.screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(State, left, right)
+    _,State.screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(State)
   end
   State.selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
