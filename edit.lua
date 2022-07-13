@@ -279,7 +279,7 @@ function edit.textinput(State, t)
   if State.search_term then
     State.search_term = State.search_term..t
     State.search_text = nil
-    Text.search_next()
+    Text.search_next(State)
   elseif State.current_drawing_mode == 'name' then
     local before = snapshot(State, State.lines.current_drawing_index)
     local drawing = State.lines.current_drawing
@@ -320,9 +320,9 @@ function edit.keychord_pressed(State, chord, key)
       State.search_text = nil
     elseif chord == 'down' then
       State.cursor1.pos = State.cursor1.pos+1
-      Text.search_next()
+      Text.search_next(State)
     elseif chord == 'up' then
-      Text.search_previous()
+      Text.search_previous(State)
     end
     return
   elseif chord == 'C-f' then

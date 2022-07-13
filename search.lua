@@ -21,83 +21,83 @@ function Text.draw_search_bar(State)
   App.color(Text_color)
 end
 
-function Text.search_next()
+function Text.search_next(State)
   -- search current line
-  local pos = Editor_state.lines[Editor_state.cursor1.line].data:find(Editor_state.search_term, Editor_state.cursor1.pos)
+  local pos = State.lines[State.cursor1.line].data:find(State.search_term, State.cursor1.pos)
   if pos then
-    Editor_state.cursor1.pos = pos
+    State.cursor1.pos = pos
   end
   if pos == nil then
-    for i=Editor_state.cursor1.line+1,#Editor_state.lines do
-      pos = Editor_state.lines[i].data:find(Editor_state.search_term)
+    for i=State.cursor1.line+1,#State.lines do
+      pos = State.lines[i].data:find(State.search_term)
       if pos then
-        Editor_state.cursor1.line = i
-        Editor_state.cursor1.pos = pos
+        State.cursor1.line = i
+        State.cursor1.pos = pos
         break
       end
     end
   end
   if pos == nil then
     -- wrap around
-    for i=1,Editor_state.cursor1.line-1 do
-      pos = Editor_state.lines[i].data:find(Editor_state.search_term)
+    for i=1,State.cursor1.line-1 do
+      pos = State.lines[i].data:find(State.search_term)
       if pos then
-        Editor_state.cursor1.line = i
-        Editor_state.cursor1.pos = pos
+        State.cursor1.line = i
+        State.cursor1.pos = pos
         break
       end
     end
   end
   if pos == nil then
-    Editor_state.cursor1.line = Editor_state.search_backup.cursor.line
-    Editor_state.cursor1.pos = Editor_state.search_backup.cursor.pos
-    Editor_state.screen_top1.line = Editor_state.search_backup.screen_top.line
-    Editor_state.screen_top1.pos = Editor_state.search_backup.screen_top.pos
+    State.cursor1.line = State.search_backup.cursor.line
+    State.cursor1.pos = State.search_backup.cursor.pos
+    State.screen_top1.line = State.search_backup.screen_top.line
+    State.screen_top1.pos = State.search_backup.screen_top.pos
   end
-  if Text.lt1(Editor_state.cursor1, Editor_state.screen_top1) or Text.lt1(Editor_state.screen_bottom1, Editor_state.cursor1) then
-    Editor_state.screen_top1.line = Editor_state.cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.screen_top1.pos = pos
+  if Text.lt1(State.cursor1, State.screen_top1) or Text.lt1(State.screen_bottom1, State.cursor1) then
+    State.screen_top1.line = State.cursor1.line
+    local _, pos = Text.pos_at_start_of_cursor_screen_line(State, State.margin_left, App.screen.width-State.margin_right)
+    State.screen_top1.pos = pos
   end
 end
 
-function Text.search_previous()
+function Text.search_previous(State)
   -- search current line
-  local pos = rfind(Editor_state.lines[Editor_state.cursor1.line].data, Editor_state.search_term, Editor_state.cursor1.pos)
+  local pos = rfind(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos)
   if pos then
-    Editor_state.cursor1.pos = pos
+    State.cursor1.pos = pos
   end
   if pos == nil then
-    for i=Editor_state.cursor1.line-1,1,-1 do
-      pos = rfind(Editor_state.lines[i].data, Editor_state.search_term)
+    for i=State.cursor1.line-1,1,-1 do
+      pos = rfind(State.lines[i].data, State.search_term)
       if pos then
-        Editor_state.cursor1.line = i
-        Editor_state.cursor1.pos = pos
+        State.cursor1.line = i
+        State.cursor1.pos = pos
         break
       end
     end
   end
   if pos == nil then
     -- wrap around
-    for i=#Editor_state.lines,Editor_state.cursor1.line+1,-1 do
-      pos = rfind(Editor_state.lines[i].data, Editor_state.search_term)
+    for i=#State.lines,State.cursor1.line+1,-1 do
+      pos = rfind(State.lines[i].data, State.search_term)
       if pos then
-        Editor_state.cursor1.line = i
-        Editor_state.cursor1.pos = pos
+        State.cursor1.line = i
+        State.cursor1.pos = pos
         break
       end
     end
   end
   if pos == nil then
-    Editor_state.cursor1.line = Editor_state.search_backup.cursor.line
-    Editor_state.cursor1.pos = Editor_state.search_backup.cursor.pos
-    Editor_state.screen_top1.line = Editor_state.search_backup.screen_top.line
-    Editor_state.screen_top1.pos = Editor_state.search_backup.screen_top.pos
+    State.cursor1.line = State.search_backup.cursor.line
+    State.cursor1.pos = State.search_backup.cursor.pos
+    State.screen_top1.line = State.search_backup.screen_top.line
+    State.screen_top1.pos = State.search_backup.screen_top.pos
   end
-  if Text.lt1(Editor_state.cursor1, Editor_state.screen_top1) or Text.lt1(Editor_state.screen_bottom1, Editor_state.cursor1) then
-    Editor_state.screen_top1.line = Editor_state.cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line(Editor_state.margin_left, App.screen.width-Editor_state.margin_right)
-    Editor_state.screen_top1.pos = pos
+  if Text.lt1(State.cursor1, State.screen_top1) or Text.lt1(State.screen_bottom1, State.cursor1) then
+    State.screen_top1.line = State.cursor1.line
+    local _, pos = Text.pos_at_start_of_cursor_screen_line(State, State.margin_left, App.screen.width-State.margin_right)
+    State.screen_top1.pos = pos
   end
 end
 
