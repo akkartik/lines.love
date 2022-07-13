@@ -391,8 +391,8 @@ function edit.keychord_pressed(State, chord, key)
         Text.insert_at_cursor(State, c)
       end
     end
-    if Text.cursor_past_screen_bottom() then
-      Text.snap_cursor_to_bottom_of_screen(State.margin_left, App.screen.height-State.margin_right)
+    if Text.cursor_past_screen_bottom(State) then
+      Text.snap_cursor_to_bottom_of_screen(State, State.margin_left, App.screen.height-State.margin_right)
     end
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
