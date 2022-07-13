@@ -237,6 +237,7 @@ function App.mouse_y()
 end
 
 -- all textinput events are also keypresses
+-- TODO: handle chords of multiple keys
 function App.run_after_textinput(t)
   App.keypressed(t)
   App.textinput(t)
@@ -246,6 +247,7 @@ function App.run_after_textinput(t)
 end
 
 -- not all keys are textinput
+-- TODO: handle chords of multiple keys
 function App.run_after_keychord(chord)
   App.keychord_pressed(chord)
   App.keyreleased(chord)
