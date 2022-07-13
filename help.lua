@@ -46,7 +46,7 @@ function draw_help_without_mouse_pressed(State, drawing)
   love.graphics.print("Press 'esc' now to hide this message", State.left+30,y)
   y = y + State.line_height
   App.color(Help_background_color)
-  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-drawing.y))
 end
 
 function draw_help_with_mouse_pressed(State, drawing)
@@ -125,7 +125,7 @@ function draw_help_with_mouse_pressed(State, drawing)
     y = y + State.line_height
   end
   App.color(Help_background_color)
-  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h),y-drawing.y))
+  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-drawing.y))
 end
 
 function current_shape(State, shape)

@@ -158,7 +158,7 @@ function edit.draw(State)
       y = y+State.drawing_padding_top
       line.y = y
       Drawing.draw(State, line)
-      y = y + Drawing.pixels(line.h) + State.drawing_padding_bottom
+      y = y + Drawing.pixels(line.h, State.width) + State.drawing_padding_bottom
     else
       line.starty = y
       line.startpos = 1
@@ -229,7 +229,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         break
       end
     elseif line.mode == 'drawing' then
-      if Drawing.in_drawing(line, x, y) then
+      if Drawing.in_drawing(line, x, y, State.left,State.right) then
         State.lines.current_drawing_index = line_index
         State.lines.current_drawing = line
         Drawing.before = snapshot(State, line_index)
