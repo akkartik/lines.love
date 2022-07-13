@@ -241,10 +241,6 @@ function Drawing.update(State)
   if State.lines.current_drawing == nil then return end
   local drawing = State.lines.current_drawing
   assert(drawing.mode == 'drawing')
-  if drawing.y == nil then
-    -- something invalidated all the y's; just wait for a draw
-    return
-  end
   local pmx, pmy = App.mouse_x(), App.mouse_y()
   local mx = Drawing.coord(pmx-State.left, State.width)
   local my = Drawing.coord(pmy-drawing.y, State.width)
