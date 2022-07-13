@@ -38,18 +38,21 @@ function Drawing.draw(State, line)
     end
     Drawing.draw_shape(line, shape, line.y, State.left,State.right)
   end
+
+  local px = function(x) return Drawing.pixels(x, State.width)+State.left end
+  local py = function(y) return Drawing.pixels(y, State.width)+line.y end
   for i,p in ipairs(line.points) do
     if p.deleted == nil then
       if Drawing.near(p, mx,my, State.width) then
         App.color(Focus_stroke_color)
-        love.graphics.circle('line', Drawing.pixels(p.x, State.width)+State.left,Drawing.pixels(p.y, State.width)+line.y, Same_point_distance)
+        love.graphics.circle('line', px(p.x),py(p.y), Same_point_distance)
       else
         App.color(Stroke_color)
-        love.graphics.circle('fill', Drawing.pixels(p.x, State.width)+State.left,Drawing.pixels(p.y, State.width)+line.y, 2)
+        love.graphics.circle('fill', px(p.x),py(p.y), 2)
       end
       if p.name then
         -- TODO: clip
-        local x,y = Drawing.pixels(p.x, State.width)+State.left+5, Drawing.pixels(p.y, State.width)+line.y+5
+        local x,y = px(p.x)+5, py(p.y)+5
         love.graphics.print(p.name, x,y)
         if State.current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
