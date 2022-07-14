@@ -128,6 +128,13 @@ function App.resize(w, h)
   Last_resize_time = App.getTime()
 end
 
+function initialize_font_settings(font_height)
+  Editor_state.font_height = font_height
+  love.graphics.setFont(love.graphics.newFont(Editor_state.font_height))
+  Editor_state.line_height = math.floor(font_height*1.3)
+  Editor_state.em = App.newText(love.graphics.getFont(), 'm')
+end
+
 function App.filedropped(file)
   -- first make sure to save edits on any existing file
   if Editor_state.next_save then
