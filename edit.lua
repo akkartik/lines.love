@@ -333,13 +333,13 @@ function edit.keychord_pressed(State, chord, key)
     State.search_backup = {cursor={line=State.cursor1.line, pos=State.cursor1.pos}, screen_top={line=State.screen_top1.line, pos=State.screen_top1.pos}}
     assert(State.search_text == nil)
   elseif chord == 'C-=' then
-    initialize_font_settings(State.font_height+2)
+    edit.update_font_settings(State, State.font_height+2)
     Text.redraw_all(State)
   elseif chord == 'C--' then
-    initialize_font_settings(State.font_height-2)
+    edit.update_font_settings(State, State.font_height-2)
     Text.redraw_all(State)
   elseif chord == 'C-0' then
-    initialize_font_settings(20)
+    edit.update_font_settings(State, 20)
     Text.redraw_all(State)
   elseif chord == 'C-z' then
     for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
@@ -448,6 +448,13 @@ function edit.keychord_pressed(State, chord, key)
 end
 
 function edit.key_released(State, key, scancode)
+end
+
+function edit.update_font_settings(State, font_height)
+  State.font_height = font_height
+  love.graphics.setFont(love.graphics.newFont(Editor_state.font_height))
+  State.line_height = math.floor(font_height*1.3)
+  State.em = App.newText(love.graphics.getFont(), 'm')
 end
 
 --== some methods for tests
