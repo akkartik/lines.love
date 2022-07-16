@@ -535,7 +535,7 @@ function test_edit_with_shift_key_deletes_selection()
   -- mimic precise keypresses for a capital letter
   App.fake_key_press('lshift')
   edit.keychord_pressed(Editor_state, 'd', 'd')
-  App.textinput('D')
+  edit.textinput(Editor_state, 'D')
   edit.key_released(Editor_state, 'd')
   App.fake_key_release('lshift')
   -- selected text is deleted and replaced with the key
