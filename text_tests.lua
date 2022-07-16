@@ -866,7 +866,7 @@ function test_pagedown_skips_drawings()
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
-  local drawing_height = Editor_state.drawing_padding_height + drawing_width/2  -- default
+  local drawing_height = Drawing_padding_height + drawing_width/2  -- default
   -- initially the screen displays the first line and the drawing
   -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
   edit.draw(Editor_state)
