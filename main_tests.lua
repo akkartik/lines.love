@@ -1,17 +1,18 @@
 function test_resize_window()
   io.write('\ntest_resize_window')
   App.screen.init{width=300, height=300}
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width)  -- zero right margin
+  Editor_state = edit.initialize_test_state()
   Editor_state.filename = 'foo'
   check_eq(App.screen.width, 300, 'F - test_resize_window/baseline/width')
   check_eq(App.screen.height, 300, 'F - test_resize_window/baseline/height')
-  check_eq(Editor_state.left, Margin_left, 'F - test_resize_window/baseline/left_margin')
+  check_eq(Editor_state.left, Test_margin_left, 'F - test_resize_window/baseline/left_margin')
   App.resize(200, 400)
   check_eq(App.screen.width, 200, 'F - test_resize_window/width')
   check_eq(App.screen.height, 400, 'F - test_resize_window/height')
-  check_eq(Editor_state.left, Margin_left, 'F - test_resize_window/left_margin')
+  check_eq(Editor_state.left, Test_margin_left, 'F - test_resize_window/left_margin')
+  -- ugly; right margin switches from 0 after resize
   check_eq(Editor_state.right, 200-Margin_right, 'F - test_resize_window/right_margin')
-  check_eq(Editor_state.width, 200-Margin_right-Margin_left, 'F - test_resize_window/drawing_width')
+  check_eq(Editor_state.width, 200-Test_margin_left-Margin_right, 'F - test_resize_window/drawing_width')
   -- TODO: how to make assertions about when App.update got past the early exit?
 end
 

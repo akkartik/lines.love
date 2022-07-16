@@ -28,7 +28,7 @@ require 'icons'
 edit = {}
 
 -- run in both tests and a real run
-function edit.initialize_state(top, left, right)  -- currently always draws to bottom of screen
+function edit.initialize_state(top, left, right, font_height, line_height)  -- currently always draws to bottom of screen
   local result = {
     -- a line is either text or a drawing
     -- a text is a table with:
@@ -88,11 +88,9 @@ function edit.initialize_state(top, left, right)  -- currently always draws to b
     current_drawing_mode = 'line',
     previous_drawing_mode = nil,  -- extra state for some ephemeral modes like moving/deleting/naming points
 
-    -- these default values are important for tests
-    font_height = 14,
-    line_height = 15,
-    -- widest possible character width
-    em = App.newText(love.graphics.getFont(), 'm'),
+    font_height = font_height,
+    line_height = line_height,
+    em = App.newText(love.graphics.getFont(), 'm'),  -- widest possible character width
 
     top = top,
     left = left,
@@ -452,7 +450,19 @@ end
 function edit.key_released(State, key, scancode)
 end
 
---== copy some App methods for tests
+--== some methods for tests
+
+Test_margin_left = 25
+
+function edit.initialize_test_state()
+  -- if you change these values, tests will start failing
+  return edit.initialize_state(
+      15,  -- top margin
+      Test_margin_left,
+      App.screen.width,  -- right margin = 0
+      14,  -- font height assuming default LÖVE font
+      15)  -- line height
+end
 
 -- all textinput events are also keypresses
 -- TODO: handle chords of multiple keys
