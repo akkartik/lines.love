@@ -703,7 +703,8 @@ function Text.in_line(State, line_index, x,y)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
-function Text.to_pos_on_line(State, line, mx, my)
+function Text.to_pos_on_line(State, line_index, mx, my)
+  local line = State.lines[line_index]
   if line.fragments == nil then
     Text.compute_fragments(line, State.left, State.right)
   end
@@ -964,10 +965,9 @@ function Text.tweak_screen_top_and_cursor(State)
 --?     print('too low')
     if Text.cursor_past_screen_bottom(State) then
 --?       print('tweak')
-      local line = State.lines[State.screen_bottom1.line]
       State.cursor1 = {
           line=State.screen_bottom1.line,
-          pos=Text.to_pos_on_line(State, line, App.screen.width-5, App.screen.height-5),
+          pos=Text.to_pos_on_line(State, State.screen_bottom1.line, App.screen.width-5, App.screen.height-5),
       }
     end
   end

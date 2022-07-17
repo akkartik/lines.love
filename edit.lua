@@ -215,7 +215,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         State.mousepress_shift = App.shift_down()
         State.selection1 = {
             line=line_index,
-            pos=Text.to_pos_on_line(State, line, x, y),
+            pos=Text.to_pos_on_line(State, line_index, x, y),
         }
 --?         print('selection', State.selection1.line, State.selection1.pos)
         break
@@ -249,7 +249,7 @@ function edit.mouse_released(State, x,y, mouse_button)
 --?           print('reset selection')
           State.cursor1 = {
               line=line_index,
-              pos=Text.to_pos_on_line(State, line, x, y),
+              pos=Text.to_pos_on_line(State, line_index, x, y),
           }
 --?           print('cursor', State.cursor1.line, State.cursor1.pos)
           if State.mousepress_shift then
