@@ -142,7 +142,7 @@ function edit.draw(State)
                      end
                      schedule_save(State)
                      record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
-                   end
+                   end,
       })
       if State.search_term == nil then
         if line_index == State.cursor1.line then

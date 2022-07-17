@@ -304,7 +304,7 @@ function App.open_for_writing(filename)
               end
             end,
     close = function(self)
-            end
+            end,
   }
 end
 
@@ -314,7 +314,7 @@ function App.open_for_reading(filename)
               return App.filesystem[filename]:gmatch('[^\n]+')
             end,
     close = function(self)
-            end
+            end,
   }
 end
 
