@@ -130,10 +130,9 @@ function edit.draw(State)
     State.screen_bottom1.line = line_index
     if line.mode == 'text' then
 --?       print('text.draw', y, line_index)
-      line.starty = y
-      line.startpos = 1
+      local startpos = 1
       if line_index == State.screen_top1.line then
-        line.startpos = State.screen_top1.pos
+        startpos = State.screen_top1.pos
       end
       if line.data == '' then
         -- button to insert new drawing
@@ -150,7 +149,7 @@ function edit.draw(State)
                      end,
         })
       end
-      y, State.screen_bottom1.pos = Text.draw(State, line_index)
+      y, State.screen_bottom1.pos = Text.draw(State, line_index, y, startpos)
       y = y + State.line_height
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then

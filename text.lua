@@ -6,16 +6,16 @@ require 'select'
 require 'undo'
 require 'text_tests'
 
--- return values:
---  y coordinate drawn until in px
---  position of start of final screen line drawn
-function Text.draw(State, line_index)
+-- draw a line starting from startpos to screen at y between State.left and State.right
+-- return the final y, and position of start of final screen line drawn
+function Text.draw(State, line_index, y, startpos)
 --?   print('text.draw', line_index)
   App.color(Text_color)
   local line = State.lines[line_index]
+  line.starty = y
+  line.startpos = startpos
   -- wrap long lines
   local x = State.left
-  local y = line.starty
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
