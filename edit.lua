@@ -38,9 +38,9 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     -- a text is a table with:
     --    mode = 'text',
     --    string data,
-    --    startpos, the index of data the line starts rendering from (if currently on screen), can only be >1 for topmost line on screen
-    --    starty, the y coord in pixels
     --    some cached data that's blown away and recomputed when data changes:
+    --      startpos, the index of data the line starts rendering from (if currently on screen), can only be >1 for topmost line on screen
+    --      starty, the y coord in pixels
     --      fragments: snippets of rendered love.graphics.Text, guaranteed to not wrap
     --      screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
     -- a drawing is a table with:
@@ -163,7 +163,7 @@ function edit.draw(State)
         line.startpos = State.screen_top1.pos
       end
 --?       print('text.draw', y, line_index)
-      y, State.screen_bottom1.pos = Text.draw(State, line, line_index, line.starty)
+      y, State.screen_bottom1.pos = Text.draw(State, line_index)
       y = y + State.line_height
 --?       print('=> y', y)
     end

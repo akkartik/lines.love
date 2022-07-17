@@ -9,12 +9,13 @@ require 'text_tests'
 -- return values:
 --  y coordinate drawn until in px
 --  position of start of final screen line drawn
-function Text.draw(State, line, line_index, top)
+function Text.draw(State, line_index)
 --?   print('text.draw', line_index)
   App.color(Text_color)
+  local line = State.lines[line_index]
   -- wrap long lines
   local x = State.left
-  local y = top
+  local y = line.starty
   local pos = 1
   local screen_line_starting_pos = 1
   if line.fragments == nil then
