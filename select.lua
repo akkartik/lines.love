@@ -137,7 +137,7 @@ function Text.delete_selection_without_undo(State)
   end
   State.selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
-  Text.clear_cache(State.lines[minl])
+  Text.clear_screen_line_cache(State, minl)
   local min_offset = Text.offset(State.lines[minl].data, minp)
   local max_offset = Text.offset(State.lines[maxl].data, maxp)
   if minl == maxl then

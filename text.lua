@@ -152,7 +152,7 @@ end
 function Text.insert_at_cursor(State, t)
   local byte_offset = Text.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
   State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_offset-1)..t..string.sub(State.lines[State.cursor1.line].data, byte_offset)
-  Text.clear_cache(State.lines[State.cursor1.line])
+  Text.clear_screen_line_cache(State, State.cursor1.line)
   State.cursor1.pos = State.cursor1.pos+1
 end
 
@@ -218,7 +218,7 @@ function Text.keychord_pressed(State, chord)
       State.screen_top1 = Text.to1(State, top2)
       Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
-    Text.clear_cache(State.lines[State.cursor1.line])
+    Text.clear_screen_line_cache(State, State.cursor1.line)
     assert(Text.le1(State.screen_top1, State.cursor1))
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
@@ -254,7 +254,7 @@ function Text.keychord_pressed(State, chord)
         table.remove(State.lines, State.cursor1.line+1)
       end
     end
-    Text.clear_cache(State.lines[State.cursor1.line])
+    Text.clear_screen_line_cache(State, State.cursor1.line)
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   --== shortcuts that move the cursor
@@ -346,8 +346,8 @@ function Text.insert_return(State)
   local byte_offset = Text.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
   table.insert(State.lines, State.cursor1.line+1, {mode='text', data=string.sub(State.lines[State.cursor1.line].data, byte_offset)})
   State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_offset-1)
-  Text.clear_cache(State.lines[State.cursor1.line])
-  Text.clear_cache(State.lines[State.cursor1.line+1])
+  Text.clear_screen_line_cache(State, State.cursor1.line)
+  Text.clear_screen_line_cache(State, State.cursor1.line+1)
   State.cursor1.line = State.cursor1.line+1
   State.cursor1.pos = 1
 end
@@ -984,14 +984,14 @@ end
 
 function Text.redraw_all(State)
 --?   print('clearing fragments')
-  for _,line in ipairs(State.lines) do
+  for line_index,line in ipairs(State.lines) do
     line.starty = nil
     line.startpos = nil
-    Text.clear_cache(line)
+    Text.clear_screen_line_cache(State, line_index)
   end
 end
 
-function Text.clear_cache(line)
-  line.fragments = nil
-  line.screen_line_starting_pos = nil
+function Text.clear_screen_line_cache(State, line_index)
+  State.lines[line_index].fragments = nil
+  State.lines[line_index].screen_line_starting_pos = nil
 end
