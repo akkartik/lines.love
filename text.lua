@@ -693,7 +693,8 @@ function Text.snap_cursor_to_bottom_of_screen(State)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
 
-function Text.in_line(State, line, x,y)
+function Text.in_line(State, line_index, x,y)
+  local line = State.lines[line_index]
   if line.starty == nil then return false end  -- outside current page
   if x < State.left then return false end
   if y < line.starty then return false end

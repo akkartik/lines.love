@@ -200,7 +200,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
 
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      if Text.in_line(State, line, x,y) then
+      if Text.in_line(State, line_index, x,y) then
         -- delicate dance between cursor, selection and old cursor/selection
         -- scenarios:
         --  regular press+release: sets cursor, clears selection
@@ -245,7 +245,7 @@ function edit.mouse_released(State, x,y, mouse_button)
   else
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
-        if Text.in_line(State, line, x,y) then
+        if Text.in_line(State, line_index, x,y) then
 --?           print('reset selection')
           State.cursor1 = {
               line=line_index,
