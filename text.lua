@@ -699,7 +699,7 @@ function Text.in_line(State, line_index, x,y)
   if x < State.left then return false end
   if y < line.starty then return false end
   Text.populate_screen_line_starting_pos(State, line_index)
-  return y < line.starty + State.line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line, line.startpos) + 1)
+  return y < line.starty + State.line_height*(#line.screen_line_starting_pos - Text.screen_line_index(line.screen_line_starting_pos, line.startpos) + 1)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
@@ -711,7 +711,7 @@ function Text.to_pos_on_line(State, line_index, mx, my)
   assert(my >= line.starty)
   -- duplicate some logic from Text.draw
   local y = line.starty
-  local start_screen_line_index = Text.screen_line_index(line, line.startpos)
+  local start_screen_line_index = Text.screen_line_index(line.screen_line_starting_pos, line.startpos)
   for screen_line_index = start_screen_line_index,#line.screen_line_starting_pos do
     local screen_line_starting_pos = line.screen_line_starting_pos[screen_line_index]
     local screen_line_starting_byte_offset = Text.offset(line.data, screen_line_starting_pos)
@@ -749,9 +749,9 @@ function Text.screen_line_width(line, i)
   return App.width(screen_line_text)
 end
 
-function Text.screen_line_index(line, pos)
-  for i = #line.screen_line_starting_pos,1,-1 do
-    if line.screen_line_starting_pos[i] <= pos then
+function Text.screen_line_index(screen_line_starting_pos, pos)
+  for i = #screen_line_starting_pos,1,-1 do
+    if screen_line_starting_pos[i] <= pos then
       return i
     end
   end
