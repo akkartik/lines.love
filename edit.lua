@@ -128,44 +128,39 @@ function edit.draw(State)
 --?     print('draw:', y, line_index, line)
     if y + State.line_height > App.screen.height then break end
     State.screen_bottom1.line = line_index
-    if line.mode == 'text' and line.data == '' then
+    if line.mode == 'text' then
+--?       print('text.draw', y, line_index)
       line.starty = y
       line.startpos = 1
-      -- insert new drawing
-      button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
-        icon = icon.insert_drawing,
-        onpress1 = function()
-                     Drawing.before = snapshot(State, line_index-1, line_index)
-                     table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                     if State.cursor1.line >= line_index then
-                       State.cursor1.line = State.cursor1.line+1
-                     end
-                     schedule_save(State)
-                     record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
-                   end,
-      })
-      if State.search_term == nil then
-        if line_index == State.cursor1.line then
-          Text.draw_cursor(State, State.left, y)
-        end
+      if line_index == State.screen_top1.line then
+        line.startpos = State.screen_top1.pos
       end
-      State.screen_bottom1.pos = State.screen_top1.pos
+      if line.data == '' then
+        -- button to insert new drawing
+        button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
+          icon = icon.insert_drawing,
+          onpress1 = function()
+                       Drawing.before = snapshot(State, line_index-1, line_index)
+                       table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                       if State.cursor1.line >= line_index then
+                         State.cursor1.line = State.cursor1.line+1
+                       end
+                       schedule_save(State)
+                       record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
+                     end,
+        })
+      end
+      y, State.screen_bottom1.pos = Text.draw(State, line_index)
       y = y + State.line_height
+--?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top
       line.y = y
       Drawing.draw(State, line)
       y = y + Drawing.pixels(line.h, State.width) + Drawing_padding_bottom
     else
-      line.starty = y
-      line.startpos = 1
-      if line_index == State.screen_top1.line then
-        line.startpos = State.screen_top1.pos
-      end
---?       print('text.draw', y, line_index)
-      y, State.screen_bottom1.pos = Text.draw(State, line_index)
-      y = y + State.line_height
---?       print('=> y', y)
+      print(line.mode)
+      assert(false)
     end
   end
   if State.cursor_y == -1 then
