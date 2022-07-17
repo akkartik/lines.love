@@ -722,7 +722,7 @@ function Text.to_pos_on_line(State, line_index, mx, my)
       -- On all wrapped screen lines but the final one, clicks past end of
       -- line position cursor on final character of screen line.
       -- (The final screen line positions past end of screen line as always.)
-      if screen_line_index < #line.screen_line_starting_pos and mx > Text.screen_line_width(line, screen_line_index) then
+      if screen_line_index < #line.screen_line_starting_pos and mx > Text.screen_line_width(State, line_index, screen_line_index) then
 --?         print('past end of non-final line; return')
         return line.screen_line_starting_pos[screen_line_index+1]-1
       end
@@ -735,7 +735,8 @@ function Text.to_pos_on_line(State, line_index, mx, my)
   assert(false)
 end
 
-function Text.screen_line_width(line, i)
+function Text.screen_line_width(State, line_index, i)
+  local line = State.lines[line_index]
   local start_pos = line.screen_line_starting_pos[i]
   local start_offset = Text.offset(line.data, start_pos)
   local screen_line
