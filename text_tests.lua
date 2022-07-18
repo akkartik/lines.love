@@ -265,8 +265,29 @@ function test_click_with_mouse()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
+end
+
+function test_click_with_mouse_takes_margins_into_account()
+  io.write('\ntest_click_with_mouse_takes_margins_into_account')
+  -- display two lines with cursor on one of them
+  App.screen.init{width=100, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.left = 50  -- occupy only right side of screen
+  Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=2, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  -- click on the other line
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- cursor moves
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_takes_margins_into_account/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_on_empty_line()
@@ -338,6 +359,45 @@ function test_draw_word_wrapping_text()
   App.screen.check(y, 'def ', 'F - test_draw_word_wrapping_text/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_draw_word_wrapping_text/screen:3')
+end
+
+function test_click_with_mouse_on_wrapping_line()
+  io.write('\ntest_click_with_mouse_on_wrapping_line')
+  -- display two lines with cursor on one of them
+  App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def ghi jkl mno pqr stu'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=20}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  -- click on the other line
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- cursor moves
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line/selection is empty to avoid perturbing future edits')
+end
+
+function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
+  io.write('\ntest_click_with_mouse_on_wrapping_line_takes_margins_into_account')
+  -- display two lines with cursor on one of them
+  App.screen.init{width=100, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.left = 50  -- occupy only right side of screen
+  Editor_state.lines = load_array{'abc def ghi jkl mno pqr stu'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=20}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  -- click on the other line
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- cursor moves
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
 function test_draw_text_wrapping_within_word()
