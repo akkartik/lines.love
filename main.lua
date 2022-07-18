@@ -39,6 +39,7 @@ function App.initialize(arg)
   if #arg > 0 then
     Editor_state.filename = arg[1]
     Editor_state.lines = load_from_disk(Editor_state.filename)
+    Text.redraw_all(Editor_state)
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
     for i,line in ipairs(Editor_state.lines) do
@@ -49,6 +50,7 @@ function App.initialize(arg)
     end
   else
     Editor_state.lines = load_from_disk(Editor_state.filename)
+    Text.redraw_all(Editor_state)
     if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
       for i,line in ipairs(Editor_state.lines) do
         if line.mode == 'text' then

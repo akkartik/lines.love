@@ -5,6 +5,7 @@ function test_initial_state()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{}
+  Text.redraw_all(Editor_state)
   edit.draw(Editor_state)
   check_eq(#Editor_state.lines, 1, 'F - test_initial_state/#lines')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_initial_state/cursor:line')
@@ -18,6 +19,7 @@ function test_click_to_create_drawing()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{}
+  Text.redraw_all(Editor_state)
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, 8,Editor_state.top+8, 1)
   -- cursor skips drawing to always remain on text
@@ -31,6 +33,7 @@ function test_backspace_to_delete_drawing()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'```lines', '```', ''}
+  Text.redraw_all(Editor_state)
   -- cursor is on text as always (outside tests this will get initialized correctly)
   Editor_state.cursor1.line = 2
   -- backspacing deletes the drawing
@@ -44,6 +47,7 @@ function test_insert_first_character()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{}
+  Text.redraw_all(Editor_state)
   edit.draw(Editor_state)
   edit.run_after_textinput(Editor_state, 'a')
   local y = Editor_state.top
@@ -56,6 +60,7 @@ function test_press_ctrl()
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{''}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -67,6 +72,7 @@ function test_move_left()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'a'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'left')
@@ -78,6 +84,7 @@ function test_move_right()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'a'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'right')
@@ -89,6 +96,7 @@ function test_move_left_to_previous_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'left')
@@ -101,6 +109,7 @@ function test_move_right_to_next_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- past end of line
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'right')
@@ -113,6 +122,7 @@ function test_move_to_start_of_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=3}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -124,6 +134,7 @@ function test_move_to_start_of_previous_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -135,6 +146,7 @@ function test_skip_to_previous_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=5}  -- at the start of second word
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -146,6 +158,7 @@ function test_skip_past_tab_to_previous_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def\tghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=10}  -- within third word
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -157,6 +170,7 @@ function test_skip_multiple_spaces_to_previous_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc  def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=6}  -- at the start of second word
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -168,6 +182,7 @@ function test_move_to_start_of_word_on_previous_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def', 'ghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-left')
@@ -180,6 +195,7 @@ function test_move_past_end_of_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-right')
@@ -191,6 +207,7 @@ function test_skip_to_next_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-right')
@@ -202,6 +219,7 @@ function test_skip_past_tab_to_next_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc\tdef'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}  -- at the space between words
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-right')
@@ -213,6 +231,7 @@ function test_skip_multiple_spaces_to_next_word()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc  def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the start of second word
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-right')
@@ -224,6 +243,7 @@ function test_move_past_end_of_word_on_next_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def', 'ghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=8}
   edit.draw(Editor_state)
   edit.run_after_keychord(Editor_state, 'M-right')
@@ -237,6 +257,7 @@ function test_click_with_mouse()
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -254,6 +275,7 @@ function test_click_with_mouse_on_empty_line()
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -269,6 +291,7 @@ function test_draw_text()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -286,6 +309,7 @@ function test_draw_wrapping_text()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'defgh', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -303,6 +327,7 @@ function test_draw_word_wrapping_text()
   App.screen.init{width=60, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -321,6 +346,7 @@ function test_draw_text_wrapping_within_word()
   App.screen.init{width=60, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abcd e fghijk', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -339,6 +365,7 @@ function test_draw_wrapping_text_containing_non_ascii()
   App.screen.init{width=60, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'madam I’m adam', 'xyz'}  -- notice the non-ASCII apostrophe
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -356,8 +383,9 @@ function test_click_on_wrapping_line()
   -- display a wrapping line
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
-                  --  12345678901234
+                               --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -379,8 +407,9 @@ function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
   -- display a wrapping line from its second screen line
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
-                  --  12345678901234
+                               --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=8}
   Editor_state.screen_top1 = {line=1, pos=7}
   Editor_state.screen_bottom1 = {}
@@ -400,8 +429,9 @@ function test_click_past_end_of_wrapping_line()
   -- display a wrapping line
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
-                  --  12345678901234
+                               --  12345678901234
   Editor_state.lines = load_array{"madam I'm adam"}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -424,8 +454,9 @@ function test_click_on_wrapping_line_containing_non_ascii()
   -- display a wrapping line containing non-ASCII
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
-                  --  12345678901234
+                               --  12345678901234
   Editor_state.lines = load_array{'madam I’m adam'}  -- notice the non-ASCII apostrophe
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -448,9 +479,10 @@ function test_click_past_end_of_word_wrapping_line()
   -- display a long line wrapping at a word boundary on a screen of more realistic length
   App.screen.init{width=160, height=80}
   Editor_state = edit.initialize_test_state()
-                   -- 0        1         2
-                   -- 123456789012345678901
+                                -- 0        1         2
+                                -- 123456789012345678901
   Editor_state.lines = load_array{'the quick brown fox jumped over the lazy dog'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -470,6 +502,7 @@ function test_select_text()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -492,6 +525,7 @@ function test_cursor_movement_without_shift_resets_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -510,6 +544,7 @@ function test_edit_deletes_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -527,6 +562,7 @@ function test_edit_with_shift_key_deletes_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -549,6 +585,7 @@ function test_copy_does_not_reset_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -567,6 +604,7 @@ function test_cut()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -585,6 +623,7 @@ function test_paste_replaces_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.selection1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -605,6 +644,7 @@ function test_deleting_selection_may_scroll()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=2}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -629,6 +669,7 @@ function test_edit_wrapping_text()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -651,6 +692,7 @@ function test_insert_newline()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -680,6 +722,7 @@ function test_insert_newline_at_start_of_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -697,6 +740,7 @@ function test_insert_from_clipboard()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -726,6 +770,7 @@ function test_move_cursor_using_mouse()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -743,6 +788,7 @@ function test_select_text_using_mouse()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -763,6 +809,7 @@ function test_select_text_using_mouse_and_shift()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -787,6 +834,8 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -817,6 +866,7 @@ function test_cut_without_selection()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -833,6 +883,7 @@ function test_pagedown()
   App.screen.init{width=120, height=45}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -859,9 +910,10 @@ function test_pagedown_skips_drawings()
   App.screen.init{width=Editor_state.left+drawing_width, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc',               -- height 15
-                     '```lines', '```',   -- height 25
-                     'def',               -- height 15
-                     'ghi'}               -- height 15
+                                  '```lines', '```',   -- height 25
+                                  'def',               -- height 15
+                                  'ghi'}               -- height 15
+  Text.redraw_all(Editor_state)
   check_eq(Editor_state.lines[2].mode, 'drawing', 'F - test_pagedown_skips_drawings/baseline/lines')
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -887,6 +939,7 @@ function test_pagedown_often_shows_start_of_wrapping_line()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -917,6 +970,7 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def ghi jkl mno pqr stu vwx yza bcd efg hij', 'XYZ'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -944,6 +998,7 @@ function test_down_arrow_moves_cursor()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -974,6 +1029,7 @@ function test_down_arrow_scrolls_down_by_one_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1002,6 +1058,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1031,6 +1088,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1059,6 +1117,7 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1093,6 +1152,7 @@ function test_up_arrow_moves_cursor()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1122,6 +1182,7 @@ function test_up_arrow_scrolls_up_by_one_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1150,6 +1211,7 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=6}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
@@ -1178,6 +1240,7 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1208,6 +1271,7 @@ function test_up_arrow_scrolls_up_to_empty_line()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'', 'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1235,6 +1299,7 @@ function test_pageup()
   App.screen.init{width=120, height=45}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1260,6 +1325,7 @@ function test_pageup_scrolls_up_by_screen_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1289,6 +1355,7 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=5}
   Editor_state.screen_top1 = {line=2, pos=5}
   Editor_state.screen_bottom1 = {}
@@ -1316,6 +1383,7 @@ function test_enter_on_bottom_line_scrolls_down()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1345,6 +1413,7 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=4, pos=2}
   Editor_state.screen_top1 = {line=4, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1368,6 +1437,7 @@ function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bot
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', ''}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1387,6 +1457,7 @@ function test_typing_on_bottom_line_scrolls_down()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1418,6 +1489,7 @@ function test_left_arrow_scrolls_up_in_wrapped_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   -- cursor is at top of screen
@@ -1447,6 +1519,7 @@ function test_right_arrow_scrolls_down_in_wrapped_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- cursor is at bottom right of screen
@@ -1477,6 +1550,7 @@ function test_home_scrolls_up_in_wrapped_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
   -- cursor is at top of screen
@@ -1506,6 +1580,7 @@ function test_end_scrolls_down_in_wrapped_line()
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- cursor is at bottom right of screen
@@ -1536,6 +1611,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   App.screen.init{width=100, height=200}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def ghi jkl mno pqr ', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=25}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1570,6 +1646,7 @@ function test_backspace_can_scroll_up()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=2, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1599,6 +1676,7 @@ function test_backspace_can_scroll_up_screen_line()
   Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=5}
   Editor_state.screen_top1 = {line=3, pos=5}
   Editor_state.screen_bottom1 = {}
@@ -1628,6 +1706,7 @@ function test_backspace_past_line_boundary()
   Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   -- backspace joins with previous line
   edit.run_after_keychord(Editor_state, 'backspace')
@@ -1644,6 +1723,7 @@ function test_backspace_over_selection()
   Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   -- backspace deletes the selected character, even though it's after the cursor
@@ -1663,6 +1743,7 @@ function test_backspace_over_selection_reverse()
   Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=1}
   -- backspace deletes the selected character
@@ -1680,8 +1761,8 @@ function test_backspace_over_multiple_lines()
   -- select just one character within a line with cursor after selection
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=4, pos=2}
   -- backspace deletes the region and joins the remaining portions of lines on either side
@@ -1700,8 +1781,8 @@ function test_backspace_to_end_of_line()
   -- select region from cursor to end of line
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=4}
   -- backspace deletes rest of line without joining to any other line
@@ -1720,8 +1801,8 @@ function test_backspace_to_start_of_line()
   -- select region from cursor to start of line
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.selection1 = {line=2, pos=3}
   -- backspace deletes beginning of line without joining to any other line
@@ -1740,6 +1821,7 @@ function test_undo_insert_text()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=4}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1775,6 +1857,7 @@ function test_undo_delete_text()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'defg', 'xyz'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=5}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
@@ -1813,6 +1896,7 @@ function test_undo_restores_selection()
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   Editor_state.screen_top1 = {line=1, pos=1}

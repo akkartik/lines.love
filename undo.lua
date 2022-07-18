@@ -95,6 +95,17 @@ function patch(lines, from, to)
   end
 end
 
+function patch_placeholders(line_cache, from, to)
+  assert(from.start_line == to.start_line)
+  for i=from.end_line,from.start_line,-1 do
+    table.remove(line_cache, i)
+  end
+  assert(#to.lines == to.end_line-to.start_line+1)
+  for i=1,#to.lines do
+    table.insert(line_cache, to.start_line+i-1, {})
+  end
+end
+
 -- https://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/26367080#26367080
 function deepcopy(obj, seen)
   if type(obj) ~= 'table' then return obj end

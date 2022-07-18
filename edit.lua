@@ -38,11 +38,6 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     -- a text is a table with:
     --    mode = 'text',
     --    string data,
-    --    some cached data that's blown away and recomputed when data changes:
-    --      startpos, the index of data the line starts rendering from (if currently on screen), can only be >1 for topmost line on screen
-    --      starty, the y coord in pixels
-    --      fragments: snippets of rendered love.graphics.Text, guaranteed to not wrap
-    --      screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
     -- a drawing is a table with:
     --    mode = 'drawing'
     --    a (y) coord in pixels (updated while painting screen),
@@ -59,12 +54,19 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     -- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
     -- The field names are carefully chosen so that switching modes in midstream
     -- remembers previously entered points where that makes sense.
-    lines = {{mode='text', data=''}},
+    lines = {{mode='text', data=''}},  -- array of lines
 
     -- Lines can be too long to fit on screen, in which case they _wrap_ into
     -- multiple _screen lines_.
-    --
-    -- Therefore, any potential location for the cursor can be described in two ways:
+
+    -- rendering wrapped text lines needs some additional short-lived data per line:
+    --   startpos, the index of data the line starts rendering from, can only be >1 for topmost line on screen
+    --   starty, the y coord in pixels the line starts rendering from
+    --   fragments: snippets of rendered love.graphics.Text, guaranteed to not straddle screen lines
+    --   screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
+    text_line_cache = {},
+
+    -- Given wrapping, any potential location for the text cursor can be described in two ways:
     -- * schema 1: As a combination of line index and position within a line (in utf8 codepoint units)
     -- * schema 2: As a combination of line index, screen line index within the line, and a position within the screen line.
     --
@@ -119,6 +121,7 @@ end  -- App.initialize_state
 function edit.draw(State)
   App.color(Text_color)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
+  assert(#State.lines == #State.text_line_cache)
   assert(Text.le1(State.screen_top1, State.cursor1))
   State.cursor_y = -1
   local y = State.top
@@ -141,6 +144,7 @@ function edit.draw(State)
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
                        table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                       table.insert(State.text_line_cache, line_index, {})
                        if State.cursor1.line >= line_index then
                          State.cursor1.line = State.cursor1.line+1
                        end
@@ -343,6 +347,7 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = deepcopy(src.cursor)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.after, event.before)
+      patch_placeholders(State.text_line_cache, event.after, event.before)
       -- invalidate various cached bits of lines
       State.lines.current_drawing = nil
       -- if we're scrolling, reclaim all fragments to avoid memory leaks
