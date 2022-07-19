@@ -1734,7 +1734,6 @@ function test_backspace_can_scroll_up_screen_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi jkl', 'mno'}
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=3, pos=5}
@@ -1764,7 +1763,6 @@ function test_backspace_past_line_boundary()
   -- position cursor at start of a (non-first) line
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def'}
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
@@ -1780,7 +1778,6 @@ function test_backspace_over_selection()
   io.write('\ntest_backspace_over_selection')
   -- select just one character within a line with cursor before selection
   App.screen.init{width=Editor_state.left+30, height=60}
-  Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Text.redraw_all(Editor_state)
@@ -1800,7 +1797,6 @@ function test_backspace_over_selection_reverse()
   io.write('\ntest_backspace_over_selection_reverse')
   -- select just one character within a line with cursor after selection
   App.screen.init{width=Editor_state.left+30, height=60}
-  Editor_state = edit.initialize_test_state()
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
   Text.redraw_all(Editor_state)
