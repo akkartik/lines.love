@@ -338,9 +338,9 @@ function test_draw_wrapping_text()
   local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_draw_wrapping_text/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'def', 'F - test_draw_wrapping_text/screen:2')
+  App.screen.check(y, 'de', 'F - test_draw_wrapping_text/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'gh', 'F - test_draw_wrapping_text/screen:3')
+  App.screen.check(y, 'fgh', 'F - test_draw_wrapping_text/screen:3')
 end
 
 function test_draw_word_wrapping_text()
@@ -414,9 +414,9 @@ function test_draw_text_wrapping_within_word()
   local y = Editor_state.top
   App.screen.check(y, 'abcd ', 'F - test_draw_text_wrapping_within_word/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'e fghi', 'F - test_draw_text_wrapping_within_word/screen:2')
+  App.screen.check(y, 'e fgh', 'F - test_draw_text_wrapping_within_word/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'jk', 'F - test_draw_text_wrapping_within_word/screen:3')
+  App.screen.check(y, 'ijk', 'F - test_draw_text_wrapping_within_word/screen:3')
 end
 
 function test_draw_wrapping_text_containing_non_ascii()
@@ -431,11 +431,11 @@ function test_draw_wrapping_text_containing_non_ascii()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   local y = Editor_state.top
-  App.screen.check(y, 'mada', 'F - test_draw_wrapping_text_containing_non_ascii/screen:1')
+  App.screen.check(y, 'mad', 'F - test_draw_wrapping_text_containing_non_ascii/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'm I’', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
+  App.screen.check(y, 'am ', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'm ad', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
+  App.screen.check(y, 'I’m ', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
 end
 
 function test_click_on_wrapping_line()
@@ -453,13 +453,13 @@ function test_click_on_wrapping_line()
   local y = Editor_state.top
   App.screen.check(y, 'madam ', 'F - test_click_on_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line/baseline/screen:2')
+  App.screen.check(y, "I'm ad", 'F - test_click_on_wrapping_line/baseline/screen:2')
   y = y + Editor_state.line_height
   -- click past end of second screen line
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
   -- cursor moves to end of screen line
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_on_wrapping_line/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 13, 'F - test_click_on_wrapping_line/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 12, 'F - test_click_on_wrapping_line/cursor:pos')
 end
 
 function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
@@ -475,13 +475,13 @@ function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   local y = Editor_state.top
-  App.screen.check(y, "I'm ada", 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/baseline/screen:2')
+  App.screen.check(y, "I'm ad", 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/baseline/screen:2')
   y = y + Editor_state.line_height
   -- click past end of second screen line
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
   -- cursor moves to end of screen line
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 13, 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 12, 'F - test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen/cursor:pos')
 end
 
 function test_click_past_end_of_wrapping_line()
@@ -499,9 +499,9 @@ function test_click_past_end_of_wrapping_line()
   local y = Editor_state.top
   App.screen.check(y, 'madam ', 'F - test_click_past_end_of_wrapping_line/baseline/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, "I'm ada", 'F - test_click_past_end_of_wrapping_line/baseline/screen:2')
+  App.screen.check(y, "I'm ad", 'F - test_click_past_end_of_wrapping_line/baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'm', 'F - test_click_past_end_of_wrapping_line/baseline/screen:3')
+  App.screen.check(y, 'am', 'F - test_click_past_end_of_wrapping_line/baseline/screen:3')
   y = y + Editor_state.line_height
   -- click past the end of it
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
@@ -509,8 +509,8 @@ function test_click_past_end_of_wrapping_line()
   check_eq(Editor_state.cursor1.pos, 15, 'F - test_click_past_end_of_wrapping_line/cursor')  -- one more than the number of UTF-8 code-points
 end
 
-function test_click_on_wrapping_line_containing_non_ascii()
-  io.write('\ntest_click_on_wrapping_line_containing_non_ascii')
+function test_click_past_end_of_wrapping_line_containing_non_ascii()
+  io.write('\ntest_click_past_end_of_wrapping_line_containing_non_ascii')
   -- display a wrapping line containing non-ASCII
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
@@ -522,16 +522,16 @@ function test_click_on_wrapping_line_containing_non_ascii()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   local y = Editor_state.top
-  App.screen.check(y, 'madam ', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:1')
+  App.screen.check(y, 'madam ', 'F - test_click_past_end_of_wrapping_line_containing_non_ascii/baseline/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'I’m ada', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:2')
+  App.screen.check(y, 'I’m ad', 'F - test_click_past_end_of_wrapping_line_containing_non_ascii/baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'm', 'F - test_click_on_wrapping_line_containing_non_ascii/baseline/screen:3')
+  App.screen.check(y, 'am', 'F - test_click_past_end_of_wrapping_line_containing_non_ascii/baseline/screen:3')
   y = y + Editor_state.line_height
   -- click past the end of it
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
   -- cursor moves to end of line
-  check_eq(Editor_state.cursor1.pos, 15, 'F - test_click_on_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
+  check_eq(Editor_state.cursor1.pos, 15, 'F - test_click_past_end_of_wrapping_line_containing_non_ascii/cursor')  -- one more than the number of UTF-8 code-points
 end
 
 function test_click_past_end_of_word_wrapping_line()
@@ -735,15 +735,12 @@ function test_edit_wrapping_text()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   edit.run_after_textinput(Editor_state, 'g')
-  edit.run_after_textinput(Editor_state, 'h')
-  edit.run_after_textinput(Editor_state, 'i')
-  edit.run_after_textinput(Editor_state, 'j')
   local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'def', 'F - test_edit_wrapping_text/screen:2')
+  App.screen.check(y, 'de', 'F - test_edit_wrapping_text/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghij', 'F - test_edit_wrapping_text/screen:3')
+  App.screen.check(y, 'fg', 'F - test_edit_wrapping_text/screen:3')
 end
 
 function test_insert_newline()
@@ -1158,18 +1155,18 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghijk', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:3')
+  App.screen.check(y, 'ghij', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/baseline/screen:3')
   -- after hitting the down arrow the screen scrolls down by one line
   edit.run_after_keychord(Editor_state, 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 6, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 5, 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/cursor:pos')
   y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghijk', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:2')
+  App.screen.check(y, 'ghij', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'l', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:3')
+  App.screen.check(y, 'kl', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:3')
 end
 
 function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
@@ -1187,7 +1184,7 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
+  App.screen.check(y, 'ghij', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
   -- after hitting pagedown the screen scrolls down to start of a long line
   edit.run_after_keychord(Editor_state, 'pagedown')
   check_eq(Editor_state.screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/screen_top')
@@ -1197,11 +1194,11 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   edit.run_after_keychord(Editor_state, 'down')
   check_eq(Editor_state.screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 6, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 5, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
   y = Editor_state.top
-  App.screen.check(y, 'ghijk', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
+  App.screen.check(y, 'ghij', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'l', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
+  App.screen.check(y, 'kl', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:3')
 end
@@ -1538,9 +1535,9 @@ function test_typing_on_bottom_line_scrolls_down()
   y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_typing_on_bottom_line_scrolls_down/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghijk', 'F - test_typing_on_bottom_line_scrolls_down/screen:2')
+  App.screen.check(y, 'ghij', 'F - test_typing_on_bottom_line_scrolls_down/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'l', 'F - test_typing_on_bottom_line_scrolls_down/screen:3')
+  App.screen.check(y, 'kl', 'F - test_typing_on_bottom_line_scrolls_down/screen:3')
 end
 
 function test_left_arrow_scrolls_up_in_wrapped_line()
@@ -1747,9 +1744,9 @@ function test_backspace_can_scroll_up_screen_line()
   -- after hitting backspace the screen scrolls up by one screen line
   edit.run_after_keychord(Editor_state, 'backspace')
   y = Editor_state.top
-  App.screen.check(y, 'ghijk', 'F - test_backspace_can_scroll_up_screen_line/screen:1')
+  App.screen.check(y, 'ghij', 'F - test_backspace_can_scroll_up_screen_line/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'l', 'F - test_backspace_can_scroll_up_screen_line/screen:2')
+  App.screen.check(y, 'kl', 'F - test_backspace_can_scroll_up_screen_line/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'F - test_backspace_can_scroll_up_screen_line/screen:3')
   check_eq(Editor_state.screen_top1.line, 3, 'F - test_backspace_can_scroll_up_screen_line/screen_top')

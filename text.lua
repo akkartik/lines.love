@@ -807,21 +807,23 @@ function Text.nearest_cursor_pos(line, x, left)
   assert(false)
 end
 
-function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
+-- return the nearest index of line (in utf8 code points) which lies entirely
+-- within x pixels of the left margin
+function Text.nearest_pos_less_than(line, x)
+--?   print('-- nearest_pos_less_than', line, x)
   if x == 0 then
     return 1
   end
   local len = utf8.len(line)
-  local max_x = Text.x(line, len+1)
+  local max_x = Text.x_after(line, len)
   if x > max_x then
     return len+1
   end
   local left, right = 1, len+1
---?   print('--')
   while true do
     local curr = math.floor((left+right)/2)
-    local currxmin = Text.x(line, curr+1)
-    local currxmax = Text.x(line, curr+2)
+    local currxmin = Text.x_after(line, curr+1)
+    local currxmax = Text.x_after(line, curr+2)
 --?     print(x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
@@ -836,6 +838,14 @@ function Text.nearest_pos_less_than(line, x)  -- x DOES NOT include left margin
     end
   end
   assert(false)
+end
+
+function Text.x_after(s, pos)
+  local offset = Text.offset(s, math.min(pos+1, #s+1))
+  local s_before = s:sub(1, offset-1)
+--?   print('^'..s_before..'$')
+  local text_before = App.newText(love.graphics.getFont(), s_before)
+  return App.width(text_before)
 end
 
 function Text.x(s, pos)
