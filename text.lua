@@ -803,15 +803,15 @@ end
 function Text.nearest_pos_less_than(line, x)
 --?   print('', '-- nearest_pos_less_than', line, x)
   local len = utf8.len(line)
-  local max_x = Text.x(line, len)
+  local max_x = Text.x_after(line, len)
   if x > max_x then
     return len+1
   end
   local left, right = 0, len+1
   while true do
     local curr = math.floor((left+right)/2)
-    local currxmin = Text.x(line, curr+1)
-    local currxmax = Text.x(line, curr+2)
+    local currxmin = Text.x_after(line, curr+1)
+    local currxmax = Text.x_after(line, curr+2)
 --?     print('', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
@@ -828,10 +828,17 @@ function Text.nearest_pos_less_than(line, x)
   assert(false)
 end
 
-function Text.x(s, pos)
+function Text.x_after(s, pos)
   local offset = Text.offset(s, math.min(pos+1, #s+1))
   local s_before = s:sub(1, offset-1)
 --?   print('^'..s_before..'$')
+  local text_before = App.newText(love.graphics.getFont(), s_before)
+  return App.width(text_before)
+end
+
+function Text.x(s, pos)
+  local offset = Text.offset(s, pos)
+  local s_before = s:sub(1, offset-1)
   local text_before = App.newText(love.graphics.getFont(), s_before)
   return App.width(text_before)
 end

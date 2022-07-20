@@ -9,6 +9,10 @@ record those here.
         - Filename as relative path
     - from defaults
 
+* How the screen looks. Our tests use a level of indirection to check text and
+  graphics printed to screen, but not the precise pixels they translate to.
+    - where exactly the cursor is drawn to highlight a given character
+
 ### Other compromises
 
 Lua is dynamically typed. Tests can't patch over lack of type-checking.
