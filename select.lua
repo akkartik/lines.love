@@ -149,7 +149,7 @@ function Text.delete_selection_without_undo(State)
   local rhs = State.lines[maxl].data:sub(max_offset)
   for i=maxl,minl+1,-1 do
     table.remove(State.lines, i)
-    table.remove(State.text_line_cache, i)
+    table.remove(State.line_cache, i)
   end
   State.lines[minl].data = State.lines[minl].data:sub(1, min_offset-1)..rhs
 end

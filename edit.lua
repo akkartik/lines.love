@@ -64,7 +64,7 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     --   starty, the y coord in pixels the line starts rendering from
     --   fragments: snippets of rendered love.graphics.Text, guaranteed to not straddle screen lines
     --   screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
-    text_line_cache = {},
+    line_cache = {},
 
     -- Given wrapping, any potential location for the text cursor can be described in two ways:
     -- * schema 1: As a combination of line index and position within a line (in utf8 codepoint units)
@@ -121,7 +121,7 @@ end  -- App.initialize_state
 function edit.draw(State)
   App.color(Text_color)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
-  assert(#State.lines == #State.text_line_cache)
+  assert(#State.lines == #State.line_cache)
   assert(Text.le1(State.screen_top1, State.cursor1))
   State.cursor_y = -1
   local y = State.top
@@ -144,7 +144,7 @@ function edit.draw(State)
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
                        table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
-                       table.insert(State.text_line_cache, line_index, {})
+                       table.insert(State.line_cache, line_index, {})
                        if State.cursor1.line >= line_index then
                          State.cursor1.line = State.cursor1.line+1
                        end
@@ -347,7 +347,7 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = deepcopy(src.cursor)
       State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.after, event.before)
-      patch_placeholders(State.text_line_cache, event.after, event.before)
+      patch_placeholders(State.line_cache, event.after, event.before)
       -- invalidate various cached bits of lines
       State.lines.current_drawing = nil
       -- if we're scrolling, reclaim all fragments to avoid memory leaks
