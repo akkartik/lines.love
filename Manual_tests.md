@@ -3,7 +3,13 @@ program before it ever runs. However, some things don't have tests yet, either
 because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
-### Compromises
+* Initializing settings:
+    - from previous session
+        - Filename as absolute path
+        - Filename as relative path
+    - from defaults
+
+### Other compromises
 
 Lua is dynamically typed. Tests can't patch over lack of type-checking.
 
@@ -27,11 +33,3 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 * My test harness automatically runs `test_*` methods -- but only at the
   top-level. I wish there was a way to raise warnings if someone defines such
   a function inside a dict somewhere.
-
-### Todo list
-
-* Initializing settings:
-    - from previous session
-        - Filename as absolute path
-        - Filename as relative path
-    - from defaults
