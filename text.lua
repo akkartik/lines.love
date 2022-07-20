@@ -757,6 +757,7 @@ end
 
 -- convert x pixel coordinate to pos
 -- oblivious to wrapping
+-- result: 1 to len+1
 function Text.nearest_cursor_pos(line, x, left)
   if x == 0 then
     return 1
@@ -798,6 +799,7 @@ end
 
 -- return the nearest index of line (in utf8 code points) which lies entirely
 -- within x pixels of the left margin
+-- result: 0 to len+1
 function Text.nearest_pos_less_than(line, x)
 --?   print('', '-- nearest_pos_less_than', line, x)
   local len = utf8.len(line)
