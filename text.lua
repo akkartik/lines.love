@@ -31,10 +31,12 @@ function Text.draw(State, line_index, y, startpos)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(State.screen_top1.line)..'; '..s(pos)..' vs '..s(State.screen_top1.pos)..'; bottom: '..s(State.screen_bottom1.line)..'/'..s(State.screen_bottom1.pos))
-    if x + frag_width > State.right then
-      assert(x > State.left)  -- no overfull lines
-      -- update y only after drawing the first screen line of screen top
-      if Text.lt1(State.screen_top1, {line=line_index, pos=pos}) then
+    if Text.lt1({line=line_index, pos=pos}, State.screen_top1) then
+      -- render nothing
+--?       print('skipping', frag)
+    else
+      if x + frag_width > State.right then
+        assert(x > State.left)  -- no overfull lines
         y = y + State.line_height
         if y + State.line_height > App.screen.height then
 --?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
@@ -42,34 +44,30 @@ function Text.draw(State, line_index, y, startpos)
         end
         screen_line_starting_pos = pos
 --?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
+        x = State.left
       end
-      x = State.left
-    end
---?     print('checking to draw', pos, State.screen_top1.pos)
-    -- don't draw text above screen top
-    if Text.le1(State.screen_top1, {line=line_index, pos=pos}) then
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, x,y, pos, lo,hi)
       end
 --?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y)
-    end
-    -- render cursor if necessary
-    if line_index == State.cursor1.line then
-      if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
-        if State.search_term then
-          if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
-            local lo_px = Text.draw_highlight(line, x,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
-            App.color(Text_color)
-            love.graphics.print(State.search_term, x+lo_px,y)
+      -- render cursor if necessary
+      if line_index == State.cursor1.line then
+        if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
+          if State.search_term then
+            if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
+              local lo_px = Text.draw_highlight(line, x,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
+              App.color(Text_color)
+              love.graphics.print(State.search_term, x+lo_px,y)
+            end
+          else
+            Text.draw_cursor(State, x+Text.x(frag, State.cursor1.pos-pos+1), y)
           end
-        else
-          Text.draw_cursor(State, x+Text.x(frag, State.cursor1.pos-pos+1), y)
         end
       end
+      x = x + frag_width
     end
-    x = x + frag_width
     pos = pos + frag_len
   end
   if State.search_term == nil then
