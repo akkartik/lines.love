@@ -9,7 +9,6 @@ require 'text_tests'
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return the final y, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos)
---?   print('text.draw', line_index)
   App.color(Text_color)
   local line = State.lines[line_index]
   local line_cache = State.text_line_cache[line_index]
@@ -23,12 +22,10 @@ function Text.draw(State, line_index, y, startpos)
     Text.compute_fragments(State, line_index)
   end
   Text.populate_screen_line_starting_pos(State, line_index)
---?   print('--')
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
     local frag_len = utf8.len(frag)
---?     local s=tostring
---?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(State.screen_top1.line)..'; '..s(pos)..' vs '..s(State.screen_top1.pos)..'; bottom: '..s(State.screen_bottom1.line)..'/'..s(State.screen_bottom1.pos))
+--?     print('text.draw:', frag, 'at', line_index,pos, 'after', x,y)
     if Text.lt1({line=line_index, pos=pos}, State.screen_top1) then
       -- render nothing
 --?       print('skipping', frag)
@@ -39,18 +36,15 @@ function Text.draw(State, line_index, y, startpos)
         assert(x > State.left)  -- no overfull lines
         y = y + State.line_height
         if y + State.line_height > App.screen.height then
---?           print('b', y, App.screen.height, '=>', screen_line_starting_pos)
           return y, screen_line_starting_pos
         end
         screen_line_starting_pos = pos
---?         print('text: new screen line', y, App.screen.height, screen_line_starting_pos)
         x = State.left
       end
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, x,y, pos, lo,hi)
       end
---?       print('drawing '..frag)
       App.screen.draw(frag_text, x,y)
       -- render cursor if necessary
       if line_index == State.cursor1.line then
@@ -92,7 +86,7 @@ function Text.draw_cursor(State, x, y)
 end
 
 function Text.compute_fragments(State, line_index)
---?   print('compute_fragments', State.right)
+--?   print('compute_fragments', line_index, 'between', State.left, State.right)
   local line = State.lines[line_index]
   local line_cache = State.text_line_cache[line_index]
   line_cache.fragments = {}
@@ -102,24 +96,23 @@ function Text.compute_fragments(State, line_index)
     local frag_text = App.newText(love.graphics.getFont(), frag)
     local frag_width = App.width(frag_text)
 --?     print('x: '..tostring(x)..'; '..tostring(State.right-x)..'px to go')
---?     print('frag: ^'..frag..'$ is '..tostring(frag_width)..'px wide')
     if x + frag_width > State.right then
       while x + frag_width > State.right do
---?         print(x, frag, frag_width, State.right)
+--?         print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
         if x < 0.8*State.right then
---?           print(frag, x, frag_width, State.right)
+--?           print('splitting')
           -- long word; chop it at some letter
           -- We're not going to reimplement TeX here.
           local bpos = Text.nearest_pos_less_than(frag, State.right - x)
+--?           print('bpos', bpos)
           assert(bpos > 0)  -- avoid infinite loop when window is too narrow
           local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
---?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset)..' bytes')
+--?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
           local frag1 = string.sub(frag, 1, boffset-1)
           local frag1_text = App.newText(love.graphics.getFont(), frag1)
           local frag1_width = App.width(frag1_text)
---?           print(frag, x, frag1_width, State.right)
+--?           print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
           assert(x + frag1_width <= State.right)
---?           print('inserting '..frag1..' of width '..tostring(frag1_width)..'px')
           table.insert(line_cache.fragments, {data=frag1, text=frag1_text})
           frag = string.sub(frag, boffset)
           frag_text = App.newText(love.graphics.getFont(), frag)
@@ -129,7 +122,7 @@ function Text.compute_fragments(State, line_index)
       end
     end
     if #frag > 0 then
---?       print('inserting '..frag..' of width '..tostring(frag_width)..'px')
+--?       print('inserting ^'..frag..'$ of width '..tostring(frag_width)..'px')
       table.insert(line_cache.fragments, {data=frag, text=frag_text})
     end
     x = x + frag_width
@@ -808,7 +801,7 @@ end
 -- return the nearest index of line (in utf8 code points) which lies entirely
 -- within x pixels of the left margin
 function Text.nearest_pos_less_than(line, x)
---?   print('-- nearest_pos_less_than', line, x)
+--?   print('', '-- nearest_pos_less_than', line, x)
   if x == 0 then
     return 1
   end
@@ -822,7 +815,7 @@ function Text.nearest_pos_less_than(line, x)
     local curr = math.floor((left+right)/2)
     local currxmin = Text.x(line, curr+1)
     local currxmax = Text.x(line, curr+2)
---?     print(x, left, right, curr, currxmin, currxmax)
+--?     print('', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
     end
