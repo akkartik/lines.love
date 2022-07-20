@@ -26,8 +26,6 @@ function Text.draw(State, line_index, y, startpos)
 --?   print('--')
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
-    -- render fragment
-    local frag_width = App.width(frag_text)
     local frag_len = utf8.len(frag)
 --?     local s=tostring
 --?     print('('..s(x)..','..s(y)..') '..frag..'('..s(frag_width)..' vs '..s(right)..') '..s(line_index)..' vs '..s(State.screen_top1.line)..'; '..s(pos)..' vs '..s(State.screen_top1.pos)..'; bottom: '..s(State.screen_bottom1.line)..'/'..s(State.screen_bottom1.pos))
@@ -35,6 +33,8 @@ function Text.draw(State, line_index, y, startpos)
       -- render nothing
 --?       print('skipping', frag)
     else
+      -- render fragment
+      local frag_width = App.width(frag_text)
       if x + frag_width > State.right then
         assert(x > State.left)  -- no overfull lines
         y = y + State.line_height
