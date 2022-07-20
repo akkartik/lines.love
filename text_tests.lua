@@ -266,7 +266,6 @@ function test_click_with_mouse()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
 end
 
@@ -286,7 +285,7 @@ function test_click_with_mouse_takes_margins_into_account()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_takes_margins_into_account/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_takes_margins_into_account/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_takes_margins_into_account/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
@@ -376,7 +375,7 @@ function test_click_with_mouse_on_wrapping_line()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_on_wrapping_line/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line/selection is empty to avoid perturbing future edits')
 end
 
@@ -396,7 +395,7 @@ function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
@@ -835,7 +834,7 @@ function test_move_cursor_using_mouse()
   edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
   edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_move_cursor_using_mouse/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
   check_nil(Editor_state.selection1.pos, 'F - test_move_cursor_using_mouse/selection:pos')
 end
@@ -856,7 +855,7 @@ function test_select_text_using_mouse()
   -- drag and release somewhere else
   edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
-  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
+  check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text_using_mouse/selection:pos')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_select_text_using_mouse/cursor:pos')
 end
@@ -881,7 +880,7 @@ function test_select_text_using_mouse_and_shift()
   edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
   App.fake_key_release('lshift')
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse_and_shift/selection:line')
-  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse_and_shift/selection:pos')
+  check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text_using_mouse_and_shift/selection:pos')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_using_mouse_and_shift/cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_select_text_using_mouse_and_shift/cursor:pos')
 end
@@ -912,9 +911,9 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   App.fake_key_release('lshift')
   -- selection is between first and third location. forget the second location, not the first.
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
-  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:pos')
+  check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:pos')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:pos')
 end
 
 function test_cut_without_selection()
@@ -1130,7 +1129,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   edit.run_after_keychord(Editor_state, 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 5, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 6, 'F - test_down_arrow_scrolls_down_by_one_screen_line/cursor:pos')
   y = Editor_state.top
   App.screen.check(y, 'def', 'F - test_down_arrow_scrolls_down_by_one_screen_line/screen:1')
   y = y + Editor_state.line_height
@@ -1683,7 +1682,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   edit.run_after_textinput(Editor_state, 's')
   edit.run_after_textinput(Editor_state, 't')
   edit.run_after_textinput(Editor_state, 'u')
-  check_eq(Editor_state.cursor1.pos, 28, 'F - test_move_cursor_using_mouse/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 28, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:pos')
   y = Editor_state.top
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:1')
   y = y + Editor_state.line_height
@@ -1693,8 +1692,8 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   -- try to move the cursor earlier in the third screen line by clicking the mouse
   edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height*2+5, 1)
   -- cursor should move
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 26, 'F - test_move_cursor_using_mouse/cursor:pos')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 25, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:pos')
 end
 
 function test_backspace_can_scroll_up()
