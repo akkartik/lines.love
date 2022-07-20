@@ -432,9 +432,9 @@ function test_draw_wrapping_text_containing_non_ascii()
   local y = Editor_state.top
   App.screen.check(y, 'mad', 'F - test_draw_wrapping_text_containing_non_ascii/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'am ', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
+  App.screen.check(y, 'am I', 'F - test_draw_wrapping_text_containing_non_ascii/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'I’m ', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
+  App.screen.check(y, '’m a', 'F - test_draw_wrapping_text_containing_non_ascii/screen:3')
 end
 
 function test_click_on_wrapping_line()

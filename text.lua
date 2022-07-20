@@ -98,7 +98,7 @@ function Text.compute_fragments(State, line_index)
 --?     print('x: '..tostring(x)..'; '..tostring(State.right-x)..'px to go')
     while x + frag_width > State.right do
 --?       print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
-      if x < 0.8*State.right then
+      if (x-State.left) < 0.8 * (State.right-State.left) then
 --?         print('splitting')
         -- long word; chop it at some letter
         -- We're not going to reimplement TeX here.
