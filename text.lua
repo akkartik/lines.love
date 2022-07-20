@@ -96,30 +96,28 @@ function Text.compute_fragments(State, line_index)
     local frag_text = App.newText(love.graphics.getFont(), frag)
     local frag_width = App.width(frag_text)
 --?     print('x: '..tostring(x)..'; '..tostring(State.right-x)..'px to go')
-    if x + frag_width > State.right then
-      while x + frag_width > State.right do
---?         print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
-        if x < 0.8*State.right then
---?           print('splitting')
-          -- long word; chop it at some letter
-          -- We're not going to reimplement TeX here.
-          local bpos = Text.nearest_pos_less_than(frag, State.right - x)
---?           print('bpos', bpos)
-          assert(bpos > 0)  -- avoid infinite loop when window is too narrow
-          local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
---?           print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
-          local frag1 = string.sub(frag, 1, boffset-1)
-          local frag1_text = App.newText(love.graphics.getFont(), frag1)
-          local frag1_width = App.width(frag1_text)
---?           print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
-          assert(x + frag1_width <= State.right)
-          table.insert(line_cache.fragments, {data=frag1, text=frag1_text})
-          frag = string.sub(frag, boffset)
-          frag_text = App.newText(love.graphics.getFont(), frag)
-          frag_width = App.width(frag_text)
-        end
-        x = State.left  -- new line
+    while x + frag_width > State.right do
+--?       print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
+      if x < 0.8*State.right then
+--?         print('splitting')
+        -- long word; chop it at some letter
+        -- We're not going to reimplement TeX here.
+        local bpos = Text.nearest_pos_less_than(frag, State.right - x)
+--?         print('bpos', bpos)
+        assert(bpos > 0)  -- avoid infinite loop when window is too narrow
+        local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
+--?         print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
+        local frag1 = string.sub(frag, 1, boffset-1)
+        local frag1_text = App.newText(love.graphics.getFont(), frag1)
+        local frag1_width = App.width(frag1_text)
+--?         print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
+        assert(x + frag1_width <= State.right)
+        table.insert(line_cache.fragments, {data=frag1, text=frag1_text})
+        frag = string.sub(frag, boffset)
+        frag_text = App.newText(love.graphics.getFont(), frag)
+        frag_width = App.width(frag_text)
       end
+      x = State.left  -- new line
     end
     if #frag > 0 then
 --?       print('inserting ^'..frag..'$ of width '..tostring(frag_width)..'px')
