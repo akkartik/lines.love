@@ -104,7 +104,7 @@ function Text.compute_fragments(State, line_index)
         -- We're not going to reimplement TeX here.
         local bpos = Text.nearest_pos_less_than(frag, State.right - x)
 --?         print('bpos', bpos)
-        assert(bpos > 0)  -- avoid infinite loop when window is too narrow
+        if bpos == 0 then break end  -- avoid infinite loop when window is too narrow
         local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
 --?         print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
         local frag1 = string.sub(frag, 1, boffset-1)
@@ -800,15 +800,12 @@ end
 -- within x pixels of the left margin
 function Text.nearest_pos_less_than(line, x)
 --?   print('', '-- nearest_pos_less_than', line, x)
-  if x == 0 then
-    return 1
-  end
   local len = utf8.len(line)
   local max_x = Text.x(line, len)
   if x > max_x then
     return len+1
   end
-  local left, right = 1, len+1
+  local left, right = 0, len+1
   while true do
     local curr = math.floor((left+right)/2)
     local currxmin = Text.x(line, curr+1)

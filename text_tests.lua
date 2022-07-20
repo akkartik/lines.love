@@ -1044,9 +1044,9 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   y = Editor_state.top
   App.screen.check(y, 'ghi ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'jkl m', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:2')
+  App.screen.check(y, 'jkl ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'no ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:3')
+  App.screen.check(y, 'mno ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:3')
 end
 
 function test_down_arrow_moves_cursor()
