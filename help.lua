@@ -1,6 +1,8 @@
-function draw_help_without_mouse_pressed(State, drawing)
+function draw_help_without_mouse_pressed(State, drawing_index)
+  local drawing = State.lines[drawing_index]
+  local line_cache = State.line_cache[drawing_index]
   App.color(Help_color)
-  local y = drawing.y+10
+  local y = line_cache.starty+10
   love.graphics.print("Things you can do:", State.left+30,y)
   y = y + State.line_height
   love.graphics.print("* Press the mouse button to start drawing a "..current_shape(State), State.left+30,y)
@@ -46,12 +48,14 @@ function draw_help_without_mouse_pressed(State, drawing)
   love.graphics.print("Press 'esc' now to hide this message", State.left+30,y)
   y = y + State.line_height
   App.color(Help_background_color)
-  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-drawing.y))
+  love.graphics.rectangle('fill', State.left,line_cache.starty, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-line_cache.starty))
 end
 
-function draw_help_with_mouse_pressed(State, drawing)
+function draw_help_with_mouse_pressed(State, drawing_index)
+  local drawing = State.lines[drawing_index]
+  local line_cache = State.line_cache[drawing_index]
   App.color(Help_color)
-  local y = drawing.y+10
+  local y = line_cache.starty+10
   love.graphics.print("You're currently drawing a "..current_shape(State, drawing.pending), State.left+30,y)
   y = y + State.line_height
   love.graphics.print('Things you can do now:', State.left+30,y)
@@ -125,7 +129,7 @@ function draw_help_with_mouse_pressed(State, drawing)
     y = y + State.line_height
   end
   App.color(Help_background_color)
-  love.graphics.rectangle('fill', State.left,drawing.y, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-drawing.y))
+  love.graphics.rectangle('fill', State.left,line_cache.starty, State.width, math.max(Drawing.pixels(drawing.h, State.width),y-line_cache.starty))
 end
 
 function current_shape(State, shape)
