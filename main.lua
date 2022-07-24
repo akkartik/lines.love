@@ -42,23 +42,11 @@ function App.initialize(arg)
     Text.redraw_all(Editor_state)
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
-    for i,line in ipairs(Editor_state.lines) do
-      if line.mode == 'text' then
-        Editor_state.cursor1.line = i
-        break
-      end
-    end
+    edit.fixup_cursor(Editor_state)
   else
     Editor_state.lines = load_from_disk(Editor_state.filename)
     Text.redraw_all(Editor_state)
-    if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
-      for i,line in ipairs(Editor_state.lines) do
-        if line.mode == 'text' then
-          Editor_state.cursor1.line = i
-          break
-        end
-      end
-    end
+    edit.fixup_cursor(Editor_state)
   end
   love.window.setTitle('lines.love - '..Editor_state.filename)
 

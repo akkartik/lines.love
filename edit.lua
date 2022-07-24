@@ -118,6 +118,17 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
   return result
 end  -- App.initialize_state
 
+function edit.fixup_cursor(State)
+  if State.cursor1.line > #State.lines or State.lines[State.cursor1.line].mode ~= 'text' then
+    for i,line in ipairs(State.lines) do
+      if line.mode == 'text' then
+        State.cursor1.line = i
+        break
+      end
+    end
+  end
+end
+
 function edit.draw(State)
   App.color(Text_color)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
