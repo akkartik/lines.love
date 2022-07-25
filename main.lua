@@ -19,8 +19,9 @@ function App.initialize_globals()
   -- blinking cursor
   Cursor_time = 0
 
-  -- for hysteresis
+  -- for hysteresis in a few places
   Last_resize_time = App.getTime()
+  Last_focus_time = App.getTime()  -- https://love2d.org/forums/viewtopic.php?p=249700
 end
 
 -- called only for real run
@@ -174,17 +175,35 @@ function App.mousereleased(x,y, mouse_button)
   return edit.mouse_released(Editor_state, x,y, mouse_button)
 end
 
+function App.focus(in_focus)
+  if in_focus then
+    Last_focus_time = App.getTime()
+  end
+end
+
 function App.textinput(t)
+  -- ignore events for some time after window in focus
+  if App.getTime() < Last_focus_time + 0.01 then
+    return
+  end
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.textinput(Editor_state, t)
 end
 
 function App.keychord_pressed(chord, key)
+  -- ignore events for some time after window in focus
+  if App.getTime() < Last_focus_time + 0.01 then
+    return
+  end
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.keychord_pressed(Editor_state, chord, key)
 end
 
 function App.keyreleased(key, scancode)
+  -- ignore events for some time after window in focus
+  if App.getTime() < Last_focus_time + 0.01 then
+    return
+  end
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.key_released(Editor_state, key, scancode)
 end
