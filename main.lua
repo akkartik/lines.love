@@ -16,10 +16,11 @@ Editor_state = {}
 function App.initialize_globals()
   -- tests currently mostly clear their own state
 
-  -- resize
-  Last_resize_time = App.getTime()
   -- blinking cursor
   Cursor_time = 0
+
+  -- for hysteresis
+  Last_resize_time = App.getTime()
 end
 
 -- called only for real run
