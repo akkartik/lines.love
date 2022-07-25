@@ -1970,18 +1970,12 @@ function test_search()
   io.write('\ntest_search')
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'deg'}
+  Editor_state.lines = load_array{'```lines', '```', 'def', 'ghi', 'deg'}
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  local y = Editor_state.top
-  App.screen.check(y, 'abc', 'F - test_search/baseline/screen:1')
-  y = y + Editor_state.line_height
-  App.screen.check(y, 'def', 'F - test_search/baseline/screen:2')
-  y = y + Editor_state.line_height
-  App.screen.check(y, 'ghi', 'F - test_search/baseline/screen:3')
   -- search for a string
   edit.run_after_keychord(Editor_state, 'C-f')
   edit.run_after_textinput(Editor_state, 'd')
@@ -1990,6 +1984,7 @@ function test_search()
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_search/1/cursor:pos')
   -- reset cursor
   Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
   -- search for second occurrence
   edit.run_after_keychord(Editor_state, 'C-f')
   edit.run_after_textinput(Editor_state, 'de')

@@ -22,18 +22,25 @@ function Text.draw_search_bar(State)
 end
 
 function Text.search_next(State)
+  local pos
   -- search current line
-  local pos = State.lines[State.cursor1.line].data:find(State.search_term, State.cursor1.pos)
-  if pos then
-    State.cursor1.pos = pos
+  local line = State.lines[State.cursor1.line]
+  if line.mode == 'text' then
+    pos = line.data:find(State.search_term, State.cursor1.pos)
+    if pos then
+      State.cursor1.pos = pos
+    end
   end
   if pos == nil then
     for i=State.cursor1.line+1,#State.lines do
-      pos = State.lines[i].data:find(State.search_term)
-      if pos then
-        State.cursor1.line = i
-        State.cursor1.pos = pos
-        break
+      local line = State.lines[i]
+      if line.mode == 'text' then
+        pos = State.lines[i].data:find(State.search_term)
+        if pos then
+          State.cursor1.line = i
+          State.cursor1.pos = pos
+          break
+        end
       end
     end
   end
