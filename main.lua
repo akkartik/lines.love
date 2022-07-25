@@ -17,8 +17,7 @@ function App.initialize_globals()
   -- tests currently mostly clear their own state
 
   -- resize
-  Last_resize_time = nil
-
+  Last_resize_time = App.getTime()
   -- blinking cursor
   Cursor_time = 0
 end
@@ -141,12 +140,8 @@ end
 function App.update(dt)
   Cursor_time = Cursor_time + dt
   -- some hysteresis while resizing
-  if Last_resize_time then
-    if App.getTime() - Last_resize_time < 0.1 then
-      return
-    else
-      Last_resize_time = nil
-    end
+  if App.getTime() < Last_resize_time + 0.1 then
+    return
   end
   edit.update(Editor_state, dt)
 end
