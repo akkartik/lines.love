@@ -39,13 +39,13 @@ function App.initialize(arg)
 
   if #arg > 0 then
     Editor_state.filename = arg[1]
-    Editor_state.lines = load_from_disk(Editor_state.filename)
+    load_from_disk(Editor_state)
     Text.redraw_all(Editor_state)
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
     edit.fixup_cursor(Editor_state)
   else
-    Editor_state.lines = load_from_disk(Editor_state.filename)
+    load_from_disk(Editor_state)
     Text.redraw_all(Editor_state)
     edit.fixup_cursor(Editor_state)
   end
@@ -117,7 +117,7 @@ end
 function App.filedropped(file)
   -- first make sure to save edits on any existing file
   if Editor_state.next_save then
-    save_to_disk(Editor_state.lines, Editor_state.filename)
+    save_to_disk(Editor_state)
   end
   -- clear the slate for the new file
   App.initialize_globals()  -- in particular, forget all undo history

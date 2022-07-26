@@ -188,7 +188,7 @@ end
 function edit.update(State, dt)
   Drawing.update(State, dt)
   if State.next_save and State.next_save < App.getTime() then
-    save_to_disk(State.lines, State.filename)
+    save_to_disk(State)
     State.next_save = nil
   end
 end
@@ -202,7 +202,7 @@ end
 function edit.quit(State)
   -- make sure to save before quitting
   if State.next_save then
-    save_to_disk(State.lines, State.filename)
+    save_to_disk(State)
   end
 end
 

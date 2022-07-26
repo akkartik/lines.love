@@ -1,9 +1,8 @@
 -- primitives for saving to file and loading from file
-function load_from_disk(filename)
-  local infile = App.open_for_reading(filename)
-  local result = load_from_file(infile)
+function load_from_disk(State)
+  local infile = App.open_for_reading(State.filename)
+  State.lines = load_from_file(infile)
   if infile then infile:close() end
-  return result
 end
 
 function load_from_file(infile)
@@ -26,12 +25,12 @@ function load_from_file(infile)
   return result
 end
 
-function save_to_disk(lines, filename)
-  local outfile = App.open_for_writing(filename)
+function save_to_disk(State)
+  local outfile = App.open_for_writing(State.filename)
   if outfile == nil then
-    error('failed to write to "'..filename..'"')
+    error('failed to write to "'..State.filename..'"')
   end
-  for _,line in ipairs(lines) do
+  for _,line in ipairs(State.lines) do
     if line.mode == 'drawing' then
       store_drawing(outfile, line)
     else
