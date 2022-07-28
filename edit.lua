@@ -382,7 +382,6 @@ function edit.keychord_pressed(State, chord, key)
     end
   -- clipboard
   elseif chord == 'C-c' then
-    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local s = Text.selection(State)
     if s then
       App.setClipboardText(s)
