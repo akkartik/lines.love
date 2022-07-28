@@ -286,7 +286,7 @@ function edit.mouse_released(State, x,y, mouse_button)
 end
 
 function edit.textinput(State, t)
-  for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+  for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
   if State.search_term then
     State.search_term = State.search_term..t
     State.search_text = nil
@@ -350,7 +350,7 @@ function edit.keychord_pressed(State, chord, key)
     edit.update_font_settings(State, 20)
     Text.redraw_all(State)
   elseif chord == 'C-z' then
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.starty = nil end  -- just in case we scroll
     local event = undo_event(State)
     if event then
       local src = event.before
@@ -366,7 +366,7 @@ function edit.keychord_pressed(State, chord, key)
       schedule_save(State)
     end
   elseif chord == 'C-y' then
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local event = redo_event(State)
     if event then
       local src = event.after
@@ -382,20 +382,20 @@ function edit.keychord_pressed(State, chord, key)
     end
   -- clipboard
   elseif chord == 'C-c' then
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local s = Text.selection(State)
     if s then
       App.setClipboardText(s)
     end
   elseif chord == 'C-x' then
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local s = Text.cut_selection(State, State.left, State.right)
     if s then
       App.setClipboardText(s)
     end
     schedule_save(State)
   elseif chord == 'C-v' then
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line in ipairs(State.lines) do line.starty = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
     -- and sometimes scroll when we didn't quite need to.
     local before_line = State.cursor1.line
@@ -416,7 +416,7 @@ function edit.keychord_pressed(State, chord, key)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
-    -- DON'T reset line.y here
+    -- DON'T reset line_cache.starty here
     local drawing_index, drawing = Drawing.current_drawing(State)
     if drawing_index then
       local before = snapshot(State, drawing_index)
@@ -451,7 +451,7 @@ function edit.keychord_pressed(State, chord, key)
     end
     schedule_save(State)
   else
-    for _,line in ipairs(State.lines) do line.y = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     Text.keychord_pressed(State, chord)
   end
 end

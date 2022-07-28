@@ -831,7 +831,7 @@ function test_move_cursor_using_mouse()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
   edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
@@ -849,7 +849,7 @@ function test_select_text_using_mouse()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
   -- press and hold on first location
   edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- drag and release somewhere else
@@ -870,7 +870,7 @@ function test_select_text_using_mouse_and_shift()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
   -- click on first location
   edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
@@ -896,7 +896,7 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line.y for each line in Editor_state.lines
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
   -- click on first location
   edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
