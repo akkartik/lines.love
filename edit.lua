@@ -131,9 +131,11 @@ end
 
 function edit.draw(State)
   App.color(Text_color)
---?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
   assert(#State.lines == #State.line_cache)
-  assert(Text.le1(State.screen_top1, State.cursor1))
+  if not Text.le1(State.screen_top1, State.cursor1) then
+    print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
+    assert(false)
+  end
   State.cursor_y = -1
   local y = State.top
 --?   print('== draw')

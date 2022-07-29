@@ -269,6 +269,25 @@ function test_click_with_mouse()
   check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
 end
 
+function test_click_with_mouse_to_left_of_line()
+  io.write('\ntest_click_with_mouse_to_left_of_line')
+  -- display a line with the cursor in the middle
+  App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=3}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  -- click to the left of the line
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left-4,Editor_state.top+5, 1)
+  -- cursor moves to start of line
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_to_left_of_line/selection is empty to avoid perturbing future edits')
+end
+
 function test_click_with_mouse_takes_margins_into_account()
   io.write('\ntest_click_with_mouse_takes_margins_into_account')
   -- display two lines with cursor on one of them

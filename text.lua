@@ -691,7 +691,6 @@ function Text.in_line(State, line_index, x,y)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   if line_cache.starty == nil then return false end  -- outside current page
-  if x < State.left then return false end
   if y < line_cache.starty then return false end
   Text.populate_screen_line_starting_pos(State, line_index)
   return y < line_cache.starty + State.line_height*(#line_cache.screen_line_starting_pos - Text.screen_line_index(line_cache.screen_line_starting_pos, line_cache.startpos) + 1)
@@ -759,7 +758,7 @@ end
 -- oblivious to wrapping
 -- result: 1 to len+1
 function Text.nearest_cursor_pos(line, x, left)
-  if x == 0 then
+  if x < left then
     return 1
   end
   local len = utf8.len(line)
