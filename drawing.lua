@@ -492,7 +492,7 @@ function Drawing.keychord_pressed(State, chord)
     drawing.pending.mode = 'arc'
     local mx,my = Drawing.coord(App.mouse_x()-State.left, State.width), Drawing.coord(App.mouse_y()-line_cache.starty, State.width)
     local center = drawing.points[drawing.pending.center]
-    drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
+    drawing.pending.radius = round(geom.dist(center.x,center.y, mx,my))
     drawing.pending.start_angle = geom.angle(center.x,center.y, mx,my)
   elseif App.mouse_down(1) and chord == 'o' then
     State.current_drawing_mode = 'circle'
