@@ -364,7 +364,7 @@ function Drawing.mouse_released(State, x,y, button)
         local mx,my = Drawing.coord(x-State.left, State.width), Drawing.coord(y-line_cache.starty, State.width)
         if mx >= 0 and mx < 256 and my >= 0 and my < drawing.h then
           local center = drawing.points[drawing.pending.center]
-          drawing.pending.radius = geom.dist(center.x,center.y, mx,my)
+          drawing.pending.radius = round(geom.dist(center.x,center.y, mx,my))
           table.insert(drawing.shapes, drawing.pending)
         end
       elseif drawing.pending.mode == 'arc' then
@@ -580,8 +580,8 @@ function Drawing.complete_rectangle(firstx,firsty, secondx,secondy, x,y)
   -- https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_an_equation
   local a = 1/first_slope
   local c = -secondy - secondx/first_slope
-  local thirdx = ((x-a*y) - a*c) / (a*a + 1)
-  local thirdy = (a*(-x + a*y) - c) / (a*a + 1)
+  local thirdx = round(((x-a*y) - a*c) / (a*a + 1))
+  local thirdy = round((a*(-x + a*y) - c) / (a*a + 1))
   -- slope of third edge = first_slope
   -- equation of line containing third edge:
   --     y - thirdy = first_slope*(x-thirdx)
@@ -589,8 +589,8 @@ function Drawing.complete_rectangle(firstx,firsty, secondx,secondy, x,y)
   -- now we want to find the point on this line that's closest to the first point
   local a = -first_slope
   local c = -thirdy + thirdx*first_slope
-  local fourthx = ((firstx-a*firsty) - a*c) / (a*a + 1)
-  local fourthy = (a*(-firstx + a*firsty) - c) / (a*a + 1)
+  local fourthx = round(((firstx-a*firsty) - a*c) / (a*a + 1))
+  local fourthy = round((a*(-firstx + a*firsty) - c) / (a*a + 1))
   return thirdx,thirdy, fourthx,fourthy
 end
 
@@ -699,10 +699,14 @@ function Drawing.smoothen(shape)
       local a = shape.points[i-1]
       local b = shape.points[i]
       local c = shape.points[i+1]
-      b.x = (a.x + b.x + c.x)/3
-      b.y = (a.y + b.y + c.y)/3
+      b.x = round((a.x + b.x + c.x)/3)
+      b.y = round((a.y + b.y + c.y)/3)
     end
   end
+end
+
+function round(num)
+  return math.floor(num+.5)
 end
 
 function Drawing.insert_point(points, x,y)
