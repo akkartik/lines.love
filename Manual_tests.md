@@ -12,6 +12,7 @@ record those here.
 * How the screen looks. Our tests use a level of indirection to check text and
   graphics printed to screen, but not the precise pixels they translate to.
     - where exactly the cursor is drawn to highlight a given character
+    - analogously, how a shape precisely looks as you draw it
 
 ### Other compromises
 

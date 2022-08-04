@@ -126,6 +126,9 @@ function Drawing.draw_pending_shape(drawing, top, left,right)
   local function py(y) return Drawing.pixels(y, width)+top end
   local mx = Drawing.coord(pmx-left, width)
   local my = Drawing.coord(pmy-top, width)
+  -- recreate pixels from coords to precisely mimic how the drawing will look
+  -- after mouse_released
+  pmx,pmy = px(mx), py(my)
   local shape = drawing.pending
   if shape.mode == nil then
     -- nothing pending
