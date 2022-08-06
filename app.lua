@@ -16,10 +16,10 @@ function love.run()
 
 --?   print('==')
   App.disable_tests()
-  if App.initialize_globals then App.initialize_globals() end
-  if App.initialize then App.initialize(love.arg.parseGameArguments(arg), arg) end
-  if love.timer then love.timer.step() end
+  App.initialize_globals()
+  App.initialize(love.arg.parseGameArguments(arg), arg)
 
+  love.timer.step()
   local dt = 0
 
   return function()
@@ -35,22 +35,15 @@ function love.run()
       end
     end
 
-    -- perform draw before update to give it a chance to mutate state
+    -- draw before update to give it a chance to mutate state
+    love.graphics.origin()
+    love.graphics.clear(love.graphics.getBackgroundColor())
+    App.draw()
+    love.graphics.present()
 
-    if love.graphics and love.graphics.isActive() then
-      love.graphics.origin()
-      love.graphics.clear(love.graphics.getBackgroundColor())
-
-      if App.draw then App.draw() end
-
-      love.graphics.present()
-    end
-
-    if love.timer then dt = love.timer.step() end
-
-    if App.update then App.update(dt) end -- will pass 0 if love.timer is disabled
-
-    if love.timer then love.timer.sleep(0.001) end
+    dt = love.timer.step()
+    App.update(dt)
+    love.timer.sleep(0.001)
   end
 end
 
