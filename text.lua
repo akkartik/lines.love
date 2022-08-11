@@ -207,7 +207,7 @@ function Text.keychord_pressed(State, chord)
       State.cursor1.line = State.cursor1.line-1
     end
     if Text.lt1(State.cursor1, State.screen_top1) then
-      local top2 = Text.to2(State, State.screen_top1, State.left, State.right)
+      local top2 = Text.to2(State, State.screen_top1)
       top2 = Text.previous_screen_line(State, top2, State.left, State.right)
       State.screen_top1 = Text.to1(State, top2)
       Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
