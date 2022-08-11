@@ -42,6 +42,22 @@ function test_backspace_to_delete_drawing()
   check_eq(Editor_state.cursor1.line, 1, 'F - test_backspace_to_delete_drawing/cursor')
 end
 
+function test_backspace_from_start_of_final_line()
+  io.write('\ntest_backspace_from_start_of_final_line')
+  -- display final line of text with cursor at start of it
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def'}
+  Editor_state.screen_top1 = {line=2, pos=1}
+  Editor_state.cursor1 = {line=2, pos=1}
+  Text.redraw_all(Editor_state)
+  -- backspace scrolls up
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(#Editor_state.lines, 1, 'F - test_backspace_from_start_of_final_line/#lines')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_backspace_from_start_of_final_line/cursor')
+  check_eq(Editor_state.screen_top1.line, 1, 'F - test_backspace_from_start_of_final_line/screen_top')
+end
+
 function test_insert_first_character()
   io.write('\ntest_insert_first_character')
   App.screen.init{width=120, height=60}
