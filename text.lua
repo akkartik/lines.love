@@ -17,7 +17,7 @@ function Text.draw(State, line_index, y, startpos)
   -- wrap long lines
   local x = State.left
   local pos = 1
-  local screen_line_starting_pos = 1
+  local screen_line_starting_pos = State.screen_top1.pos
   if line_cache.fragments == nil then
     Text.compute_fragments(State, line_index)
   end

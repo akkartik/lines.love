@@ -1084,6 +1084,23 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   App.screen.check(y, 'mno ', 'F - test_pagedown_can_start_from_middle_of_long_wrapping_line/screen:3')
 end
 
+function test_pagedown_never_moves_up()
+  io.write('\ntest_pagedown_never_moves_up')
+  -- draw the final screen line of a wrapping line
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def ghi'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=9}
+  Editor_state.screen_top1 = {line=1, pos=9}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- pagedown makes no change
+  edit.run_after_keychord(Editor_state, 'pagedown')
+  check_eq(Editor_state.screen_top1.line, 1, 'F - test_pagedown_never_moves_up/screen_top:line')
+  check_eq(Editor_state.screen_top1.pos, 9, 'F - test_pagedown_never_moves_up/screen_top:pos')
+end
+
 function test_down_arrow_moves_cursor()
   io.write('\ntest_down_arrow_moves_cursor')
   App.screen.init{width=120, height=60}
