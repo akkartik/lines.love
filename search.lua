@@ -68,12 +68,13 @@ function Text.search_next(State)
 end
 
 function Text.search_previous(State)
-  -- search current line
+  -- search current line before cursor
   local pos = rfind(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos-1)
   if pos then
     State.cursor1.pos = pos
   end
   if pos == nil then
+    -- search lines above cursor
     for i=State.cursor1.line-1,1,-1 do
       pos = rfind(State.lines[i].data, State.search_term)
       if pos then
@@ -92,6 +93,13 @@ function Text.search_previous(State)
         State.cursor1.pos = pos
         break
       end
+    end
+  end
+  if pos == nil then
+    -- search current line after cursor
+    pos = rfind(State.lines[State.cursor1.line].data, State.search_term)
+    if pos and pos > State.cursor1.pos then
+      State.cursor1.pos = pos
     end
   end
   if pos == nil then
