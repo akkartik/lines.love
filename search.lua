@@ -20,33 +20,26 @@ function Text.draw_search_bar(State)
 end
 
 function Text.search_next(State)
-  local pos
   -- search current line from cursor
-  local line = State.lines[State.cursor1.line]
-  if line.mode == 'text' then
-    pos = line.data:find(State.search_term, State.cursor1.pos)
-    if pos then
-      State.cursor1.pos = pos
-    end
+  local pos = find(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos)
+  if pos then
+    State.cursor1.pos = pos
   end
   if pos == nil then
     -- search lines below cursor
     for i=State.cursor1.line+1,#State.lines do
-      local line = State.lines[i]
-      if line.mode == 'text' then
-        pos = State.lines[i].data:find(State.search_term)
-        if pos then
-          State.cursor1.line = i
-          State.cursor1.pos = pos
-          break
-        end
+      pos = find(State.lines[i].data, State.search_term)
+      if pos then
+        State.cursor1.line = i
+        State.cursor1.pos = pos
+        break
       end
     end
   end
   if pos == nil then
     -- wrap around
     for i=1,State.cursor1.line-1 do
-      pos = State.lines[i].data:find(State.search_term)
+      pos = find(State.lines[i].data, State.search_term)
       if pos then
         State.cursor1.line = i
         State.cursor1.pos = pos
@@ -56,12 +49,9 @@ function Text.search_next(State)
   end
   if pos == nil then
     -- search current line until cursor
-    local line = State.lines[State.cursor1.line]
-    if line.mode == 'text' then
-      pos = line.data:find(State.search_term)
-      if pos and pos < State.cursor1.pos then
-        State.cursor1.pos = pos
-      end
+    pos = find(State.lines[State.cursor1.line].data, State.search_term)
+    if pos and pos < State.cursor1.pos then
+      State.cursor1.pos = pos
     end
   end
   if pos == nil then
@@ -117,7 +107,13 @@ function Text.search_previous(State)
   end
 end
 
+function find(s, pat, i)
+  if s == nil then return end
+  return s:find(pat, i)
+end
+
 function rfind(s, pat, i)
+  if s == nil then return end
   local rs = s:reverse()
   local rpat = pat:reverse()
   if i == nil then i = #s end
