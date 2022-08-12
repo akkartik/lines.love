@@ -846,17 +846,17 @@ function Text.x(s, pos)
   return App.width(text_before)
 end
 
-function Text.to2(State, pos1)
-  if State.lines[pos1.line].mode == 'drawing' then
-    return {line=pos1.line, screen_line=1, screen_pos=1}
+function Text.to2(State, loc1)
+  if State.lines[loc1.line].mode == 'drawing' then
+    return {line=loc1.line, screen_line=1, screen_pos=1}
   end
-  local result = {line=pos1.line, screen_line=1}
-  Text.populate_screen_line_starting_pos(State, pos1.line)
-  for i=#State.line_cache[pos1.line].screen_line_starting_pos,1,-1 do
-    local spos = State.line_cache[pos1.line].screen_line_starting_pos[i]
-    if spos <= pos1.pos then
+  local result = {line=loc1.line, screen_line=1}
+  Text.populate_screen_line_starting_pos(State, loc1.line)
+  for i=#State.line_cache[loc1.line].screen_line_starting_pos,1,-1 do
+    local spos = State.line_cache[loc1.line].screen_line_starting_pos[i]
+    if spos <= loc1.pos then
       result.screen_line = i
-      result.screen_pos = pos1.pos - spos + 1
+      result.screen_pos = loc1.pos - spos + 1
       break
     end
   end
@@ -864,10 +864,10 @@ function Text.to2(State, pos1)
   return result
 end
 
-function Text.to1(State, pos2)
-  local result = {line=pos2.line, pos=pos2.screen_pos}
-  if pos2.screen_line > 1 then
-    result.pos = State.line_cache[pos2.line].screen_line_starting_pos[pos2.screen_line] + pos2.screen_pos - 1
+function Text.to1(State, loc2)
+  local result = {line=loc2.line, pos=loc2.screen_pos}
+  if loc2.screen_line > 1 then
+    result.pos = State.line_cache[loc2.line].screen_line_starting_pos[loc2.screen_line] + loc2.screen_pos - 1
   end
   return result
 end
@@ -906,17 +906,17 @@ function Text.offset(s, pos1)
   return result
 end
 
-function Text.previous_screen_line(State, pos2)
-  if pos2.screen_line > 1 then
-    return {line=pos2.line, screen_line=pos2.screen_line-1, screen_pos=1}
-  elseif pos2.line == 1 then
-    return pos2
-  elseif State.lines[pos2.line-1].mode == 'drawing' then
-    return {line=pos2.line-1, screen_line=1, screen_pos=1}
+function Text.previous_screen_line(State, loc2)
+  if loc2.screen_line > 1 then
+    return {line=loc2.line, screen_line=loc2.screen_line-1, screen_pos=1}
+  elseif loc2.line == 1 then
+    return loc2
+  elseif State.lines[loc2.line-1].mode == 'drawing' then
+    return {line=loc2.line-1, screen_line=1, screen_pos=1}
   else
-    local l = State.lines[pos2.line-1]
-    Text.populate_screen_line_starting_pos(State, pos2.line-1)
-    return {line=pos2.line-1, screen_line=#State.line_cache[pos2.line-1].screen_line_starting_pos, screen_pos=1}
+    local l = State.lines[loc2.line-1]
+    Text.populate_screen_line_starting_pos(State, loc2.line-1)
+    return {line=loc2.line-1, screen_line=#State.line_cache[loc2.line-1].screen_line_starting_pos, screen_pos=1}
   end
 end
 
