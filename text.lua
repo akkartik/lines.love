@@ -922,6 +922,7 @@ end
 
 function Text.populate_screen_line_starting_pos(State, line_index)
   local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
   local line_cache = State.line_cache[line_index]
   if line_cache.screen_line_starting_pos then
     return
