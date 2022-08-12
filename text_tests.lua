@@ -2046,6 +2046,25 @@ function test_search()
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_search/2/cursor:pos')
 end
 
+function test_search_upwards()
+  io.write('\ntest_search_upwards')
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc abd'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- search for a string
+  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_textinput(Editor_state, 'a')
+  -- search for previous occurrence
+  edit.run_after_keychord(Editor_state, 'up')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_search_upwards/2/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_search_upwards/2/cursor:pos')
+end
+
 function test_search_wrap()
   io.write('\ntest_search_wrap')
   App.screen.init{width=120, height=60}

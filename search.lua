@@ -79,7 +79,7 @@ end
 
 function Text.search_previous(State)
   -- search current line
-  local pos = rfind(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos)
+  local pos = rfind(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos-1)
   if pos then
     State.cursor1.pos = pos
   end
