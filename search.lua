@@ -21,7 +21,7 @@ end
 
 function Text.search_next(State)
   local pos
-  -- search current line
+  -- search current line from cursor
   local line = State.lines[State.cursor1.line]
   if line.mode == 'text' then
     pos = line.data:find(State.search_term, State.cursor1.pos)
@@ -30,6 +30,7 @@ function Text.search_next(State)
     end
   end
   if pos == nil then
+    -- search lines below cursor
     for i=State.cursor1.line+1,#State.lines do
       local line = State.lines[i]
       if line.mode == 'text' then
@@ -50,6 +51,16 @@ function Text.search_next(State)
         State.cursor1.line = i
         State.cursor1.pos = pos
         break
+      end
+    end
+  end
+  if pos == nil then
+    -- search current line until cursor
+    local line = State.lines[State.cursor1.line]
+    if line.mode == 'text' then
+      pos = line.data:find(State.search_term)
+      if pos and pos < State.cursor1.pos then
+        State.cursor1.pos = pos
       end
     end
   end

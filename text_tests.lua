@@ -2045,3 +2045,22 @@ function test_search()
   check_eq(Editor_state.cursor1.line, 4, 'F - test_search/2/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_search/2/cursor:pos')
 end
+
+function test_search_wrap()
+  io.write('\ntest_search_wrap')
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=3}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- search for a string
+  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_keychord(Editor_state, 'return')
+  -- cursor wraps
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_search_wrap/1/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_search_wrap/1/cursor:pos')
+end
