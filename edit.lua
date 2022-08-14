@@ -119,12 +119,10 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
 end  -- App.initialize_state
 
 function edit.fixup_cursor(State)
-  if State.cursor1.line > #State.lines or State.lines[State.cursor1.line].mode ~= 'text' then
-    for i,line in ipairs(State.lines) do
-      if line.mode == 'text' then
-        State.cursor1.line = i
-        break
-      end
+  for i,line in ipairs(State.lines) do
+    if line.mode == 'text' then
+      State.cursor1.line = i
+      break
     end
   end
 end

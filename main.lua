@@ -47,7 +47,9 @@ function App.initialize(arg)
   else
     load_from_disk(Editor_state)
     Text.redraw_all(Editor_state)
-    edit.fixup_cursor(Editor_state)
+    if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
+      edit.fixup_cursor(Editor_state)
+    end
   end
   love.window.setTitle('lines.love - '..Editor_state.filename)
 
@@ -125,12 +127,7 @@ function App.filedropped(file)
   file:open('r')
   Editor_state.lines = load_from_file(file)
   file:close()
-  for i,line in ipairs(Editor_state.lines) do
-    if line.mode == 'text' then
-      Editor_state.cursor1.line = i
-      break
-    end
-  end
+  edit.fixup_cursor(Editor_state)
   love.window.setTitle('lines.love - '..Editor_state.filename)
 end
 
