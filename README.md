@@ -88,6 +88,7 @@ to the website above:
 * https://tildegit.org/akkartik/lines.love
 * https://git.tilde.institute/akkartik/lines.love
 * https://git.sr.ht/~akkartik/lines.love
+* https://notabug.org/akkartik/lines.love
 * https://pagure.io/lines.love
 
 Forks of lines.love are encouraged. If you show me your fork, I'll link to it
