@@ -8,15 +8,18 @@ http://akkartik.name/lines.html
 
 ## Invocation
 
-To run lines.love, double-click on it.
+To run from the terminal, [pass this directory to LÖVE](https://love2d.org/wiki/Getting_Started#Running_Games),
+optionally with a file path to edit.
+
+Alternatively, turn it into a .love file you can double-click on:
+```
+$ zip -r /tmp/lines.love *.lua
+```
 
 By default, lines.love reads/writes the file `lines.txt` in your default
 user/home directory (`https://love2d.org/wiki/love.filesystem.getUserDirectory`).
 
 To open a different file, drop it on the lines.love window.
-
-lines.love can also be [invoked from the terminal](https://love2d.org/wiki/Getting_Started#Running_Games),
-optionally with a file path to edit.
 
 ## Keyboard shortcuts
 
