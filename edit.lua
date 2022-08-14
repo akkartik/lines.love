@@ -352,7 +352,7 @@ function edit.keychord_pressed(State, chord, key)
     edit.update_font_settings(State, 20)
     Text.redraw_all(State)
   elseif chord == 'C-z' then
-    for _,line in ipairs(State.lines) do line.starty = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local event = undo_event(State)
     if event then
       local src = event.before
@@ -396,7 +396,7 @@ function edit.keychord_pressed(State, chord, key)
     end
     schedule_save(State)
   elseif chord == 'C-v' then
-    for _,line in ipairs(State.lines) do line.starty = nil end  -- just in case we scroll
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     -- We don't have a good sense of when to scroll, so we'll be conservative
     -- and sometimes scroll when we didn't quite need to.
     local before_line = State.cursor1.line
