@@ -131,7 +131,7 @@ function App.filedropped(file)
       break
     end
   end
-  love.window.setTitle('Text with Editor_state.lines - '..Editor_state.filename)
+  love.window.setTitle('lines.love - '..Editor_state.filename)
 end
 
 function App.draw()
