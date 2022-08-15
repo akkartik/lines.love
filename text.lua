@@ -82,6 +82,34 @@ function Text.draw_cursor(State, x, y)
   State.cursor_y = y+State.line_height
 end
 
+function Text.populate_screen_line_starting_pos(State, line_index)
+  local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
+  local line_cache = State.line_cache[line_index]
+  if line_cache.screen_line_starting_pos then
+    return
+  end
+  -- duplicate some logic from Text.draw
+  if line_cache.fragments == nil then
+    Text.compute_fragments(State, line_index)
+  end
+  line_cache.screen_line_starting_pos = {1}
+  local x = State.left
+  local pos = 1
+  for _, f in ipairs(line_cache.fragments) do
+    local frag, frag_text = f.data, f.text
+    -- render fragment
+    local frag_width = App.width(frag_text)
+    if x + frag_width > State.right then
+      x = State.left
+      table.insert(line_cache.screen_line_starting_pos, pos)
+    end
+    x = x + frag_width
+    local frag_len = utf8.len(frag)
+    pos = pos + frag_len
+  end
+end
+
 function Text.compute_fragments(State, line_index)
 --?   print('compute_fragments', line_index, 'between', State.left, State.right)
   local line = State.lines[line_index]
@@ -911,34 +939,6 @@ function Text.previous_screen_line(State, loc2)
     local l = State.lines[loc2.line-1]
     Text.populate_screen_line_starting_pos(State, loc2.line-1)
     return {line=loc2.line-1, screen_line=#State.line_cache[loc2.line-1].screen_line_starting_pos, screen_pos=1}
-  end
-end
-
-function Text.populate_screen_line_starting_pos(State, line_index)
-  local line = State.lines[line_index]
-  if line.mode ~= 'text' then return end
-  local line_cache = State.line_cache[line_index]
-  if line_cache.screen_line_starting_pos then
-    return
-  end
-  -- duplicate some logic from Text.draw
-  if line_cache.fragments == nil then
-    Text.compute_fragments(State, line_index)
-  end
-  line_cache.screen_line_starting_pos = {1}
-  local x = State.left
-  local pos = 1
-  for _, f in ipairs(line_cache.fragments) do
-    local frag, frag_text = f.data, f.text
-    -- render fragment
-    local frag_width = App.width(frag_text)
-    if x + frag_width > State.right then
-      x = State.left
-      table.insert(line_cache.screen_line_starting_pos, pos)
-    end
-    x = x + frag_width
-    local frag_len = utf8.len(frag)
-    pos = pos + frag_len
   end
 end
 
