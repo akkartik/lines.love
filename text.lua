@@ -18,9 +18,6 @@ function Text.draw(State, line_index, y, startpos)
   local x = State.left
   local pos = 1
   local screen_line_starting_pos = startpos
-  if line_cache.fragments == nil then
-    Text.compute_fragments(State, line_index)
-  end
   Text.populate_screen_line_starting_pos(State, line_index)
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
@@ -704,9 +701,6 @@ end
 function Text.to_pos_on_line(State, line_index, mx, my)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
-  if line_cache.fragments == nil then
-    Text.compute_fragments(State, line_index)
-  end
   assert(my >= line_cache.starty)
   -- duplicate some logic from Text.draw
   local y = line_cache.starty
