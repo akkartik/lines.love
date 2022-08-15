@@ -17,7 +17,7 @@ function Text.draw(State, line_index, y, startpos)
   -- wrap long lines
   local x = State.left
   local pos = 1
-  local screen_line_starting_pos = State.screen_top1.pos
+  local screen_line_starting_pos = startpos
   if line_cache.fragments == nil then
     Text.compute_fragments(State, line_index)
   end
@@ -26,7 +26,7 @@ function Text.draw(State, line_index, y, startpos)
     local frag, frag_text = f.data, f.text
     local frag_len = utf8.len(frag)
 --?     print('text.draw:', frag, 'at', line_index,pos, 'after', x,y)
-    if Text.lt1({line=line_index, pos=pos}, State.screen_top1) then
+    if pos < startpos then
       -- render nothing
 --?       print('skipping', frag)
     else
