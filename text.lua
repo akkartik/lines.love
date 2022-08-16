@@ -68,8 +68,6 @@ function Text.draw(State, line_index, y, startpos)
   end
   return y, screen_line_starting_pos
 end
--- manual tests:
---  draw with small screen width of 100
 
 function Text.draw_cursor(State, x, y)
   -- blink every 0.5s
