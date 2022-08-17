@@ -18,7 +18,9 @@ function Text.draw(State, line_index, y, startpos)
   local x = State.left
   local pos = 1
   local screen_line_starting_pos = startpos
-  Text.populate_screen_line_starting_pos(State, line_index)
+  if line_cache.fragments == nil then
+    Text.compute_fragments(State, line_index)
+  end
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
     local frag_len = utf8.len(frag)
