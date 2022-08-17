@@ -156,7 +156,7 @@ function Text.textinput(State, t)
   local before = snapshot(State, State.cursor1.line)
 --?   print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   Text.insert_at_cursor(State, t)
-  if State.cursor_y >= App.screen.height - State.line_height then
+  if State.cursor_y > App.screen.height - State.line_height then
     Text.populate_screen_line_starting_pos(State, State.cursor1.line)
     Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
 --?     print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
@@ -180,7 +180,7 @@ function Text.keychord_pressed(State, chord)
     local before = snapshot(State, before_line)
     Text.insert_return(State)
     State.selection1 = {}
-    if (State.cursor_y + State.line_height) > App.screen.height then
+    if State.cursor_y > App.screen.height - State.line_height then
       Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
     schedule_save(State)
@@ -189,7 +189,7 @@ function Text.keychord_pressed(State, chord)
     local before = snapshot(State, State.cursor1.line)
 --?     print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
     Text.insert_at_cursor(State, '\t')
-    if State.cursor_y >= App.screen.height - State.line_height then
+    if State.cursor_y > App.screen.height - State.line_height then
       Text.populate_screen_line_starting_pos(State, State.cursor1.line)
       Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
 --?       print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
