@@ -18,9 +18,7 @@ function Text.draw(State, line_index, y, startpos)
   local x = State.left
   local pos = 1
   local screen_line_starting_pos = startpos
-  if line_cache.fragments == nil then
-    Text.compute_fragments(State, line_index)
-  end
+  Text.compute_fragments(State, line_index)
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
     local frag_len = utf8.len(frag)
@@ -90,9 +88,7 @@ function Text.populate_screen_line_starting_pos(State, line_index)
     return
   end
   -- duplicate some logic from Text.draw
-  if line_cache.fragments == nil then
-    Text.compute_fragments(State, line_index)
-  end
+  Text.compute_fragments(State, line_index)
   line_cache.screen_line_starting_pos = {1}
   local x = State.left
   local pos = 1
@@ -113,7 +109,11 @@ end
 function Text.compute_fragments(State, line_index)
 --?   print('compute_fragments', line_index, 'between', State.left, State.right)
   local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
   local line_cache = State.line_cache[line_index]
+  if line_cache.fragments then
+    return
+  end
   line_cache.fragments = {}
   local x = State.left
   -- try to wrap at word boundaries
