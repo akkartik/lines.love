@@ -528,7 +528,7 @@ function Text.end_of_line(State)
   State.cursor1.pos = utf8.len(State.lines[State.cursor1.line].data) + 1
   local botpos = Text.pos_at_start_of_cursor_screen_line(State)
   local botline1 = {line=State.cursor1.line, pos=botpos}
-  if Text.cursor_past_screen_bottom(State) then
+  if Text.cursor_out_of_screen(State) then
     Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
@@ -577,7 +577,7 @@ function Text.word_right(State)
       break
     end
   end
-  if Text.cursor_past_screen_bottom(State) then
+  if Text.cursor_out_of_screen(State) then
     Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
@@ -615,7 +615,7 @@ end
 
 function Text.right(State)
   Text.right_without_scroll(State)
-  if Text.cursor_past_screen_bottom(State) then
+  if Text.cursor_out_of_screen(State) then
     Text.snap_cursor_to_bottom_of_screen(State)
   end
 end
@@ -968,7 +968,7 @@ function Text.tweak_screen_top_and_cursor(State)
     State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
   elseif State.cursor1.line >= State.screen_bottom1.line then
 --?     print('too low')
-    if Text.cursor_past_screen_bottom(State) then
+    if Text.cursor_out_of_screen(State) then
 --?       print('tweak')
       State.cursor1 = {
           line=State.screen_bottom1.line,
@@ -979,9 +979,9 @@ function Text.tweak_screen_top_and_cursor(State)
 end
 
 -- slightly expensive since it redraws the screen
-function Text.cursor_past_screen_bottom(State)
+function Text.cursor_out_of_screen(State)
   App.draw()
-  return State.cursor_y >= App.screen.height - State.line_height
+  return State.cursor_y == nil
   -- this approach is cheaper and almost works, except on the final screen
   -- where file ends above bottom of screen
 --?   local botpos = Text.pos_at_start_of_cursor_screen_line(State)
