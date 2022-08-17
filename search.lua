@@ -62,7 +62,7 @@ function Text.search_next(State)
   end
   if Text.lt1(State.cursor1, State.screen_top1) or Text.lt1(State.screen_bottom1, State.cursor1) then
     State.screen_top1.line = State.cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line(State, State.left, State.right)
+    local pos = Text.pos_at_start_of_cursor_screen_line(State, State.left, State.right)
     State.screen_top1.pos = pos
   end
 end
@@ -110,7 +110,7 @@ function Text.search_previous(State)
   end
   if Text.lt1(State.cursor1, State.screen_top1) or Text.lt1(State.screen_bottom1, State.cursor1) then
     State.screen_top1.line = State.cursor1.line
-    local _, pos = Text.pos_at_start_of_cursor_screen_line(State, State.left, State.right)
+    local pos = Text.pos_at_start_of_cursor_screen_line(State, State.left, State.right)
     State.screen_top1.pos = pos
   end
 end

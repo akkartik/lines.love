@@ -133,7 +133,7 @@ function Text.delete_selection_without_undo(State)
   State.cursor1.pos = minp
   if Text.lt1(State.cursor1, State.screen_top1) then
     State.screen_top1.line = State.cursor1.line
-    _,State.screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(State)
+    State.screen_top1.pos = Text.pos_at_start_of_cursor_screen_line(State)
   end
   State.selection1 = {}
   -- delete everything between min (inclusive) and max (exclusive)
