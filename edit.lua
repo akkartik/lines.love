@@ -338,6 +338,7 @@ function edit.keychord_pressed(State, chord, key)
     State.search_term = ''
     State.search_backup = {cursor={line=State.cursor1.line, pos=State.cursor1.pos}, screen_top={line=State.screen_top1.line, pos=State.screen_top1.pos}}
     assert(State.search_text == nil)
+  -- zoom
   elseif chord == 'C-=' then
     edit.update_font_settings(State, State.font_height+2)
     Text.redraw_all(State)
@@ -347,6 +348,7 @@ function edit.keychord_pressed(State, chord, key)
   elseif chord == 'C-0' then
     edit.update_font_settings(State, 20)
     Text.redraw_all(State)
+  -- undo
   elseif chord == 'C-z' then
     for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local event = undo_event(State)
