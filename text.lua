@@ -281,43 +281,43 @@ function Text.keychord_pressed(State, chord)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   --== shortcuts that move the cursor
   elseif chord == 'left' then
-    Text.left(State, State.left, State.right)
+    Text.left(State)
     State.selection1 = {}
   elseif chord == 'right' then
-    Text.right(State, State.left, State.right)
+    Text.right(State)
     State.selection1 = {}
   elseif chord == 'S-left' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.left(State, State.left, State.right)
+    Text.left(State)
   elseif chord == 'S-right' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.right(State, State.left, State.right)
+    Text.right(State)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
-    Text.word_left(State, State.left, State.right)
+    Text.word_left(State)
     State.selection1 = {}
   elseif chord == 'M-right' then
-    Text.word_right(State, State.left, State.right)
+    Text.word_right(State)
     State.selection1 = {}
   elseif chord == 'M-S-left' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_left(State, State.left, State.right)
+    Text.word_left(State)
   elseif chord == 'M-S-right' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.word_right(State, State.left, State.right)
+    Text.word_right(State)
   elseif chord == 'home' then
     Text.start_of_line(State)
     State.selection1 = {}
   elseif chord == 'end' then
-    Text.end_of_line(State, State.left, State.right)
+    Text.end_of_line(State)
     State.selection1 = {}
   elseif chord == 'S-home' then
     if State.selection1.line == nil then
@@ -328,39 +328,39 @@ function Text.keychord_pressed(State, chord)
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.end_of_line(State, State.left, State.right)
+    Text.end_of_line(State)
   elseif chord == 'up' then
-    Text.up(State, State.left, State.right)
+    Text.up(State)
     State.selection1 = {}
   elseif chord == 'down' then
-    Text.down(State, State.left, State.right)
+    Text.down(State)
     State.selection1 = {}
   elseif chord == 'S-up' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.up(State, State.left, State.right)
+    Text.up(State)
   elseif chord == 'S-down' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.down(State, State.left, State.right)
+    Text.down(State)
   elseif chord == 'pageup' then
-    Text.pageup(State, State.left, State.right)
+    Text.pageup(State)
     State.selection1 = {}
   elseif chord == 'pagedown' then
-    Text.pagedown(State, State.left, State.right)
+    Text.pagedown(State)
     State.selection1 = {}
   elseif chord == 'S-pageup' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pageup(State, State.left, State.right)
+    Text.pageup(State)
   elseif chord == 'S-pagedown' then
     if State.selection1.line == nil then
       State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
     end
-    Text.pagedown(State, State.left, State.right)
+    Text.pagedown(State)
   end
 end
 
