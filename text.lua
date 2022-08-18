@@ -498,10 +498,7 @@ function Text.down(State)
     end
   else
     -- move down one screen line in current line
-    local scroll_down = false
-    if Text.le1(State.screen_bottom1, State.cursor1) then
-      scroll_down = true
-    end
+    local scroll_down = Text.le1(State.screen_bottom1, State.cursor1)
 --?     print('cursor is NOT at final screen line of its line')
     local screen_line_starting_pos, screen_line_index = Text.pos_at_start_of_cursor_screen_line(State)
     new_screen_line_starting_pos = State.line_cache[State.cursor1.line].screen_line_starting_pos[screen_line_index+1]
