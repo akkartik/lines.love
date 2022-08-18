@@ -16,13 +16,10 @@ function Text.clip_selection(State, line_index, apos, bpos)
   else
     maxl,maxp = State.cursor1.line,State.cursor1.pos
   end
-  if minl > maxl then
+  if Text.lt1({line=maxl, pos=maxp},
+              {line=minl, pos=minp}) then
     minl,maxl = maxl,minl
     minp,maxp = maxp,minp
-  elseif minl == maxl then
-    if minp > maxp then
-      minp,maxp = maxp,minp
-    end
   end
   -- check if intervals are disjoint
   if line_index < minl then return nil,nil end
