@@ -525,8 +525,6 @@ end
 
 function Text.end_of_line(State)
   State.cursor1.pos = utf8.len(State.lines[State.cursor1.line].data) + 1
-  local botpos = Text.pos_at_start_of_screen_line(State, State.cursor1)
-  local botline1 = {line=State.cursor1.line, pos=botpos}
   if Text.cursor_out_of_screen(State) then
     Text.snap_cursor_to_bottom_of_screen(State)
   end
