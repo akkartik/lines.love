@@ -870,9 +870,10 @@ function Text.to2(State, loc1)
     return {line=loc1.line, screen_line=1, screen_pos=1}
   end
   local result = {line=loc1.line, screen_line=1}
+  local line_cache = State.line_cache[loc1.line]
   Text.populate_screen_line_starting_pos(State, loc1.line)
-  for i=#State.line_cache[loc1.line].screen_line_starting_pos,1,-1 do
-    local spos = State.line_cache[loc1.line].screen_line_starting_pos[i]
+  for i=#line_cache.screen_line_starting_pos,1,-1 do
+    local spos = line_cache.screen_line_starting_pos[i]
     if spos <= loc1.pos then
       result.screen_line = i
       result.screen_pos = loc1.pos - spos + 1
