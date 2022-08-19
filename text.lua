@@ -403,11 +403,11 @@ function Text.pagedown(State)
   -- If a line/paragraph gets to a page boundary, I often want to scroll
   -- before I get to the bottom.
   -- However, only do this if it makes forward progress.
-  local top2 = Text.to2(State, State.screen_bottom1)
-  if top2.screen_line > 1 then
-    top2.screen_line = math.max(top2.screen_line-10, 1)
+  local bot2 = Text.to2(State, State.screen_bottom1)
+  if bot2.screen_line > 1 then
+    bot2.screen_line = math.max(bot2.screen_line-10, 1)
   end
-  local new_top1 = Text.to1(State, top2)
+  local new_top1 = Text.to1(State, bot2)
   if Text.lt1(State.screen_top1, new_top1) then
     State.screen_top1 = new_top1
   else
