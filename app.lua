@@ -341,6 +341,8 @@ function App.disable_tests()
   end
 
   -- test methods are disallowed outside tests
+  App.run_tests = nil
+  App.disable_tests = nil
   App.screen.init = nil
   App.filesystem = nil
   App.time = nil
