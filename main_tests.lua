@@ -19,6 +19,7 @@ end
 function test_drop_file()
   io.write('\ntest_drop_file')
   App.screen.init{width=Editor_state.left+300, height=300}
+  Editor_state = edit.initialize_test_state()
   App.filesystem['foo'] = 'abc\ndef\nghi\n'
   local fake_dropped_file = {
     opened = false,
@@ -41,6 +42,7 @@ function test_drop_file()
   check_eq(Editor_state.lines[1].data, 'abc', 'F - test_drop_file/lines:1')
   check_eq(Editor_state.lines[2].data, 'def', 'F - test_drop_file/lines:2')
   check_eq(Editor_state.lines[3].data, 'ghi', 'F - test_drop_file/lines:3')
+  edit.draw(Editor_state)
 end
 
 function test_drop_file_saves_previous()
