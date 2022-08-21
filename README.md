@@ -97,6 +97,8 @@ here.
 * https://github.com/akkartik/lines-polygon-experiment -- an experiment that
   uses separate shortcuts for regular polygons. `ctrl+3` for triangles,
   `ctrl+4` for squares, etc.
+* https://codeberg.org/akkartik/text.love -- a stripped down version without
+  drawings; useful starting point for some forks
 
 ## Associated tools
 
