@@ -122,7 +122,7 @@ function App.filedropped(file)
     save_to_disk(Editor_state)
   end
   -- clear the slate for the new file
-  App.initialize_globals()  -- in particular, forget all undo history
+  App.initialize_globals()
   Editor_state.filename = file:getFilename()
   file:open('r')
   Editor_state.lines = load_from_file(file)
