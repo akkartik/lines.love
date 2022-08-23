@@ -1,4 +1,7 @@
--- simple immediate-mode buttons
+-- Simple immediate-mode buttons with (currently) just an onpress1 handler for
+-- the left button.
+-- If the handler returns true, it'll prevent any further processing of the
+-- event.
 
 Button_handlers = {}
 
