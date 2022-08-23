@@ -302,13 +302,15 @@ function App.open_for_writing(filename)
 end
 
 function App.open_for_reading(filename)
-  return {
-    lines = function(self)
-              return App.filesystem[filename]:gmatch('[^\n]+')
-            end,
-    close = function(self)
-            end,
-  }
+  if App.filesystem[filename] then
+    return {
+      lines = function(self)
+                return App.filesystem[filename]:gmatch('[^\n]+')
+              end,
+      close = function(self)
+              end,
+    }
+  end
 end
 
 function App.run_tests()
