@@ -207,22 +207,22 @@ function App.modifier_down(key)
 end
 
 App.fake_mouse_state = {x=-1, y=-1}  -- x,y always set
-function App.fake_mouse_press(x,y, button)
+function App.fake_mouse_press(x,y, mouse_button)
   App.fake_mouse_state.x = x
   App.fake_mouse_state.y = y
-  App.fake_mouse_state[button] = true
+  App.fake_mouse_state[mouse_button] = true
 end
-function App.fake_mouse_release(x,y, button)
+function App.fake_mouse_release(x,y, mouse_button)
   App.fake_mouse_state.x = x
   App.fake_mouse_state.y = y
-  App.fake_mouse_state[button] = nil
+  App.fake_mouse_state[mouse_button] = nil
 end
 function App.mouse_move(x,y)
   App.fake_mouse_state.x = x
   App.fake_mouse_state.y = y
 end
-function App.mouse_down(button)
-  return App.fake_mouse_state[button]
+function App.mouse_down(mouse_button)
+  return App.fake_mouse_state[mouse_button]
 end
 function App.mouse_x()
   return App.fake_mouse_state.x
@@ -250,25 +250,25 @@ function App.run_after_keychord(chord)
   App.draw()
 end
 
-function App.run_after_mouse_click(x,y, button)
-  App.fake_mouse_press(x,y, button)
-  App.mousepressed(x,y, button)
-  App.fake_mouse_release(x,y, button)
-  App.mousereleased(x,y, button)
+function App.run_after_mouse_click(x,y, mouse_button)
+  App.fake_mouse_press(x,y, mouse_button)
+  App.mousepressed(x,y, mouse_button)
+  App.fake_mouse_release(x,y, mouse_button)
+  App.mousereleased(x,y, mouse_button)
   App.screen.contents = {}
   App.draw()
 end
 
-function App.run_after_mouse_press(x,y, button)
-  App.fake_mouse_press(x,y, button)
-  App.mousepressed(x,y, button)
+function App.run_after_mouse_press(x,y, mouse_button)
+  App.fake_mouse_press(x,y, mouse_button)
+  App.mousepressed(x,y, mouse_button)
   App.screen.contents = {}
   App.draw()
 end
 
-function App.run_after_mouse_release(x,y, button)
-  App.fake_mouse_release(x,y, button)
-  App.mousereleased(x,y, button)
+function App.run_after_mouse_release(x,y, mouse_button)
+  App.fake_mouse_release(x,y, mouse_button)
+  App.mousereleased(x,y, mouse_button)
   App.screen.contents = {}
   App.draw()
 end

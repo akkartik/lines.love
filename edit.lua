@@ -497,25 +497,25 @@ function edit.run_after_keychord(State, chord)
   edit.draw(State)
 end
 
-function edit.run_after_mouse_click(State, x,y, button)
-  App.fake_mouse_press(x,y, button)
-  edit.mouse_pressed(State, x,y, button)
-  App.fake_mouse_release(x,y, button)
-  edit.mouse_released(State, x,y, button)
+function edit.run_after_mouse_click(State, x,y, mouse_button)
+  App.fake_mouse_press(x,y, mouse_button)
+  edit.mouse_pressed(State, x,y, mouse_button)
+  App.fake_mouse_release(x,y, mouse_button)
+  edit.mouse_released(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.draw(State)
 end
 
-function edit.run_after_mouse_press(State, x,y, button)
-  App.fake_mouse_press(x,y, button)
-  edit.mouse_pressed(State, x,y, button)
+function edit.run_after_mouse_press(State, x,y, mouse_button)
+  App.fake_mouse_press(x,y, mouse_button)
+  edit.mouse_pressed(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.draw(State)
 end
 
-function edit.run_after_mouse_release(State, x,y, button)
-  App.fake_mouse_release(x,y, button)
-  edit.mouse_released(State, x,y, button)
+function edit.run_after_mouse_release(State, x,y, mouse_button)
+  App.fake_mouse_release(x,y, mouse_button)
+  edit.mouse_released(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.draw(State)
 end
