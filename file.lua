@@ -1,4 +1,14 @@
 -- primitives for saving to file and loading from file
+function file_exists(filename)
+  local infile = App.open_for_reading(filename)
+  if infile then
+    infile:close()
+    return true
+  else
+    return false
+  end
+end
+
 function load_from_disk(State)
   local infile = App.open_for_reading(State.filename)
   State.lines = load_from_file(infile)
