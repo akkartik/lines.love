@@ -133,7 +133,6 @@ function App.filedropped(file)
 end
 
 function App.draw()
-  Button_handlers = {}
   edit.draw(Editor_state)
 end
 

@@ -128,6 +128,7 @@ function edit.fixup_cursor(State)
 end
 
 function edit.draw(State)
+  State.button_handlers = {}
   App.color(Text_color)
   assert(#State.lines == #State.line_cache)
   if not Text.le1(State.screen_top1, State.cursor1) then
@@ -151,7 +152,7 @@ function edit.draw(State)
       end
       if line.data == '' then
         -- button to insert new drawing
-        button('draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
+        button(State, 'draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
@@ -208,7 +209,7 @@ end
 function edit.mouse_pressed(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print('press', State.selection1.line, State.selection1.pos)
-  if propagate_to_button_handlers(x,y, mouse_button) then
+  if propagate_to_button_handlers(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
   end
