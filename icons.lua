@@ -1,6 +1,7 @@
 icon = {}
 
-function icon.insert_drawing(x, y)
+function icon.insert_drawing(button_params)
+  local x,y = button_params.x, button_params.y
   App.color(Icon_color)
   love.graphics.rectangle('line', x,y, 12,12)
   love.graphics.line(4,y+6, 16,y+6)

@@ -14,7 +14,7 @@ function button(State, name, params)
   end
   love.graphics.setColor(params.color[1], params.color[2], params.color[3])
   love.graphics.rectangle('fill', params.x,params.y, params.w,params.h, 5,5)
-  if params.icon then params.icon(params.x, params.y) end
+  if params.icon then params.icon(params) end
   table.insert(State.button_handlers, params)
 end
 
