@@ -990,3 +990,15 @@ function Text.clear_screen_line_cache(State, line_index)
   State.line_cache[line_index].fragments = nil
   State.line_cache[line_index].screen_line_starting_pos = nil
 end
+
+function trim(s)
+  return s:gsub('^%s+', ''):gsub('%s+$', '')
+end
+
+function ltrim(s)
+  return s:gsub('^%s+', '')
+end
+
+function rtrim(s)
+  return s:gsub('%s+$', '')
+end
