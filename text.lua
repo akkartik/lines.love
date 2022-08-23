@@ -9,7 +9,6 @@ require 'text_tests'
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return the final y, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos)
-  App.color(Text_color)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   line_cache.starty = y
@@ -20,6 +19,7 @@ function Text.draw(State, line_index, y, startpos)
   local screen_line_starting_pos = startpos
   Text.compute_fragments(State, line_index)
   for _, f in ipairs(line_cache.fragments) do
+    App.color(Text_color)
     local frag, frag_text = f.data, f.text
     local frag_len = utf8.len(frag)
 --?     print('text.draw:', frag, 'at', line_index,pos, 'after', x,y)
