@@ -99,6 +99,11 @@ here.
   `ctrl+4` for squares, etc.
 * https://codeberg.org/akkartik/text.love -- a stripped down version without
   drawings; useful starting point for some forks
+* https://git.sr.ht/~akkartik/pensieve.love -- a note-taking app on an
+  infinite 2D surface. Still in development.
+* https://git.sr.ht/~akkartik/capture.love -- a blank-slate mode for the
+  note-taking app, so all the stuff pensieve.love puts on screen doesn't cause
+  you to forget what you came to write down.
 
 ## Associated tools
 
