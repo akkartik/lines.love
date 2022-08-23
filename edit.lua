@@ -163,7 +163,6 @@ function edit.draw(State)
                        end
                        schedule_save(State)
                        record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
-                       return true  -- don't handle any other events with this mouse button press
                      end,
         })
       end
@@ -209,7 +208,7 @@ end
 function edit.mouse_pressed(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print('press', State.selection1.line, State.selection1.pos)
-  if propagate_to_button_handlers(State, x,y, mouse_button) then
+  if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
   end
