@@ -23,15 +23,17 @@ function mouse_press_consumed_by_any_button_handler(State, x, y, mouse_button)
   if State.button_handlers == nil then
     return
   end
-  local result = false
+  local button_pressed = false
+  local consume_press = true
   for _,ev in ipairs(State.button_handlers) do
     if x>ev.x and x<ev.x+ev.w and y>ev.y and y<ev.y+ev.h then
       if ev.onpress1 and mouse_button == 1 then
-        if not ev.onpress1() then
-          result = true
+        button_pressed = true
+        if ev.onpress1() then
+          consume_press = false
         end
       end
     end
   end
-  return result
+  return button_pressed and consume_press
 end
