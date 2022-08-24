@@ -146,11 +146,6 @@ function current_shape(State, shape)
   end
 end
 
-_bullet_indent = nil
 function bullet_indent()
-  if _bullet_indent == nil then
-    local text = love.graphics.newText(love.graphics.getFont(), '* ')
-    _bullet_indent = text:getWidth()
-  end
-  return _bullet_indent
+  return App.width(to_text('* '))
 end

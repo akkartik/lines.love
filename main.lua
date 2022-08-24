@@ -16,6 +16,9 @@ Editor_state = {}
 function App.initialize_globals()
   -- tests currently mostly clear their own state
 
+  -- a few text objects we can avoid recomputing unless the font changes
+  Text_cache = {}
+
   -- blinking cursor
   Cursor_time = 0
 
@@ -203,4 +206,12 @@ function App.keyreleased(key, scancode)
   end
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.key_released(Editor_state, key, scancode)
+end
+
+-- use this sparingly
+function to_text(s)
+  if Text_cache[s] == nil then
+    Text_cache[s] = App.newText(love.graphics.getFont(), s)
+  end
+  return Text_cache[s]
 end
