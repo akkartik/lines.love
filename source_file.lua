@@ -56,16 +56,6 @@ function save_to_disk(State)
   outfile:close()
 end
 
-function file_exists(filename)
-  local infile = App.open_for_reading(filename)
-  if infile then
-    infile:close()
-    return true
-  else
-    return false
-  end
-end
-
 -- for tests
 function load_array(a)
   local result = {}
