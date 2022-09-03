@@ -56,9 +56,17 @@ end
 array = {}
 
 function array.find(arr, elem)
-  for i,x in ipairs(arr) do
-    if x == elem then
-      return i
+  if type(elem) == 'function' then
+    for i,x in ipairs(arr) do
+      if elem(x) then
+        return i
+      end
+    end
+  else
+    for i,x in ipairs(arr) do
+      if x == elem then
+        return i
+      end
     end
   end
   return nil

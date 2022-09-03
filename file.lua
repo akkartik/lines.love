@@ -50,7 +50,6 @@ function save_to_disk(State)
   outfile:close()
 end
 
-json = require 'json'
 function load_drawing(infile_next_line)
   local drawing = {mode='drawing', h=256/2, points={}, shapes={}, pending={}}
   while true do

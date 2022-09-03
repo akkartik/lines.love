@@ -1,217 +1,260 @@
+-- Entrypoint for the app. You can edit this file from within the app if
+-- you're careful.
+
+-- files that come with LÖVE; we can't edit those from within the app
 utf8 = require 'utf8'
 
-require 'app'
-require 'test'
+function load_file_from_source_or_save_directory(filename)
+  local contents = love.filesystem.read(filename)
+  local code, err = loadstring(contents, filename)
+  if code == nil then
+    error(err)
+  end
+  return code()
+end
 
-require 'keychord'
-require 'button'
+json = load_file_from_source_or_save_directory('json.lua')
 
-require 'main_tests'
+load_file_from_source_or_save_directory('app.lua')
+load_file_from_source_or_save_directory('test.lua')
 
--- delegate most business logic to a layer that can be reused by other projects
-require 'edit'
-Editor_state = {}
+load_file_from_source_or_save_directory('keychord.lua')
+load_file_from_source_or_save_directory('button.lua')
 
--- called both in tests and real run
+-- both sides require (different parts of) the logging framework
+load_file_from_source_or_save_directory('log.lua')
+
+-- but some files we want to only load sometimes
+function App.load()
+  if love.filesystem.getInfo('config') then
+    Settings = json.decode(love.filesystem.read('config'))
+    Current_app = Settings.current_app
+  end
+
+  if Current_app == nil then
+    Current_app = 'run'
+  end
+
+  if Current_app == 'run' then
+    load_file_from_source_or_save_directory('file.lua')
+    load_file_from_source_or_save_directory('run.lua')
+      load_file_from_source_or_save_directory('edit.lua')
+      load_file_from_source_or_save_directory('text.lua')
+        load_file_from_source_or_save_directory('search.lua')
+        load_file_from_source_or_save_directory('select.lua')
+        load_file_from_source_or_save_directory('undo.lua')
+      load_file_from_source_or_save_directory('icons.lua')
+      load_file_from_source_or_save_directory('text_tests.lua')
+    load_file_from_source_or_save_directory('run_tests.lua')
+    load_file_from_source_or_save_directory('drawing.lua')
+      load_file_from_source_or_save_directory('geom.lua')
+      load_file_from_source_or_save_directory('help.lua')
+    load_file_from_source_or_save_directory('drawing_tests.lua')
+  else
+    load_file_from_source_or_save_directory('source_file.lua')
+    load_file_from_source_or_save_directory('source.lua')
+      load_file_from_source_or_save_directory('commands.lua')
+      load_file_from_source_or_save_directory('source_edit.lua')
+      load_file_from_source_or_save_directory('log_browser.lua')
+      load_file_from_source_or_save_directory('source_text.lua')
+        load_file_from_source_or_save_directory('search.lua')
+        load_file_from_source_or_save_directory('select.lua')
+        load_file_from_source_or_save_directory('source_undo.lua')
+        load_file_from_source_or_save_directory('colorize.lua')
+      load_file_from_source_or_save_directory('source_text_tests.lua')
+    load_file_from_source_or_save_directory('source_tests.lua')
+  end
+end
+
 function App.initialize_globals()
-  -- tests currently mostly clear their own state
-
-  -- a few text objects we can avoid recomputing unless the font changes
-  Text_cache = {}
-
-  -- blinking cursor
-  Cursor_time = 0
+  if Current_app == 'run' then
+    run.initialize_globals()
+  elseif Current_app == 'source' then
+    source.initialize_globals()
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 
   -- for hysteresis in a few places
-  Last_resize_time = App.getTime()
   Last_focus_time = App.getTime()  -- https://love2d.org/forums/viewtopic.php?p=249700
+  Last_resize_time = App.getTime()
 end
 
--- called only for real run
 function App.initialize(arg)
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  love.keyboard.setKeyRepeat(true)
-
-  love.graphics.setBackgroundColor(1,1,1)
-
-  if love.filesystem.getInfo('config') then
-    load_settings()
+  if Current_app == 'run' then
+    run.initialize(arg)
+  elseif Current_app == 'source' then
+    source.initialize(arg)
   else
-    initialize_default_settings()
+    assert(false, 'unknown app "'..Current_app..'"')
   end
+  love.window.setTitle('text.love - '..Current_app)
+end
 
-  if #arg > 0 then
-    Editor_state.filename = arg[1]
-    load_from_disk(Editor_state)
-    Text.redraw_all(Editor_state)
-    Editor_state.screen_top1 = {line=1, pos=1}
-    Editor_state.cursor1 = {line=1, pos=1}
-    edit.fixup_cursor(Editor_state)
+function App.resize(w,h)
+  if Current_app == 'run' then
+    if run.resize then run.resize(w,h) end
+  elseif Current_app == 'source' then
+    if source.resize then source.resize(w,h) end
   else
-    load_from_disk(Editor_state)
-    Text.redraw_all(Editor_state)
-    if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
-      edit.fixup_cursor(Editor_state)
-    end
+    assert(false, 'unknown app "'..Current_app..'"')
   end
-  love.window.setTitle('lines.love - '..Editor_state.filename)
-
-  if #arg > 1 then
-    print('ignoring commandline args after '..arg[1])
-  end
-
-  if rawget(_G, 'jit') then
-    jit.off()
-    jit.flush()
-  end
-end
-
-function load_settings()
-  local settings = json.decode(love.filesystem.read('config'))
-  love.graphics.setFont(love.graphics.newFont(settings.font_height))
-  -- maximize window to determine maximum allowable dimensions
-  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
-  -- set up desired window dimensions
-  love.window.setPosition(settings.x, settings.y, settings.displayindex)
-  App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.width, 200)
-  App.screen.width, App.screen.height = settings.width, settings.height
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, settings.font_height, math.floor(settings.font_height*1.3))
-  Editor_state.filename = settings.filename
-  Editor_state.screen_top1 = settings.screen_top
-  Editor_state.cursor1 = settings.cursor
-end
-
-function initialize_default_settings()
-  local font_height = 20
-  love.graphics.setFont(love.graphics.newFont(font_height))
-  local em = App.newText(love.graphics.getFont(), 'm')
-  initialize_window_geometry(App.width(em))
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right)
-  Editor_state.font_height = font_height
-  Editor_state.line_height = math.floor(font_height*1.3)
-  Editor_state.em = em
-end
-
-function initialize_window_geometry(em_width)
-  -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
-  -- shrink height slightly to account for window decoration
-  App.screen.height = App.screen.height-100
-  App.screen.width = 40*em_width
-  App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.width, 200)
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
-end
-
-function App.resize(w, h)
---?   print(("Window resized to width: %d and height: %d."):format(w, h))
-  App.screen.width, App.screen.height = w, h
-  Text.redraw_all(Editor_state)
-  Editor_state.selection1 = {}  -- no support for shift drag while we're resizing
-  Editor_state.right = App.screen.width-Margin_right
-  Editor_state.width = Editor_state.right-Editor_state.left
-  Text.tweak_screen_top_and_cursor(Editor_state, Editor_state.left, Editor_state.right)
   Last_resize_time = App.getTime()
 end
 
 function App.filedropped(file)
-  -- first make sure to save edits on any existing file
-  if Editor_state.next_save then
-    save_to_disk(Editor_state)
+  if Current_app == 'run' then
+    if run.filedropped then run.filedropped(file) end
+  elseif Current_app == 'source' then
+    if source.filedropped then source.filedropped(file) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
   end
-  -- clear the slate for the new file
-  App.initialize_globals()
-  Editor_state.filename = file:getFilename()
-  file:open('r')
-  Editor_state.lines = load_from_file(file)
-  file:close()
-  Text.redraw_all(Editor_state)
-  edit.fixup_cursor(Editor_state)
-  love.window.setTitle('lines.love - '..Editor_state.filename)
-end
-
-function App.draw()
-  edit.draw(Editor_state)
-end
-
-function App.update(dt)
-  Cursor_time = Cursor_time + dt
-  -- some hysteresis while resizing
-  if App.getTime() < Last_resize_time + 0.1 then
-    return
-  end
-  edit.update(Editor_state, dt)
-end
-
-function love.quit()
-  edit.quit(Editor_state)
-  -- save some important settings
-  local x,y,displayindex = love.window.getPosition()
-  local filename = Editor_state.filename
-  if filename:sub(1,1) ~= '/' then
-    filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
-  end
-  local settings = {
-    x=x, y=y, displayindex=displayindex,
-    width=App.screen.width, height=App.screen.height,
-    font_height=Editor_state.font_height,
-    filename=filename,
-    screen_top=Editor_state.screen_top1, cursor=Editor_state.cursor1}
-  love.filesystem.write('config', json.encode(settings))
-end
-
-function App.mousepressed(x,y, mouse_button)
-  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_pressed(Editor_state, x,y, mouse_button)
-end
-
-function App.mousereleased(x,y, mouse_button)
-  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_released(Editor_state, x,y, mouse_button)
+  love.window.setTitle('text.love - '..Current_app)
 end
 
 function App.focus(in_focus)
   if in_focus then
     Last_focus_time = App.getTime()
   end
+  if Current_app == 'run' then
+    if run.focus then run.focus(in_focus) end
+  elseif Current_app == 'source' then
+    if source.focus then source.focus(in_focus) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 end
 
-function App.textinput(t)
-  -- ignore events for some time after window in focus
-  if App.getTime() < Last_focus_time + 0.01 then
+function App.draw()
+  if Current_app == 'run' then
+    run.draw()
+  elseif Current_app == 'source' then
+    source.draw()
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
+function App.update(dt)
+  -- some hysteresis while resizing
+  if App.getTime() < Last_resize_time + 0.1 then
     return
   end
-  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.textinput(Editor_state, t)
+  --
+  if Current_app == 'run' then
+    run.update(dt)
+  elseif Current_app == 'source' then
+    source.update(dt)
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 end
 
 function App.keychord_pressed(chord, key)
-  -- ignore events for some time after window in focus
+  -- ignore events for some time after window in focus (mostly alt-tab)
   if App.getTime() < Last_focus_time + 0.01 then
     return
   end
-  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.keychord_pressed(Editor_state, chord, key)
+  --
+  if chord == 'C-e' then
+    -- carefully save settings
+    if Current_app == 'run' then
+      local source_settings = Settings.source
+      Settings = run.settings()
+      Settings.source = source_settings
+      if run.quit then run.quit() end
+      Current_app = 'source'
+    elseif Current_app == 'source' then
+      Settings.source = source.settings()
+      if source.quit then source.quit() end
+      Current_app = 'run'
+    else
+      assert(false, 'unknown app "'..Current_app..'"')
+    end
+    Settings.current_app = Current_app
+    love.filesystem.write('config', json.encode(Settings))
+    -- reboot
+    load_file_from_source_or_save_directory('main.lua')
+    App.undo_initialize()
+    App.run_tests_and_initialize()
+    return
+  end
+  if Current_app == 'run' then
+    if run.keychord_pressed then run.keychord_pressed(chord, key) end
+  elseif Current_app == 'source' then
+    if source.keychord_pressed then source.keychord_pressed(chord, key) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 end
 
-function App.keyreleased(key, scancode)
-  -- ignore events for some time after window in focus
+function App.textinput(t)
+  -- ignore events for some time after window in focus (mostly alt-tab)
   if App.getTime() < Last_focus_time + 0.01 then
     return
   end
-  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.key_released(Editor_state, key, scancode)
+  --
+  if Current_app == 'run' then
+    if run.textinput then run.textinput(t) end
+  elseif Current_app == 'source' then
+    if source.textinput then source.textinput(t) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 end
 
--- use this sparingly
-function to_text(s)
-  if Text_cache[s] == nil then
-    Text_cache[s] = App.newText(love.graphics.getFont(), s)
+function App.keyreleased(chord, key)
+  -- ignore events for some time after window in focus (mostly alt-tab)
+  if App.getTime() < Last_focus_time + 0.01 then
+    return
   end
-  return Text_cache[s]
+  --
+  if Current_app == 'run' then
+    if run.key_released then run.key_released(chord, key) end
+  elseif Current_app == 'source' then
+    if source.key_released then source.key_released(chord, key) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
+function App.mousepressed(x,y, mouse_button)
+--?   print('mouse press', x,y)
+  if Current_app == 'run' then
+    if run.mouse_pressed then run.mouse_pressed(x,y, mouse_button) end
+  elseif Current_app == 'source' then
+    if source.mouse_pressed then source.mouse_pressed(x,y, mouse_button) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
+function App.mousereleased(x,y, mouse_button)
+  if Current_app == 'run' then
+    if run.mouse_released then run.mouse_released(x,y, mouse_button) end
+  elseif Current_app == 'source' then
+    if source.mouse_released then source.mouse_released(x,y, mouse_button) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
+function love.quit()
+  if Current_app == 'run' then
+    local source_settings = Settings.source
+    Settings = run.settings()
+    Settings.source = source_settings
+  else
+    Settings.source = source.settings()
+  end
+  Settings.current_app = Current_app
+  love.filesystem.write('config', json.encode(Settings))
+  if Current_app == 'run' then
+    if run.quit then run.quit() end
+  elseif Current_app == 'source' then
+    if source.quit then source.quit() end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
 end

@@ -1,11 +1,6 @@
 -- text editor, particularly text drawing, horizontal wrap, vertical scrolling
 Text = {}
 
-require 'search'
-require 'select'
-require 'undo'
-require 'text_tests'
-
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return the final y, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos)

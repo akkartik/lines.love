@@ -3,16 +3,27 @@ program before it ever runs. However, some things don't have tests yet, either
 because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
-* Initializing settings:
-    - from previous session
-        - Filename as absolute path
-        - Filename as relative path
-    - from defaults
+Startup:
+    - terminal log shows unit tests running
+
+Initializing settings:
+    - delete app settings, start; window opens running the text editor
+    - quit while running the text editor, restart; window opens running the text editor in same position+dimensions
+    - quit while editing source (color; no drawings; no selection), restart; window opens editing source in same position+dimensions
+    - start out running the text editor, move window, press ctrl+e twice; window is running text editor in same position+dimensions
+    - start out editing source, move window, press ctrl+e twice; window is editing source in same position+dimensions
+    - no log file; switching to source works
+
+Code loading:
+* run love with directory; text editor runs
+* run love with zip file; text editor runs
 
 * How the screen looks. Our tests use a level of indirection to check text and
   graphics printed to screen, but not the precise pixels they translate to.
     - where exactly the cursor is drawn to highlight a given character
     - analogously, how a shape precisely looks as you draw it
+
+* start out running the text editor, press ctrl+e to edit source, make a change to the source, press ctrl+e twice to return to the source editor; the change should be preserved.
 
 ### Other compromises
 

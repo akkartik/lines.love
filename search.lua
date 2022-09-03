@@ -30,8 +30,7 @@ function Text.search_next(State)
     for i=State.cursor1.line+1,#State.lines do
       pos = find(State.lines[i].data, State.search_term)
       if pos then
-        State.cursor1.line = i
-        State.cursor1.pos = pos
+        State.cursor1 = {line=i, pos=pos}
         break
       end
     end
@@ -41,8 +40,7 @@ function Text.search_next(State)
     for i=1,State.cursor1.line-1 do
       pos = find(State.lines[i].data, State.search_term)
       if pos then
-        State.cursor1.line = i
-        State.cursor1.pos = pos
+        State.cursor1 = {line=i, pos=pos}
         break
       end
     end
@@ -78,8 +76,7 @@ function Text.search_previous(State)
     for i=State.cursor1.line-1,1,-1 do
       pos = rfind(State.lines[i].data, State.search_term)
       if pos then
-        State.cursor1.line = i
-        State.cursor1.pos = pos
+        State.cursor1 = {line=i, pos=pos}
         break
       end
     end
@@ -89,8 +86,7 @@ function Text.search_previous(State)
     for i=#State.lines,State.cursor1.line+1,-1 do
       pos = rfind(State.lines[i].data, State.search_term)
       if pos then
-        State.cursor1.line = i
-        State.cursor1.pos = pos
+        State.cursor1 = {line=i, pos=pos}
         break
       end
     end
@@ -115,18 +111,18 @@ function Text.search_previous(State)
   end
 end
 
-function find(s, pat, i)
+function find(s, pat, i, plain)
   if s == nil then return end
-  return s:find(pat, i)
+  return s:find(pat, i, plain)
 end
 
-function rfind(s, pat, i)
+function rfind(s, pat, i, plain)
   if s == nil then return end
   local rs = s:reverse()
   local rpat = pat:reverse()
   if i == nil then i = #s end
   local ri = #s - i + 1
-  local rendpos = rs:find(rpat, ri)
+  local rendpos = rs:find(rpat, ri, plain)
   if rendpos == nil then return nil end
   local endpos = #s - rendpos + 1
   assert (endpos >= #pat)

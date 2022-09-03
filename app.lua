@@ -1,4 +1,4 @@
--- main entrypoint for LÖVE
+-- love.run: main entrypoint function for LÖVE
 --
 -- Most apps can just use the default, but we need to override it to
 -- install a test harness.
@@ -11,13 +11,10 @@
 --
 -- Scroll below this function for more details.
 function love.run()
+  App.snapshot_love()
   -- Tests always run at the start.
-  App.run_tests()
-
+  App.run_tests_and_initialize()
 --?   print('==')
-  App.disable_tests()
-  App.initialize_globals()
-  App.initialize(love.arg.parseGameArguments(arg), arg)
 
   love.timer.step()
   local dt = 0
@@ -122,6 +119,26 @@ end
 -- happen to have needed so far.
 
 App = {screen={}}
+
+-- save/restore various framework globals we care about -- only on very first load
+function App.snapshot_love()
+  if Love_snapshot then return end
+  Love_snapshot = {}
+  -- save the entire initial font; it doesn't seem reliably recreated using newFont
+  Love_snapshot.initial_font = love.graphics.getFont()
+end
+
+function App.undo_initialize()
+  love.graphics.setFont(Love_snapshot.initial_font)
+end
+
+function App.run_tests_and_initialize()
+  App.load()
+  App.run_tests()
+  App.disable_tests()
+  App.initialize_globals()
+  App.initialize(love.arg.parseGameArguments(arg), arg)
+end
 
 function App.initialize_for_test()
   App.screen.init({width=100, height=50})
