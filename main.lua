@@ -88,7 +88,7 @@ function App.initialize(arg)
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
-  love.window.setTitle('text.love - '..Current_app)
+  love.window.setTitle('lines.love - '..Current_app)
 end
 
 function App.resize(w,h)
@@ -110,7 +110,7 @@ function App.filedropped(file)
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
-  love.window.setTitle('text.love - '..Current_app)
+  love.window.setTitle('lines.love - '..Current_app)
 end
 
 function App.focus(in_focus)
