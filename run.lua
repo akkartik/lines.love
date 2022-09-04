@@ -57,12 +57,12 @@ function run.load_settings()
   -- maximize window to determine maximum allowable dimensions
   App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
   -- set up desired window dimensions
-  love.window.setPosition(Settings.x, Settings.y, Settings.displayindex)
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.width, 200)
   App.screen.width, App.screen.height = Settings.width, Settings.height
   love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
+  love.window.setPosition(Settings.x, Settings.y, Settings.displayindex)
   Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, Settings.font_height, math.floor(Settings.font_height*1.3))
   Editor_state.filename = Settings.filename
   Editor_state.screen_top1 = Settings.screen_top
@@ -134,13 +134,15 @@ function run.quit()
 end
 
 function run.settings()
-  local x,y,displayindex = love.window.getPosition()
+  if Current_app == 'run' then
+    Settings.x, Settings.y, Settings.displayindex = love.window.getPosition()
+  end
   local filename = Editor_state.filename
   if filename:sub(1,1) ~= '/' then
     filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
   end
   return {
-    x=x, y=y, displayindex=displayindex,
+    x=Settings.x, y=Settings.y, displayindex=Settings.displayindex,
     width=App.screen.width, height=App.screen.height,
     font_height=Editor_state.font_height,
     filename=filename,
