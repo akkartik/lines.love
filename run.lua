@@ -134,6 +134,9 @@ function run.quit()
 end
 
 function run.settings()
+  if Settings == nil then
+    Settings = {}
+  end
   if Current_app == 'run' then
     Settings.x, Settings.y, Settings.displayindex = love.window.getPosition()
   end
