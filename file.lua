@@ -61,20 +61,20 @@ function load_drawing(infile_next_line)
       -- no changes needed
     elseif shape.mode == 'line' or shape.mode == 'manhattan' then
       local name = shape.p1.name
-      shape.p1 = Drawing.insert_point(drawing.points, shape.p1.x, shape.p1.y)
+      shape.p1 = Drawing.find_or_insert_point(drawing.points, shape.p1.x, shape.p1.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.p1].name = name
       name = shape.p2.name
-      shape.p2 = Drawing.insert_point(drawing.points, shape.p2.x, shape.p2.y)
+      shape.p2 = Drawing.find_or_insert_point(drawing.points, shape.p2.x, shape.p2.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.p2].name = name
     elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       for i,p in ipairs(shape.vertices) do
         local name = p.name
-        shape.vertices[i] = Drawing.insert_point(drawing.points, p.x,p.y)
+        shape.vertices[i] = Drawing.find_or_insert_point(drawing.points, p.x,p.y, --[[large width to minimize overlap]] 1600)
         drawing.points[shape.vertices[i]].name = name
       end
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
       local name = shape.center.name
-      shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
+      shape.center = Drawing.find_or_insert_point(drawing.points, shape.center.x,shape.center.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.center].name = name
     elseif shape.mode == 'deleted' then
       -- ignore
@@ -154,20 +154,20 @@ function load_drawing_from_array(iter, a, i)
       -- no changes needed
     elseif shape.mode == 'line' or shape.mode == 'manhattan' then
       local name = shape.p1.name
-      shape.p1 = Drawing.insert_point(drawing.points, shape.p1.x, shape.p1.y)
+      shape.p1 = Drawing.find_or_insert_point(drawing.points, shape.p1.x, shape.p1.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.p1].name = name
       name = shape.p2.name
-      shape.p2 = Drawing.insert_point(drawing.points, shape.p2.x, shape.p2.y)
+      shape.p2 = Drawing.find_or_insert_point(drawing.points, shape.p2.x, shape.p2.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.p2].name = name
     elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       for i,p in ipairs(shape.vertices) do
         local name = p.name
-        shape.vertices[i] = Drawing.insert_point(drawing.points, p.x,p.y)
+        shape.vertices[i] = Drawing.find_or_insert_point(drawing.points, p.x,p.y, --[[large width to minimize overlap]] 1600)
         drawing.points[shape.vertices[i]].name = name
       end
     elseif shape.mode == 'circle' or shape.mode == 'arc' then
       local name = shape.center.name
-      shape.center = Drawing.insert_point(drawing.points, shape.center.x,shape.center.y)
+      shape.center = Drawing.find_or_insert_point(drawing.points, shape.center.x,shape.center.y, --[[large width to minimize overlap]] 1600)
       drawing.points[shape.center].name = name
     elseif shape.mode == 'deleted' then
       -- ignore

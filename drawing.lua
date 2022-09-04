@@ -712,11 +712,6 @@ function round(num)
   return math.floor(num+.5)
 end
 
-function Drawing.insert_point(points, x,y)
-  table.insert(points, {x=x, y=y})
-  return #points
-end
-
 function Drawing.find_or_insert_point(points, x,y, width)
   -- check if UI would snap the two points together
   for i,point in ipairs(points) do
