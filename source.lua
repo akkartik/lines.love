@@ -69,6 +69,7 @@ function source.initialize()
   Menu_status_bar_height = 5 + Editor_state.line_height + 5
   Editor_state.top = Editor_state.top + Menu_status_bar_height
   Log_browser_state.top = Log_browser_state.top + Menu_status_bar_height
+  love.window.setTitle('lines.love - source')
 end
 
 -- environment for a mutable file of bifolded text
@@ -196,6 +197,7 @@ function source.filedropped(file)
   Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.cursor1 = {line=1, pos=1}
+  love.window.setTitle('lines.love - source')
 end
 
 -- a copy of source.filedropped when given a filename
