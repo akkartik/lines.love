@@ -110,6 +110,20 @@ function Text.draw_wrapping_line(State, line_index, x,y, startpos)
         screen_line_starting_pos = pos
         x = State.left
       end
+      -- Make [[WikiWords]] (single word, all in one screen line) clickable.
+      local trimmed_word = rtrim(frag)  -- compute_fragments puts whitespace at the end
+      if starts_with(trimmed_word, '[[') and ends_with(trimmed_word, ']]') then
+        local filename = trimmed_word:gsub('^..(.*)..$', '%1')
+        if source.link_exists(State, filename) then
+          local filename_text = App.newText(love.graphics.getFont(), filename)
+          button(State, 'link', {x=x+App.width(to_text('[[')), y=y, w=App.width(filename_text), h=State.line_height, color={1,1,1},
+            icon = icon.hyperlink_decoration,
+            onpress1 = function()
+                         source.switch_to_file(filename)
+                        end,
+          })
+        end
+      end
       App.screen.draw(frag_text, x,y)
       -- render cursor if necessary
       if State.cursor1.pos and line_index == State.cursor1.line then
@@ -1610,12 +1624,23 @@ function Text.cursor_out_of_screen(State)
 --?   return Text.lt1(State.screen_bottom1, botline1)
 end
 
+function source.link_exists(State, filename)
+  if State.link_cache == nil then
+    State.link_cache = {}
+  end
+  if State.link_cache[filename] == nil then
+    State.link_cache[filename] = file_exists(filename)
+  end
+  return State.link_cache[filename]
+end
+
 function Text.redraw_all(State)
 --?   print('clearing fragments')
   State.line_cache = {}
   for i=1,#State.lines do
     State.line_cache[i] = {}
   end
+  State.link_cache = {}
 end
 
 function Text.clear_screen_line_cache(State, line_index)
@@ -1635,4 +1660,12 @@ end
 
 function rtrim(s)
   return s:gsub('%s+$', '')
+end
+
+function starts_with(s, sub)
+  return s:find(sub, 1, --[[no escapes]] true) == 1
+end
+
+function ends_with(s, sub)
+  return s:reverse():find(sub:reverse(), 1, --[[no escapes]] true) == 1
 end

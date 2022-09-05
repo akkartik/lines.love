@@ -1,6 +1,7 @@
 -- some constants people might like to tweak
 Text_color = {r=0, g=0, b=0}
 Cursor_color = {r=1, g=0, b=0}
+Hyperlink_decoration_color = {r=0.4, g=0.4, b=1}
 Stroke_color = {r=0, g=0, b=0}
 Current_stroke_color = {r=0.7, g=0.7, b=0.7}  -- in process of being drawn
 Current_name_background_color = {r=1, g=0, b=0, a=0.1}  -- name currently being edited

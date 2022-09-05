@@ -8,6 +8,12 @@ function icon.insert_drawing(button_params)
   love.graphics.line(10,y, 10,y+12)
 end
 
+function icon.hyperlink_decoration(button_params)
+  local x,y = button_params.x, button_params.y
+  App.color(Hyperlink_decoration_color)
+  love.graphics.line(x,y+Editor_state.line_height, x+button_params.w,y+Editor_state.line_height)
+end
+
 function icon.freehand(x, y)
   love.graphics.line(x+4,y+7,x+5,y+5)
   love.graphics.line(x+5,y+5,x+7,y+4)
