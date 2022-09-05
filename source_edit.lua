@@ -1,8 +1,14 @@
 -- some constants people might like to tweak
 Text_color = {r=0, g=0, b=0}
 Cursor_color = {r=1, g=0, b=0}
+Stroke_color = {r=0, g=0, b=0}
+Current_stroke_color = {r=0.7, g=0.7, b=0.7}  -- in process of being drawn
+Current_name_background_color = {r=1, g=0, b=0, a=0.1}  -- name currently being edited
 Focus_stroke_color = {r=1, g=0, b=0}  -- what mouse is hovering over
 Highlight_color = {r=0.7, g=0.7, b=0.9}  -- selected text
+Icon_color = {r=0.7, g=0.7, b=0.7}  -- color of current mode icon in drawings
+Help_color = {r=0, g=0.5, b=0}
+Help_background_color = {r=0, g=0.5, b=0, a=0.1}
 Fold_color = {r=0, g=0.6, b=0}
 Fold_background_color = {r=0, g=0.7, b=0}
 
@@ -10,14 +16,40 @@ Margin_top = 15
 Margin_left = 25
 Margin_right = 25
 
+Drawing_padding_top = 10
+Drawing_padding_bottom = 10
+Drawing_padding_height = Drawing_padding_top + Drawing_padding_bottom
+
+Same_point_distance = 4  -- pixel distance at which two points are considered the same
+
 edit = {}
 
 -- run in both tests and a real run
 function edit.initialize_state(top, left, right, font_height, line_height)  -- currently always draws to bottom of screen
   local result = {
-    -- a line of bifold text consists of an A side and an optional B side, each of which is a string
-    -- expanded: whether to show B side
-    lines = {{data='', dataB=nil, expanded=nil}},  -- array of lines
+    -- a line is either bifold text or a drawing
+    -- a line of bifold text consists of an A side and an optional B side
+    --    mode = 'text',
+    --    string data,
+    --    string dataB,
+    --    expanded: whether to show B side
+    -- a drawing is a table with:
+    --    mode = 'drawing'
+    --    a (y) coord in pixels (updated while painting screen),
+    --    a (h)eight,
+    --    an array of points, and
+    --    an array of shapes
+    -- a shape is a table containing:
+    --    a mode
+    --    an array points for mode 'freehand' (raw x,y coords; freehand drawings don't pollute the points array of a drawing)
+    --    an array vertices for mode 'polygon', 'rectangle', 'square'
+    --    p1, p2 for mode 'line'
+    --    center, radius for mode 'circle'
+    --    center, radius, start_angle, end_angle for mode 'arc'
+    -- Unless otherwise specified, coord fields are normalized; a drawing is always 256 units wide
+    -- The field names are carefully chosen so that switching modes in midstream
+    -- remembers previously entered points where that makes sense.
+    lines = {{mode='text', data='', dataB=nil, expanded=nil}},  -- array of lines
 
     -- Lines can be too long to fit on screen, in which case they _wrap_ into
     -- multiple _screen lines_.
@@ -47,6 +79,9 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     cursor_x = 0,
     cursor_y = 0,
 
+    current_drawing_mode = 'line',
+    previous_drawing_mode = nil,  -- extra state for some ephemeral modes like moving/deleting/naming points
+
     font_height = font_height,
     line_height = line_height,
     em = App.newText(love.graphics.getFont(), 'm'),  -- widest possible character width
@@ -71,6 +106,15 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
   return result
 end  -- App.initialize_state
 
+function edit.fixup_cursor(State)
+  for i,line in ipairs(State.lines) do
+    if line.mode == 'text' then
+      State.cursor1.line = i
+      break
+    end
+  end
+end
+
 function edit.draw(State)
   State.button_handlers = {}
   App.color(Text_color)
@@ -85,21 +129,46 @@ function edit.draw(State)
 --?   print('== draw')
   for line_index = State.screen_top1.line,#State.lines do
     local line = State.lines[line_index]
---?     print('draw:', y, line_index, line)
+--?     print('draw:', y, line_index, line, line.mode)
     if y + State.line_height > App.screen.height then break end
     State.screen_bottom1 = {line=line_index, pos=nil, posB=nil}
+    if line.mode == 'text' then
 --?     print('text.draw', y, line_index)
-    local startpos, startposB = 1, nil
-    if line_index == State.screen_top1.line then
-      if State.screen_top1.pos then
-        startpos = State.screen_top1.pos
-      else
-        startpos, startposB = nil, State.screen_top1.posB
+      local startpos, startposB = 1, nil
+      if line_index == State.screen_top1.line then
+        if State.screen_top1.pos then
+          startpos = State.screen_top1.pos
+        else
+          startpos, startposB = nil, State.screen_top1.posB
+        end
       end
+      if line.data == '' then
+        -- button to insert new drawing
+        button(State, 'draw', {x=4,y=y+4, w=12,h=12, color={1,1,0},
+          icon = icon.insert_drawing,
+          onpress1 = function()
+                       Drawing.before = snapshot(State, line_index-1, line_index)
+                       table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
+                       table.insert(State.line_cache, line_index, {})
+                       if State.cursor1.line >= line_index then
+                         State.cursor1.line = State.cursor1.line+1
+                       end
+                       schedule_save(State)
+                       record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
+                     end,
+        })
+      end
+      y, State.screen_bottom1.pos, State.screen_bottom1.posB = Text.draw(State, line_index, y, startpos, startposB)
+      y = y + State.line_height
+--?       print('=> y', y)
+    elseif line.mode == 'drawing' then
+      y = y+Drawing_padding_top
+      Drawing.draw(State, line_index, y)
+      y = y + Drawing.pixels(line.h, State.width) + Drawing_padding_bottom
+    else
+      print(line.mode)
+      assert(false)
     end
-    y, State.screen_bottom1.pos, State.screen_bottom1.posB = Text.draw(State, line_index, y, startpos, startposB)
-    y = y + State.line_height
---?     print('=> y', y)
   end
   if State.search_term then
     Text.draw_search_bar(State)
@@ -107,6 +176,7 @@ function edit.draw(State)
 end
 
 function edit.update(State, dt)
+  Drawing.update(State, dt)
   if State.next_save and State.next_save < App.getTime() then
     save_to_disk(State)
     State.next_save = nil
@@ -128,23 +198,44 @@ end
 
 function edit.mouse_pressed(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('press', State.selection1.line, State.selection1.pos)
+--?   print('press')
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
   end
 
   for line_index,line in ipairs(State.lines) do
-    if Text.in_line(State, line_index, x,y) then
-      local pos,posB = Text.to_pos_on_line(State, line_index, x, y)
---?       print(x,y, 'setting cursor:', line_index, pos, posB)
-      State.cursor1 = {line=line_index, pos=pos, posB=posB}
-      break
+    if line.mode == 'text' then
+      if Text.in_line(State, line_index, x,y) then
+        local pos,posB = Text.to_pos_on_line(State, line_index, x, y)
+  --?       print(x,y, 'setting cursor:', line_index, pos, posB)
+        State.cursor1 = {line=line_index, pos=pos, posB=posB}
+        break
+      end
+    elseif line.mode == 'drawing' then
+      local line_cache = State.line_cache[line_index]
+      if Drawing.in_drawing(line, line_cache, x, y, State.left,State.right) then
+        State.lines.current_drawing_index = line_index
+        State.lines.current_drawing = line
+        Drawing.before = snapshot(State, line_index)
+        Drawing.mouse_pressed(State, line_index, x,y, mouse_button)
+        break
+      end
     end
   end
 end
 
 function edit.mouse_released(State, x,y, mouse_button)
+  if State.search_term then return end
+--?   print('release')
+  if State.lines.current_drawing then
+    Drawing.mouse_released(State, x,y, mouse_button)
+    schedule_save(State)
+    if Drawing.before then
+      record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
+      Drawing.before = nil
+    end
+  end
 end
 
 function edit.textinput(State, t)
@@ -153,6 +244,12 @@ function edit.textinput(State, t)
     State.search_term = State.search_term..t
     State.search_text = nil
     Text.search_next(State)
+  elseif State.current_drawing_mode == 'name' then
+    local before = snapshot(State, State.lines.current_drawing_index)
+    local drawing = State.lines.current_drawing
+    local p = drawing.points[drawing.pending.target_point]
+    p.name = p.name..t
+    record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
   else
     Text.textinput(State, t)
   end
@@ -205,7 +302,7 @@ function edit.keychord_pressed(State, chord, key)
       end
       edit.eradicate_locations_after_the_fold(State)
     end
-  elseif chord == 'C-d' then
+  elseif chord == 'C-i' then
     if State.cursor1.posB == nil then
       local before = snapshot(State, State.cursor1.line)
       if State.lines[State.cursor1.line].dataB == nil then
@@ -240,6 +337,8 @@ function edit.keychord_pressed(State, chord, key)
       State.cursor1 = deepcopy(src.cursor)
       patch(State.lines, event.after, event.before)
       patch_placeholders(State.line_cache, event.after, event.before)
+      -- invalidate various cached bits of lines
+      State.lines.current_drawing = nil
       -- if we're scrolling, reclaim all fragments to avoid memory leaks
       Text.redraw_all(State)
       schedule_save(State)
@@ -252,6 +351,8 @@ function edit.keychord_pressed(State, chord, key)
       State.screen_top1 = deepcopy(src.screen_top)
       State.cursor1 = deepcopy(src.cursor)
       patch(State.lines, event.before, event.after)
+      -- invalidate various cached bits of lines
+      State.lines.current_drawing = nil
       -- if we're scrolling, reclaim all fragments to avoid memory leaks
       Text.redraw_all(State)
       schedule_save(State)
@@ -289,7 +390,42 @@ function edit.keychord_pressed(State, chord, key)
     end
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
-  -- dispatch to text
+  -- dispatch to drawing or text
+  elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
+    -- DON'T reset line_cache.starty here
+    local drawing_index, drawing = Drawing.current_drawing(State)
+    if drawing_index then
+      local before = snapshot(State, drawing_index)
+      Drawing.keychord_pressed(State, chord)
+      record_undo_event(State, {before=before, after=snapshot(State, drawing_index)})
+      schedule_save(State)
+    end
+  elseif chord == 'escape' and not App.mouse_down(1) then
+    for _,line in ipairs(State.lines) do
+      if line.mode == 'drawing' then
+        line.show_help = false
+      end
+    end
+  elseif State.current_drawing_mode == 'name' then
+    if chord == 'return' then
+      State.current_drawing_mode = State.previous_drawing_mode
+      State.previous_drawing_mode = nil
+    else
+      local before = snapshot(State, State.lines.current_drawing_index)
+      local drawing = State.lines.current_drawing
+      local p = drawing.points[drawing.pending.target_point]
+      if chord == 'escape' then
+        p.name = nil
+        record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
+      elseif chord == 'backspace' then
+        local len = utf8.len(p.name)
+        local byte_offset = Text.offset(p.name, len-1)
+        if len == 1 then byte_offset = 0 end
+        p.name = string.sub(p.name, 1, byte_offset)
+        record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
+      end
+    end
+    schedule_save(State)
   else
     for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     Text.keychord_pressed(State, chord)

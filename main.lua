@@ -24,6 +24,13 @@ load_file_from_source_or_save_directory('button.lua')
 -- both sides require (different parts of) the logging framework
 load_file_from_source_or_save_directory('log.lua')
 
+-- both sides use drawings
+load_file_from_source_or_save_directory('icons.lua')
+load_file_from_source_or_save_directory('drawing.lua')
+  load_file_from_source_or_save_directory('geom.lua')
+  load_file_from_source_or_save_directory('help.lua')
+load_file_from_source_or_save_directory('drawing_tests.lua')
+
 -- but some files we want to only load sometimes
 function App.load()
   if love.filesystem.getInfo('config') then
@@ -43,13 +50,8 @@ function App.load()
         load_file_from_source_or_save_directory('search.lua')
         load_file_from_source_or_save_directory('select.lua')
         load_file_from_source_or_save_directory('undo.lua')
-      load_file_from_source_or_save_directory('icons.lua')
       load_file_from_source_or_save_directory('text_tests.lua')
     load_file_from_source_or_save_directory('run_tests.lua')
-    load_file_from_source_or_save_directory('drawing.lua')
-      load_file_from_source_or_save_directory('geom.lua')
-      load_file_from_source_or_save_directory('help.lua')
-    load_file_from_source_or_save_directory('drawing_tests.lua')
   else
     load_file_from_source_or_save_directory('source_file.lua')
     load_file_from_source_or_save_directory('source.lua')

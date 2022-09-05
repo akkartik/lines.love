@@ -50,6 +50,8 @@ function snapshot(State, s,e)
     screen_top=deepcopy(State.screen_top1),
     selection=deepcopy(State.selection1),
     cursor=deepcopy(State.cursor1),
+    current_drawing_mode=Drawing_mode,
+    previous_drawing_mode=State.previous_drawing_mode,
     lines={},
     start_line=s,
     end_line=e,
@@ -58,7 +60,19 @@ function snapshot(State, s,e)
   -- deep copy lines without cached stuff like text fragments
   for i=s,e do
     local line = State.lines[i]
-    table.insert(event.lines, {data=line.data, dataB=line.dataB})
+    if line.mode == 'text' then
+      table.insert(event.lines, {mode='text', data=line.data, dataB=line.dataB})
+    elseif line.mode == 'drawing' then
+      local points=deepcopy(line.points)
+--?       print('copying', line.points, 'with', #line.points, 'points into', points)
+      local shapes=deepcopy(line.shapes)
+--?       print('copying', line.shapes, 'with', #line.shapes, 'shapes into', shapes)
+      table.insert(event.lines, {mode='drawing', h=line.h, points=points, shapes=shapes, pending={}})
+--?       table.insert(event.lines, {mode='drawing', h=line.h, points=deepcopy(line.points), shapes=deepcopy(line.shapes), pending={}})
+    else
+      print(line.mode)
+      assert(false)
+    end
   end
   return event
 end

@@ -277,7 +277,7 @@ function source.mouse_pressed(x,y, mouse_button)
 --?   print('mouse click', x, y)
 --?   print(Editor_state.left, Editor_state.right)
 --?   print(Log_browser_state.left, Log_browser_state.right)
-  if Editor_state.left <= x and x < Editor_state.right then
+  if x < Editor_state.right + Margin_right then
 --?     print('click on edit side')
     if Focus ~= 'edit' then
       Focus = 'edit'

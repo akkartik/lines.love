@@ -14,6 +14,34 @@ function test_initial_state()
   check_eq(Editor_state.screen_top1.pos, 1, 'F - test_initial_state/screen_top:pos')
 end
 
+function test_click_to_create_drawing()
+  io.write('\ntest_click_to_create_drawing')
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{}
+  Text.redraw_all(Editor_state)
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, 8,Editor_state.top+8, 1)
+  -- cursor skips drawing to always remain on text
+  check_eq(#Editor_state.lines, 2, 'F - test_click_to_create_drawing/#lines')
+  check_eq(Editor_state.cursor1.line, 2, 'F - test_click_to_create_drawing/cursor')
+end
+
+function test_backspace_to_delete_drawing()
+  io.write('\ntest_backspace_to_delete_drawing')
+  -- display a drawing followed by a line of text (you shouldn't ever have a drawing right at the end)
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'```lines', '```', ''}
+  Text.redraw_all(Editor_state)
+  -- cursor is on text as always (outside tests this will get initialized correctly)
+  Editor_state.cursor1.line = 2
+  -- backspacing deletes the drawing
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(#Editor_state.lines, 1, 'F - test_backspace_to_delete_drawing/#lines')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_backspace_to_delete_drawing/cursor')
+end
+
 function test_backspace_from_start_of_final_line()
   io.write('\ntest_backspace_from_start_of_final_line')
   -- display final line of text with cursor at start of it
@@ -693,6 +721,36 @@ function test_pagedown()
   App.screen.check(y, 'def', 'F - test_pagedown/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_pagedown/screen:2')
+end
+
+function test_pagedown_skips_drawings()
+  io.write('\ntest_pagedown_skips_drawings')
+  -- some lines of text with a drawing intermixed
+  local drawing_width = 50
+  App.screen.init{width=Editor_state.left+drawing_width, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc',               -- height 15
+                                  '```lines', '```',   -- height 25
+                                  'def',               -- height 15
+                                  'ghi'}               -- height 15
+  Text.redraw_all(Editor_state)
+  check_eq(Editor_state.lines[2].mode, 'drawing', 'F - test_pagedown_skips_drawings/baseline/lines')
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  local drawing_height = Drawing_padding_height + drawing_width/2  -- default
+  -- initially the screen displays the first line and the drawing
+  -- 15px margin + 15px line1 + 10px margin + 25px drawing + 10px margin = 75px < screen height 80px
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'abc', 'F - test_pagedown_skips_drawings/baseline/screen:1')
+  -- after pagedown the screen draws the drawing up top
+  -- 15px margin + 10px margin + 25px drawing + 10px margin + 15px line3 = 75px < screen height 80px
+  edit.run_after_keychord(Editor_state, 'pagedown')
+  check_eq(Editor_state.screen_top1.line, 2, 'F - test_pagedown_skips_drawings/screen_top')
+  check_eq(Editor_state.cursor1.line, 3, 'F - test_pagedown_skips_drawings/cursor')
+  y = Editor_state.top + drawing_height
+  App.screen.check(y, 'def', 'F - test_pagedown_skips_drawings/screen:1')
 end
 
 function test_pagedown_can_start_from_middle_of_long_wrapping_line()
@@ -1527,7 +1585,7 @@ function test_search()
   io.write('\ntest_search')
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'deg'}
+  Editor_state.lines = load_array{'```lines', '```', 'def', 'ghi', 'deg'}
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}

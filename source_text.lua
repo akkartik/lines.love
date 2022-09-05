@@ -53,9 +53,6 @@ function Text.draw(State, line_index, y, startpos, startposB)
   -- draw B side
 --?   if line_index == 8 then print('drawing B side') end
   App.color(Fold_color)
---?   if Foo then
---?     print('draw:', State.lines[line_index].data, "=====", State.lines[line_index].dataB, 'starting from x', x+AB_padding)
---?   end
   if startposB then
     overflows_screen, x, y, pos, screen_line_starting_pos = Text.draw_wrapping_lineB(State, line_index, x,y, startposB)
   else
@@ -196,6 +193,7 @@ end
 
 function Text.populate_screen_line_starting_pos(State, line_index)
   local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
   local line_cache = State.line_cache[line_index]
   if line_cache.screen_line_starting_pos then
     return
@@ -222,6 +220,7 @@ end
 function Text.compute_fragments(State, line_index)
 --?   print('compute_fragments', line_index, 'between', State.left, State.right)
   local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
   local line_cache = State.line_cache[line_index]
   if line_cache.fragments then
     return
@@ -416,11 +415,16 @@ function Text.keychord_pressed(State, chord)
       end
     elseif State.cursor1.line > 1 then
       before = snapshot(State, State.cursor1.line-1, State.cursor1.line)
-      -- join lines
-      State.cursor1.pos = utf8.len(State.lines[State.cursor1.line-1].data)+1
-      State.lines[State.cursor1.line-1].data = State.lines[State.cursor1.line-1].data..State.lines[State.cursor1.line].data
-      table.remove(State.lines, State.cursor1.line)
-      table.remove(State.line_cache, State.cursor1.line)
+      if State.lines[State.cursor1.line-1].mode == 'drawing' then
+        table.remove(State.lines, State.cursor1.line-1)
+        table.remove(State.line_cache, State.cursor1.line-1)
+      else
+        -- join lines
+        State.cursor1.pos = utf8.len(State.lines[State.cursor1.line-1].data)+1
+        State.lines[State.cursor1.line-1].data = State.lines[State.cursor1.line-1].data..State.lines[State.cursor1.line].data
+        table.remove(State.lines, State.cursor1.line)
+        table.remove(State.line_cache, State.cursor1.line)
+      end
       State.cursor1.line = State.cursor1.line-1
     end
     if State.screen_top1.line > #State.lines then
@@ -471,10 +475,12 @@ function Text.keychord_pressed(State, chord)
         -- refuse to delete past end of side B
       end
     elseif State.cursor1.line < #State.lines then
-      -- join lines
-      State.lines[State.cursor1.line].data = State.lines[State.cursor1.line].data..State.lines[State.cursor1.line+1].data
-      -- delete side B on first line
-      State.lines[State.cursor1.line].dataB = State.lines[State.cursor1.line+1].dataB
+      if State.lines[State.cursor1.line+1].mode == 'text' then
+        -- join lines
+        State.lines[State.cursor1.line].data = State.lines[State.cursor1.line].data..State.lines[State.cursor1.line+1].data
+        -- delete side B on first line
+        State.lines[State.cursor1.line].dataB = State.lines[State.cursor1.line+1].dataB
+      end
       table.remove(State.lines, State.cursor1.line+1)
       table.remove(State.line_cache, State.cursor1.line+1)
     end
@@ -530,7 +536,7 @@ function Text.insert_return(State)
   if State.cursor1.pos then
     -- when inserting a newline, move any B side to the new line
     local byte_offset = Text.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
-    table.insert(State.lines, State.cursor1.line+1, {data=string.sub(State.lines[State.cursor1.line].data, byte_offset), dataB=State.lines[State.cursor1.line].dataB})
+    table.insert(State.lines, State.cursor1.line+1, {mode='text', data=string.sub(State.lines[State.cursor1.line].data, byte_offset), dataB=State.lines[State.cursor1.line].dataB})
     table.insert(State.line_cache, State.cursor1.line+1, {})
     State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_offset-1)
     State.lines[State.cursor1.line].dataB = nil
@@ -550,7 +556,11 @@ function Text.pageup(State)
   while y >= State.top do
 --?     print(y, top2.line, top2.screen_line, top2.screen_pos)
     if State.screen_top1.line == 1 and State.screen_top1.pos and State.screen_top1.pos == 1 then break end
-    y = y - State.line_height
+    if State.lines[State.screen_top1.line].mode == 'text' then
+      y = y - State.line_height
+    elseif State.lines[State.screen_top1.line].mode == 'drawing' then
+      y = y - Drawing_padding_height - Drawing.pixels(State.lines[State.screen_top1.line].h, State.width)
+    end
     top2 = Text.previous_screen_line(State, top2)
   end
   State.screen_top1 = Text.to1(State, top2)
@@ -567,7 +577,7 @@ function Text.pagedown(State)
   if Text.lt1(State.screen_top1, new_top1) then
     State.screen_top1 = new_top1
   else
-    State.screen_top1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
+    State.screen_top1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos, posB=State.screen_bottom1.posB}
   end
 --?   print('setting top to', State.screen_top1.line, State.screen_top1.pos)
   State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos, posB=State.screen_top1.posB}
@@ -578,6 +588,7 @@ function Text.pagedown(State)
 end
 
 function Text.up(State)
+  assert(State.lines[State.cursor1.line].mode == 'text')
   if State.cursor1.pos then
     Text.upA(State)
   else
@@ -591,18 +602,23 @@ function Text.upA(State)
   if screen_line_starting_pos == 1 then
 --?     print('cursor is at first screen line of its line')
     -- line is done; skip to previous text line
-    if State.cursor1.line > 1 then
---?       print('found previous text line')
-      State.cursor1 = {line=State.cursor1.line-1, pos=nil}
-      Text.populate_screen_line_starting_pos(State, State.cursor1.line)
-      -- previous text line found, pick its final screen line
---?       print('has multiple screen lines')
-      local screen_line_starting_pos = State.line_cache[State.cursor1.line].screen_line_starting_pos
---?       print(#screen_line_starting_pos)
-      screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
-      local screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, screen_line_starting_pos)
-      local s = string.sub(State.lines[State.cursor1.line].data, screen_line_starting_byte_offset)
-      State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if State.lines[new_cursor_line].mode == 'text' then
+--?         print('found previous text line')
+        State.cursor1 = {line=State.cursor1.line-1, pos=nil}
+        Text.populate_screen_line_starting_pos(State, State.cursor1.line)
+        -- previous text line found, pick its final screen line
+--?         print('has multiple screen lines')
+        local screen_line_starting_pos = State.line_cache[State.cursor1.line].screen_line_starting_pos
+--?         print(#screen_line_starting_pos)
+        screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
+        local screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, screen_line_starting_pos)
+        local s = string.sub(State.lines[State.cursor1.line].data, screen_line_starting_byte_offset)
+        State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+        break
+      end
     end
   else
     -- move up one screen line in current line
@@ -626,15 +642,19 @@ function Text.upB(State)
   assert(screen_line_indexB >= 1)
   if screen_line_indexB == 1 then
     -- move to A side of previous line
-    if State.cursor1.line > 1 then
-      State.cursor1.line = State.cursor1.line-1
-      State.cursor1.posB = nil
-      Text.populate_screen_line_starting_pos(State, State.cursor1.line)
-      local prev_line_cache = State.line_cache[State.cursor1.line]
-      local prev_screen_line_starting_pos = prev_line_cache.screen_line_starting_pos[#prev_line_cache.screen_line_starting_pos]
-      local prev_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, prev_screen_line_starting_pos)
-      local s = string.sub(State.lines[State.cursor1.line].data, prev_screen_line_starting_byte_offset)
-      State.cursor1.pos = prev_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1 = {line=State.cursor1.line-1, posB=nil}
+        Text.populate_screen_line_starting_pos(State, State.cursor1.line)
+        local prev_line_cache = State.line_cache[State.cursor1.line]
+        local prev_screen_line_starting_pos = prev_line_cache.screen_line_starting_pos[#prev_line_cache.screen_line_starting_pos]
+        local prev_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, prev_screen_line_starting_pos)
+        local s = string.sub(State.lines[State.cursor1.line].data, prev_screen_line_starting_byte_offset)
+        State.cursor1.pos = prev_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+        break
+      end
     end
   elseif screen_line_indexB == 2 then
     -- all-B screen-line to potentially A+B screen-line
@@ -673,16 +693,22 @@ end
 -- cursor on A side => move down one screen line (A side) in current line
 -- cursor on B side => move down one screen line (B side) in current line
 function Text.down(State)
+  assert(State.lines[State.cursor1.line].mode == 'text')
 --?   print('down', State.cursor1.line, State.cursor1.pos, State.screen_top1.line, State.screen_top1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   if Text.cursor_at_final_screen_line(State) then
     -- line is done, skip to next text line
 --?     print('cursor at final screen line of its line')
-    if State.cursor1.line < #State.lines then
-      State.cursor1 = {
-        line = State.cursor1.line+1,
-        pos = Text.nearest_cursor_pos(State.lines[State.cursor1.line+1].data, State.cursor_x, State.left)
-      }
---?       print(State.cursor1.pos)
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line < #State.lines do
+      new_cursor_line = new_cursor_line+1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1 = {
+          line = new_cursor_line,
+          pos = Text.nearest_cursor_pos(State.lines[new_cursor_line].data, State.cursor_x, State.left),
+        }
+--?         print(State.cursor1.pos)
+        break
+      end
     end
     if State.cursor1.line > State.screen_bottom1.line then
 --?       print('screen top before:', State.screen_top1.line, State.screen_top1.pos)
@@ -737,7 +763,7 @@ function Text.start_of_line(State)
     State.cursor1.posB = 1
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
-    State.screen_top1 = {line=State.cursor1.line, pos=1}  -- copy
+    State.screen_top1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}  -- copy
   end
 end
 
@@ -919,11 +945,18 @@ end
 function Text.leftA(State)
   if State.cursor1.pos > 1 then
     State.cursor1.pos = State.cursor1.pos-1
-  elseif State.cursor1.line > 1 then
-    State.cursor1 = {
-      line = State.cursor1.line-1,
-      pos = utf8.len(State.lines[State.cursor1.line-1].data) + 1,
-    }
+  else
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line > 1 do
+      new_cursor_line = new_cursor_line-1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1 = {
+          line = new_cursor_line,
+          pos = utf8.len(State.lines[new_cursor_line].data) + 1,
+        }
+        break
+      end
+    end
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
     local top2 = Text.to2(State, State.screen_top1)
@@ -955,6 +988,7 @@ function Text.right(State)
 end
 
 function Text.right_without_scroll(State)
+  assert(State.lines[State.cursor1.line].mode == 'text')
   if State.cursor1.pos then
     Text.right_without_scrollA(State)
   else
@@ -965,17 +999,31 @@ end
 function Text.right_without_scrollA(State)
   if State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
     State.cursor1.pos = State.cursor1.pos+1
-  elseif State.cursor1.line <= #State.lines-1 then
-    State.cursor1 = {line=State.cursor1.line+1, pos=1}
+  else
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line <= #State.lines-1 do
+      new_cursor_line = new_cursor_line+1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1 = {line=new_cursor_line, pos=1}
+        break
+      end
+    end
   end
 end
 
 function Text.right_without_scrollB(State)
   if State.cursor1.posB <= utf8.len(State.lines[State.cursor1.line].dataB) then
     State.cursor1.posB = State.cursor1.posB+1
-  elseif State.cursor1.line <= #State.lines-1 then
+  else
     -- overflow back into A side
-    State.cursor1 = {line=State.cursor1.line+1, pos=1}
+    local new_cursor_line = State.cursor1.line
+    while new_cursor_line <= #State.lines-1 do
+      new_cursor_line = new_cursor_line+1
+      if State.lines[new_cursor_line].mode == 'text' then
+        State.cursor1 = {line=new_cursor_line, pos=1}
+        break
+      end
+    end
   end
 end
 
@@ -1027,7 +1075,23 @@ function Text.cursor_at_final_screen_line(State)
 end
 
 function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
-  if State.top > App.screen.height - State.line_height then
+  local y = State.top
+  while State.cursor1.line <= #State.lines do
+    if State.lines[State.cursor1.line].mode == 'text' then
+      break
+    end
+--?     print('cursor skips', State.cursor1.line)
+    y = y + Drawing_padding_height + Drawing.pixels(State.lines[State.cursor1.line].h, State.width)
+    State.cursor1.line = State.cursor1.line + 1
+  end
+  -- hack: insert a text line at bottom of file if necessary
+  if State.cursor1.line > #State.lines then
+    assert(State.cursor1.line == #State.lines+1)
+    table.insert(State.lines, {mode='text', data=''})
+    table.insert(State.line_cache, {})
+  end
+--?   print(y, App.screen.height, App.screen.height-State.line_height)
+  if y > App.screen.height - State.line_height then
 --?     print('scroll up')
     Text.snap_cursor_to_bottom_of_screen(State)
   end
@@ -1052,11 +1116,24 @@ function Text.snap_cursor_to_bottom_of_screen(State)
   while true do
 --?     print(y, 'top2:', State.lines[top2.line].data, top2.line, top2.screen_line, top2.screen_pos, top2.screen_lineB, top2.screen_posB)
     if top2.line == 1 and top2.screen_line == 1 then break end
-    local h = State.line_height
-    if y - h < State.top then
-      break
+    if top2.screen_line > 1 or State.lines[top2.line-1].mode == 'text' then
+      local h = State.line_height
+      if y - h < State.top then
+        break
+      end
+      y = y - h
+    else
+      assert(top2.line > 1)
+      assert(State.lines[top2.line-1].mode == 'drawing')
+      -- We currently can't draw partial drawings, so either skip it entirely
+      -- or not at all.
+      local h = Drawing_padding_height + Drawing.pixels(State.lines[top2.line-1].h, State.width)
+      if y - h < State.top then
+        break
+      end
+--?       print('skipping drawing of height', h)
+      y = y - h
     end
-    y = y - h
     top2 = Text.previous_screen_line(State, top2)
   end
 --?   print('top2 finally:', top2.line, top2.screen_line, top2.screen_pos)
@@ -1064,7 +1141,6 @@ function Text.snap_cursor_to_bottom_of_screen(State)
 --?   print('top1 finally:', State.screen_top1.line, State.screen_top1.pos)
 --?   print('snap =>', State.screen_top1.line, State.screen_top1.pos, State.screen_top1.posB, State.cursor1.line, State.cursor1.pos, State.cursor1.posB, State.screen_bottom1.line, State.screen_bottom1.pos, State.screen_bottom1.posB)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
-  Foo = true
 end
 
 function Text.in_line(State, line_index, x,y)
@@ -1338,6 +1414,9 @@ function Text.x(s, pos)
 end
 
 function Text.to2(State, loc1)
+  if State.lines[loc1.line].mode == 'drawing' then
+    return {line=loc1.line, screen_line=1, screen_pos=1}
+  end
   if loc1.pos then
     return Text.to2A(State, loc1)
   else
@@ -1448,10 +1527,8 @@ end
 
 function Text.previous_screen_lineA(State, loc2)
   if loc2.screen_line > 1 then
---?     print('a')
     return {line=loc2.line, screen_line=loc2.screen_line-1, screen_pos=1}
   elseif loc2.line == 1 then
---?     print('b')
     return loc2
   else
     Text.populate_screen_line_starting_pos(State, loc2.line-1)

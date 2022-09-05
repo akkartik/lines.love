@@ -44,7 +44,8 @@ function save_to_disk(State)
     if line.mode == 'drawing' then
       store_drawing(outfile, line)
     else
-      outfile:write(line.data, '\n')
+      outfile:write(line.data)
+      outfile:write('\n')
     end
   end
   outfile:close()
