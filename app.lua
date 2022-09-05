@@ -383,8 +383,32 @@ function App.disable_tests()
   App.newText = love.graphics.newText
   App.screen.draw = love.graphics.draw
   App.width = function(text) return text:getWidth() end
-  App.open_for_reading = function(filename) return io.open(filename, 'r') end
-  App.open_for_writing = function(filename) return io.open(filename, 'w') end
+  if Current_app == nil or Current_app == 'run' then
+    App.open_for_reading = function(filename) return io.open(filename, 'r') end
+    App.open_for_writing = function(filename) return io.open(filename, 'w') end
+  elseif Current_app == 'source' then
+    -- HACK: source editor requires a couple of different foundational definitions
+    App.open_for_reading =
+        function(filename)
+          local result = love.filesystem.newFile(filename)
+          local ok, err = result:open('r')
+          if ok then
+            return result
+          else
+            return ok, err
+          end
+        end
+    App.open_for_writing =
+        function(filename)
+          local result = love.filesystem.newFile(filename)
+          local ok, err = result:open('w')
+          if ok then
+            return result
+          else
+            return ok, err
+          end
+        end
+  end
   App.getTime = love.timer.getTime
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText
