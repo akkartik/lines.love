@@ -52,7 +52,7 @@ function App.load()
         load_file_from_source_or_save_directory('undo.lua')
       load_file_from_source_or_save_directory('text_tests.lua')
     load_file_from_source_or_save_directory('run_tests.lua')
-  else
+  elseif Current_app == 'source' then
     load_file_from_source_or_save_directory('source_file.lua')
     load_file_from_source_or_save_directory('source.lua')
       load_file_from_source_or_save_directory('commands.lua')
@@ -65,6 +65,8 @@ function App.load()
         load_file_from_source_or_save_directory('colorize.lua')
       load_file_from_source_or_save_directory('source_text_tests.lua')
     load_file_from_source_or_save_directory('source_tests.lua')
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
   end
 end
 
