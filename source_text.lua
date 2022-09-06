@@ -110,6 +110,10 @@ function Text.draw_wrapping_line(State, line_index, x,y, startpos)
         screen_line_starting_pos = pos
         x = State.left
       end
+      if State.selection1.line then
+        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
+        Text.draw_highlight(State, line, x,y, pos, lo,hi)
+      end
       -- Make [[WikiWords]] (single word, all in one screen line) clickable.
       local trimmed_word = rtrim(frag)  -- compute_fragments puts whitespace at the end
       if starts_with(trimmed_word, '[[') and ends_with(trimmed_word, ']]') then
@@ -171,6 +175,10 @@ function Text.draw_wrapping_lineB(State, line_index, x,y, startpos)
         end
         screen_line_starting_pos = pos
         x = State.left
+      end
+      if State.selection1.line then
+        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
+        Text.draw_highlight(State, line, x,y, pos, lo,hi)
       end
       App.screen.draw(frag_text, x,y)
       -- render cursor if necessary
@@ -375,12 +383,13 @@ end
 
 -- Don't handle any keys here that would trigger love.textinput above.
 function Text.keychord_pressed(State, chord)
---?   print('chord', chord)
+--?   print('chord', chord, State.selection1.line, State.selection1.pos)
   --== shortcuts that mutate text
   if chord == 'return' then
     local before_line = State.cursor1.line
     local before = snapshot(State, before_line)
     Text.insert_return(State)
+    State.selection1 = {}
     if State.cursor_y > App.screen.height - State.line_height then
       Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
@@ -398,6 +407,11 @@ function Text.keychord_pressed(State, chord)
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'backspace' then
+    if State.selection1.line then
+      Text.delete_selection(State, State.left, State.right)
+      schedule_save(State)
+      return
+    end
     local before
     if State.cursor1.pos and State.cursor1.pos > 1 then
       before = snapshot(State, State.cursor1.line)
@@ -456,6 +470,11 @@ function Text.keychord_pressed(State, chord)
     schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
   elseif chord == 'delete' then
+    if State.selection1.line then
+      Text.delete_selection(State, State.left, State.right)
+      schedule_save(State)
+      return
+    end
     local before
     if State.cursor1.posB or State.cursor1.pos <= utf8.len(State.lines[State.cursor1.line].data) then
       before = snapshot(State, State.cursor1.line)
@@ -504,44 +523,84 @@ function Text.keychord_pressed(State, chord)
   --== shortcuts that move the cursor
   elseif chord == 'left' then
     Text.left(State)
+    State.selection1 = {}
   elseif chord == 'right' then
     Text.right(State)
+    State.selection1 = {}
   elseif chord == 'S-left' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.left(State)
   elseif chord == 'S-right' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.right(State)
   -- C- hotkeys reserved for drawings, so we'll use M-
   elseif chord == 'M-left' then
     Text.word_left(State)
+    State.selection1 = {}
   elseif chord == 'M-right' then
     Text.word_right(State)
+    State.selection1 = {}
   elseif chord == 'M-S-left' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.word_left(State)
   elseif chord == 'M-S-right' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.word_right(State)
   elseif chord == 'home' then
     Text.start_of_line(State)
+    State.selection1 = {}
   elseif chord == 'end' then
     Text.end_of_line(State)
+    State.selection1 = {}
   elseif chord == 'S-home' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.start_of_line(State)
   elseif chord == 'S-end' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.end_of_line(State)
   elseif chord == 'up' then
     Text.up(State)
+    State.selection1 = {}
   elseif chord == 'down' then
     Text.down(State)
+    State.selection1 = {}
   elseif chord == 'S-up' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.up(State)
   elseif chord == 'S-down' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.down(State)
   elseif chord == 'pageup' then
     Text.pageup(State)
+    State.selection1 = {}
   elseif chord == 'pagedown' then
     Text.pagedown(State)
+    State.selection1 = {}
   elseif chord == 'S-pageup' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.pageup(State)
   elseif chord == 'S-pagedown' then
+    if State.selection1.line == nil then
+      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos, posB=State.cursor1.posB}
+    end
     Text.pagedown(State)
   end
 end

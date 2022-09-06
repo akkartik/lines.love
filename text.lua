@@ -931,7 +931,6 @@ end
 
 -- resize helper
 function Text.tweak_screen_top_and_cursor(State)
---?   print('a', State.selection1.line)
   if State.screen_top1.pos == 1 then return end
   Text.populate_screen_line_starting_pos(State, State.screen_top1.line)
   local line = State.lines[State.screen_top1.line]

@@ -282,6 +282,7 @@ function test_click_with_mouse()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor:line')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_to_left_of_line()
@@ -300,6 +301,7 @@ function test_click_with_mouse_to_left_of_line()
   -- cursor moves to start of line
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_to_left_of_line/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_takes_margins_into_account()
@@ -319,6 +321,7 @@ function test_click_with_mouse_takes_margins_into_account()
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_takes_margins_into_account/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_on_empty_line()
@@ -408,6 +411,7 @@ function test_click_with_mouse_on_wrapping_line()
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line/selection is empty to avoid perturbing future edits')
 end
 
 function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
@@ -427,6 +431,7 @@ function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
 function test_draw_text_wrapping_within_word()
@@ -585,6 +590,174 @@ function test_click_past_end_of_word_wrapping_line()
   check_eq(Editor_state.cursor1.pos, 20, 'F - test_click_past_end_of_word_wrapping_line/cursor')
 end
 
+function test_select_text()
+  io.write('\ntest_select_text')
+  -- display a line of text
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- select a letter
+  App.fake_key_press('lshift')
+  edit.run_after_keychord(Editor_state, 'S-right')
+  App.fake_key_release('lshift')
+  edit.key_released(Editor_state, 'lshift')
+  -- selection persists even after shift is released
+  check_eq(Editor_state.selection1.line, 1, 'F - test_select_text/selection:line')
+  check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text/selection:pos')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_select_text/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_select_text/cursor:pos')
+end
+
+function test_cursor_movement_without_shift_resets_selection()
+  io.write('\ntest_cursor_movement_without_shift_resets_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- press an arrow key without shift
+  edit.run_after_keychord(Editor_state, 'right')
+  -- no change to data, selection is reset
+  check_nil(Editor_state.selection1.line, 'F - test_cursor_movement_without_shift_resets_selection')
+  check_eq(Editor_state.lines[1].data, 'abc', 'F - test_cursor_movement_without_shift_resets_selection/data')
+end
+
+function test_edit_deletes_selection()
+  io.write('\ntest_edit_deletes_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- press a key
+  edit.run_after_textinput(Editor_state, 'x')
+  -- selected text is deleted and replaced with the key
+  check_eq(Editor_state.lines[1].data, 'xbc', 'F - test_edit_deletes_selection')
+end
+
+function test_edit_with_shift_key_deletes_selection()
+  io.write('\ntest_edit_with_shift_key_deletes_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- mimic precise keypresses for a capital letter
+  App.fake_key_press('lshift')
+  edit.keychord_pressed(Editor_state, 'd', 'd')
+  edit.textinput(Editor_state, 'D')
+  edit.key_released(Editor_state, 'd')
+  App.fake_key_release('lshift')
+  -- selected text is deleted and replaced with the key
+  check_nil(Editor_state.selection1.line, 'F - test_edit_with_shift_key_deletes_selection')
+  check_eq(Editor_state.lines[1].data, 'Dbc', 'F - test_edit_with_shift_key_deletes_selection/data')
+end
+
+function test_copy_does_not_reset_selection()
+  io.write('\ntest_copy_does_not_reset_selection')
+  -- display a line of text with a selection
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- copy selection
+  edit.run_after_keychord(Editor_state, 'C-c')
+  check_eq(App.clipboard, 'a', 'F - test_copy_does_not_reset_selection/clipboard')
+  -- selection is reset since shift key is not pressed
+  check(Editor_state.selection1.line, 'F - test_copy_does_not_reset_selection')
+end
+
+function test_cut()
+  io.write('\ntest_cut')
+  -- display a line of text with some part selected
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- press a key
+  edit.run_after_keychord(Editor_state, 'C-x')
+  check_eq(App.clipboard, 'a', 'F - test_cut/clipboard')
+  -- selected text is deleted
+  check_eq(Editor_state.lines[1].data, 'bc', 'F - test_cut/data')
+end
+
+function test_paste_replaces_selection()
+  io.write('\ntest_paste_replaces_selection')
+  -- display a line of text with a selection
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=2, pos=1}
+  Editor_state.selection1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- set clipboard
+  App.clipboard = 'xyz'
+  -- paste selection
+  edit.run_after_keychord(Editor_state, 'C-v')
+  -- selection is reset since shift key is not pressed
+  -- selection includes the newline, so it's also deleted
+  check_eq(Editor_state.lines[1].data, 'xyzdef', 'F - test_paste_replaces_selection')
+end
+
+function test_deleting_selection_may_scroll()
+  io.write('\ntest_deleting_selection_may_scroll')
+  -- display lines 2/3/4
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=3, pos=2}
+  Editor_state.screen_top1 = {line=2, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'def', 'F - test_deleting_selection_may_scroll/baseline/screen:1')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'ghi', 'F - test_deleting_selection_may_scroll/baseline/screen:2')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'jkl', 'F - test_deleting_selection_may_scroll/baseline/screen:3')
+  -- set up a selection starting above the currently displayed page
+  Editor_state.selection1 = {line=1, pos=2}
+  -- delete selection
+  edit.run_after_keychord(Editor_state, 'backspace')
+  -- page scrolls up
+  check_eq(Editor_state.screen_top1.line, 1, 'F - test_deleting_selection_may_scroll')
+  check_eq(Editor_state.lines[1].data, 'ahi', 'F - test_deleting_selection_may_scroll/data')
+end
+
 function test_edit_wrapping_text()
   io.write('\ntest_edit_wrapping_text')
   App.screen.init{width=50, height=60}
@@ -692,10 +865,108 @@ function test_move_cursor_using_mouse()
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
   edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
-  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_move_cursor_using_mouse/selection:pos')
+end
+
+function test_select_text_using_mouse()
+  io.write('\ntest_select_text_using_mouse')
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  -- press and hold on first location
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- drag and release somewhere else
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
+  check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse/selection:line')
+  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse/selection:pos')
+  check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_using_mouse/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 4, 'F - test_select_text_using_mouse/cursor:pos')
+end
+
+function test_select_text_using_mouse_and_shift()
+  io.write('\ntest_select_text_using_mouse_and_shift')
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  -- click on first location
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- hold down shift and click somewhere else
+  App.fake_key_press('lshift')
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
+  App.fake_key_release('lshift')
+  check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_using_mouse_and_shift/selection:line')
+  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_using_mouse_and_shift/selection:pos')
+  check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_using_mouse_and_shift/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 4, 'F - test_select_text_using_mouse_and_shift/cursor:pos')
+end
+
+function test_select_text_repeatedly_using_mouse_and_shift()
+  io.write('\ntest_select_text_repeatedly_using_mouse_and_shift')
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  -- click on first location
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  -- hold down shift and click on a second location
+  App.fake_key_press('lshift')
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+20,Editor_state.top+Editor_state.line_height+5, 1)
+  -- hold down shift and click at a third location
+  App.fake_key_press('lshift')
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+20,Editor_state.top+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height+5, 1)
+  App.fake_key_release('lshift')
+  -- selection is between first and third location. forget the second location, not the first.
+  check_eq(Editor_state.selection1.line, 1, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:line')
+  check_eq(Editor_state.selection1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/selection:pos')
+  check_eq(Editor_state.cursor1.line, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_select_text_repeatedly_using_mouse_and_shift/cursor:pos')
+end
+
+function test_cut_without_selection()
+  io.write('\ntest_cut_without_selection')
+  -- display a few lines
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)
+  -- try to cut without selecting text
+  edit.run_after_keychord(Editor_state, 'C-x')
+  -- no crash
+  check_nil(Editor_state.selection1.line, 'F - test_cut_without_selection')
 end
 
 function test_pagedown()
@@ -1440,7 +1711,7 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'stu', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:3')
   -- try to move the cursor earlier in the third screen line by clicking the mouse
-  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height*2+5, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+Editor_state.line_height*2+5, 1)
   -- cursor should move
   check_eq(Editor_state.cursor1.line, 1, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:line')
   check_eq(Editor_state.cursor1.pos, 26, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:pos')
@@ -1517,6 +1788,107 @@ function test_backspace_past_line_boundary()
   check_eq(Editor_state.lines[1].data, 'abcdef', "F - test_backspace_past_line_boundary")
 end
 
+-- some tests for operating over selections created using Shift- chords
+-- we're just testing delete_selection, and it works the same for all keys
+
+function test_backspace_over_selection()
+  io.write('\ntest_backspace_over_selection')
+  -- select just one character within a line with cursor before selection
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  -- backspace deletes the selected character, even though it's after the cursor
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(Editor_state.lines[1].data, 'bc', "F - test_backspace_over_selection/data")
+  -- cursor (remains) at start of selection
+  check_eq(Editor_state.cursor1.line, 1, "F - test_backspace_over_selection/cursor:line")
+  check_eq(Editor_state.cursor1.pos, 1, "F - test_backspace_over_selection/cursor:pos")
+  -- selection is cleared
+  check_nil(Editor_state.selection1.line, "F - test_backspace_over_selection/selection")
+end
+
+function test_backspace_over_selection_reverse()
+  io.write('\ntest_backspace_over_selection_reverse')
+  -- select just one character within a line with cursor after selection
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.selection1 = {line=1, pos=1}
+  -- backspace deletes the selected character
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(Editor_state.lines[1].data, 'bc', "F - test_backspace_over_selection_reverse/data")
+  -- cursor moves to start of selection
+  check_eq(Editor_state.cursor1.line, 1, "F - test_backspace_over_selection_reverse/cursor:line")
+  check_eq(Editor_state.cursor1.pos, 1, "F - test_backspace_over_selection_reverse/cursor:pos")
+  -- selection is cleared
+  check_nil(Editor_state.selection1.line, "F - test_backspace_over_selection_reverse/selection")
+end
+
+function test_backspace_over_multiple_lines()
+  io.write('\ntest_backspace_over_multiple_lines')
+  -- select just one character within a line with cursor after selection
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.selection1 = {line=4, pos=2}
+  -- backspace deletes the region and joins the remaining portions of lines on either side
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(Editor_state.lines[1].data, 'akl', "F - test_backspace_over_multiple_lines/data:1")
+  check_eq(Editor_state.lines[2].data, 'mno', "F - test_backspace_over_multiple_lines/data:2")
+  -- cursor remains at start of selection
+  check_eq(Editor_state.cursor1.line, 1, "F - test_backspace_over_multiple_lines/cursor:line")
+  check_eq(Editor_state.cursor1.pos, 2, "F - test_backspace_over_multiple_lines/cursor:pos")
+  -- selection is cleared
+  check_nil(Editor_state.selection1.line, "F - test_backspace_over_multiple_lines/selection")
+end
+
+function test_backspace_to_end_of_line()
+  io.write('\ntest_backspace_to_end_of_line')
+  -- select region from cursor to end of line
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.selection1 = {line=1, pos=4}
+  -- backspace deletes rest of line without joining to any other line
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(Editor_state.lines[1].data, 'a', "F - test_backspace_to_start_of_line/data:1")
+  check_eq(Editor_state.lines[2].data, 'def', "F - test_backspace_to_start_of_line/data:2")
+  -- cursor remains at start of selection
+  check_eq(Editor_state.cursor1.line, 1, "F - test_backspace_to_start_of_line/cursor:line")
+  check_eq(Editor_state.cursor1.pos, 2, "F - test_backspace_to_start_of_line/cursor:pos")
+  -- selection is cleared
+  check_nil(Editor_state.selection1.line, "F - test_backspace_to_start_of_line/selection")
+end
+
+function test_backspace_to_start_of_line()
+  io.write('\ntest_backspace_to_start_of_line')
+  -- select region from cursor to start of line
+  App.screen.init{width=Editor_state.left+30, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi', 'jkl', 'mno'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=2, pos=1}
+  Editor_state.selection1 = {line=2, pos=3}
+  -- backspace deletes beginning of line without joining to any other line
+  edit.run_after_keychord(Editor_state, 'backspace')
+  check_eq(Editor_state.lines[1].data, 'abc', "F - test_backspace_to_start_of_line/data:1")
+  check_eq(Editor_state.lines[2].data, 'f', "F - test_backspace_to_start_of_line/data:2")
+  -- cursor remains at start of selection
+  check_eq(Editor_state.cursor1.line, 2, "F - test_backspace_to_start_of_line/cursor:line")
+  check_eq(Editor_state.cursor1.pos, 1, "F - test_backspace_to_start_of_line/cursor:pos")
+  -- selection is cleared
+  check_nil(Editor_state.selection1.line, "F - test_backspace_to_start_of_line/selection")
+end
+
 function test_undo_insert_text()
   io.write('\ntest_undo_insert_text')
   App.screen.init{width=120, height=60}
@@ -1531,6 +1903,8 @@ function test_undo_insert_text()
   edit.run_after_textinput(Editor_state, 'g')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_undo_insert_text/baseline/cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'F - test_undo_insert_text/baseline/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_undo_insert_text/baseline/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_undo_insert_text/baseline/selection:pos')
   local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/baseline/screen:1')
   y = y + Editor_state.line_height
@@ -1541,6 +1915,8 @@ function test_undo_insert_text()
   edit.run_after_keychord(Editor_state, 'C-z')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_undo_insert_text/cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_undo_insert_text/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_undo_insert_text/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_undo_insert_text/selection:pos')
   y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_insert_text/screen:1')
   y = y + Editor_state.line_height
@@ -1562,6 +1938,8 @@ function test_undo_delete_text()
   edit.run_after_keychord(Editor_state, 'backspace')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_undo_delete_text/baseline/cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_undo_delete_text/baseline/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_undo_delete_text/baseline/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_undo_delete_text/baseline/selection:pos')
   local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/baseline/screen:1')
   y = y + Editor_state.line_height
@@ -1573,12 +1951,40 @@ function test_undo_delete_text()
   edit.run_after_keychord(Editor_state, 'C-z')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_undo_delete_text/cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'F - test_undo_delete_text/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_undo_delete_text/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_undo_delete_text/selection:pos')
+--?   check_eq(Editor_state.selection1.line, 2, 'F - test_undo_delete_text/selection:line')
+--?   check_eq(Editor_state.selection1.pos, 4, 'F - test_undo_delete_text/selection:pos')
   y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_undo_delete_text/screen:1')
   y = y + Editor_state.line_height
   App.screen.check(y, 'defg', 'F - test_undo_delete_text/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'xyz', 'F - test_undo_delete_text/screen:3')
+end
+
+function test_undo_restores_selection()
+  io.write('\ntest_undo_restores_selection')
+  -- display a line of text with some part selected
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.selection1 = {line=1, pos=2}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- delete selected text
+  edit.run_after_textinput(Editor_state, 'x')
+  check_eq(Editor_state.lines[1].data, 'xbc', 'F - test_undo_restores_selection/baseline')
+  check_nil(Editor_state.selection1.line, 'F - test_undo_restores_selection/baseline:selection')
+  -- undo
+  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z')
+  -- selection is restored
+  check_eq(Editor_state.selection1.line, 1, 'F - test_undo_restores_selection/line')
+  check_eq(Editor_state.selection1.pos, 2, 'F - test_undo_restores_selection/pos')
 end
 
 function test_search()

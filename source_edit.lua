@@ -76,6 +76,14 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     cursor1 = {line=1, pos=1, posB=nil},  -- position of cursor
     screen_bottom1 = {line=1, pos=1, posB=nil},  -- position of start of screen line at bottom of screen
 
+    selection1 = {},
+    -- some extra state to compute selection between mouse press and release
+    old_cursor1 = nil,
+    old_selection1 = nil,
+    mousepress_shift = nil,
+    -- when selecting text, avoid recomputing some state on every single frame
+    recent_mouse = {},
+
     -- cursor coordinates in pixels
     cursor_x = 0,
     cursor_y = 0,
@@ -208,9 +216,22 @@ function edit.mouse_pressed(State, x,y, mouse_button)
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
       if Text.in_line(State, line_index, x,y) then
+        -- delicate dance between cursor, selection and old cursor/selection
+        -- scenarios:
+        --  regular press+release: sets cursor, clears selection
+        --  shift press+release:
+        --    sets selection to old cursor if not set otherwise leaves it untouched
+        --    sets cursor
+        --  press and hold to start a selection: sets selection on press, cursor on release
+        --  press and hold, then press shift: ignore shift
+        --    i.e. mouse_released should never look at shift state
+        State.old_cursor1 = State.cursor1
+        State.old_selection1 = State.selection1
+        State.mousepress_shift = App.shift_down()
         local pos,posB = Text.to_pos_on_line(State, line_index, x, y)
   --?       print(x,y, 'setting cursor:', line_index, pos, posB)
-        State.cursor1 = {line=line_index, pos=pos, posB=posB}
+        State.selection1 = {line=line_index, pos=pos, posB=posB}
+--?         print('selection', State.selection1.line, State.selection1.pos, State.selection1.posB)
         break
       end
     elseif line.mode == 'drawing' then
@@ -236,6 +257,30 @@ function edit.mouse_released(State, x,y, mouse_button)
       record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
       Drawing.before = nil
     end
+  else
+    for line_index,line in ipairs(State.lines) do
+      if line.mode == 'text' then
+        if Text.in_line(State, line_index, x,y) then
+--?           print('reset selection')
+          local pos,posB = Text.to_pos_on_line(State, line_index, x, y)
+          State.cursor1 = {line=line_index, pos=pos, posB=posB}
+--?           print('cursor', State.cursor1.line, State.cursor1.pos, State.cursor1.posB)
+          if State.mousepress_shift then
+            if State.old_selection1.line == nil then
+              State.selection1 = State.old_cursor1
+            else
+              State.selection1 = State.old_selection1
+            end
+          end
+          State.old_cursor1, State.old_selection1, State.mousepress_shift = nil
+          if eq(State.cursor1, State.selection1) then
+            State.selection1 = {}
+          end
+          break
+        end
+      end
+    end
+--?     print('selection:', State.selection1.line, State.selection1.pos)
   end
 end
 
@@ -258,6 +303,14 @@ function edit.textinput(State, t)
 end
 
 function edit.keychord_pressed(State, chord, key)
+  if State.selection1.line and
+      not State.lines.current_drawing and
+      -- printable character created using shift key => delete selection
+      -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
+      (not App.shift_down() or utf8.len(key) == 1) and
+      chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
+    Text.delete_selection(State, State.left, State.right)
+  end
   if State.search_term then
     if chord == 'escape' then
       State.search_term = nil
@@ -336,6 +389,7 @@ function edit.keychord_pressed(State, chord, key)
       local src = event.before
       State.screen_top1 = deepcopy(src.screen_top)
       State.cursor1 = deepcopy(src.cursor)
+      State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.after, event.before)
       patch_placeholders(State.line_cache, event.after, event.before)
       -- invalidate various cached bits of lines
@@ -351,6 +405,7 @@ function edit.keychord_pressed(State, chord, key)
       local src = event.after
       State.screen_top1 = deepcopy(src.screen_top)
       State.cursor1 = deepcopy(src.cursor)
+      State.selection1 = deepcopy(src.selection)
       patch(State.lines, event.before, event.after)
       -- invalidate various cached bits of lines
       State.lines.current_drawing = nil
