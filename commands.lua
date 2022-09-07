@@ -24,11 +24,11 @@ function source.draw_menu_bar()
       add_hotkey_to_menu('ctrl+l: show log browser')
     end
     if Editor_state.expanded then
-      add_hotkey_to_menu('ctrl+b: collapse debug prints')
+      add_hotkey_to_menu('alt+b: collapse debug prints')
     else
-      add_hotkey_to_menu('ctrl+b: expand debug prints')
+      add_hotkey_to_menu('alt+b: expand debug prints')
     end
-    add_hotkey_to_menu('ctrl+i: create/edit debug print')
+    add_hotkey_to_menu('alt+d: create/edit debug print')
     add_hotkey_to_menu('ctrl+f: find in file')
     add_hotkey_to_menu('alt+left alt+right: prev/next word')
   elseif Focus == 'log_browser' then

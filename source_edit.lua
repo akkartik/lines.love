@@ -347,7 +347,7 @@ function edit.keychord_pressed(State, chord, key)
     }
     assert(State.search_text == nil)
   -- bifold text
-  elseif chord == 'C-b' then
+  elseif chord == 'M-b' then
     State.expanded = not State.expanded
     Text.redraw_all(State)
     if not State.expanded then
@@ -356,7 +356,7 @@ function edit.keychord_pressed(State, chord, key)
       end
       edit.eradicate_locations_after_the_fold(State)
     end
-  elseif chord == 'C-i' then
+  elseif chord == 'M-d' then
     if State.cursor1.posB == nil then
       local before = snapshot(State, State.cursor1.line)
       if State.lines[State.cursor1.line].dataB == nil then
