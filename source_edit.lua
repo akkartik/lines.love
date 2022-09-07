@@ -515,14 +515,17 @@ end
 
 --== some methods for tests
 
+-- Insulate tests from some key globals so I don't have to change the vast
+-- majority of tests when they're modified for the real app.
 Test_margin_left = 25
+Test_margin_right = 0
 
 function edit.initialize_test_state()
   -- if you change these values, tests will start failing
   return edit.initialize_state(
       15,  -- top margin
       Test_margin_left,
-      App.screen.width,  -- right margin = 0
+      App.screen.width - Test_margin_right,
       14,  -- font height assuming default LÖVE font
       15)  -- line height
 end
