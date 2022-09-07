@@ -79,9 +79,7 @@ found anything amiss: http://akkartik.name/contact
 
 * No scrollbars yet. That stuff is hard.
 
-* There are some temporary limitations when editing sources:
-    - no line drawings
-    - no selecting text
+* When editing sources, selecting text is not yet completely implemented.
 
 ## Mirrors and Forks
 
