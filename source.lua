@@ -257,8 +257,9 @@ function source.settings()
     Settings.source.x, Settings.source.y, Settings.source.displayindex = love.window.getPosition()
   end
   local filename = Editor_state.filename
-  if filename:sub(1,1) ~= '/' then
-    filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
+  local os_path_separator = package.config:sub(1,1)
+  if filename:sub(1,1) ~= os_path_separator then
+    filename = love.filesystem.getWorkingDirectory()..os_path_separator..filename
   end
 --?   print('saving source settings', Settings.source.x, Settings.source.y, Settings.source.displayindex)
   return {

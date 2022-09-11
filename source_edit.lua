@@ -100,7 +100,7 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     right = right,
     width = right-left,
 
-    filename = love.filesystem.getUserDirectory()..'/lines.txt',
+    filename = love.filesystem.getUserDirectory()..'/lines.txt',  -- '/' should work even on Windows
     next_save = nil,
 
     -- undo
