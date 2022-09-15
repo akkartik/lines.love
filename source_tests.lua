@@ -18,6 +18,22 @@ function test_resize_window()
   -- TODO: how to make assertions about when App.update got past the early exit?
 end
 
+function test_show_log_browser_side()
+  io.write('\ntest_show_log_browser_side')
+  App.screen.init{width=300, height=300}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.filename = 'foo'
+  Text.redraw_all(Editor_state)
+  Log_browser_state = edit.initialize_test_state()
+  Text.redraw_all(Log_browser_state)
+  log_browser.parse(Log_browser_state)
+  check(not Show_log_browser_side, 'F - test_show_log_browser_side/baseline')
+  Current_app = 'source'
+  App.wait_fake_time(0.1)
+  App.run_after_keychord('C-l')
+  check(Show_log_browser_side, 'F - test_show_log_browser_side')
+end
+
 function test_drop_file()
   io.write('\ntest_drop_file')
   App.screen.init{width=Editor_state.left+300, height=300}

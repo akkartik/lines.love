@@ -45,7 +45,7 @@ function source.initialize_globals()
     index = 1,
   }
 
-  Menu_status_bar_height = nil  -- initialized below
+  Menu_status_bar_height = 5 + --[[line height in tests]] 15 + 5
 
   -- a few text objects we can avoid recomputing unless the font changes
   Text_cache = {}
