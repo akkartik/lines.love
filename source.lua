@@ -334,7 +334,9 @@ function source.keychord_pressed(chord, key)
 --?     print('done setting window')
     -- try to restore position if possible
     -- if the window gets wider the window manager may not respect this
-    source.set_window_position_from_settings(Settings.source)
+    if not App.run_tests then
+      source.set_window_position_from_settings(Settings.source)
+    end
     return
   end
   if chord == 'C-g' then
