@@ -322,7 +322,10 @@ function source.keychord_pressed(chord, key)
 --?     print('C-l')
     Show_log_browser_side = not Show_log_browser_side
     if Show_log_browser_side then
-      App.screen.width = Log_browser_state.right + Margin_right
+      App.screen.width = math.min(Display_width, App.screen.width*2)
+      Editor_state.right = App.screen.width/2 - Margin_right
+      Log_browser_state.left = App.screen.width/2 + Margin_left
+      Log_browser_state.right = App.screen.width - Margin_right
     else
       App.screen.width = Editor_state.right + Margin_right
     end
