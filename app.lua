@@ -154,6 +154,27 @@ function App.screen.init(dims)
   App.screen.height = dims.height
 end
 
+-- operations on the LÖVE window within the monitor/display
+function App.screen.resize(width, height, flags)
+  App.screen.width = width
+  App.screen.height = height
+  App.screen.flags = flags
+end
+
+function App.screen.size()
+  return App.screen.width, App.screen.height, App.screen.flags
+end
+
+function App.screen.move(x,y, displayindex)
+  App.screen.x = x
+  App.screen.y = y
+  App.screen.displayindex = displayindex
+end
+
+function App.screen.position()
+  return App.screen.x, App.screen.y, App.screen.displayindex
+end
+
 function App.screen.print(msg, x,y)
   local screen_row = 'y'..tostring(y)
 --?   print('drawing "'..msg..'" at y '..tostring(y))
@@ -379,6 +400,10 @@ function App.disable_tests()
   App.fake_mouse_press = nil
   App.fake_mouse_release = nil
   -- other methods dispatch to real hardware
+  App.screen.resize = love.window.setMode
+  App.screen.size = love.window.getMode
+  App.screen.move = love.window.setPosition
+  App.screen.position = love.window.getPosition
   App.screen.print = love.graphics.print
   App.newText = love.graphics.newText
   App.screen.draw = love.graphics.draw

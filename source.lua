@@ -116,15 +116,15 @@ function source.load_settings()
   local settings = Settings.source
   love.graphics.setFont(love.graphics.newFont(settings.font_height))
   -- maximize window to determine maximum allowable dimensions
-  love.window.setMode(0, 0)  -- maximize
-  Display_width, Display_height, App.screen.flags = love.window.getMode()
+  App.screen.resize(0, 0)  -- maximize
+  Display_width, Display_height, App.screen.flags = App.screen.size()
   -- set up desired window dimensions
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(Display_width, 200)
   App.screen.flags.minheight = math.min(Display_height, 200)
   App.screen.width, App.screen.height = settings.width, settings.height
 --?   print('setting window from settings:', App.screen.width, App.screen.height)
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
+  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 --?   print('loading source position', settings.x, settings.y, settings.displayindex)
   source.set_window_position_from_settings(settings)
   Show_log_browser_side = settings.show_log_browser_side
@@ -156,19 +156,19 @@ end
 
 function source.initialize_window_geometry(em_width)
   -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  Display_width, Display_height, App.screen.flags = love.window.getMode()
+  App.screen.resize(0, 0)  -- maximize
+  Display_width, Display_height, App.screen.flags = App.screen.size()
   -- shrink height slightly to account for window decoration
   App.screen.height = Display_height-100
   App.screen.width = 40*em_width
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.width, 200)
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
+  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   print('initializing source position')
   if Settings == nil then Settings = {} end
   if Settings.source == nil then Settings.source = {} end
-  Settings.source.x, Settings.source.y, Settings.source.displayindex = love.window.getPosition()
+  Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
 end
 
 function source.resize(w, h)
@@ -254,7 +254,7 @@ end
 function source.settings()
   if Current_app == 'source' then
 --?     print('reading source window position')
-    Settings.source.x, Settings.source.y, Settings.source.displayindex = love.window.getPosition()
+    Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
   end
   local filename = Editor_state.filename
   if is_relative_path(filename) then
@@ -330,7 +330,7 @@ function source.keychord_pressed(chord, key)
       App.screen.width = Editor_state.right + Margin_right
     end
 --?     print('setting window:', App.screen.width, App.screen.height)
-    love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
+    App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 --?     print('done setting window')
     -- try to restore position if possible
     -- if the window gets wider the window manager may not respect this
