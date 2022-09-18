@@ -27,9 +27,13 @@ log_browser = {}
 function log_browser.parse(State)
   for _,line in ipairs(State.lines) do
     if line.data ~= '' then
-      line.filename, line.line_number, line.data = line.data:match('%[string "([^:]*)"%]:([^:]*):%s*(.*)')
+      local rest
+      line.filename, line.line_number, rest = line.data:match('%[string "([^:]*)"%]:([^:]*):%s*(.*)')
       if line.filename == nil then
-        line.filename, line.line_number, line.data = line.data:match('([^:]*):([^:]*):%s*(.*)')
+        line.filename, line.line_number, rest = line.data:match('([^:]*):([^:]*):%s*(.*)')
+      end
+      if rest then
+        line.data = rest
       end
       line.filename = guess_source(line.filename)
       line.line_number = tonumber(line.line_number)
