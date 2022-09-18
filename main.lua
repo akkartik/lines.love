@@ -33,6 +33,7 @@ load_file_from_source_or_save_directory('drawing_tests.lua')
 
 -- but some files we want to only load sometimes
 function App.load()
+  log_new('session')
   if love.filesystem.getInfo('config') then
     Settings = json.decode(love.filesystem.read('config'))
     Current_app = Settings.current_app

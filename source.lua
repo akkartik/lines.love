@@ -11,6 +11,7 @@ function source.initialize_globals()
   Show_file_navigator = false
   File_navigation = {
     candidates = {
+      'main',
       'run',
       'run_tests',
       'log',
@@ -56,6 +57,7 @@ end
 
 -- called only for real run
 function source.initialize()
+  log_new('source')
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 

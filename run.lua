@@ -15,6 +15,7 @@ end
 
 -- called only for real run
 function run.initialize(arg)
+  log_new('run')
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
