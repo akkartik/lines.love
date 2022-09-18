@@ -61,6 +61,9 @@ function source.draw_file_navigator()
     end
     log(2, file)
     add_file_to_menu(file, i == File_navigation.index)
+    if Menu_cursor >= App.screen.width - 5 then
+      break
+    end
   end
   log_end('render file navigator')
 end
@@ -68,10 +71,6 @@ end
 function add_file_to_menu(s, cursor_highlight)
   local s_text = to_text(s)
   local width = App.width(s_text)
-  if Menu_cursor + width > App.screen.width - 5 then
-    log(2, 'skipped')
-    return
-  end
   if cursor_highlight then
     App.color(Menu_highlight_color)
     love.graphics.rectangle('fill', Menu_cursor-5,5-2, width+5*2,Editor_state.line_height+2*2)
