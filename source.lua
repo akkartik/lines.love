@@ -11,7 +11,7 @@ function source.initialize_globals()
   Focus = 'edit'
   Show_file_navigator = false
   File_navigation = {
-    candidates = {
+    all_candidates = {
       'main',
       'run',
       'run_tests',
@@ -45,7 +45,9 @@ function source.initialize_globals()
       'json',
     },
     index = 1,
+    filter = '',
   }
+  File_navigation.candidates = File_navigation.all_candidates  -- modified with filter
 
   Menu_status_bar_height = 5 + --[[line height in tests]] 15 + 5
 
@@ -308,6 +310,7 @@ end
 function source.textinput(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Show_file_navigator then
+    textinput_on_file_navigator(t)
     return
   end
   if Focus == 'edit' then

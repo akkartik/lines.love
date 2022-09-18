@@ -53,6 +53,10 @@ function add_hotkey_to_menu(s)
 end
 
 function source.draw_file_navigator()
+  App.color(Menu_command_color)
+  local filter_text = to_text(File_navigation.filter)
+  App.screen.draw(filter_text, 5, 5)
+  draw_cursor(5 + App.width(filter_text), 5)
   if File_navigation.num_lines == nil then
     File_navigation.num_lines = source.num_lines_for_file_navigator(File_navigation.candidates)
   end
@@ -69,6 +73,27 @@ function source.draw_file_navigator()
       break
     end
   end
+end
+
+function draw_cursor(x, y)
+  -- blink every 0.5s
+  if math.floor(Cursor_time*2)%2 == 0 then
+    App.color(Cursor_color)
+    love.graphics.rectangle('fill', x,y, 3,Editor_state.line_height)
+  end
+end
+
+function source.file_navigator_candidates()
+  if File_navigation.filter == '' then
+    return File_navigation.all_candidates
+  end
+  local result = {}
+  for _,filename in ipairs(File_navigation.all_candidates) do
+    if starts_with(filename, File_navigation.filter) then
+      table.insert(result, filename)
+    end
+  end
+  return result
 end
 
 function source.num_lines_for_file_navigator(candidates)
@@ -115,10 +140,22 @@ function keychord_pressed_on_file_navigator(chord, key)
   log(2, {name='file_navigator_state', files=File_navigation.candidates, index=File_navigation.index})
   if chord == 'escape' then
     Show_file_navigator = false
+    File_navigation.index = 1
+    File_navigation.filter = ''
+    File_navigation.candidates = File_navigation.all_candidates
   elseif chord == 'return' then
     local candidate = guess_source(File_navigation.candidates[File_navigation.index]..'.lua')
     source.switch_to_file(candidate)
     Show_file_navigator = false
+    File_navigation.index = 1
+    File_navigation.filter = ''
+    File_navigation.candidates = File_navigation.all_candidates
+  elseif chord == 'backspace' then
+    local len = utf8.len(File_navigation.filter)
+    local byte_offset = Text.offset(File_navigation.filter, len)
+    File_navigation.filter = string.sub(File_navigation.filter, 1, byte_offset-1)
+    File_navigation.index = 1
+    File_navigation.candidates = source.file_navigator_candidates()
   elseif chord == 'left' then
     if File_navigation.index > 1 then
       File_navigation.index = File_navigation.index-1
@@ -242,4 +279,9 @@ function file_index(fy, fx, fwidth)
   end
   log_end('file index')
   return best_guess
+end
+
+function textinput_on_file_navigator(t)
+  File_navigation.filter = File_navigation.filter..t
+  File_navigation.candidates = source.file_navigator_candidates()
 end
