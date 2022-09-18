@@ -4,7 +4,7 @@ AB_padding = 20  -- space in pixels between A side and B side
 
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return the final y, and pos,posB of start of final screen line drawn
-function Text.draw(State, line_index, y, startpos, startposB)
+function Text.draw(State, line_index, y, startpos, startposB, hide_cursor)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   line_cache.starty = y
@@ -18,7 +18,7 @@ function Text.draw(State, line_index, y, startpos, startposB)
       return y, screen_line_starting_pos
     end
     if Focus == 'edit' and State.cursor1.pos then
-      if State.search_term == nil then
+      if not hide_cursor and not State.search_term then
         if line_index == State.cursor1.line and State.cursor1.pos == pos then
           Text.draw_cursor(State, x, y)
         end
@@ -64,7 +64,7 @@ function Text.draw(State, line_index, y, startpos, startposB)
 --?   if line_index == 8 then print('a') end
   if Focus == 'edit' and State.cursor1.posB then
 --?     if line_index == 8 then print('b') end
-    if State.search_term == nil then
+    if not hide_cursor and not State.search_term then
 --?       if line_index == 8 then print('c', State.cursor1.line, State.cursor1.posB, line_index, pos) end
       if line_index == State.cursor1.line and State.cursor1.posB == pos then
         Text.draw_cursor(State, x, y)

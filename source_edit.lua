@@ -124,7 +124,7 @@ function edit.fixup_cursor(State)
   end
 end
 
-function edit.draw(State)
+function edit.draw(State, hide_cursor)
   State.button_handlers = {}
   App.color(Text_color)
   if #State.lines ~= #State.line_cache then
@@ -170,7 +170,7 @@ function edit.draw(State)
                      end,
         })
       end
-      y, State.screen_bottom1.pos, State.screen_bottom1.posB = Text.draw(State, line_index, y, startpos, startposB)
+      y, State.screen_bottom1.pos, State.screen_bottom1.posB = Text.draw(State, line_index, y, startpos, startposB, hide_cursor)
       y = y + State.line_height
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then

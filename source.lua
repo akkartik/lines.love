@@ -222,7 +222,7 @@ function source.switch_to_file(filename)
 end
 
 function source.draw()
-  edit.draw(Editor_state)
+  edit.draw(Editor_state, --[[hide cursor?]] Show_file_navigator)
   if Show_log_browser_side then
     -- divider
     App.color(Divider_color)
