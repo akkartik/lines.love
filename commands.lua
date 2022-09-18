@@ -53,19 +53,16 @@ function add_hotkey_to_menu(s)
 end
 
 function source.draw_file_navigator()
-  log_start('render file navigator')
   for i,file in ipairs(File_navigation.candidates) do
     if file == 'source' then
       App.color(Menu_border_color)
       love.graphics.line(Menu_cursor-10,2, Menu_cursor-10,Menu_status_bar_height-2)
     end
-    log(2, file)
     add_file_to_menu(file, i == File_navigation.index)
     if Menu_cursor >= App.screen.width - 5 then
       break
     end
   end
-  log_end('render file navigator')
 end
 
 function add_file_to_menu(s, cursor_highlight)
