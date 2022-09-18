@@ -93,10 +93,17 @@ function add_file_to_menu(x,y, s, cursor_highlight)
     y = y + Editor_state.line_height
     x = 5
   end
+  local color = Menu_background_color
   if cursor_highlight then
-    App.color(Menu_highlight_color)
-    love.graphics.rectangle('fill', x-5,y-2, width+5*2,Editor_state.line_height+2*2)
+    color = Menu_highlight_color
   end
+  button(Editor_state, 'menu', {x=x-5, y=y-2, w=width+5*2, h=Editor_state.line_height+2*2, color=colortable(color),
+    onpress1 = function()
+      local candidate = guess_source(s..'.lua')
+      source.switch_to_file(candidate)
+      Show_file_navigator = false
+    end
+  })
   App.color(Menu_command_color)
   App.screen.draw(s_text, x,y)
   x = x + width + 30

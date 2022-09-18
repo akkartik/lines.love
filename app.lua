@@ -194,6 +194,10 @@ function App.color(color)
   love.graphics.setColor(color.r, color.g, color.b, color.a)
 end
 
+function colortable(app_color)
+  return {app_color.r, app_color.g, app_color.b, app_color.a}
+end
+
 App.time = 1
 function App.getTime()
   return App.time
