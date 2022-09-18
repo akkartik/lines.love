@@ -104,6 +104,8 @@ function add_file_to_menu(x,y, s, cursor_highlight)
 end
 
 function keychord_pressed_on_file_navigator(chord, key)
+  log(2, 'file navigator: '..chord)
+  log(2, ('cursor initially at %d %s'):format(File_navigation.index, File_navigation.candidates[File_navigation.index]))
   if chord == 'escape' then
     Show_file_navigator = false
   elseif chord == 'return' then
@@ -118,5 +120,71 @@ function keychord_pressed_on_file_navigator(chord, key)
     if File_navigation.index < #File_navigation.candidates then
       File_navigation.index = File_navigation.index+1
     end
+  elseif chord == 'down' then
+    file_navigator_down()
+  elseif chord == 'up' then
+    file_navigator_up()
   end
+end
+
+function file_navigator_up()
+  local y, x, width = file_coord(File_navigation.index)
+  local index = file_index(y-Editor_state.line_height, x, width)
+  if index then
+    File_navigation.index = index
+  end
+end
+
+function file_navigator_down()
+  local y, x, width = file_coord(File_navigation.index)
+  local index = file_index(y+Editor_state.line_height, x, width)
+  if index then
+    File_navigation.index = index
+  end
+end
+
+function file_coord(index)
+  local y,x = Menu_status_bar_height, 5
+  for i,filename in ipairs(File_navigation.candidates) do
+    local width = App.width(to_text(filename))
+    if x + width > App.screen.width - 5 then
+      y = y + Editor_state.line_height
+      x = 5
+    end
+    if i == index then
+    return y, x, width
+    end
+    x = x + width + 30
+  end
+end
+
+function file_index(fy, fx, fwidth)
+  log_start('file index')
+  log(2, ('for %d %d %d'):format(fy, fx, fwidth))
+  local y,x = Menu_status_bar_height, 5
+  local best_guess, best_guess_x, best_guess_width
+  for i,filename in ipairs(File_navigation.candidates) do
+    local width = App.width(to_text(filename))
+    if x + width > App.screen.width - 5 then
+      y = y + Editor_state.line_height
+      x = 5
+    end
+    if y == fy then
+      log(2, ('%d: correct row; considering %d %s %d %d'):format(y, i, filename, x, width))
+      if best_guess == nil then
+        log(2, 'nil')
+        best_guess = i
+        best_guess_x = x
+        best_guess_width = width
+      elseif math.abs(fx + fwidth/2 - x - width/2) < math.abs(fx + fwidth/2 - best_guess_x - best_guess_width/2) then
+        best_guess = i
+        best_guess_x = x
+        best_guess_width = width
+      end
+      log(2, ('best guess now %d %s %d %d'):format(best_guess, File_navigation.candidates[best_guess], best_guess_x, best_guess_width))
+    end
+    x = x + width + 30
+  end
+  log_end('file index')
+  return best_guess
 end
