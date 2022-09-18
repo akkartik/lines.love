@@ -343,7 +343,6 @@ function source.keychord_pressed(chord, key)
   end
   if chord == 'C-g' then
     Show_file_navigator = true
-    File_navigation.index = 1
     return
   end
   if Focus == 'edit' then
