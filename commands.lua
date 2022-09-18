@@ -53,28 +53,54 @@ function add_hotkey_to_menu(s)
 end
 
 function source.draw_file_navigator()
+  if File_navigation.num_lines == nil then
+    File_navigation.num_lines = source.num_lines_for_file_navigator()
+  end
+  App.color(Menu_background_color)
+  love.graphics.rectangle('fill', 0,Menu_status_bar_height, App.screen.width, File_navigation.num_lines * Editor_state.line_height)
+  local x,y = 5, Menu_status_bar_height
   for i,filename in ipairs(File_navigation.candidates) do
     if filename == 'source' then
       App.color(Menu_border_color)
       love.graphics.line(Menu_cursor-10,2, Menu_cursor-10,Menu_status_bar_height-2)
     end
-    add_file_to_menu(filename, i == File_navigation.index)
+    x,y = add_file_to_menu(x,y, filename, i == File_navigation.index)
     if Menu_cursor >= App.screen.width - 5 then
       break
     end
   end
 end
 
-function add_file_to_menu(s, cursor_highlight)
+function source.num_lines_for_file_navigator()
+  local result = 1
+  local x = 5
+  for i,filename in ipairs(File_navigation.candidates) do
+  local width = App.width(to_text(filename))
+  if x + width > App.screen.width - 5 then
+    result = result+1
+    x = 5 + width
+  else
+    x = x + width + 30
+  end
+  end
+  return result
+end
+
+function add_file_to_menu(x,y, s, cursor_highlight)
   local s_text = to_text(s)
   local width = App.width(s_text)
+  if x + width > App.screen.width - 5 then
+    y = y + Editor_state.line_height
+    x = 5
+  end
   if cursor_highlight then
     App.color(Menu_highlight_color)
-    love.graphics.rectangle('fill', Menu_cursor-5,5-2, width+5*2,Editor_state.line_height+2*2)
+    love.graphics.rectangle('fill', x-5,y-2, width+5*2,Editor_state.line_height+2*2)
   end
   App.color(Menu_command_color)
-  App.screen.draw(s_text, Menu_cursor,5)
-  Menu_cursor = Menu_cursor + width + 30
+  App.screen.draw(s_text, x,y)
+  x = x + width + 30
+  return x,y
 end
 
 function keychord_pressed_on_file_navigator(chord, key)
