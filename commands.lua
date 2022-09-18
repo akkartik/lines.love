@@ -75,13 +75,13 @@ function source.num_lines_for_file_navigator()
   local result = 1
   local x = 5
   for i,filename in ipairs(File_navigation.candidates) do
-  local width = App.width(to_text(filename))
-  if x + width > App.screen.width - 5 then
-    result = result+1
-    x = 5 + width
-  else
-    x = x + width + 30
-  end
+    local width = App.width(to_text(filename))
+    if x + width > App.screen.width - 5 then
+      result = result+1
+      x = 5 + width
+    else
+      x = x + width + 30
+    end
   end
   return result
 end
