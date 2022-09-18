@@ -1,4 +1,5 @@
 source = {}
+log_render = {}
 
 Editor_state = {}
 

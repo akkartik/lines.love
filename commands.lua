@@ -54,10 +54,10 @@ end
 
 function source.draw_file_navigator()
   if File_navigation.num_lines == nil then
-    File_navigation.num_lines = source.num_lines_for_file_navigator()
+    File_navigation.num_lines = source.num_lines_for_file_navigator(File_navigation.candidates)
   end
   App.color(Menu_background_color)
-  love.graphics.rectangle('fill', 0,Menu_status_bar_height, App.screen.width, File_navigation.num_lines * Editor_state.line_height)
+  love.graphics.rectangle('fill', 0,Menu_status_bar_height, App.screen.width, File_navigation.num_lines * Editor_state.line_height + --[[highlight padding]] 2)
   local x,y = 5, Menu_status_bar_height
   for i,filename in ipairs(File_navigation.candidates) do
     if filename == 'source' then
@@ -71,10 +71,10 @@ function source.draw_file_navigator()
   end
 end
 
-function source.num_lines_for_file_navigator()
+function source.num_lines_for_file_navigator(candidates)
   local result = 1
   local x = 5
-  for i,filename in ipairs(File_navigation.candidates) do
+  for i,filename in ipairs(candidates) do
     local width = App.width(to_text(filename))
     if x + width > App.screen.width - 5 then
       result = result+1
@@ -105,7 +105,7 @@ end
 
 function keychord_pressed_on_file_navigator(chord, key)
   log(2, 'file navigator: '..chord)
-  log(2, ('cursor initially at %d %s'):format(File_navigation.index, File_navigation.candidates[File_navigation.index]))
+  log(2, {name='file_navigator_state', files=File_navigation.candidates, index=File_navigation.index})
   if chord == 'escape' then
     Show_file_navigator = false
   elseif chord == 'return' then
@@ -125,6 +125,54 @@ function keychord_pressed_on_file_navigator(chord, key)
   elseif chord == 'up' then
     file_navigator_up()
   end
+end
+
+function log_render.file_navigator_state(o, x,y, w)
+  -- duplicate structure of source.draw_file_navigator
+  local num_lines = source.num_lines_for_file_navigator(o.files)
+  local h = num_lines * Editor_state.line_height
+  App.color(Menu_background_color)
+  love.graphics.rectangle('fill', x,y, w,h)
+  -- compute the x,y,width of the current index (in offsets from top left)
+  local x2,y2 = 0,0
+  local width = 0
+  for i,filename in ipairs(o.files) do
+    local filename_text = to_text(filename)
+    width = App.width(filename_text)
+    if x2 + width > App.screen.width - 5 then
+      y2 = y2 + Editor_state.line_height
+      x2 = 0
+    end
+    if i == o.index then
+      break
+    end
+    x2 = x2 + width + 30
+  end
+  -- figure out how much of the menu to display
+  local menu_xmin = math.max(0, x2-w/2)
+  local menu_xmax = math.min(App.screen.width, x2+w/2)
+  -- now selectively print out entries
+  local x3,y3 = 0,y  -- x3 is relative, y3 is absolute
+  local width = 0
+  for i,filename in ipairs(o.files) do
+    local filename_text = to_text(filename)
+    width = App.width(filename_text)
+    if x3 + width > App.screen.width - 5 then
+      y3 = y3 + Editor_state.line_height
+      x3 = 0
+    end
+    if i == o.index then
+      App.color(Menu_highlight_color)
+      love.graphics.rectangle('fill', x + x3-menu_xmin - 5, y3-2, width+5*2, Editor_state.line_height+2*2)
+    end
+    if x3 >= menu_xmin and x3 + width < menu_xmax then
+      App.color(Menu_command_color)
+      App.screen.draw(filename_text, x + x3-menu_xmin, y3)
+    end
+    x3 = x3 + width + 30
+  end
+  --
+  return h+20
 end
 
 function file_navigator_up()
