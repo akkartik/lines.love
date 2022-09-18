@@ -307,6 +307,9 @@ end
 
 function source.textinput(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
+  if Show_file_navigator then
+    return
+  end
   if Focus == 'edit' then
     return edit.textinput(Editor_state, t)
   else
