@@ -42,15 +42,13 @@ function source.draw_menu_bar()
 end
 
 function add_hotkey_to_menu(s)
-  if Text_cache[s] == nil then
-    Text_cache[s] = App.newText(love.graphics.getFont(), s)
-  end
-  local width = App.width(Text_cache[s])
+  local s_text = to_text(s)
+  local width = App.width(s_text)
   if Menu_cursor + width > App.screen.width - 5 then
     return
   end
   App.color(Menu_command_color)
-  App.screen.draw(Text_cache[s], Menu_cursor,5)
+  App.screen.draw(s_text, Menu_cursor,5)
   Menu_cursor = Menu_cursor + width + 30
 end
 
@@ -68,20 +66,18 @@ function source.draw_file_navigator()
 end
 
 function add_file_to_menu(s, cursor_highlight)
-  if Text_cache[s] == nil then
-    Text_cache[s] = App.newText(love.graphics.getFont(), s)
-  end
-  local width = App.width(Text_cache[s])
+  local s_text = to_text(s)
+  local width = App.width(s_text)
   if Menu_cursor + width > App.screen.width - 5 then
     log(2, 'skipped')
     return
   end
   if cursor_highlight then
     App.color(Menu_highlight_color)
-    love.graphics.rectangle('fill', Menu_cursor-5,5-2, App.width(Text_cache[s])+5*2,Editor_state.line_height+2*2)
+    love.graphics.rectangle('fill', Menu_cursor-5,5-2, App.width(s_text)+5*2,Editor_state.line_height+2*2)
   end
   App.color(Menu_command_color)
-  App.screen.draw(Text_cache[s], Menu_cursor,5)
+  App.screen.draw(s_text, Menu_cursor,5)
   Menu_cursor = Menu_cursor + width + 30
 end
 
