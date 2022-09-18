@@ -12,7 +12,6 @@ function source.initialize_globals()
   Show_file_navigator = false
   File_navigation = {
     all_candidates = {
-      'main',
       'run',
       'run_tests',
       'log',
