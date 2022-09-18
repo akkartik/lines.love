@@ -221,7 +221,6 @@ function source.switch_to_file(filename)
 end
 
 function source.draw()
-  source.draw_menu_bar()
   edit.draw(Editor_state)
   if Show_log_browser_side then
     -- divider
@@ -230,6 +229,7 @@ function source.draw()
     --
     log_browser.draw(Log_browser_state)
   end
+  source.draw_menu_bar()
 end
 
 function source.update(dt)
