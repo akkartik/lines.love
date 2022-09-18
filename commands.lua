@@ -74,7 +74,7 @@ function add_file_to_menu(s, cursor_highlight)
   end
   if cursor_highlight then
     App.color(Menu_highlight_color)
-    love.graphics.rectangle('fill', Menu_cursor-5,5-2, App.width(s_text)+5*2,Editor_state.line_height+2*2)
+    love.graphics.rectangle('fill', Menu_cursor-5,5-2, width+5*2,Editor_state.line_height+2*2)
   end
   App.color(Menu_command_color)
   App.screen.draw(s_text, Menu_cursor,5)
