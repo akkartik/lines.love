@@ -281,6 +281,11 @@ function source.mouse_pressed(x,y, mouse_button)
 --?   print('mouse click', x, y)
 --?   print(Editor_state.left, Editor_state.right)
 --?   print(Log_browser_state.left, Log_browser_state.right)
+  if Show_file_navigator and y < Menu_status_bar_height + File_navigation.num_lines * Editor_state.line_height then
+    -- send click to buttons
+    edit.mouse_pressed(Editor_state, x,y, mouse_button)
+    return
+  end
   if x < Editor_state.right + Margin_right then
 --?     print('click on edit side')
     if Focus ~= 'edit' then
