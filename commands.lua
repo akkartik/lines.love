@@ -124,9 +124,7 @@ function add_file_to_menu(x,y, s, cursor_highlight)
   end
   button(Editor_state, 'menu', {x=x-5, y=y-2, w=width+5*2, h=Editor_state.line_height+2*2, color=colortable(color),
     onpress1 = function()
-      local candidate = guess_source(s..'.lua')
-      source.switch_to_file(candidate)
-      Show_file_navigator = false
+      navigate_to_file(s)
     end
   })
   App.color(Menu_command_color)
@@ -135,21 +133,26 @@ function add_file_to_menu(x,y, s, cursor_highlight)
   return x,y
 end
 
+function navigate_to_file(s)
+  local candidate = guess_source(s..'.lua')
+  source.switch_to_file(candidate)
+  reset_file_navigator()
+end
+
+function reset_file_navigator()
+  Show_file_navigator = false
+  File_navigation.index = 1
+  File_navigation.filter = ''
+  File_navigation.candidates = File_navigation.all_candidates
+end
+
 function keychord_pressed_on_file_navigator(chord, key)
   log(2, 'file navigator: '..chord)
   log(2, {name='file_navigator_state', files=File_navigation.candidates, index=File_navigation.index})
   if chord == 'escape' then
-    Show_file_navigator = false
-    File_navigation.index = 1
-    File_navigation.filter = ''
-    File_navigation.candidates = File_navigation.all_candidates
+    reset_file_navigator()
   elseif chord == 'return' then
-    local candidate = guess_source(File_navigation.candidates[File_navigation.index]..'.lua')
-    source.switch_to_file(candidate)
-    Show_file_navigator = false
-    File_navigation.index = 1
-    File_navigation.filter = ''
-    File_navigation.candidates = File_navigation.all_candidates
+    navigate_to_file(File_navigation.candidates[File_navigation.index])
   elseif chord == 'backspace' then
     local len = utf8.len(File_navigation.filter)
     local byte_offset = Text.offset(File_navigation.filter, len)
