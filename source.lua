@@ -45,6 +45,7 @@ function source.initialize_globals()
     },
     index = 1,
     filter = '',
+    cursors = {},  -- filename to cursor1, screen_top1
   }
   File_navigation.candidates = File_navigation.all_candidates  -- modified with filter
 
@@ -214,12 +215,19 @@ function source.switch_to_file(filename)
   if Editor_state.next_save then
     save_to_disk(Editor_state)
   end
+  -- save cursor position
+  File_navigation.cursors[Editor_state.filename] = {cursor1=Editor_state.cursor1, screen_top1=Editor_state.screen_top1}
   -- clear the slate for the new file
   Editor_state.filename = filename
   load_from_disk(Editor_state)
   Text.redraw_all(Editor_state)
-  Editor_state.screen_top1 = {line=1, pos=1}
-  Editor_state.cursor1 = {line=1, pos=1}
+  if File_navigation.cursors[filename] then
+    Editor_state.screen_top1 = File_navigation.cursors[filename].screen_top1
+    Editor_state.cursor1 = File_navigation.cursors[filename].cursor1
+  else
+    Editor_state.screen_top1 = {line=1, pos=1}
+    Editor_state.cursor1 = {line=1, pos=1}
+  end
 end
 
 function source.draw()
@@ -261,13 +269,13 @@ function source.settings()
     Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
   end
 --?   print('saving source settings', Settings.source.x, Settings.source.y, Settings.source.displayindex)
-  print(Editor_state.filename)
+  File_navigation.cursors[Editor_state.filename] = {cursor1=Editor_state.cursor1, screen_top1=Editor_state.screen_top1}
   return {
     x=Settings.source.x, y=Settings.source.y, displayindex=Settings.source.displayindex,
     width=App.screen.width, height=App.screen.height,
     font_height=Editor_state.font_height,
     filename=Editor_state.filename,
-    screen_top=Editor_state.screen_top1, cursor=Editor_state.cursor1,
+    cursors=File_navigation.cursors,
     show_log_browser_side=Show_log_browser_side,
     focus=Focus,
   }
