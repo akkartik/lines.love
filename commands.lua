@@ -64,10 +64,6 @@ function source.draw_file_navigator()
   love.graphics.rectangle('fill', 0,Menu_status_bar_height, App.screen.width, File_navigation.num_lines * Editor_state.line_height + --[[highlight padding]] 2)
   local x,y = 5, Menu_status_bar_height
   for i,filename in ipairs(File_navigation.candidates) do
-    if filename == 'source' then
-      App.color(Menu_border_color)
-      love.graphics.line(Menu_cursor-10,2, Menu_cursor-10,Menu_status_bar_height-2)
-    end
     x,y = add_file_to_menu(x,y, filename, i == File_navigation.index)
     if Menu_cursor >= App.screen.width - 5 then
       break
@@ -134,9 +130,17 @@ function add_file_to_menu(x,y, s, cursor_highlight)
 end
 
 function navigate_to_file(s)
+  move_candidate_to_front(s)
   local candidate = guess_source(s..'.lua')
   source.switch_to_file(candidate)
   reset_file_navigator()
+end
+
+function move_candidate_to_front(s)
+  local index = array.find(File_navigation.all_candidates, s)
+  assert(index)
+  table.remove(File_navigation.all_candidates, index)
+  table.insert(File_navigation.all_candidates, 1, s)
 end
 
 function reset_file_navigator()
