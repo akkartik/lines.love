@@ -260,16 +260,13 @@ function source.settings()
 --?     print('reading source window position')
     Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
   end
-  local filename = Editor_state.filename
-  if is_relative_path(filename) then
-    filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
-  end
 --?   print('saving source settings', Settings.source.x, Settings.source.y, Settings.source.displayindex)
+  print(Editor_state.filename)
   return {
     x=Settings.source.x, y=Settings.source.y, displayindex=Settings.source.displayindex,
     width=App.screen.width, height=App.screen.height,
     font_height=Editor_state.font_height,
-    filename=filename,
+    filename=Editor_state.filename,
     screen_top=Editor_state.screen_top1, cursor=Editor_state.cursor1,
     show_log_browser_side=Show_log_browser_side,
     focus=Focus,
