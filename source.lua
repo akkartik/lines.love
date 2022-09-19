@@ -72,7 +72,7 @@ function source.initialize()
     source.initialize_default_settings()
   end
 
-  source.initialize_edit_side{'run.lua'}
+  source.initialize_edit_side()
   source.initialize_log_browser_side()
 
   Menu_status_bar_height = 5 + Editor_state.line_height + 5
