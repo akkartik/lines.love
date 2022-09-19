@@ -216,3 +216,39 @@ end
 function is_relative_path(path)
   return not is_absolute_path(path)
 end
+
+function dirname(path)
+  local os_path_separator = package.config:sub(1,1)
+  if os_path_separator == '/' then
+    -- POSIX systems permit backslashes in filenames
+    return path:match('.*/') or './'
+  elseif os_path_separator == '\\' then
+    return path:match('.*[/\\]') or './'
+  else
+    error('What OS is this? LÖVE reports that the path separator is "'..os_path_separator..'"')
+  end
+end
+
+function test_dirname()
+  check_eq(dirname('a/b'), 'a/', 'F - test_dirname')
+  check_eq(dirname('x'), './', 'F - test_dirname/current')
+end
+
+function basename(path)
+  local os_path_separator = package.config:sub(1,1)
+  if os_path_separator == '/' then
+    -- POSIX systems permit backslashes in filenames
+    return string.gsub(path, ".*/(.*)", "%1")
+  elseif os_path_separator == '\\' then
+    return string.gsub(path, ".*[/\\](.*)", "%1")
+  else
+    error('What OS is this? LÖVE reports that the path separator is "'..os_path_separator..'"')
+  end
+end
+
+function empty(h)
+  for _,_ in pairs(h) do
+    return false
+  end
+  return true
+end
