@@ -83,21 +83,9 @@ end
 
 -- environment for a mutable file of bifolded text
 -- TODO: some initialization is also happening in load_settings/initialize_default_settings. Clean that up.
-function source.initialize_edit_side(arg)
-  if #arg > 0 then
-    Editor_state.filename = arg[1]
-    load_from_disk(Editor_state)
-    Text.redraw_all(Editor_state)
-    Editor_state.screen_top1 = {line=1, pos=1}
-    Editor_state.cursor1 = {line=1, pos=1}
-  else
-    load_from_disk(Editor_state)
-    Text.redraw_all(Editor_state)
-  end
-
-  if #arg > 1 then
-    print('ignoring commandline args after '..arg[1])
-  end
+function source.initialize_edit_side()
+  load_from_disk(Editor_state)
+  Text.redraw_all(Editor_state)
 
   -- We currently start out with side B collapsed.
   -- Other options:
@@ -154,6 +142,7 @@ function source.initialize_default_settings()
   local em = App.newText(love.graphics.getFont(), 'm')
   source.initialize_window_geometry(App.width(em))
   Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right)
+  Editor_state.filename = 'run.lua'
   Editor_state.font_height = font_height
   Editor_state.line_height = math.floor(font_height*1.3)
   Editor_state.em = em
