@@ -86,6 +86,8 @@ end
 function source.initialize_edit_side()
   load_from_disk(Editor_state)
   Text.redraw_all(Editor_state)
+  Editor_state.screen_top1 = File_navigation.cursors[Editor_state.filename].screen_top1
+  Editor_state.cursor1 = File_navigation.cursors[Editor_state.filename].cursor1
 
   -- We currently start out with side B collapsed.
   -- Other options:
@@ -127,8 +129,9 @@ function source.load_settings()
   end
   Editor_state = edit.initialize_state(Margin_top, Margin_left, right, settings.font_height, math.floor(settings.font_height*1.3))
   Editor_state.filename = settings.filename
-  Editor_state.screen_top1 = settings.screen_top
-  Editor_state.cursor1 = settings.cursor
+  File_navigation.cursors = settings.cursors
+  Editor_state.screen_top1 = File_navigation.cursors[Editor_state.filename].screen_top1
+  Editor_state.cursor1 = File_navigation.cursors[Editor_state.filename].cursor1
 end
 
 function source.set_window_position_from_settings(settings)
