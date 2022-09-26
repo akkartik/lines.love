@@ -206,6 +206,7 @@ function is_absolute_path(path)
     -- POSIX systems permit backslashes in filenames
     return path:sub(1,1) == '/'
   elseif os_path_separator == '\\' then
+    if path:sub(2,2) == ':' then return true end  -- DOS drive letter followed by volume separator
     local f = path:sub(1,1)
     return f == '/' or f == '\\'
   else
