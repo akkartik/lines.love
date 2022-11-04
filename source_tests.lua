@@ -31,7 +31,7 @@ function test_show_log_browser_side()
   log_browser.parse(Log_browser_state)
   check(not Show_log_browser_side, 'F - test_show_log_browser_side/baseline')
   -- pressing ctrl+l shows log-browser side
-  App.wait_fake_time(0.1)
+  Current_time = Current_time + 0.1
   App.run_after_keychord('C-l')
   check(Show_log_browser_side, 'F - test_show_log_browser_side')
 end
@@ -56,7 +56,7 @@ function test_show_log_browser_side_doubles_window_width_if_possible()
   Text.redraw_all(Log_browser_state)
   log_browser.parse(Log_browser_state)
   -- display log browser
-  App.wait_fake_time(0.1)
+  Current_time = Current_time + 0.1
   App.run_after_keychord('C-l')
   -- window width is doubled
   check_eq(App.screen.width, 600, 'F - test_show_log_browser_side_doubles_window_width_if_possible/display:width')
@@ -87,7 +87,7 @@ function test_show_log_browser_side_resizes_both_sides_if_cannot_double_window_w
   Text.redraw_all(Log_browser_state)
   log_browser.parse(Log_browser_state)
   -- display log browser
-  App.wait_fake_time(0.1)
+  Current_time = Current_time + 0.1
   App.run_after_keychord('C-l')
   -- margins are now adjusted
   check_eq(Editor_state.left, Margin_left, 'F - test_show_log_browser_side_resizes_both_sides_if_cannot_double_window_width/edit:left')

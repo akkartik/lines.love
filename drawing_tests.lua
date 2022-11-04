@@ -16,7 +16,7 @@ function test_creating_drawing_saves()
   edit.update(Editor_state, 0.01)
   check_nil(App.filesystem['foo'], 'F - test_creating_drawing_saves/early')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- filesystem contains drawing and an empty line of text
   check_eq(App.filesystem['foo'], '```lines\n```\n\n', 'F - test_creating_drawing_saves')
@@ -51,7 +51,7 @@ function test_draw_line()
   check_eq(p2.x, 35, 'F - test_draw_line/p2:x')
   check_eq(p2.y, 36, 'F - test_draw_line/p2:y')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- The format on disk isn't perfectly stable. Table fields can be reordered.
   -- So just reload from disk to verify.
@@ -430,7 +430,7 @@ function test_name_point()
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_name_point/mode:3')
   check_eq(p2.name, 'A', 'F - test_name_point')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- change is saved
   load_from_disk(Editor_state)
@@ -462,7 +462,7 @@ function test_move_point()
   check_eq(p2.x, 35, 'F - test_move_point/baseline/p2:x')
   check_eq(p2.y, 36, 'F - test_move_point/baseline/p2:y')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- line is saved to disk
   load_from_disk(Editor_state)
@@ -489,7 +489,7 @@ function test_move_point()
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_move_point/mode:3')
   check_eq(drawing.pending, {}, 'F - test_move_point/pending')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- change is saved
   load_from_disk(Editor_state)
@@ -550,7 +550,7 @@ function test_delete_lines_at_point()
   check_eq(drawing.shapes[1].mode, 'deleted', 'F - test_delete_lines_at_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'F - test_delete_lines_at_point/shape:2')
   -- wait for some time
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- deleted points disappear after file is reloaded
   load_from_disk(Editor_state)
@@ -684,7 +684,7 @@ function test_undo_name_point()
   check_eq(Editor_state.next_history, 3, 'F - test_undo_name_point/next_history')
   check_eq(p2.name, '', 'F - test_undo_name_point')  -- not quite what it was before, but close enough
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- undo is saved
   load_from_disk(Editor_state)
@@ -735,7 +735,7 @@ function test_undo_move_point()
   check_eq(p2.x, 35, 'F - test_undo_move_point/x')
   check_eq(p2.y, 36, 'F - test_undo_move_point/y')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- undo is saved
   load_from_disk(Editor_state)
@@ -776,7 +776,7 @@ function test_undo_delete_point()
   check_eq(drawing.shapes[1].mode, 'line', 'F - test_undo_delete_point/shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'F - test_undo_delete_point/shape:2')
   -- wait until save
-  App.wait_fake_time(3.1)
+  Current_time = Current_time + 3.1
   edit.update(Editor_state, 0)
   -- undo is saved
   load_from_disk(Editor_state)
