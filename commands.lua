@@ -44,7 +44,7 @@ end
 function add_hotkey_to_menu(s)
   local s_text = to_text(s)
   local width = App.width(s_text)
-  if Menu_cursor + width > App.screen.width - 5 then
+  if Menu_cursor > App.screen.width - 30 then
     return
   end
   App.color(Menu_command_color)
