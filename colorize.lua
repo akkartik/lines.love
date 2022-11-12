@@ -4,9 +4,11 @@
 -- at word boundaries.
 Next_state = {
   normal={
+    {prefix='--[[', target='block_comment'},  -- only single-line for now
     {prefix='--', target='comment'},
     {prefix='"', target='dstring'},
     {prefix="'", target='sstring'},
+    {prefix='[[', target='block_string'},  -- only single line for now
   },
   dstring={
     {suffix='"', target='normal'},
@@ -14,18 +16,26 @@ Next_state = {
   sstring={
     {suffix="'", target='normal'},
   },
+  block_string={
+    {suffix=']]', target='normal'},
+  },
+  block_comment={
+    {suffix=']]', target='normal'},
+  },
   -- comments are a sink
 }
 
-Comments_color = {r=0, g=0, b=1}
+Comment_color = {r=0, g=0, b=1}
 String_color = {r=0, g=0.5, b=0.5}
 Divider_color = {r=0.7, g=0.7, b=0.7}
 
 Colors = {
   normal=Text_color,
-  comment=Comments_color,
+  comment=Comment_color,
   sstring=String_color,
-  dstring=String_color
+  dstring=String_color,
+  block_string=String_color,
+  block_comment=Comment_color,
 }
 
 Current_state = 'normal'
@@ -63,7 +73,7 @@ function switch_color_based_on_suffix(frag)
   end
   frag = rtrim(frag)
   for _,edge in pairs(Next_state[Current_state]) do
-    if edge.suffix and rfind(frag, edge.suffix, nil, --[[plain]] true) == #frag then
+    if edge.suffix and rfind(frag, edge.suffix, nil, --[[plain]] true) == #frag - #edge.suffix + 1 then
       Current_state = edge.target
       break
     end
