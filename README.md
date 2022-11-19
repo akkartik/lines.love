@@ -29,6 +29,7 @@ While editing text:
 * `ctrl+z` to undo, `ctrl+y` to redo
 * `ctrl+=` to zoom in, `ctrl+-` to zoom out, `ctrl+0` to reset zoom
 * `alt+right`/`alt+left` to jump to the next/previous word, respectively
+* mouse drag or `shift` + movement to select text, `ctrl+a` to select all
 * `ctrl+e` to modify the sources
 
 For shortcuts while editing drawings, consult the online help. Either:

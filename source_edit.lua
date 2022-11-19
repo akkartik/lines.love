@@ -311,7 +311,7 @@ function edit.keychord_pressed(State, chord, key)
       -- printable character created using shift key => delete selection
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
-      chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
+      chord ~= 'C-a' and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
     Text.delete_selection(State, State.left, State.right)
   end
   if State.search_term then
@@ -417,6 +417,9 @@ function edit.keychord_pressed(State, chord, key)
       schedule_save(State)
     end
   -- clipboard
+  elseif chord == 'C-a' then
+    State.selection1 = {line=1, pos=1}
+    State.cursor1 = {line=#State.lines, pos=utf8.len(State.lines[#State.lines].data)+1, posB=nil}
   elseif chord == 'C-c' then
     local s = Text.selection(State)
     if s then
