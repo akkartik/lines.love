@@ -32,14 +32,14 @@ function love.run()
       end
     end
 
-    -- draw before update to give it a chance to mutate state
+    dt = love.timer.step()
+    App.update(dt)
+
     love.graphics.origin()
     love.graphics.clear(love.graphics.getBackgroundColor())
     App.draw()
     love.graphics.present()
 
-    dt = love.timer.step()
-    App.update(dt)
     love.timer.sleep(0.001)
   end
 end
