@@ -513,7 +513,7 @@ end
 
 function edit.update_font_settings(State, font_height)
   State.font_height = font_height
-  love.graphics.setFont(love.graphics.newFont(Editor_state.font_height))
+  love.graphics.setFont(love.graphics.newFont(State.font_height))
   State.line_height = math.floor(font_height*1.3)
   State.em = App.newText(love.graphics.getFont(), 'm')
   Text_cache = {}
