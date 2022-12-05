@@ -367,7 +367,9 @@ function source.keychord_pressed(chord, key)
     -- clear logs
     love.filesystem.remove('log')
     -- restart to reload state of logs on screen
+    Settings.source = source.settings()
     source.quit()
+    love.filesystem.write('config', json.encode(Settings))
     load_file_from_source_or_save_directory('main.lua')
     App.undo_initialize()
     App.run_tests_and_initialize()
