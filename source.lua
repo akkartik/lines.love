@@ -363,6 +363,16 @@ function source.keychord_pressed(chord, key)
     end
     return
   end
+  if chord == 'C-k' then
+    -- clear logs
+    love.filesystem.remove('log')
+    -- restart to reload state of logs on screen
+    source.quit()
+    load_file_from_source_or_save_directory('main.lua')
+    App.undo_initialize()
+    App.run_tests_and_initialize()
+    return
+  end
   if chord == 'C-g' then
     Show_file_navigator = true
     return

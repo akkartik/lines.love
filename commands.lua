@@ -23,6 +23,7 @@ function source.draw_menu_bar()
     else
       add_hotkey_to_menu('ctrl+l: show log browser')
     end
+    add_hotkey_to_menu('ctrl+k: clear logs')
     if Editor_state.expanded then
       add_hotkey_to_menu('alt+b: collapse debug prints')
     else
