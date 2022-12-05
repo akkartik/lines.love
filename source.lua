@@ -299,12 +299,14 @@ function source.mouse_pressed(x,y, mouse_button)
 --?     print('click on edit side')
     if Focus ~= 'edit' then
       Focus = 'edit'
+      return
     end
     edit.mouse_pressed(Editor_state, x,y, mouse_button)
   elseif Show_log_browser_side and Log_browser_state.left <= x and x < Log_browser_state.right then
 --?     print('click on log_browser side')
     if Focus ~= 'log_browser' then
       Focus = 'log_browser'
+      return
     end
     log_browser.mouse_pressed(Log_browser_state, x,y, mouse_button)
     for _,line_cache in ipairs(Editor_state.line_cache) do line_cache.starty = nil end  -- just in case we scroll
