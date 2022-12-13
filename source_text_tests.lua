@@ -1172,8 +1172,8 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   App.screen.check(y, 'kl', 'F - test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_word/screen:3')
 end
 
-function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
-  io.write('\ntest_page_down_followed_by_down_arrow_does_not_scroll_screen_up')
+function test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up()
+  io.write('\ntest_pagedown_followed_by_down_arrow_does_not_scroll_screen_up')
   App.screen.init{width=Editor_state.left+30, height=60}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc', 'def', 'ghijkl', 'mno'}
@@ -1183,27 +1183,27 @@ function test_page_down_followed_by_down_arrow_does_not_scroll_screen_up()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   local y = Editor_state.top
-  App.screen.check(y, 'abc', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:1')
+  App.screen.check(y, 'abc', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'def', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
+  App.screen.check(y, 'def', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'ghij', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
+  App.screen.check(y, 'ghij', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline/screen:3')
   -- after hitting pagedown the screen scrolls down to start of a long line
   edit.run_after_keychord(Editor_state, 'pagedown')
-  check_eq(Editor_state.screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/screen_top')
-  check_eq(Editor_state.cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 1, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:pos')
+  check_eq(Editor_state.screen_top1.line, 3, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/screen_top')
+  check_eq(Editor_state.cursor1.line, 3, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/baseline2/cursor:pos')
   -- after hitting down arrow the screen doesn't scroll down further, and certainly doesn't scroll up
   edit.run_after_keychord(Editor_state, 'down')
-  check_eq(Editor_state.screen_top1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen_top')
-  check_eq(Editor_state.cursor1.line, 3, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 5, 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
+  check_eq(Editor_state.screen_top1.line, 3, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/screen_top')
+  check_eq(Editor_state.cursor1.line, 3, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 5, 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/cursor:pos')
   y = Editor_state.top
-  App.screen.check(y, 'ghij', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
+  App.screen.check(y, 'ghij', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'kl', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
+  App.screen.check(y, 'kl', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'mno', 'F - test_page_down_followed_by_down_arrow_does_not_scroll_screen_up/screen:3')
+  App.screen.check(y, 'mno', 'F - test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up/screen:3')
 end
 
 function test_up_arrow_moves_cursor()
