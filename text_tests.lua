@@ -269,20 +269,21 @@ end
 
 function test_click_with_mouse()
   io.write('\ntest_click_with_mouse')
-  -- display two lines with cursor on one of them
-  App.screen.init{width=50, height=80}
+  App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def'}
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=2, pos=1}
+  Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
-  -- click on the other line
-  edit.draw(Editor_state)
-  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
-  -- cursor moves
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor:line')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse/cursor:pos')
+  -- selection is empty to avoid perturbing future edits
+  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_click_with_mouse/selection:pos')
 end
 
 function test_click_with_mouse_to_left_of_line()
@@ -854,24 +855,6 @@ function test_insert_from_clipboard()
   App.screen.check(y, 'zbc', 'F - test_insert_from_clipboard/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/screen:3')
-end
-
-function test_move_cursor_using_mouse()
-  io.write('\ntest_move_cursor_using_mouse')
-  App.screen.init{width=50, height=60}
-  Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
-  Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=1, pos=1}
-  Editor_state.screen_top1 = {line=1, pos=1}
-  Editor_state.screen_bottom1 = {}
-  Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
-  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
-  check_nil(Editor_state.selection1.pos, 'F - test_move_cursor_using_mouse/selection:pos')
 end
 
 function test_select_text_using_mouse()
