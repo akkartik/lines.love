@@ -299,8 +299,11 @@ function edit.textinput(State, t)
     p.name = p.name..t
     record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
   else
-    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
-    Text.textinput(State, t)
+    local drawing_index, drawing = Drawing.current_drawing(State)
+    if drawing_index == nil then
+      for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
+      Text.textinput(State, t)
+    end
   end
   schedule_save(State)
 end
