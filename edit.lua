@@ -278,7 +278,6 @@ function edit.mouse_released(State, x,y, mouse_button)
 end
 
 function edit.textinput(State, t)
-  for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
   if State.search_term then
     State.search_term = State.search_term..t
     State.search_text = nil
@@ -290,6 +289,7 @@ function edit.textinput(State, t)
     p.name = p.name..t
     record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
   else
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     Text.textinput(State, t)
   end
   schedule_save(State)
@@ -490,6 +490,7 @@ function edit.run_after_textinput(State, t)
   edit.textinput(State, t)
   edit.key_released(State, t)
   App.screen.contents = {}
+  edit.update(State, 0)
   edit.draw(State)
 end
 
@@ -498,6 +499,7 @@ function edit.run_after_keychord(State, chord)
   edit.keychord_pressed(State, chord)
   edit.key_released(State, chord)
   App.screen.contents = {}
+  edit.update(State, 0)
   edit.draw(State)
 end
 
@@ -507,6 +509,7 @@ function edit.run_after_mouse_click(State, x,y, mouse_button)
   App.fake_mouse_release(x,y, mouse_button)
   edit.mouse_released(State, x,y, mouse_button)
   App.screen.contents = {}
+  edit.update(State, 0)
   edit.draw(State)
 end
 
@@ -514,6 +517,7 @@ function edit.run_after_mouse_press(State, x,y, mouse_button)
   App.fake_mouse_press(x,y, mouse_button)
   edit.mouse_pressed(State, x,y, mouse_button)
   App.screen.contents = {}
+  edit.update(State, 0)
   edit.draw(State)
 end
 
@@ -521,5 +525,6 @@ function edit.run_after_mouse_release(State, x,y, mouse_button)
   App.fake_mouse_release(x,y, mouse_button)
   edit.mouse_released(State, x,y, mouse_button)
   App.screen.contents = {}
+  edit.update(State, 0)
   edit.draw(State)
 end
