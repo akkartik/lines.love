@@ -267,26 +267,27 @@ function test_move_past_end_of_word_on_next_line()
   check_eq(Editor_state.cursor1.pos, 4, 'F - test_move_past_end_of_word_on_next_line/pos')
 end
 
-function test_click_with_mouse()
-  io.write('\ntest_click_with_mouse')
-  -- display two lines with cursor on one of them
-  App.screen.init{width=50, height=80}
+function test_click_moves_cursor()
+  io.write('\ntest_click_moves_cursor')
+  App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def'}
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
   Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=2, pos=1}
+  Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
-  -- click on the other line
-  edit.draw(Editor_state)
-  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
-  -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse/cursor:line')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse/selection is empty to avoid perturbing future edits')
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_moves_cursor/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_moves_cursor/cursor:pos')
+  -- selection is empty to avoid perturbing future edits
+  check_nil(Editor_state.selection1.line, 'F - test_click_moves_cursor/selection:line')
+  check_nil(Editor_state.selection1.pos, 'F - test_click_moves_cursor/selection:pos')
 end
 
-function test_click_with_mouse_to_left_of_line()
-  io.write('\ntest_click_with_mouse_to_left_of_line')
+function test_click_to_left_of_line()
+  io.write('\ntest_click_to_left_of_line')
   -- display a line with the cursor in the middle
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
@@ -299,13 +300,13 @@ function test_click_with_mouse_to_left_of_line()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left-4,Editor_state.top+5, 1)
   -- cursor moves to start of line
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_with_mouse_to_left_of_line/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_to_left_of_line/selection is empty to avoid perturbing future edits')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_to_left_of_line/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 1, 'F - test_click_to_left_of_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_to_left_of_line/selection is empty to avoid perturbing future edits')
 end
 
-function test_click_with_mouse_takes_margins_into_account()
-  io.write('\ntest_click_with_mouse_takes_margins_into_account')
+function test_click_takes_margins_into_account()
+  io.write('\ntest_click_takes_margins_into_account')
   -- display two lines with cursor on one of them
   App.screen.init{width=100, height=80}
   Editor_state = edit.initialize_test_state()
@@ -319,13 +320,13 @@ function test_click_with_mouse_takes_margins_into_account()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_takes_margins_into_account/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_takes_margins_into_account/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_takes_margins_into_account/selection is empty to avoid perturbing future edits')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_takes_margins_into_account/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
-function test_click_with_mouse_on_empty_line()
-  io.write('\ntest_click_with_mouse_on_empty_line')
+function test_click_on_empty_line()
+  io.write('\ntest_click_on_empty_line')
   -- display two lines with the first one empty
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
@@ -338,7 +339,7 @@ function test_click_with_mouse_on_empty_line()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_empty_line/cursor')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_on_empty_line/cursor')
 end
 
 function test_draw_text()
@@ -395,8 +396,8 @@ function test_draw_word_wrapping_text()
   App.screen.check(y, 'ghi', 'F - test_draw_word_wrapping_text/screen:3')
 end
 
-function test_click_with_mouse_on_wrapping_line()
-  io.write('\ntest_click_with_mouse_on_wrapping_line')
+function test_click_on_wrapping_line()
+  io.write('\ntest_click_on_wrapping_line')
   -- display two lines with cursor on one of them
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
@@ -409,13 +410,13 @@ function test_click_with_mouse_on_wrapping_line()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line/selection is empty to avoid perturbing future edits')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_on_wrapping_line/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_on_wrapping_line/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_on_wrapping_line/selection is empty to avoid perturbing future edits')
 end
 
-function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
-  io.write('\ntest_click_with_mouse_on_wrapping_line_takes_margins_into_account')
+function test_click_on_wrapping_line_takes_margins_into_account()
+  io.write('\ntest_click_on_wrapping_line_takes_margins_into_account')
   -- display two lines with cursor on one of them
   App.screen.init{width=100, height=80}
   Editor_state = edit.initialize_test_state()
@@ -429,9 +430,9 @@ function test_click_with_mouse_on_wrapping_line_takes_margins_into_account()
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_click_with_mouse_on_wrapping_line_takes_margins_into_account/selection is empty to avoid perturbing future edits')
+  check_eq(Editor_state.cursor1.line, 1, 'F - test_click_on_wrapping_line_takes_margins_into_account/cursor:line')
+  check_eq(Editor_state.cursor1.pos, 2, 'F - test_click_on_wrapping_line_takes_margins_into_account/cursor:pos')
+  check_nil(Editor_state.selection1.line, 'F - test_click_on_wrapping_line_takes_margins_into_account/selection is empty to avoid perturbing future edits')
 end
 
 function test_draw_text_wrapping_within_word()
@@ -854,24 +855,6 @@ function test_insert_from_clipboard()
   App.screen.check(y, 'zbc', 'F - test_insert_from_clipboard/screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'F - test_insert_from_clipboard/screen:3')
-end
-
-function test_move_cursor_using_mouse()
-  io.write('\ntest_move_cursor_using_mouse')
-  App.screen.init{width=50, height=60}
-  Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
-  Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=1, pos=1}
-  Editor_state.screen_top1 = {line=1, pos=1}
-  Editor_state.screen_bottom1 = {}
-  Editor_state.selection1 = {}
-  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
-  edit.run_after_mouse_release(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
-  check_eq(Editor_state.cursor1.line, 1, 'F - test_move_cursor_using_mouse/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 2, 'F - test_move_cursor_using_mouse/cursor:pos')
-  check_nil(Editor_state.selection1.line, 'F - test_move_cursor_using_mouse/selection:line')
-  check_nil(Editor_state.selection1.pos, 'F - test_move_cursor_using_mouse/selection:pos')
 end
 
 function test_select_text_using_mouse()
