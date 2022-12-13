@@ -162,7 +162,7 @@ function test_keys_do_not_affect_shape_when_mouse_up()
   edit.draw(Editor_state)
   -- hover over drawing and press 'o' without holding mouse
   App.mouse_move(Editor_state.left+4, Editor_state.top+Drawing_padding_top+4)  -- hover on drawing
-  edit.run_after_textinput(Editor_state, 'o')
+  edit.run_after_keychord(Editor_state, 'o')
   -- no change to drawing mode
   check_eq(Editor_state.current_drawing_mode, 'line', 'F - test_keys_do_not_affect_shape_when_mouse_up/drawing_mode')
   -- no change to text either because we didn't run the textinput event
