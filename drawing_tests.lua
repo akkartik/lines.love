@@ -185,7 +185,7 @@ function test_draw_circle_mid_stroke()
   -- draw a circle
   App.mouse_move(Editor_state.left+4, Editor_state.top+Drawing_padding_top+4)  -- hover on drawing
   edit.run_after_mouse_press(Editor_state, Editor_state.left+35, Editor_state.top+Drawing_padding_top+36, 1)
-  edit.run_after_keychord(Editor_state, 'o')
+  edit.run_after_textinput(Editor_state, 'o')
   edit.run_after_mouse_release(Editor_state, Editor_state.left+35+30, Editor_state.top+Drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 1, 'F - test_draw_circle_mid_stroke/#shapes')
