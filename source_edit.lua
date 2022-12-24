@@ -208,7 +208,7 @@ function edit.quit(State)
   end
 end
 
-function edit.mouse_pressed(State, x,y, mouse_button)
+function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print('press')
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
@@ -243,7 +243,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         State.lines.current_drawing_index = line_index
         State.lines.current_drawing = line
         Drawing.before = snapshot(State, line_index)
-        Drawing.mouse_pressed(State, line_index, x,y, mouse_button)
+        Drawing.mouse_press(State, line_index, x,y, mouse_button)
         break
       end
     end
@@ -561,7 +561,7 @@ end
 
 function edit.run_after_mouse_click(State, x,y, mouse_button)
   App.fake_mouse_press(x,y, mouse_button)
-  edit.mouse_pressed(State, x,y, mouse_button)
+  edit.mouse_press(State, x,y, mouse_button)
   App.fake_mouse_release(x,y, mouse_button)
   edit.mouse_release(State, x,y, mouse_button)
   App.screen.contents = {}
@@ -571,7 +571,7 @@ end
 
 function edit.run_after_mouse_press(State, x,y, mouse_button)
   App.fake_mouse_press(x,y, mouse_button)
-  edit.mouse_pressed(State, x,y, mouse_button)
+  edit.mouse_press(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)

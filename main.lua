@@ -227,9 +227,9 @@ end
 function App.mousepressed(x,y, mouse_button)
 --?   print('mouse press', x,y)
   if Current_app == 'run' then
-    if run.mouse_pressed then run.mouse_pressed(x,y, mouse_button) end
+    if run.mouse_pressed then run.mouse_press(x,y, mouse_button) end
   elseif Current_app == 'source' then
-    if source.mouse_pressed then source.mouse_pressed(x,y, mouse_button) end
+    if source.mouse_pressed then source.mouse_press(x,y, mouse_button) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end

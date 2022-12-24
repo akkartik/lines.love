@@ -218,7 +218,7 @@ function Drawing.in_drawing(drawing, line_cache, x,y, left,right)
   return y >= line_cache.starty and y < line_cache.starty + Drawing.pixels(drawing.h, width) and x >= left and x < right
 end
 
-function Drawing.mouse_pressed(State, drawing_index, x,y, mouse_button)
+function Drawing.mouse_press(State, drawing_index, x,y, mouse_button)
   local drawing = State.lines[drawing_index]
   local line_cache = State.line_cache[drawing_index]
   local cx = Drawing.coord(x-State.left, State.width)

@@ -194,7 +194,7 @@ end
 function log_browser.quit(State)
 end
 
-function log_browser.mouse_pressed(State, x,y, mouse_button)
+function log_browser.mouse_press(State, x,y, mouse_button)
   local line_index = log_browser.line_index(State, x,y)
   if line_index == nil then
     -- below lower margin
