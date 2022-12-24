@@ -607,7 +607,7 @@ function test_select_text()
   edit.run_after_keychord(Editor_state, 'S-right')
   App.fake_key_release('lshift')
   edit.key_release(Editor_state, 'lshift')
-  -- selection persists even after shift is release
+  -- selection persists even after shift is released
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text/selection:line')
   check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text/selection:pos')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_select_text/cursor:line')
