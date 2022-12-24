@@ -227,7 +227,7 @@ function edit.mouse_pressed(State, x,y, mouse_button)
         --    sets cursor
         --  press and hold to start a selection: sets selection on press, cursor on release
         --  press and hold, then press shift: ignore shift
-        --    i.e. mouse_released should never look at shift state
+        --    i.e. mouse_release should never look at shift state
         State.old_cursor1 = State.cursor1
         State.old_selection1 = State.selection1
         State.mousepress_shift = App.shift_down()
@@ -250,11 +250,11 @@ function edit.mouse_pressed(State, x,y, mouse_button)
   end
 end
 
-function edit.mouse_released(State, x,y, mouse_button)
+function edit.mouse_release(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print('release')
   if State.lines.current_drawing then
-    Drawing.mouse_released(State, x,y, mouse_button)
+    Drawing.mouse_release(State, x,y, mouse_button)
     schedule_save(State)
     if Drawing.before then
       record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
@@ -287,7 +287,7 @@ function edit.mouse_released(State, x,y, mouse_button)
   end
 end
 
-function edit.textinput(State, t)
+function edit.text_input(State, t)
   if State.search_term then
     State.search_term = State.search_term..t
     State.search_text = nil
@@ -302,13 +302,13 @@ function edit.textinput(State, t)
     local drawing_index, drawing = Drawing.current_drawing(State)
     if drawing_index == nil then
       for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
-      Text.textinput(State, t)
+      Text.text_input(State, t)
     end
   end
   schedule_save(State)
 end
 
-function edit.keychord_pressed(State, chord, key)
+function edit.keychord_press(State, chord, key)
   if State.selection1.line and
       not State.lines.current_drawing and
       -- printable character created using shift key => delete selection
@@ -461,7 +461,7 @@ function edit.keychord_pressed(State, chord, key)
     local drawing_index, drawing = Drawing.current_drawing(State)
     if drawing_index then
       local before = snapshot(State, drawing_index)
-      Drawing.keychord_pressed(State, chord)
+      Drawing.keychord_press(State, chord)
       record_undo_event(State, {before=before, after=snapshot(State, drawing_index)})
       schedule_save(State)
     end
@@ -493,7 +493,7 @@ function edit.keychord_pressed(State, chord, key)
     schedule_save(State)
   else
     for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
-    Text.keychord_pressed(State, chord)
+    Text.keychord_press(State, chord)
   end
 end
 
@@ -511,7 +511,7 @@ function edit.eradicate_locations_after_the_fold(State)
   end
 end
 
-function edit.key_released(State, key, scancode)
+function edit.key_release(State, key, scancode)
 end
 
 function edit.update_font_settings(State, font_height)
@@ -539,21 +539,21 @@ function edit.initialize_test_state()
       15)  -- line height
 end
 
--- all textinput events are also keypresses
+-- all text_input events are also keypresses
 -- TODO: handle chords of multiple keys
-function edit.run_after_textinput(State, t)
-  edit.keychord_pressed(State, t)
-  edit.textinput(State, t)
-  edit.key_released(State, t)
+function edit.run_after_text_input(State, t)
+  edit.keychord_press(State, t)
+  edit.text_input(State, t)
+  edit.key_release(State, t)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)
 end
 
--- not all keys are textinput
+-- not all keys are text_input
 function edit.run_after_keychord(State, chord)
-  edit.keychord_pressed(State, chord)
-  edit.key_released(State, chord)
+  edit.keychord_press(State, chord)
+  edit.key_release(State, chord)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)
@@ -563,7 +563,7 @@ function edit.run_after_mouse_click(State, x,y, mouse_button)
   App.fake_mouse_press(x,y, mouse_button)
   edit.mouse_pressed(State, x,y, mouse_button)
   App.fake_mouse_release(x,y, mouse_button)
-  edit.mouse_released(State, x,y, mouse_button)
+  edit.mouse_release(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)
@@ -579,7 +579,7 @@ end
 
 function edit.run_after_mouse_release(State, x,y, mouse_button)
   App.fake_mouse_release(x,y, mouse_button)
-  edit.mouse_released(State, x,y, mouse_button)
+  edit.mouse_release(State, x,y, mouse_button)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)

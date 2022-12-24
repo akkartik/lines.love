@@ -127,7 +127,7 @@ function Drawing.draw_pending_shape(drawing, top, left,right)
   local mx = Drawing.coord(pmx-left, width)
   local my = Drawing.coord(pmy-top, width)
   -- recreate pixels from coords to precisely mimic how the drawing will look
-  -- after mouse_released
+  -- after mouse_release
   pmx,pmy = px(mx), py(my)
   local shape = drawing.pending
   if shape.mode == nil then
@@ -235,7 +235,7 @@ function Drawing.mouse_pressed(State, drawing_index, x,y, mouse_button)
     local j = Drawing.find_or_insert_point(drawing.points, cx, cy, State.width)
     drawing.pending = {mode=State.current_drawing_mode, center=j}
   elseif State.current_drawing_mode == 'move' then
-    -- all the action is in mouse_released
+    -- all the action is in mouse_release
   elseif State.current_drawing_mode == 'name' then
     -- nothing
   else
@@ -292,7 +292,7 @@ function Drawing.relax_constraints(drawing, p)
   end
 end
 
-function Drawing.mouse_released(State, x,y, mouse_button)
+function Drawing.mouse_release(State, x,y, mouse_button)
   if State.current_drawing_mode == 'move' then
     State.current_drawing_mode = State.previous_drawing_mode
     State.previous_drawing_mode = nil
@@ -389,7 +389,7 @@ function Drawing.mouse_released(State, x,y, mouse_button)
   end
 end
 
-function Drawing.keychord_pressed(State, chord)
+function Drawing.keychord_press(State, chord)
   if chord == 'C-p' and not App.mouse_down(1) then
     State.current_drawing_mode = 'freehand'
   elseif App.mouse_down(1) and chord == 'l' then

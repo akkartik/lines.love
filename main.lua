@@ -109,9 +109,9 @@ end
 
 function App.filedropped(file)
   if Current_app == 'run' then
-    if run.filedropped then run.filedropped(file) end
+    if run.file_drop then run.file_drop(file) end
   elseif Current_app == 'source' then
-    if source.filedropped then source.filedropped(file) end
+    if source.file_drop then source.file_drop(file) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -156,7 +156,7 @@ function App.update(dt)
   end
 end
 
-function App.keychord_pressed(chord, key)
+function App.keychord_press(chord, key)
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -186,9 +186,9 @@ function App.keychord_pressed(chord, key)
     return
   end
   if Current_app == 'run' then
-    if run.keychord_pressed then run.keychord_pressed(chord, key) end
+    if run.keychord_press then run.keychord_press(chord, key) end
   elseif Current_app == 'source' then
-    if source.keychord_pressed then source.keychord_pressed(chord, key) end
+    if source.keychord_press then source.keychord_press(chord, key) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -201,9 +201,9 @@ function App.textinput(t)
   end
   --
   if Current_app == 'run' then
-    if run.textinput then run.textinput(t) end
+    if run.text_input then run.text_input(t) end
   elseif Current_app == 'source' then
-    if source.textinput then source.textinput(t) end
+    if source.text_input then source.text_input(t) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -216,9 +216,9 @@ function App.keyreleased(chord, key)
   end
   --
   if Current_app == 'run' then
-    if run.key_released then run.key_released(chord, key) end
+    if run.key_release then run.key_release(chord, key) end
   elseif Current_app == 'source' then
-    if source.key_released then source.key_released(chord, key) end
+    if source.key_release then source.key_release(chord, key) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -237,9 +237,9 @@ end
 
 function App.mousereleased(x,y, mouse_button)
   if Current_app == 'run' then
-    if run.mouse_released then run.mouse_released(x,y, mouse_button) end
+    if run.mouse_release then run.mouse_release(x,y, mouse_button) end
   elseif Current_app == 'source' then
-    if source.mouse_released then source.mouse_released(x,y, mouse_button) end
+    if source.mouse_release then source.mouse_release(x,y, mouse_button) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end

@@ -197,7 +197,7 @@ function source.resize(w, h)
 --?   print('end resize')
 end
 
-function source.filedropped(file)
+function source.file_drop(file)
   -- first make sure to save edits on any existing file
   if Editor_state.next_save then
     save_to_disk(Editor_state)
@@ -213,7 +213,7 @@ function source.filedropped(file)
   love.window.setTitle('lines.love - source')
 end
 
--- a copy of source.filedropped when given a filename
+-- a copy of source.file_drop when given a filename
 function source.switch_to_file(filename)
   -- first make sure to save edits on any existing file
   if Editor_state.next_save then
@@ -313,33 +313,33 @@ function source.mouse_pressed(x,y, mouse_button)
   end
 end
 
-function source.mouse_released(x,y, mouse_button)
+function source.mouse_release(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Focus == 'edit' then
-    return edit.mouse_released(Editor_state, x,y, mouse_button)
+    return edit.mouse_release(Editor_state, x,y, mouse_button)
   else
-    return log_browser.mouse_released(Log_browser_state, x,y, mouse_button)
+    return log_browser.mouse_release(Log_browser_state, x,y, mouse_button)
   end
 end
 
-function source.textinput(t)
+function source.text_input(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Show_file_navigator then
-    textinput_on_file_navigator(t)
+    text_input_on_file_navigator(t)
     return
   end
   if Focus == 'edit' then
-    return edit.textinput(Editor_state, t)
+    return edit.text_input(Editor_state, t)
   else
-    return log_browser.textinput(Log_browser_state, t)
+    return log_browser.text_input(Log_browser_state, t)
   end
 end
 
-function source.keychord_pressed(chord, key)
+function source.keychord_press(chord, key)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
 --?   print('source keychord')
   if Show_file_navigator then
-    keychord_pressed_on_file_navigator(chord, key)
+    keychord_press_on_file_navigator(chord, key)
     return
   end
   if chord == 'C-l' then
@@ -380,18 +380,18 @@ function source.keychord_pressed(chord, key)
     return
   end
   if Focus == 'edit' then
-    return edit.keychord_pressed(Editor_state, chord, key)
+    return edit.keychord_press(Editor_state, chord, key)
   else
-    return log_browser.keychord_pressed(Log_browser_state, chord, key)
+    return log_browser.keychord_press(Log_browser_state, chord, key)
   end
 end
 
-function source.key_released(key, scancode)
+function source.key_release(key, scancode)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Focus == 'edit' then
-    return edit.key_released(Editor_state, key, scancode)
+    return edit.key_release(Editor_state, key, scancode)
   else
-    return log_browser.keychord_pressed(Log_browser_state, chordkey, scancode)
+    return log_browser.keychord_press(Log_browser_state, chordkey, scancode)
   end
 end
 

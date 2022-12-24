@@ -147,7 +147,7 @@ function Text.compute_fragments(State, line_index)
   end
 end
 
-function Text.textinput(State, t)
+function Text.text_input(State, t)
   if App.mouse_down(1) then return end
   if App.ctrl_down() or App.alt_down() or App.cmd_down() then return end
   local before = snapshot(State, State.cursor1.line)
@@ -168,8 +168,8 @@ function Text.insert_at_cursor(State, t)
   State.cursor1.pos = State.cursor1.pos+1
 end
 
--- Don't handle any keys here that would trigger love.textinput above.
-function Text.keychord_pressed(State, chord)
+-- Don't handle any keys here that would trigger text_input above.
+function Text.keychord_press(State, chord)
 --?   print('chord', chord, State.selection1.line, State.selection1.pos)
   --== shortcuts that mutate text
   if chord == 'return' then

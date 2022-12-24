@@ -151,7 +151,7 @@ function reset_file_navigator()
   File_navigation.candidates = File_navigation.all_candidates
 end
 
-function keychord_pressed_on_file_navigator(chord, key)
+function keychord_press_on_file_navigator(chord, key)
   log(2, 'file navigator: '..chord)
   log(2, {name='file_navigator_state', files=File_navigation.candidates, index=File_navigation.index})
   if chord == 'escape' then
@@ -289,7 +289,7 @@ function file_index(fy, fx, fwidth)
   return best_guess
 end
 
-function textinput_on_file_navigator(t)
+function text_input_on_file_navigator(t)
   File_navigation.filter = File_navigation.filter..t
   File_navigation.candidates = source.file_navigator_candidates()
 end

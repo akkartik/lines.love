@@ -105,7 +105,7 @@ function run.resize(w, h)
   Text.tweak_screen_top_and_cursor(Editor_state, Editor_state.left, Editor_state.right)
 end
 
-function run.filedropped(file)
+function run.file_drop(file)
   -- first make sure to save edits on any existing file
   if Editor_state.next_save then
     save_to_disk(Editor_state)
@@ -159,24 +159,24 @@ function run.mouse_pressed(x,y, mouse_button)
   return edit.mouse_pressed(Editor_state, x,y, mouse_button)
 end
 
-function run.mouse_released(x,y, mouse_button)
+function run.mouse_release(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_released(Editor_state, x,y, mouse_button)
+  return edit.mouse_release(Editor_state, x,y, mouse_button)
 end
 
-function run.textinput(t)
+function run.text_input(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.textinput(Editor_state, t)
+  return edit.text_input(Editor_state, t)
 end
 
-function run.keychord_pressed(chord, key)
+function run.keychord_press(chord, key)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.keychord_pressed(Editor_state, chord, key)
+  return edit.keychord_press(Editor_state, chord, key)
 end
 
-function run.key_released(key, scancode)
+function run.key_release(key, scancode)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.key_released(Editor_state, key, scancode)
+  return edit.key_release(Editor_state, key, scancode)
 end
 
 -- use this sparingly

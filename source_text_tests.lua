@@ -65,7 +65,7 @@ function test_insert_first_character()
   Editor_state.lines = load_array{}
   Text.redraw_all(Editor_state)
   edit.draw(Editor_state)
-  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_text_input(Editor_state, 'a')
   local y = Editor_state.top
   App.screen.check(y, 'a', 'F - test_insert_first_character/screen:1')
 end
@@ -606,8 +606,8 @@ function test_select_text()
   App.fake_key_press('lshift')
   edit.run_after_keychord(Editor_state, 'S-right')
   App.fake_key_release('lshift')
-  edit.key_released(Editor_state, 'lshift')
-  -- selection persists even after shift is released
+  edit.key_release(Editor_state, 'lshift')
+  -- selection persists even after shift is release
   check_eq(Editor_state.selection1.line, 1, 'F - test_select_text/selection:line')
   check_eq(Editor_state.selection1.pos, 1, 'F - test_select_text/selection:pos')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_select_text/cursor:line')
@@ -646,7 +646,7 @@ function test_edit_deletes_selection()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- press a key
-  edit.run_after_textinput(Editor_state, 'x')
+  edit.run_after_text_input(Editor_state, 'x')
   -- selected text is deleted and replaced with the key
   check_eq(Editor_state.lines[1].data, 'xbc', 'F - test_edit_deletes_selection')
 end
@@ -665,9 +665,9 @@ function test_edit_with_shift_key_deletes_selection()
   edit.draw(Editor_state)
   -- mimic precise keypresses for a capital letter
   App.fake_key_press('lshift')
-  edit.keychord_pressed(Editor_state, 'd', 'd')
-  edit.textinput(Editor_state, 'D')
-  edit.key_released(Editor_state, 'd')
+  edit.keychord_press(Editor_state, 'd', 'd')
+  edit.text_input(Editor_state, 'D')
+  edit.key_release(Editor_state, 'd')
   App.fake_key_release('lshift')
   -- selected text is deleted and replaced with the key
   check_nil(Editor_state.selection1.line, 'F - test_edit_with_shift_key_deletes_selection')
@@ -769,7 +769,7 @@ function test_edit_wrapping_text()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
-  edit.run_after_textinput(Editor_state, 'g')
+  edit.run_after_text_input(Editor_state, 'g')
   local y = Editor_state.top
   App.screen.check(y, 'abc', 'F - test_edit_wrapping_text/screen:1')
   y = y + Editor_state.line_height
@@ -1503,7 +1503,7 @@ function test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bot
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- after hitting the inserting_text key the screen does not scroll down
-  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_text_input(Editor_state, 'a')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'F - test_inserting_text_on_final_line_avoids_scrolling_down_when_not_at_bottom/cursor:pos')
@@ -1529,9 +1529,9 @@ function test_typing_on_bottom_line_scrolls_down()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'F - test_typing_on_bottom_line_scrolls_down/baseline/screen:3')
   -- after typing something the line wraps and the screen scrolls down
-  edit.run_after_textinput(Editor_state, 'j')
-  edit.run_after_textinput(Editor_state, 'k')
-  edit.run_after_textinput(Editor_state, 'l')
+  edit.run_after_text_input(Editor_state, 'j')
+  edit.run_after_text_input(Editor_state, 'k')
+  edit.run_after_text_input(Editor_state, 'l')
   check_eq(Editor_state.screen_top1.line, 2, 'F - test_typing_on_bottom_line_scrolls_down/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'F - test_typing_on_bottom_line_scrolls_down/cursor:line')
   check_eq(Editor_state.cursor1.pos, 7, 'F - test_typing_on_bottom_line_scrolls_down/cursor:pos')
@@ -1683,9 +1683,9 @@ function test_position_cursor_on_recently_edited_wrapping_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'xyz', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline1/screen:3')
   -- add to the line until it's wrapping over 3 screen lines
-  edit.run_after_textinput(Editor_state, 's')
-  edit.run_after_textinput(Editor_state, 't')
-  edit.run_after_textinput(Editor_state, 'u')
+  edit.run_after_text_input(Editor_state, 's')
+  edit.run_after_text_input(Editor_state, 't')
+  edit.run_after_text_input(Editor_state, 'u')
   check_eq(Editor_state.cursor1.pos, 28, 'F - test_position_cursor_on_recently_edited_wrapping_line/cursor:pos')
   y = Editor_state.top
   App.screen.check(y, 'abc def ghi ', 'F - test_position_cursor_on_recently_edited_wrapping_line/baseline2/screen:1')
@@ -1883,7 +1883,7 @@ function test_undo_insert_text()
   Editor_state.screen_bottom1 = {}
   -- insert a character
   edit.draw(Editor_state)
-  edit.run_after_textinput(Editor_state, 'g')
+  edit.run_after_text_input(Editor_state, 'g')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_undo_insert_text/baseline/cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'F - test_undo_insert_text/baseline/cursor:pos')
   check_nil(Editor_state.selection1.line, 'F - test_undo_insert_text/baseline/selection:line')
@@ -1959,7 +1959,7 @@ function test_undo_restores_selection()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- delete selected text
-  edit.run_after_textinput(Editor_state, 'x')
+  edit.run_after_text_input(Editor_state, 'x')
   check_eq(Editor_state.lines[1].data, 'xbc', 'F - test_undo_restores_selection/baseline')
   check_nil(Editor_state.selection1.line, 'F - test_undo_restores_selection/baseline:selection')
   -- undo
@@ -1982,7 +1982,7 @@ function test_search()
   edit.draw(Editor_state)
   -- search for a string
   edit.run_after_keychord(Editor_state, 'C-f')
-  edit.run_after_textinput(Editor_state, 'd')
+  edit.run_after_text_input(Editor_state, 'd')
   edit.run_after_keychord(Editor_state, 'return')
   check_eq(Editor_state.cursor1.line, 2, 'F - test_search/1/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'F - test_search/1/cursor:pos')
@@ -1991,7 +1991,7 @@ function test_search()
   Editor_state.screen_top1 = {line=1, pos=1}
   -- search for second occurrence
   edit.run_after_keychord(Editor_state, 'C-f')
-  edit.run_after_textinput(Editor_state, 'de')
+  edit.run_after_text_input(Editor_state, 'de')
   edit.run_after_keychord(Editor_state, 'down')
   edit.run_after_keychord(Editor_state, 'return')
   check_eq(Editor_state.cursor1.line, 4, 'F - test_search/2/cursor:line')
@@ -2010,7 +2010,7 @@ function test_search_upwards()
   edit.draw(Editor_state)
   -- search for a string
   edit.run_after_keychord(Editor_state, 'C-f')
-  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_text_input(Editor_state, 'a')
   -- search for previous occurrence
   edit.run_after_keychord(Editor_state, 'up')
   check_eq(Editor_state.cursor1.line, 1, 'F - test_search_upwards/2/cursor:line')
@@ -2029,7 +2029,7 @@ function test_search_wrap()
   edit.draw(Editor_state)
   -- search for a string
   edit.run_after_keychord(Editor_state, 'C-f')
-  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_text_input(Editor_state, 'a')
   edit.run_after_keychord(Editor_state, 'return')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, 'F - test_search_wrap/1/cursor:line')
@@ -2048,7 +2048,7 @@ function test_search_wrap_upwards()
   edit.draw(Editor_state)
   -- search upwards for a string
   edit.run_after_keychord(Editor_state, 'C-f')
-  edit.run_after_textinput(Editor_state, 'a')
+  edit.run_after_text_input(Editor_state, 'a')
   edit.run_after_keychord(Editor_state, 'up')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, 'F - test_search_wrap_upwards/1/cursor:line')

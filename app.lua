@@ -144,7 +144,7 @@ function App.initialize_for_test()
   App.screen.init({width=100, height=50})
   App.screen.contents = {}  -- clear screen
   App.filesystem = {}
-  App.fake_key_pressed = {}
+  App.fake_keys_pressed = {}
   App.fake_mouse_state = {x=-1, y=-1}
   if App.initialize_globals then App.initialize_globals() end
 end
@@ -237,15 +237,15 @@ function App.setClipboardText(s)
   App.clipboard = s
 end
 
-App.fake_key_pressed = {}
+App.fake_keys_pressed = {}
 function App.fake_key_press(key)
-  App.fake_key_pressed[key] = true
+  App.fake_keys_pressed[key] = true
 end
 function App.fake_key_release(key)
-  App.fake_key_pressed[key] = nil
+  App.fake_keys_pressed[key] = nil
 end
 function App.modifier_down(key)
-  return App.fake_key_pressed[key]
+  return App.fake_keys_pressed[key]
 end
 
 App.fake_mouse_state = {x=-1, y=-1}  -- x,y always set
@@ -286,7 +286,7 @@ end
 -- not all keys are textinput
 -- TODO: handle chords of multiple keys
 function App.run_after_keychord(chord)
-  App.keychord_pressed(chord)
+  App.keychord_press(chord)
   App.keyreleased(chord)
   App.screen.contents = {}
   App.draw()
@@ -397,7 +397,7 @@ function App.disable_tests()
   App.run_after_mouse_click = nil
   App.run_after_mouse_press = nil
   App.run_after_mouse_release = nil
-  App.fake_key_pressed = nil
+  App.fake_keys_pressed = nil
   App.fake_key_press = nil
   App.fake_key_release = nil
   App.fake_mouse_state = nil

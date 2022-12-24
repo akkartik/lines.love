@@ -262,13 +262,13 @@ function log_browser.line_index(State, mx,my)
   end
 end
 
-function log_browser.mouse_released(State, x,y, mouse_button)
+function log_browser.mouse_release(State, x,y, mouse_button)
 end
 
-function log_browser.textinput(State, t)
+function log_browser.text_input(State, t)
 end
 
-function log_browser.keychord_pressed(State, chord, key)
+function log_browser.keychord_press(State, chord, key)
   -- move
   if chord == 'up' then
     while State.screen_top1.line > 1 do
@@ -319,5 +319,5 @@ function log_browser.height(State, line_index)
   end
 end
 
-function log_browser.keyreleased(State, key, scancode)
+function log_browser.key_release(State, key, scancode)
 end
