@@ -90,8 +90,8 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     em = App.newText(love.graphics.getFont(), 'm'),  -- widest possible character width
 
     top = top,
-    left = left,
-    right = right,
+    left = math.floor(left),
+    right = math.floor(right),
     width = right-left,
 
     filename = love.filesystem.getUserDirectory()..'/lines.txt',  -- '/' should work even on Windows
