@@ -304,7 +304,7 @@ function edit.keychord_press(State, chord, key)
       -- printable character created using shift key => delete selection
       -- (we're not creating any ctrl-shift- or alt-shift- combinations using regular/printable keys)
       (not App.shift_down() or utf8.len(key) == 1) and
-      chord ~= 'C-a' and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and backspace ~= 'delete' and not App.is_cursor_movement(chord) then
+      chord ~= 'C-a' and chord ~= 'C-c' and chord ~= 'C-x' and chord ~= 'backspace' and chord ~= 'delete' and not App.is_cursor_movement(chord) then
     Text.delete_selection(State, State.left, State.right)
   end
   if State.search_term then
