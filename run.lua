@@ -55,7 +55,7 @@ end
 
 function run.load_settings()
   love.graphics.setFont(love.graphics.newFont(Settings.font_height))
-  -- maximize window to determine maximum allowable dimensions
+  -- determine default dimensions and flags
   App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
   -- set up desired window dimensions
   App.screen.flags.resizable = true
