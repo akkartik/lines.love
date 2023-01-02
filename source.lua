@@ -172,7 +172,7 @@ function source.initialize_window_geometry(em_width)
   App.screen.width = 40*em_width
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.width, 200)
+  App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   print('initializing source position')
   if Settings == nil then Settings = {} end
