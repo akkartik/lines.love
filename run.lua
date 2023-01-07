@@ -154,9 +154,9 @@ function run.settings()
   }
 end
 
-function run.mouse_pressed(x,y, mouse_button)
+function run.mouse_press(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_pressed(Editor_state, x,y, mouse_button)
+  return edit.mouse_press(Editor_state, x,y, mouse_button)
 end
 
 function run.mouse_release(x,y, mouse_button)
