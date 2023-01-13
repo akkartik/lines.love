@@ -1001,3 +1001,27 @@ end
 function rtrim(s)
   return s:gsub('%s+$', '')
 end
+
+function starts_with(s, prefix)
+  if #s < #prefix then
+    return false
+  end
+  for i=1,#prefix do
+    if s:sub(i,i) ~= prefix:sub(i,i) then
+      return false
+    end
+  end
+  return true
+end
+
+function ends_with(s, suffix)
+  if #s < #suffix then
+    return false
+  end
+  for i=0,#suffix-1 do
+    if s:sub(#s-i,#s-i) ~= suffix:sub(#suffix-i,#suffix-i) then
+      return false
+    end
+  end
+  return true
+end

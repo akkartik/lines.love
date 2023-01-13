@@ -60,7 +60,7 @@ function switch_color_based_on_prefix(frag)
   end
   frag = rtrim(frag)
   for _,edge in pairs(Next_state[Current_state]) do
-    if edge.prefix and find(frag, edge.prefix, nil, --[[plain]] true) == 1 then
+    if edge.prefix and starts_with(frag, edge.prefix) then
       Current_state = edge.target
       break
     end
@@ -73,21 +73,9 @@ function switch_color_based_on_suffix(frag)
   end
   frag = rtrim(frag)
   for _,edge in pairs(Next_state[Current_state]) do
-    if edge.suffix and rfind(frag, edge.suffix, nil, --[[plain]] true) == #frag - #edge.suffix + 1 then
+    if edge.suffix and ends_with(frag, edge.suffix) then
       Current_state = edge.target
       break
     end
   end
-end
-
-function trim(s)
-  return s:gsub('^%s+', ''):gsub('%s+$', '')
-end
-
-function ltrim(s)
-  return s:gsub('^%s+', '')
-end
-
-function rtrim(s)
-  return s:gsub('%s+$', '')
 end

@@ -116,6 +116,8 @@ function find(s, pat, i, plain)
   return s:find(pat, i, plain)
 end
 
+-- TODO: avoid the expensive reverse() operations
+-- Particularly if we only care about literal matches, we don't need all of string.find
 function rfind(s, pat, i, plain)
   if s == nil then return end
   local rs = s:reverse()
