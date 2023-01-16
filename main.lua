@@ -87,6 +87,11 @@ function App.initialize_globals()
 end
 
 function App.initialize(arg)
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
+  love.keyboard.setKeyRepeat(true)
+
+  love.graphics.setBackgroundColor(1,1,1)
+
   if Current_app == 'run' then
     run.initialize(arg)
   elseif Current_app == 'source' then

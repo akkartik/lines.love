@@ -16,11 +16,6 @@ end
 -- called only for real run
 function run.initialize(arg)
   log_new('run')
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  love.keyboard.setKeyRepeat(true)
-
-  love.graphics.setBackgroundColor(1,1,1)
-
   if Settings then
     run.load_settings()
   else

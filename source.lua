@@ -61,11 +61,6 @@ end
 -- called only for real run
 function source.initialize()
   log_new('source')
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  love.keyboard.setKeyRepeat(true)
-
-  love.graphics.setBackgroundColor(1,1,1)
-
   if Settings and Settings.source then
     source.load_settings()
   else
