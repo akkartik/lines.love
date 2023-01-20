@@ -87,7 +87,6 @@ function App.initialize_globals()
 end
 
 function App.initialize(arg)
-  love.window.setVSync(0)  -- simplify profiling; we're not a game
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
