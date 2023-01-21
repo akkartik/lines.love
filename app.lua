@@ -371,7 +371,6 @@ function App.run_tests()
     App.initialize_for_test()
     xpcall(_G[name], function(err) prepend_debug_info_to_test_failure(name, err) end)
   end
-  print()
   -- clean up all test methods
   for _,name in ipairs(sorted_names) do
     _G[name] = nil
