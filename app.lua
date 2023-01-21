@@ -1,7 +1,7 @@
 -- love.run: main entrypoint function for LÖVE
 --
--- Most apps can just use the default, but we need to override it to
--- install a test harness.
+-- Most apps can just use the default shown in https://love2d.org/wiki/love.run,
+-- but we need to override it to install a test harness.
 --
 -- A test harness needs to check what the 'real' code did.
 -- To do this it needs to hook into primitive operations performed by code.
