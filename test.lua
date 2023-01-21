@@ -14,7 +14,7 @@ end
 
 function check_eq(x, expected, msg)
   if not eq(x, expected) then
-    error(msg..'; got "'..x..'"')
+    error(msg..'; should be "'..expected..'" but got "'..x..'"')
   end
 end
 
