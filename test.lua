@@ -1,28 +1,19 @@
 -- Some primitives for tests.
---
--- Success indicators go to the terminal; failures go to the window.
--- I don't know what I am doing.
 
 function check(x, msg)
-  if x then
-    io.write('.')
-  else
+  if not x then
     error(msg)
   end
 end
 
 function check_nil(x, msg)
-  if x == nil then
-    io.write('.')
-  else
+  if x ~= nil then
     error(msg..'; should be nil but got "'..x..'"')
   end
 end
 
 function check_eq(x, expected, msg)
-  if eq(x, expected) then
-    io.write('.')
-  else
+  if not eq(x, expected) then
     error(msg..'; got "'..x..'"')
   end
 end

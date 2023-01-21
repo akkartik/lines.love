@@ -134,7 +134,11 @@ end
 
 function App.run_tests_and_initialize()
   App.load()
+  Test_errors = {}
   App.run_tests()
+  if #Test_errors > 0 then
+    error('There were test failures:\n\n'..table.concat(Test_errors))
+  end
   App.disable_tests()
   App.initialize_globals()
   App.initialize(love.arg.parseGameArguments(arg), arg)
@@ -365,13 +369,22 @@ function App.run_tests()
   table.sort(sorted_names)
   for _,name in ipairs(sorted_names) do
     App.initialize_for_test()
-    _G[name]()
+    xpcall(_G[name], function(err) prepend_debug_info_to_test_failure(name, err) end)
   end
   print()
   -- clean up all test methods
   for _,name in ipairs(sorted_names) do
     _G[name] = nil
   end
+end
+
+-- prepend file/line/test
+function prepend_debug_info_to_test_failure(test_name, err)
+  local err_without_line_number = err:gsub('^[^:]*:[^:]*: ', '')
+  local stack_trace = debug.traceback('', --[[stack frame]]5)
+  local file_and_line_number = stack_trace:gsub('stack traceback:\n', ''):gsub(': .*', '')
+  local full_error = file_and_line_number..':'..test_name..' -- '..err_without_line_number
+  table.insert(Test_errors, full_error)
 end
 
 -- call this once all tests are run
