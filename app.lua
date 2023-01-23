@@ -150,7 +150,7 @@ function App.initialize_for_test()
   App.filesystem = {}
   App.fake_keys_pressed = {}
   App.fake_mouse_state = {x=-1, y=-1}
-  if App.initialize_globals then App.initialize_globals() end
+  App.initialize_globals()
 end
 
 function App.screen.init(dims)
