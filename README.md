@@ -88,11 +88,11 @@ Updates to lines.love can be downloaded from the following mirrors in addition
 to the website above:
 * https://github.com/akkartik/lines.love
 * https://repo.or.cz/lines.love.git
-* https://codeberg.org/akkartik/lines.love
 * https://tildegit.org/akkartik/lines.love
 * https://git.tilde.institute/akkartik/lines.love
 * https://git.sr.ht/~akkartik/lines.love
 * https://notabug.org/akkartik/lines.love
+* https://codeberg.org/akkartik/lines.love
 * https://pagure.io/lines.love
 
 Forks of lines.love are encouraged. If you show me your fork, I'll link to it
@@ -101,7 +101,7 @@ here.
 * https://github.com/akkartik/lines-polygon-experiment -- an experiment that
   uses separate shortcuts for regular polygons. `ctrl+3` for triangles,
   `ctrl+4` for squares, etc.
-* https://codeberg.org/akkartik/text.love -- a stripped down version without
+* https://git.sr.ht/~akkartik/text.love -- a stripped down version without
   drawings; useful starting point for some forks
 * https://git.sr.ht/~akkartik/pensieve.love -- a note-taking app on an
   infinite 2D surface. Still in development.
