@@ -192,6 +192,8 @@ function edit.quit(State)
   -- make sure to save before quitting
   if State.next_save then
     save_to_disk(State)
+    -- give some time for the OS to flush everything to disk
+    love.timer.sleep(0.1)
   end
 end
 
