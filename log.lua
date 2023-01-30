@@ -31,4 +31,7 @@ function log_new(name, stack_frame_index)
 	log_start(name, stack_frame_index)
 end
 
+-- rendering graphical objects within sections/boxes
+log_render = {}
+
 -- vim:noexpandtab
