@@ -426,7 +426,7 @@ function Text.up(State)
       new_cursor_line = new_cursor_line-1
       if State.lines[new_cursor_line].mode == 'text' then
 --?         print('found previous text line')
-        State.cursor1 = {line=State.cursor1.line-1, pos=nil}
+        State.cursor1 = {line=new_cursor_line, pos=nil}
         Text.populate_screen_line_starting_pos(State, State.cursor1.line)
         -- previous text line found, pick its final screen line
 --?         print('has multiple screen lines')

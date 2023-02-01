@@ -680,7 +680,7 @@ function Text.upA(State)
       new_cursor_line = new_cursor_line-1
       if State.lines[new_cursor_line].mode == 'text' then
 --?         print('found previous text line')
-        State.cursor1 = {line=State.cursor1.line-1, pos=nil}
+        State.cursor1 = {line=new_cursor_line, pos=nil}
         Text.populate_screen_line_starting_pos(State, State.cursor1.line)
         -- previous text line found, pick its final screen line
 --?         print('has multiple screen lines')
@@ -719,7 +719,7 @@ function Text.upB(State)
     while new_cursor_line > 1 do
       new_cursor_line = new_cursor_line-1
       if State.lines[new_cursor_line].mode == 'text' then
-        State.cursor1 = {line=State.cursor1.line-1, posB=nil}
+        State.cursor1 = {line=new_cursor_line, posB=nil}
         Text.populate_screen_line_starting_pos(State, State.cursor1.line)
         local prev_line_cache = State.line_cache[State.cursor1.line]
         local prev_screen_line_starting_pos = prev_line_cache.screen_line_starting_pos[#prev_line_cache.screen_line_starting_pos]

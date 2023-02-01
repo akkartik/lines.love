@@ -1025,6 +1025,31 @@ function test_down_arrow_moves_cursor()
   App.screen.check(y, 'ghi', 'screen:3')
 end
 
+function test_down_arrow_skips_drawing()
+  -- some lines of text with a drawing intermixed
+  local drawing_width = 50
+  App.screen.init{width=Editor_state.left+drawing_width, height=100}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc',               -- height 15
+                                  '```lines', '```',   -- height 25
+                                  'ghi'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'abc', 'baseline/screen:1')
+  y = y + Editor_state.line_height
+  local drawing_height = Drawing_padding_height + drawing_width/2  -- default
+  y = y + drawing_height
+  App.screen.check(y, 'ghi', 'baseline/screen:3')
+  check(Editor_state.cursor_x, 'baseline/cursor_x')
+  -- after hitting the down arrow the cursor moves down by 2 lines, skipping the drawing
+  edit.run_after_keychord(Editor_state, 'down')
+  check_eq(Editor_state.cursor1.line, 3, 'cursor')
+end
+
 function test_down_arrow_scrolls_down_by_one_line()
   -- display the first three lines with the cursor on the bottom line
   App.screen.init{width=120, height=60}
@@ -1171,6 +1196,31 @@ function test_up_arrow_moves_cursor()
   App.screen.check(y, 'def', 'screen:2')
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'screen:3')
+end
+
+function test_up_arrow_skips_drawing()
+  -- some lines of text with a drawing intermixed
+  local drawing_width = 50
+  App.screen.init{width=Editor_state.left+drawing_width, height=100}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc',               -- height 15
+                                  '```lines', '```',   -- height 25
+                                  'ghi'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=3, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'abc', 'baseline/screen:1')
+  y = y + Editor_state.line_height
+  local drawing_height = Drawing_padding_height + drawing_width/2  -- default
+  y = y + drawing_height
+  App.screen.check(y, 'ghi', 'baseline/screen:3')
+  check(Editor_state.cursor_x, 'baseline/cursor_x')
+  -- after hitting the up arrow the cursor moves up by 2 lines, skipping the drawing
+  edit.run_after_keychord(Editor_state, 'up')
+  check_eq(Editor_state.cursor1.line, 1, 'cursor')
 end
 
 function test_up_arrow_scrolls_up_by_one_line()
