@@ -318,6 +318,7 @@ function edit.keychord_press(State, chord, key)
     Text.delete_selection(State, State.left, State.right)
   end
   if State.search_term then
+    for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     if chord == 'escape' then
       State.search_term = nil
       State.search_text = nil
