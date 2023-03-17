@@ -87,6 +87,7 @@ function source.initialize_edit_side()
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
   end
+  edit.check_locs(Editor_state)
 
   -- We currently start out with side B collapsed.
   -- Other options:

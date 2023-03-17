@@ -115,10 +115,32 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
   return result
 end  -- App.initialize_state
 
-function edit.fixup_cursor(State)
+function edit.check_locs(State)
+  -- if State is inconsistent (i.e. file changed by some other program),
+  --   throw away all cursor state entirely
+  if edit.invalid1(State, State.screen_top1)
+      or edit.invalid1(State, State.cursor1)
+      or not edit.cursor_on_text(State)
+      or not Text.le1(State.screen_top1, State.cursor1) then
+    State.screen_top1 = {line=1, pos=1}
+    edit.put_cursor_on_first_text_line(State)
+  end
+end
+
+function edit.invalid1(State, loc1)
+  return loc1.line > #State.lines
+      or loc1.pos > #State.lines[loc1.line].data
+end
+
+function edit.cursor_on_text(State)
+  return State.cursor1.line <= #State.lines
+      and State.lines[State.cursor1.line].mode == 'text'
+end
+
+function edit.put_cursor_on_first_text_line(State)
   for i,line in ipairs(State.lines) do
     if line.mode == 'text' then
-      State.cursor1.line = i
+      State.cursor1 = {line=i, pos=1}
       break
     end
   end
