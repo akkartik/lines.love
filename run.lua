@@ -28,14 +28,11 @@ function run.initialize(arg)
     Text.redraw_all(Editor_state)
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
-    edit.fixup_cursor(Editor_state)
   else
     load_from_disk(Editor_state)
     Text.redraw_all(Editor_state)
-    if Editor_state.cursor1.line > #Editor_state.lines or Editor_state.lines[Editor_state.cursor1.line].mode ~= 'text' then
-      edit.fixup_cursor(Editor_state)
-    end
   end
+  edit.check_locs(Editor_state)
   love.window.setTitle('lines.love - '..Editor_state.filename)
 
   if #arg > 1 then
@@ -112,7 +109,7 @@ function run.file_drop(file)
   Editor_state.lines = load_from_file(file)
   file:close()
   Text.redraw_all(Editor_state)
-  edit.fixup_cursor(Editor_state)
+  edit.check_locs(Editor_state)
   love.window.setTitle('lines.love - '..Editor_state.filename)
 end
 
