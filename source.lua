@@ -75,7 +75,7 @@ function source.initialize()
   love.window.setTitle('lines.love - source')
 end
 
--- environment for a mutable file of bifolded text
+-- environment for a mutable file
 -- TODO: some initialization is also happening in load_settings/initialize_default_settings. Clean that up.
 function source.initialize_edit_side()
   load_from_disk(Editor_state)
@@ -89,17 +89,12 @@ function source.initialize_edit_side()
   end
   edit.check_locs(Editor_state)
 
-  -- We currently start out with side B collapsed.
-  -- Other options:
-  --  * save all expanded state by line
-  --  * expand all if any location is in side B
   if Editor_state.cursor1.line > #Editor_state.lines then
     Editor_state.cursor1 = {line=1, pos=1}
   end
   if Editor_state.screen_top1.line > #Editor_state.lines then
     Editor_state.screen_top1 = {line=1, pos=1}
   end
-  edit.eradicate_locations_after_the_fold(Editor_state)
 
   if rawget(_G, 'jit') then
     jit.off()
@@ -253,13 +248,6 @@ end
 function source.quit()
   edit.quit(Editor_state)
   log_browser.quit(Log_browser_state)
-  -- convert any bifold files here
-end
-
-function source.convert_bifold_text(infilename, outfilename)
-  local contents = love.filesystem.read(infilename)
-  contents = contents:gsub('\u{1e}', ';')
-  love.filesystem.write(outfilename, contents)
 end
 
 function source.settings()

@@ -156,7 +156,6 @@ function Text.text_input(State, t)
   if State.cursor_y > App.screen.height - State.line_height then
     Text.populate_screen_line_starting_pos(State, State.cursor1.line)
     Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
---?     print('=>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
   end
   record_undo_event(State, {before=before, after=snapshot(State, State.cursor1.line)})
 end
