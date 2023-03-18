@@ -405,8 +405,10 @@ function edit.keychord_press(State, chord, key)
     edit.update_font_settings(State, State.font_height+2)
     Text.redraw_all(State)
   elseif chord == 'C--' then
-    edit.update_font_settings(State, State.font_height-2)
-    Text.redraw_all(State)
+    if State.font_height > 2 then
+      edit.update_font_settings(State, State.font_height-2)
+      Text.redraw_all(State)
+    end
   elseif chord == 'C-0' then
     edit.update_font_settings(State, 20)
     Text.redraw_all(State)
