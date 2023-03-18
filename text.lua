@@ -230,9 +230,10 @@ function Text.keychord_press(State, chord)
       local line_cache = State.line_cache[#State.line_cache]
       State.screen_top1 = {line=#State.lines, pos=line_cache.screen_line_starting_pos[#line_cache.screen_line_starting_pos]}
     elseif Text.lt1(State.cursor1, State.screen_top1) then
-      local top2 = Text.to2(State, State.screen_top1)
-      top2 = Text.previous_screen_line(State, top2, State.left, State.right)
-      State.screen_top1 = Text.to1(State, top2)
+      State.screen_top1 = {
+        line=State.cursor1.line,
+        pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
+      }
       Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     end
     Text.clear_screen_line_cache(State, State.cursor1.line)
@@ -448,9 +449,11 @@ function Text.up(State)
 --?     print('cursor pos is now '..tostring(State.cursor1.pos))
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
-    local top2 = Text.to2(State, State.screen_top1)
-    top2 = Text.previous_screen_line(State, top2)
-    State.screen_top1 = Text.to1(State, top2)
+    State.screen_top1 = {
+      line=State.cursor1.line,
+      pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
+    }
+    Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
   end
 end
 
@@ -589,9 +592,11 @@ function Text.left(State)
     end
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
-    local top2 = Text.to2(State, State.screen_top1)
-    top2 = Text.previous_screen_line(State, top2)
-    State.screen_top1 = Text.to1(State, top2)
+    State.screen_top1 = {
+      line=State.cursor1.line,
+      pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
+    }
+    Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
   end
 end
 

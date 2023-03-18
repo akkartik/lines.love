@@ -1251,6 +1251,28 @@ function test_up_arrow_scrolls_up_by_one_line()
   App.screen.check(y, 'ghi', 'screen:3')
 end
 
+function test_up_arrow_scrolls_up_by_one_line_skipping_drawing()
+  -- display lines 3/4/5 with a drawing just off screen at line 2
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', '```lines', '```', 'def', 'ghi', 'jkl'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=3, pos=1}
+  Editor_state.screen_top1 = {line=3, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'def', 'baseline/screen:1')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'ghi', 'baseline/screen:2')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'jkl', 'baseline/screen:3')
+  -- after hitting the up arrow the screen scrolls up to previous text line
+  edit.run_after_keychord(Editor_state, 'up')
+  check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
+  check_eq(Editor_state.cursor1.line, 1, 'cursor')
+end
+
 function test_up_arrow_scrolls_up_by_one_screen_line()
   -- display lines starting from second screen line of a line
   App.screen.init{width=Editor_state.left+30, height=60}
