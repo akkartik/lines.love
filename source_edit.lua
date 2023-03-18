@@ -96,8 +96,8 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     em = App.newText(love.graphics.getFont(), 'm'),  -- widest possible character width
 
     top = top,
-    left = left,
-    right = right,
+    left = math.floor(left),
+    right = math.floor(right),
     width = right-left,
 
     filename = love.filesystem.getUserDirectory()..'/lines.txt',  -- '/' should work even on Windows
@@ -227,12 +227,14 @@ function edit.quit(State)
   -- make sure to save before quitting
   if State.next_save then
     save_to_disk(State)
+    -- give some time for the OS to flush everything to disk
+    love.timer.sleep(0.1)
   end
 end
 
 function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('press')
+--?   print('press', State.selection1.line, State.selection1.pos)
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
