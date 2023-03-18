@@ -12,7 +12,7 @@ function source.initialize_log_browser_side()
   log_browser.parse(Log_browser_state)
   Text.redraw_all(Log_browser_state)
   Log_browser_state.screen_top1 = {line=1, pos=1}
-  Log_browser_state.cursor1 = {line=1, pos=nil}
+  Log_browser_state.cursor1 = {line=1, pos=1}
 end
 
 Section_stack = {}
@@ -237,14 +237,12 @@ function log_browser.mouse_press(State, x,y, mouse_button)
     source.switch_to_file(line.filename)
   end
   -- set cursor
-  Editor_state.cursor1 = {line=line.line_number, pos=1, posB=nil}
+  Editor_state.cursor1 = {line=line.line_number, pos=1}
   -- make sure it's visible
   -- TODO: handle extremely long lines
   Editor_state.screen_top1.line = math.max(0, Editor_state.cursor1.line-5)
   -- show cursor
   Focus = 'edit'
-  -- expand B side
-  Editor_state.expanded = true
 end
 
 function log_browser.line_index(State, mx,my)

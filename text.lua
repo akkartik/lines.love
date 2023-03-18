@@ -672,7 +672,7 @@ function Text.snap_cursor_to_bottom_of_screen(State)
 --?   print('to2: =>', top2.line, top2.screen_line, top2.screen_pos)
   -- slide to start of screen line
   top2.screen_pos = 1  -- start of screen line
---?   print('snap', State.screen_top1.line, State.screen_top1.pos, State.screen_top1.posB, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
+--?   print('snap', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
 --?   print('cursor pos '..tostring(State.cursor1.pos)..' is on the #'..tostring(top2.screen_line)..' screen line down')
   local y = App.screen.height - State.line_height
   -- duplicate some logic from love.draw
