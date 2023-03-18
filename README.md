@@ -84,8 +84,6 @@ found anything amiss: http://akkartik.name/contact
 
 * No scrollbars yet. That stuff is hard.
 
-* When editing sources, selecting text is not yet completely implemented.
-
 ## Mirrors and Forks
 
 Updates to lines.love can be downloaded from the following mirrors in addition
