@@ -137,8 +137,8 @@ function source.load_settings()
 end
 
 function source.set_window_position_from_settings(settings)
-  -- setPosition doesn't quite seem to do what is asked of it on Linux.
-  love.window.setPosition(settings.x, settings.y-37, settings.displayindex)
+  -- love.window.setPosition doesn't quite seem to do what is asked of it on Linux.
+  App.screen.move(settings.x, settings.y-37, settings.displayindex)
 end
 
 function source.initialize_default_settings()

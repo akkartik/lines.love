@@ -48,14 +48,14 @@ end
 function run.load_settings()
   love.graphics.setFont(love.graphics.newFont(Settings.font_height))
   -- determine default dimensions and flags
-  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
+  App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
   -- set up desired window dimensions
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.width, App.screen.height = Settings.width, Settings.height
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
-  love.window.setPosition(Settings.x, Settings.y, Settings.displayindex)
+  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
+  App.screen.move(Settings.x, Settings.y, Settings.displayindex)
   Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, Settings.font_height, math.floor(Settings.font_height*1.3))
   Editor_state.filename = Settings.filename
   Editor_state.screen_top1 = Settings.screen_top
@@ -76,15 +76,15 @@ end
 
 function run.initialize_window_geometry(em_width)
   -- maximize window
-  love.window.setMode(0, 0)  -- maximize
-  App.screen.width, App.screen.height, App.screen.flags = love.window.getMode()
+  App.screen.resize(0, 0)  -- maximize
+  App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
   -- shrink height slightly to account for window decoration
   App.screen.height = App.screen.height-100
   App.screen.width = 40*em_width
   App.screen.flags.resizable = true
   App.screen.flags.minwidth = math.min(App.screen.width, 200)
   App.screen.flags.minheight = math.min(App.screen.height, 200)
-  love.window.setMode(App.screen.width, App.screen.height, App.screen.flags)
+  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
 
 function run.resize(w, h)
@@ -131,7 +131,7 @@ function run.settings()
     Settings = {}
   end
   if Current_app == 'run' then
-    Settings.x, Settings.y, Settings.displayindex = love.window.getPosition()
+    Settings.x, Settings.y, Settings.displayindex = App.screen.position()
   end
   local filename = Editor_state.filename
   if is_relative_path(filename) then
