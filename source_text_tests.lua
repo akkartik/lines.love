@@ -369,7 +369,7 @@ function test_draw_word_wrapping_text()
 end
 
 function test_click_on_wrapping_line()
-  -- display two lines with cursor on one of them
+  -- display two screen lines with cursor on one of them
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{'abc def ghi jkl mno pqr stu'}
@@ -387,7 +387,7 @@ function test_click_on_wrapping_line()
 end
 
 function test_click_on_wrapping_line_takes_margins_into_account()
-  -- display two lines with cursor on one of them
+  -- display two screen lines with cursor on one of them
   App.screen.init{width=100, height=80}
   Editor_state = edit.initialize_test_state()
   Editor_state.left = 50  -- occupy only right side of screen
@@ -441,7 +441,7 @@ function test_draw_wrapping_text_containing_non_ascii()
   App.screen.check(y, '’m a', 'screen:3')
 end
 
-function test_click_on_wrapping_line()
+function test_click_past_end_of_screen_line()
   -- display a wrapping line
   App.screen.init{width=75, height=80}
   Editor_state = edit.initialize_test_state()
