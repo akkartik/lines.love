@@ -128,6 +128,13 @@ function source.load_settings()
 end
 
 function source.resize_window_from_settings(settings)
+  local os = love.system.getOS()
+  if os == 'Android' or os == 'iOS' then
+    -- maximizing on iOS breaks text rendering: https://github.com/deltadaedalus/vudu/issues/7
+    -- no point second-guessing window dimensions on mobile
+    App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
+    return
+  end
   -- maximize window to determine maximum allowable dimensions
   App.screen.resize(0, 0)  -- maximize
   Display_width, Display_height, App.screen.flags = App.screen.size()
@@ -158,6 +165,13 @@ function source.initialize_default_settings()
 end
 
 function source.initialize_window_geometry(em_width)
+  local os = love.system.getOS()
+  if os == 'Android' or os == 'iOS' then
+    -- maximizing on iOS breaks text rendering: https://github.com/deltadaedalus/vudu/issues/7
+    -- no point second-guessing window dimensions on mobile
+    App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
+    return
+  end
   -- maximize window
   App.screen.resize(0, 0)  -- maximize
   Display_width, Display_height, App.screen.flags = App.screen.size()
