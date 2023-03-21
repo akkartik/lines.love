@@ -115,6 +115,8 @@ here.
 
 * https://codeberg.org/akkartik/lines2md exports lines.love files to Markdown
   and (non-editable) SVG.
+* https://git.sr.ht/~akkartik/lines2html.love exports lines.love files to html
+  and inline SVG.
 
 ## Feedback
 
