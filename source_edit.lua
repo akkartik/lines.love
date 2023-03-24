@@ -311,7 +311,7 @@ function edit.mouse_wheel_move(State, dx,dy)
     for i=1,math.floor(dy) do
       Text.up(State)
     end
-  else
+  elseif dy < 0 then
     State.cursor1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
     for i=1,math.floor(-dy) do
       Text.down(State)

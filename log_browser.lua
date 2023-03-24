@@ -268,7 +268,7 @@ function log_browser.mouse_wheel_move(State, dx,dy)
     for i=1,math.floor(dy) do
       log_browser.up(State)
     end
-  else
+  elseif dy < 0 then
     for i=1,math.floor(-dy) do
       log_browser.down(State)
     end
