@@ -163,6 +163,11 @@ function run.mouse_release(x,y, mouse_button)
   return edit.mouse_release(Editor_state, x,y, mouse_button)
 end
 
+function run.mouse_wheel_move(x,y)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
+  return edit.mouse_wheel_move(Editor_state, x,y)
+end
+
 function run.text_input(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   return edit.text_input(Editor_state, t)

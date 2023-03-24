@@ -305,6 +305,20 @@ function edit.mouse_release(State, x,y, mouse_button)
   end
 end
 
+function edit.mouse_wheel_move(State, dx,dy)
+  if dy > 0 then
+    State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+    for i=1,math.floor(dy) do
+      Text.up(State)
+    end
+  else
+    State.cursor1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
+    for i=1,math.floor(-dy) do
+      Text.down(State)
+    end
+  end
+end
+
 function edit.text_input(State, t)
   if State.search_term then
     State.search_term = State.search_term..t

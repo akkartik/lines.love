@@ -323,6 +323,15 @@ function source.mouse_release(x,y, mouse_button)
   end
 end
 
+function source.mouse_wheel_move(dx,dy)
+  Cursor_time = 0  -- ensure cursor is visible immediately after it moves
+  if Focus == 'edit' then
+    return edit.mouse_wheel_move(Editor_state, dx,dy)
+  else
+    return log_browser.mouse_wheel_move(Log_browser_state, dx,dy)
+  end
+end
+
 function source.text_input(t)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Show_file_navigator then

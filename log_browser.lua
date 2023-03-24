@@ -263,25 +263,27 @@ end
 function log_browser.mouse_release(State, x,y, mouse_button)
 end
 
+function log_browser.mouse_wheel_move(State, dx,dy)
+  if dy > 0 then
+    for i=1,math.floor(dy) do
+      log_browser.up(State)
+    end
+  else
+    for i=1,math.floor(-dy) do
+      log_browser.down(State)
+    end
+  end
+end
+
 function log_browser.text_input(State, t)
 end
 
 function log_browser.keychord_press(State, chord, key)
   -- move
   if chord == 'up' then
-    while State.screen_top1.line > 1 do
-      State.screen_top1.line = State.screen_top1.line-1
-      if should_show(State.lines[State.screen_top1.line]) then
-        break
-      end
-    end
+    log_browser.up(State)
   elseif chord == 'down' then
-    while State.screen_top1.line < #State.lines do
-      State.screen_top1.line = State.screen_top1.line+1
-      if should_show(State.lines[State.screen_top1.line]) then
-        break
-      end
-    end
+    log_browser.down(State)
   elseif chord == 'pageup' then
     local y = 0
     while State.screen_top1.line > 1 and y < App.screen.height - 100 do
@@ -297,6 +299,24 @@ function log_browser.keychord_press(State, chord, key)
         y = y + log_browser.height(State, State.screen_top1.line)
       end
       State.screen_top1.line = State.screen_top1.line + 1
+    end
+  end
+end
+
+function log_browser.up(State)
+  while State.screen_top1.line > 1 do
+    State.screen_top1.line = State.screen_top1.line-1
+    if should_show(State.lines[State.screen_top1.line]) then
+      break
+    end
+  end
+end
+
+function log_browser.down(State)
+  while State.screen_top1.line < #State.lines do
+    State.screen_top1.line = State.screen_top1.line+1
+    if should_show(State.lines[State.screen_top1.line]) then
+      break
     end
   end
 end

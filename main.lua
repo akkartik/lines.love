@@ -250,6 +250,16 @@ function App.mousereleased(x,y, mouse_button)
   end
 end
 
+function App.wheelmoved(dx,dy)
+  if Current_app == 'run' then
+    if run.mouse_wheel_move then run.mouse_wheel_move(dx,dy) end
+  elseif Current_app == 'source' then
+    if source.mouse_wheel_move then source.mouse_wheel_move(dx,dy) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
 function love.quit()
   if Current_app == 'run' then
     local source_settings = Settings.source
