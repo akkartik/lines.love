@@ -122,7 +122,8 @@ function run.file_drop(file)
   Editor_state.lines = load_from_file(file)
   file:close()
   Text.redraw_all(Editor_state)
-  edit.check_locs(Editor_state)
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.cursor1 = {line=1, pos=1}
 
 
 
