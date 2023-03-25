@@ -72,7 +72,14 @@ function source.initialize()
   Menu_status_bar_height = 5 + Editor_state.line_height + 5
   Editor_state.top = Editor_state.top + Menu_status_bar_height
   Log_browser_state.top = Log_browser_state.top + Menu_status_bar_height
+
+
+
+  -- keep a few blank lines around: https://merveilles.town/@akkartik/110084833821965708
   love.window.setTitle('lines.love - source')
+
+
+
 end
 
 -- environment for a mutable file
@@ -218,7 +225,14 @@ function source.file_drop(file)
   Text.redraw_all(Editor_state)
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.cursor1 = {line=1, pos=1}
+
+
+
+  -- keep a few blank lines around: https://merveilles.town/@akkartik/110084833821965708
   love.window.setTitle('lines.love - source')
+
+
+
 end
 
 -- a copy of source.file_drop when given a filename

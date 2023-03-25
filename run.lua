@@ -33,7 +33,13 @@ function run.initialize(arg)
     Text.redraw_all(Editor_state)
   end
   edit.check_locs(Editor_state)
+
+
+
+  -- keep a few blank lines around: https://merveilles.town/@akkartik/110084833821965708
   love.window.setTitle('lines.love - '..Editor_state.filename)
+
+
 
   if #arg > 1 then
     print('ignoring commandline args after '..arg[1])
@@ -117,7 +123,14 @@ function run.file_drop(file)
   file:close()
   Text.redraw_all(Editor_state)
   edit.check_locs(Editor_state)
+
+
+
+  -- keep a few blank lines around: https://merveilles.town/@akkartik/110084833821965708
   love.window.setTitle('lines.love - '..Editor_state.filename)
+
+
+
 end
 
 function run.draw()
