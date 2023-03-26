@@ -122,8 +122,10 @@ function edit.check_locs(State)
 end
 
 function edit.invalid1(State, loc1)
-  return loc1.line > #State.lines
-      or loc1.pos > #State.lines[loc1.line].data
+  if loc1.line > #State.lines then return true end
+  local l = State.lines[loc1.line]
+  if l.mode ~= 'text' then return false end  -- pos is irrelevant to validity for a drawing line
+  return loc1.pos > #State.lines[loc1.line].data
 end
 
 function edit.cursor_on_text(State)
