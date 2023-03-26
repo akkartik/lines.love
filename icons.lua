@@ -4,8 +4,8 @@ function icon.insert_drawing(button_params)
   local x,y = button_params.x, button_params.y
   App.color(Icon_color)
   love.graphics.rectangle('line', x,y, 12,12)
-  love.graphics.line(4,y+6, 16,y+6)
-  love.graphics.line(10,y, 10,y+12)
+  love.graphics.line(x,y+6, x+12,y+6)
+  love.graphics.line(x+6,y, x+6,y+12)
 end
 
 function icon.hyperlink_decoration(button_params)
