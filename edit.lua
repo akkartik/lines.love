@@ -226,7 +226,7 @@ end
 
 function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('press', State.selection1.line, State.selection1.pos)
+--?   print('press', State.cursor1.line)
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
@@ -269,7 +269,7 @@ end
 
 function edit.mouse_release(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('release')
+--?   print('release', State.cursor1.line)
   if State.lines.current_drawing then
     Drawing.mouse_release(State, x,y, mouse_button)
     schedule_save(State)
@@ -321,11 +321,12 @@ function edit.mouse_wheel_move(State, dx,dy)
 end
 
 function edit.text_input(State, t)
+--?   print('text input', t)
   if State.search_term then
     State.search_term = State.search_term..t
     State.search_text = nil
     Text.search_next(State)
-  elseif State.current_drawing_mode == 'name' then
+  elseif State.lines.current_drawing and State.current_drawing_mode == 'name' then
     local before = snapshot(State, State.lines.current_drawing_index)
     local drawing = State.lines.current_drawing
     local p = drawing.points[drawing.pending.target_point]
@@ -478,7 +479,7 @@ function edit.keychord_press(State, chord, key)
         line.show_help = false
       end
     end
-  elseif State.current_drawing_mode == 'name' then
+  elseif State.lines.current_drawing and State.current_drawing_mode == 'name' then
     if chord == 'return' then
       State.current_drawing_mode = State.previous_drawing_mode
       State.previous_drawing_mode = nil
