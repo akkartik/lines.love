@@ -178,6 +178,7 @@ function Text.text_input(State, t)
 end
 
 function Text.insert_at_cursor(State, t)
+  assert(State.lines[State.cursor1.line].mode == 'text')
   local byte_offset = Text.offset(State.lines[State.cursor1.line].data, State.cursor1.pos)
   State.lines[State.cursor1.line].data = string.sub(State.lines[State.cursor1.line].data, 1, byte_offset-1)..t..string.sub(State.lines[State.cursor1.line].data, byte_offset)
   Text.clear_screen_line_cache(State, State.cursor1.line)
