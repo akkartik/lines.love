@@ -426,6 +426,37 @@ function test_name_point()
   check_eq(p2.name, 'A', 'save')
 end
 
+function test_name_point_then_hit_backspace()
+  -- create a drawing with a line
+  App.screen.init{width=Test_margin_left+256, height=300}  -- drawing coordinates 1:1 with pixels
+  Editor_state = edit.initialize_test_state()
+  Editor_state.filename = 'foo'
+  Editor_state.lines = load_array{'```lines', '```', ''}
+  Text.redraw_all(Editor_state)
+  Editor_state.current_drawing_mode = 'line'
+  edit.draw(Editor_state)
+  -- draw a line
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+5, Editor_state.top+Drawing_padding_top+6, 1)
+  edit.run_after_mouse_release(Editor_state, Editor_state.left+35, Editor_state.top+Drawing_padding_top+36, 1)
+  local drawing = Editor_state.lines[1]
+  check_eq(#drawing.shapes, 1, 'baseline/#shapes')
+  check_eq(#drawing.points, 2, 'baseline/#points')
+  check_eq(drawing.shapes[1].mode, 'line', 'baseline/shape:1')
+  local p1 = drawing.points[drawing.shapes[1].p1]
+  local p2 = drawing.points[drawing.shapes[1].p2]
+  check_eq(p1.x, 5, 'baseline/p1:x')
+  check_eq(p1.y, 6, 'baseline/p1:y')
+  check_eq(p2.x, 35, 'baseline/p2:x')
+  check_eq(p2.y, 36, 'baseline/p2:y')
+  check_nil(p2.name, 'baseline/p2:name')
+  -- enter 'name' mode without moving the mouse
+  edit.run_after_keychord(Editor_state, 'C-n')
+  check_eq(Editor_state.current_drawing_mode, 'name', 'mode:1')
+  -- hit backspace
+  edit.run_after_keychord(Editor_state, 'backspace')
+  -- no crash
+end
+
 function test_move_point()
   -- create a drawing with a line
   App.screen.init{width=Test_margin_left+256, height=300}  -- drawing coordinates 1:1 with pixels

@@ -491,10 +491,12 @@ function edit.keychord_press(State, chord, key)
         record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
       elseif chord == 'backspace' then
         local len = utf8.len(p.name)
-        local byte_offset = Text.offset(p.name, len-1)
-        if len == 1 then byte_offset = 0 end
-        p.name = string.sub(p.name, 1, byte_offset)
-        record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
+        if len > 0 then
+          local byte_offset = Text.offset(p.name, len-1)
+          if len == 1 then byte_offset = 0 end
+          p.name = string.sub(p.name, 1, byte_offset)
+          record_undo_event(State, {before=before, after=snapshot(State, State.lines.current_drawing_index)})
+        end
       end
     end
     schedule_save(State)
