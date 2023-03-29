@@ -4,15 +4,17 @@ because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
 Startup:
-    - terminal log shows unit tests running
+
+  - terminal log shows unit tests running
 
 Initializing settings:
-    - delete app settings, start; window opens running the text editor
-    - quit while running the text editor, restart; window opens running the text editor in same position+dimensions
-    - quit while editing source (color; no drawings; no selection), restart; window opens editing source in same position+dimensions
-    - start out running the text editor, move window, press ctrl+e twice; window is running text editor in same position+dimensions
-    - start out editing source, move window, press ctrl+e twice; window is editing source in same position+dimensions
-    - no log file; switching to source works
+
+  - delete app settings, start; window opens running the text editor
+  - quit while running the text editor, restart; window opens running the text editor in same position+dimensions
+  - quit while editing source (color; no drawings; no selection), restart; window opens editing source in same position+dimensions
+  - start out running the text editor, move window, press ctrl+e twice; window is running text editor in same position+dimensions
+  - start out editing source, move window, press ctrl+e twice; window is editing source in same position+dimensions
+  - no log file; switching to source works
 
 Code loading:
 * run love with directory; text editor runs
@@ -46,8 +48,8 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
 * Like any high-level language, it's easy to accidentally alias two non-scalar
   variables. I wish there was a way to require copy when assigning.
 
-* I wish I could require pixel coordinates to integers. The editor defensively
-  converts input margins to integers.
+* I wish I could require pixel coordinates to be integers. The editor
+  defensively converts input margins to integers.
 
 * My test harness automatically runs `test_*` methods -- but only at the
   top-level. I wish there was a way to raise warnings if someone defines such
