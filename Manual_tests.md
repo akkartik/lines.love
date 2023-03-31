@@ -4,7 +4,6 @@ because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
 Initializing settings:
-
   - delete app settings, start; window opens running the text editor
   - quit while running the text editor, restart; window opens running the text editor in same position+dimensions
   - quit while editing source (color; no drawings; no selection), restart; window opens editing source in same position+dimensions
