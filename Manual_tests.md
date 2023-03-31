@@ -3,10 +3,6 @@ program before it ever runs. However, some things don't have tests yet, either
 because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
-Startup:
-
-  - terminal log shows unit tests running
-
 Initializing settings:
 
   - delete app settings, start; window opens running the text editor
