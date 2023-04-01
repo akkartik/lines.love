@@ -99,7 +99,6 @@ function Text.populate_screen_line_starting_pos(State, line_index)
 end
 
 function Text.compute_fragments(State, line_index)
---?   print('compute_fragments', line_index, 'between', State.left, State.right)
   local line = State.lines[line_index]
   if line.mode ~= 'text' then return end
   local line_cache = State.line_cache[line_index]
@@ -111,21 +110,15 @@ function Text.compute_fragments(State, line_index)
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_width = App.width(frag)
---?     print('x: '..tostring(x)..'; frag_width: '..tostring(frag_width)..'; '..tostring(State.right-x)..'px to go')
     while x + frag_width > State.right do
---?       print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
       if (x-State.left) < 0.8 * (State.right-State.left) then
---?         print('splitting')
         -- long word; chop it at some letter
         -- We're not going to reimplement TeX here.
         local bpos = Text.nearest_pos_less_than(frag, State.right - x)
---?         print('bpos', bpos)
         if bpos == 0 then break end  -- avoid infinite loop when window is too narrow
         local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
---?         print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
         local frag1 = string.sub(frag, 1, boffset-1)
         local frag1_width = App.width(frag1)
---?         print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
         assert(x + frag1_width <= State.right)
         table.insert(line_cache.fragments, {data=frag1})
         frag = string.sub(frag, boffset)
@@ -134,7 +127,6 @@ function Text.compute_fragments(State, line_index)
       x = State.left  -- new line
     end
     if #frag > 0 then
---?       print('inserting ^'..frag..'$ of width '..tostring(frag_width)..'px')
       table.insert(line_cache.fragments, {data=frag})
     end
     x = x + frag_width
