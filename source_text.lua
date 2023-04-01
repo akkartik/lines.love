@@ -26,7 +26,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
 --?       print('skipping', frag)
     else
       -- render fragment
-      local frag_width = App.width(frag_text)
+      local frag_width = App.width(f.data)
       if x + frag_width > State.right then
         assert(x > State.left)  -- no overfull lines
         y = y + State.line_height
@@ -106,7 +106,7 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   for _, f in ipairs(line_cache.fragments) do
     local frag, frag_text = f.data, f.text
     -- render fragment
-    local frag_width = App.width(frag_text)
+    local frag_width = App.width(f.data)
     if x + frag_width > State.right then
       x = State.left
       table.insert(line_cache.screen_line_starting_pos, pos)
@@ -130,7 +130,7 @@ function Text.compute_fragments(State, line_index)
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_text = App.newText(love.graphics.getFont(), frag)
-    local frag_width = App.width(frag_text)
+    local frag_width = App.width(frag)
 --?     print('x: '..tostring(x)..'; frag_width: '..tostring(frag_width)..'; '..tostring(State.right-x)..'px to go')
     while x + frag_width > State.right do
 --?       print(('checking whether to split fragment ^%s$ of width %d when rendering from %d'):format(frag, frag_width, x))
@@ -145,13 +145,13 @@ function Text.compute_fragments(State, line_index)
 --?         print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
         local frag1 = string.sub(frag, 1, boffset-1)
         local frag1_text = App.newText(love.graphics.getFont(), frag1)
-        local frag1_width = App.width(frag1_text)
+        local frag1_width = App.width(frag1)
 --?         print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
         assert(x + frag1_width <= State.right)
         table.insert(line_cache.fragments, {data=frag1, text=frag1_text})
         frag = string.sub(frag, boffset)
         frag_text = App.newText(love.graphics.getFont(), frag)
-        frag_width = App.width(frag_text)
+        frag_width = App.width(frag)
       end
       x = State.left  -- new line
     end
@@ -775,8 +775,7 @@ function Text.screen_line_width(State, line_index, i)
   else
     screen_line = string.sub(line.data, start_pos)
   end
-  local screen_line_text = App.newText(love.graphics.getFont(), screen_line)
-  return App.width(screen_line_text)
+  return App.width(screen_line)
 end
 
 function Text.screen_line_index(screen_line_starting_pos, pos)
@@ -864,15 +863,13 @@ function Text.x_after(s, pos)
   local offset = Text.offset(s, math.min(pos+1, #s+1))
   local s_before = s:sub(1, offset-1)
 --?   print('^'..s_before..'$')
-  local text_before = App.newText(love.graphics.getFont(), s_before)
-  return App.width(text_before)
+  return App.width(s_before)
 end
 
 function Text.x(s, pos)
   local offset = Text.offset(s, pos)
   local s_before = s:sub(1, offset-1)
-  local text_before = App.newText(love.graphics.getFont(), s_before)
-  return App.width(text_before)
+  return App.width(s_before)
 end
 
 function Text.to2(State, loc1)

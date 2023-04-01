@@ -104,7 +104,6 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
 
     -- search
     search_term = nil,
-    search_text = nil,
     search_backup = nil,  -- stuff to restore when cancelling search
   }
   return result
@@ -325,7 +324,6 @@ function edit.text_input(State, t)
 --?   print('text input', t)
   if State.search_term then
     State.search_term = State.search_term..t
-    State.search_text = nil
     Text.search_next(State)
   elseif State.lines.current_drawing and State.current_drawing_mode == 'name' then
     local before = snapshot(State, State.lines.current_drawing_index)
@@ -356,20 +354,17 @@ function edit.keychord_press(State, chord, key)
     for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     if chord == 'escape' then
       State.search_term = nil
-      State.search_text = nil
       State.cursor1 = State.search_backup.cursor
       State.screen_top1 = State.search_backup.screen_top
       State.search_backup = nil
       Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
     elseif chord == 'return' then
       State.search_term = nil
-      State.search_text = nil
       State.search_backup = nil
     elseif chord == 'backspace' then
       local len = utf8.len(State.search_term)
       local byte_offset = Text.offset(State.search_term, len)
       State.search_term = string.sub(State.search_term, 1, byte_offset-1)
-      State.search_text = nil
     elseif chord == 'down' then
       State.cursor1.pos = State.cursor1.pos+1
       Text.search_next(State)
@@ -383,7 +378,6 @@ function edit.keychord_press(State, chord, key)
       cursor={line=State.cursor1.line, pos=State.cursor1.pos},
       screen_top={line=State.screen_top1.line, pos=State.screen_top1.pos},
     }
-    assert(State.search_text == nil)
   -- zoom
   elseif chord == 'C-=' then
     edit.update_font_settings(State, State.font_height+2)
@@ -515,7 +509,6 @@ function edit.update_font_settings(State, font_height)
   State.font_height = font_height
   love.graphics.setFont(love.graphics.newFont(State.font_height))
   State.line_height = math.floor(font_height*1.3)
-  State.em = App.newText(love.graphics.getFont(), 'm')
   Text_cache = {}
 end
 

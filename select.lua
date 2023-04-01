@@ -58,15 +58,12 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
       lo_px = 0
     else
       local before = line.data:sub(pos_offset, lo_offset-1)
-      local before_text = App.newText(love.graphics.getFont(), before)
-      lo_px = App.width(before_text)
+      lo_px = App.width(before)
     end
 --?     print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
     local s = line.data:sub(lo_offset, hi_offset-1)
-    local text = App.newText(love.graphics.getFont(), s)
-    local text_width = App.width(text)
     App.color(Highlight_color)
-    love.graphics.rectangle('fill', x+lo_px,y, text_width,State.line_height)
+    love.graphics.rectangle('fill', x+lo_px,y, App.width(s),State.line_height)
     App.color(Text_color)
     return lo_px
   end

@@ -13,10 +13,7 @@ function Text.draw_search_bar(State)
   love.graphics.rectangle('line', 20, y-6, App.screen.width-40, h+2, 2,2)
   App.color(Text_color)
   App.screen.print(State.search_term, 25,y-5)
-  if State.search_text == nil then
-    State.search_text = App.newText(love.graphics.getFont(), State.search_term)
-  end
-  Text.draw_cursor(State, 25+App.width(State.search_text),y-5)
+  Text.draw_cursor(State, 25+App.width(State.search_term),y-5)
 end
 
 function Text.search_next(State)

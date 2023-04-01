@@ -60,14 +60,13 @@ function Drawing.draw(State, line_index, y)
         if State.current_drawing_mode == 'name' and i == line.pending.target_point then
           -- create a faint red box for the name
           App.color(Current_name_background_color)
-          local name_text
-          -- TODO: avoid computing name width on every repaint
+          local name_width
           if p.name == '' then
-            name_text = State.em
+            name_width = App.width('m')
           else
-            name_text = App.newText(love.graphics.getFont(), p.name)
+            name_width = App.width(p.name)
           end
-          love.graphics.rectangle('fill', x,y, App.width(name_text), State.line_height)
+          love.graphics.rectangle('fill', x,y, name_width, State.line_height)
         end
       end
     end
