@@ -88,7 +88,6 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
 
     font_height = font_height,
     line_height = line_height,
-    em = App.newText(love.graphics.getFont(), 'm'),  -- widest possible character width
 
     top = top,
     left = math.floor(left),

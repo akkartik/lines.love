@@ -17,13 +17,12 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
   initialize_color()
   for _, f in ipairs(line_cache.fragments) do
     App.color(Text_color)
-    local frag, frag_text = f.data, f.text
-    select_color(frag)
-    local frag_len = utf8.len(frag)
---?     print('text.draw:', frag, 'at', line_index,pos, 'after', x,y)
+    select_color(f.data)
+    local frag_len = utf8.len(f.data)
+--?     print('text.draw:', f.data, 'at', line_index,pos, 'after', x,y)
     if pos < startpos then
       -- render nothing
---?       print('skipping', frag)
+--?       print('skipping', f.data)
     else
       -- render fragment
       local frag_width = App.width(f.data)
@@ -41,7 +40,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
         Text.draw_highlight(State, line, x,y, pos, lo,hi)
       end
       -- Make [[WikiWords]] (single word, all in one screen line) clickable.
-      local trimmed_word = rtrim(frag)  -- compute_fragments puts whitespace at the end
+      local trimmed_word = rtrim(f.data)  -- compute_fragments puts whitespace at the end
       if starts_with(trimmed_word, '[[') and ends_with(trimmed_word, ']]') then
         local filename = trimmed_word:gsub('^..(.*)..$', '%1')
         if source.link_exists(State, filename) then
@@ -53,7 +52,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
           })
         end
       end
-      App.screen.draw(frag_text, x,y)
+      App.screen.print(f.data, x,y)
       -- render cursor if necessary
       if line_index == State.cursor1.line then
         if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
@@ -64,7 +63,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
               love.graphics.print(State.search_term, x+lo_px,y)
             end
           elseif Focus == 'edit' then
-            Text.draw_cursor(State, x+Text.x(frag, State.cursor1.pos-pos+1), y)
+            Text.draw_cursor(State, x+Text.x(f.data, State.cursor1.pos-pos+1), y)
             App.color(Text_color)
           end
         end
@@ -104,7 +103,6 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   local x = State.left
   local pos = 1
   for _, f in ipairs(line_cache.fragments) do
-    local frag, frag_text = f.data, f.text
     -- render fragment
     local frag_width = App.width(f.data)
     if x + frag_width > State.right then
@@ -112,8 +110,7 @@ function Text.populate_screen_line_starting_pos(State, line_index)
       table.insert(line_cache.screen_line_starting_pos, pos)
     end
     x = x + frag_width
-    local frag_len = utf8.len(frag)
-    pos = pos + frag_len
+    pos = pos + utf8.len(f.data)
   end
 end
 
@@ -129,7 +126,6 @@ function Text.compute_fragments(State, line_index)
   local x = State.left
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
-    local frag_text = App.newText(love.graphics.getFont(), frag)
     local frag_width = App.width(frag)
 --?     print('x: '..tostring(x)..'; frag_width: '..tostring(frag_width)..'; '..tostring(State.right-x)..'px to go')
     while x + frag_width > State.right do
@@ -144,20 +140,18 @@ function Text.compute_fragments(State, line_index)
         local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
 --?         print('space for '..tostring(bpos)..' graphemes, '..tostring(boffset-1)..' bytes')
         local frag1 = string.sub(frag, 1, boffset-1)
-        local frag1_text = App.newText(love.graphics.getFont(), frag1)
         local frag1_width = App.width(frag1)
 --?         print('extracting ^'..frag1..'$ of width '..tostring(frag1_width)..'px')
         assert(x + frag1_width <= State.right)
-        table.insert(line_cache.fragments, {data=frag1, text=frag1_text})
+        table.insert(line_cache.fragments, {data=frag1})
         frag = string.sub(frag, boffset)
-        frag_text = App.newText(love.graphics.getFont(), frag)
         frag_width = App.width(frag)
       end
       x = State.left  -- new line
     end
     if #frag > 0 then
 --?       print('inserting ^'..frag..'$ of width '..tostring(frag_width)..'px')
-      table.insert(line_cache.fragments, {data=frag, text=frag_text})
+      table.insert(line_cache.fragments, {data=frag})
     end
     x = x + frag_width
   end
