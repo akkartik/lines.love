@@ -53,7 +53,7 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     -- rendering wrapped text lines needs some additional short-lived data per line:
     --   startpos, the index of data the line starts rendering from, can only be >1 for topmost line on screen
     --   starty, the y coord in pixels the line starts rendering from
-    --   fragments: snippets of rendered love.graphics.Text, guaranteed to not straddle screen lines
+    --   fragments: snippets of the line guaranteed to not straddle screen lines
     --   screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
     line_cache = {},
 
