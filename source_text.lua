@@ -45,8 +45,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
       if starts_with(trimmed_word, '[[') and ends_with(trimmed_word, ']]') then
         local filename = trimmed_word:gsub('^..(.*)..$', '%1')
         if source.link_exists(State, filename) then
-          local filename_text = App.newText(love.graphics.getFont(), filename)
-          button(State, 'link', {x=x+App.width(to_text('[[')), y=y, w=App.width(filename_text), h=State.line_height, color={1,1,1},
+          button(State, 'link', {x=x+App.width('[['), y=y, w=App.width(filename), h=State.line_height, color={1,1,1},
             icon = icon.hyperlink_decoration,
             onpress1 = function()
                          source.switch_to_file(filename)

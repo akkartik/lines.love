@@ -147,5 +147,5 @@ function current_shape(State, shape)
 end
 
 function bullet_indent()
-  return App.width(to_text('* '))
+  return App.width('* ')
 end

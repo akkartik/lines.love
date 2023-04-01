@@ -98,21 +98,20 @@ function log_browser.draw(State)
       local xright = render_stack_right_margin(State, line_index, line, y)
       if line.section_name then
         App.color(Section_border_color)
-        local section_text = to_text(line.section_name)
         if line.section_begin then
           local sectiony = y+Section_border_padding_vertical
           love.graphics.line(xleft,sectiony, xleft,y+State.line_height)
           love.graphics.line(xright,sectiony, xright,y+State.line_height)
           love.graphics.line(xleft,sectiony, xleft+50-2,sectiony)
-          love.graphics.draw(section_text, xleft+50,y)
-          love.graphics.line(xleft+50+App.width(section_text)+2,sectiony, xright,sectiony)
+          love.graphics.print(line.section_name, xleft+50,y)
+          love.graphics.line(xleft+50+App.width(line.section_name)+2,sectiony, xright,sectiony)
         else assert(line.section_end)
           local sectiony = y+State.line_height-Section_border_padding_vertical
           love.graphics.line(xleft,y, xleft,sectiony)
           love.graphics.line(xright,y, xright,sectiony)
           love.graphics.line(xleft,sectiony, xleft+50-2,sectiony)
-          love.graphics.draw(section_text, xleft+50,y)
-          love.graphics.line(xleft+50+App.width(section_text)+2,sectiony, xright,sectiony)
+          love.graphics.print(line.section_name, xleft+50,y)
+          love.graphics.line(xleft+50+App.width(line.section_name)+2,sectiony, xright,sectiony)
         end
       else
         if type(line.data) == 'string' then
@@ -148,7 +147,7 @@ function render_stack_left_margin(State, line_index, line, y)
       love.graphics.print(line.section_stack[i].name, x+State.font_height+5, y+5, --[[vertically]] math.pi/2)
     end
     if y > App.screen.height-log_browser.height(State, line_index) then
-      love.graphics.print(line.section_stack[i].name, x+State.font_height+5, App.screen.height-App.width(to_text(line.section_stack[i].name))-5, --[[vertically]] math.pi/2)
+      love.graphics.print(line.section_stack[i].name, x+State.font_height+5, App.screen.height-App.width(line.section_stack[i].name)-5, --[[vertically]] math.pi/2)
     end
   end
   return log_browser.left_margin(State, line)
@@ -163,7 +162,7 @@ function render_stack_right_margin(State, line_index, line, y)
       love.graphics.print(line.section_stack[i].name, x, y+5, --[[vertically]] math.pi/2)
     end
     if y > App.screen.height-log_browser.height(State, line_index) then
-      love.graphics.print(line.section_stack[i].name, x, App.screen.height-App.width(to_text(line.section_stack[i].name))-5, --[[vertically]] math.pi/2)
+      love.graphics.print(line.section_stack[i].name, x, App.screen.height-App.width(line.section_stack[i].name)-5, --[[vertically]] math.pi/2)
     end
   end
   return log_browser.right_margin(State, line)

@@ -43,21 +43,19 @@ function source.draw_menu_bar()
 end
 
 function add_hotkey_to_menu(s)
-  local s_text = to_text(s)
-  local width = App.width(s_text)
+  local width = App.width(s)
   if Menu_cursor > App.screen.width - 30 then
     return
   end
   App.color(Menu_command_color)
-  App.screen.draw(s_text, Menu_cursor,5)
+  App.screen.print(s, Menu_cursor,5)
   Menu_cursor = Menu_cursor + width + 30
 end
 
 function source.draw_file_navigator()
   App.color(Menu_command_color)
-  local filter_text = to_text(File_navigation.filter)
-  App.screen.draw(filter_text, 5, 5)
-  draw_cursor(5 + App.width(filter_text), 5)
+  App.screen.print(File_navigation.filter, 5, 5)
+  draw_cursor(5 + App.width(File_navigation.filter), 5)
   if File_navigation.num_lines == nil then
     File_navigation.num_lines = source.num_lines_for_file_navigator(File_navigation.candidates)
   end
@@ -97,7 +95,7 @@ function source.num_lines_for_file_navigator(candidates)
   local result = 1
   local x = 5
   for i,filename in ipairs(candidates) do
-    local width = App.width(to_text(filename))
+    local width = App.width(filename)
     if x + width > App.screen.width - 5 then
       result = result+1
       x = 5 + width
@@ -109,8 +107,7 @@ function source.num_lines_for_file_navigator(candidates)
 end
 
 function add_file_to_menu(x,y, s, cursor_highlight)
-  local s_text = to_text(s)
-  local width = App.width(s_text)
+  local width = App.width(s)
   if x + width > App.screen.width - 5 then
     y = y + Editor_state.line_height
     x = 5
@@ -125,7 +122,7 @@ function add_file_to_menu(x,y, s, cursor_highlight)
     end
   })
   App.color(Menu_command_color)
-  App.screen.draw(s_text, x,y)
+  App.screen.print(s, x,y)
   x = x + width + 30
   return x,y
 end
@@ -189,8 +186,7 @@ function log_render.file_navigator_state(o, x,y, w)
   local x2,y2 = 0,0
   local width = 0
   for i,filename in ipairs(o.files) do
-    local filename_text = to_text(filename)
-    width = App.width(filename_text)
+    width = App.width(filename)
     if x2 + width > App.screen.width - 5 then
       y2 = y2 + Editor_state.line_height
       x2 = 0
@@ -207,8 +203,7 @@ function log_render.file_navigator_state(o, x,y, w)
   local x3,y3 = 0,y  -- x3 is relative, y3 is absolute
   local width = 0
   for i,filename in ipairs(o.files) do
-    local filename_text = to_text(filename)
-    width = App.width(filename_text)
+    width = App.width(filename)
     if x3 + width > App.screen.width - 5 then
       y3 = y3 + Editor_state.line_height
       x3 = 0
@@ -219,7 +214,7 @@ function log_render.file_navigator_state(o, x,y, w)
     end
     if x3 >= menu_xmin and x3 + width < menu_xmax then
       App.color(Menu_command_color)
-      App.screen.draw(filename_text, x + x3-menu_xmin, y3)
+      App.screen.print(filename, x + x3-menu_xmin, y3)
     end
     x3 = x3 + width + 30
   end
@@ -246,7 +241,7 @@ end
 function file_coord(index)
   local y,x = Menu_status_bar_height, 5
   for i,filename in ipairs(File_navigation.candidates) do
-    local width = App.width(to_text(filename))
+    local width = App.width(filename)
     if x + width > App.screen.width - 5 then
       y = y + Editor_state.line_height
       x = 5
@@ -264,7 +259,7 @@ function file_index(fy, fx, fwidth)
   local y,x = Menu_status_bar_height, 5
   local best_guess, best_guess_x, best_guess_width
   for i,filename in ipairs(File_navigation.candidates) do
-    local width = App.width(to_text(filename))
+    local width = App.width(filename)
     if x + width > App.screen.width - 5 then
       y = y + Editor_state.line_height
       x = 5

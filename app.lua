@@ -219,6 +219,9 @@ function App.newText(font, s)
 end
 
 function App.width(text)
+  if type(text) == 'string' then
+    return love.graphics.getFont():getWidth(text)
+  end
   return text.text:getWidth()
 end
 
@@ -425,7 +428,12 @@ function App.disable_tests()
   App.screen.print = love.graphics.print
   App.newText = love.graphics.newText
   App.screen.draw = love.graphics.draw
-  App.width = function(text) return text:getWidth() end
+  App.width = function(text)
+    if type(text) == 'string' then
+      return love.graphics.getFont():getWidth(text)
+    end
+    return text:getWidth()
+  end
   if Current_app == nil or Current_app == 'run' then
     App.open_for_reading = function(filename) return io.open(filename, 'r') end
     App.open_for_writing = function(filename) return io.open(filename, 'w') end

@@ -418,11 +418,3 @@ function source.key_release(key, scancode)
     return log_browser.keychord_press(Log_browser_state, chordkey, scancode)
   end
 end
-
--- use this sparingly
-function to_text(s)
-  if Text_cache[s] == nil then
-    Text_cache[s] = App.newText(love.graphics.getFont(), s)
-  end
-  return Text_cache[s]
-end

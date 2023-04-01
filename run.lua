@@ -197,10 +197,6 @@ function run.key_release(key, scancode)
   return edit.key_release(Editor_state, key, scancode)
 end
 
--- use this sparingly
-function to_text(s)
-  if Text_cache[s] == nil then
-    Text_cache[s] = App.newText(love.graphics.getFont(), s)
-  end
-  return Text_cache[s]
+function width(s)
+  return love.graphics.getFont():getWidth(s)
 end
