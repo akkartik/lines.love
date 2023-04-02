@@ -61,14 +61,9 @@ function snapshot(State, s,e)
   for i=s,e do
     local line = State.lines[i]
     if line.mode == 'text' then
-      table.insert(event.lines, {mode='text', data=line.data})
+      table.insert(event.lines, {mode='text', data=line.data})  -- I've forgotten: should we deepcopy(line.data)?
     elseif line.mode == 'drawing' then
-      local points=deepcopy(line.points)
---?       print('copying', line.points, 'with', #line.points, 'points into', points)
-      local shapes=deepcopy(line.shapes)
---?       print('copying', line.shapes, 'with', #line.shapes, 'shapes into', shapes)
-      table.insert(event.lines, {mode='drawing', h=line.h, points=points, shapes=shapes, pending={}})
---?       table.insert(event.lines, {mode='drawing', h=line.h, points=deepcopy(line.points), shapes=deepcopy(line.shapes), pending={}})
+      table.insert(event.lines, {mode='drawing', h=line.h, points=deepcopy(line.points), shapes=deepcopy(line.shapes), pending={}})
     else
       print(line.mode)
       assert(false)
