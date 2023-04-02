@@ -12,7 +12,7 @@ function Text.draw(State, line_index, y, startpos)
   local x = State.left
   local pos = 1
   local screen_line_starting_pos = startpos
-  Text.compute_fragments(State, line_index)
+  Text.populate_screen_line_starting_pos(State, line_index)
   for _, f in ipairs(line_cache.fragments) do
     App.color(Text_color)
     local frag_len = utf8.len(f)
