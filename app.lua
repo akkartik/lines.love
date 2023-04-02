@@ -137,7 +137,7 @@ function App.run_tests_and_initialize()
   Test_errors = {}
   App.run_tests()
   if #Test_errors > 0 then
-    error('There were test failures:\n\n'..table.concat(Test_errors))
+    error(('There were %d test failures:\n\n%s'):format(#Test_errors, table.concat(Test_errors)))
   end
   App.disable_tests()
   App.initialize_globals()
