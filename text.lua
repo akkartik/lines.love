@@ -4,63 +4,64 @@ Text = {}
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return the final y, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos)
+--?   print('text.draw', line_index, y)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   line_cache.starty = y
   line_cache.startpos = startpos
   -- wrap long lines
-  local x = State.left
-  local pos = 1
-  local screen_line_starting_pos = startpos
+  local final_screen_line_starting_pos = startpos  -- track value to return
   Text.populate_screen_line_starting_pos(State, line_index)
-  for _, f in ipairs(line_cache.fragments) do
-    App.color(Text_color)
-    local frag_len = utf8.len(f)
---?     print('text.draw:', f, 'at', line_index,pos, 'after', x,y)
+  assert(#line_cache.screen_line_starting_pos >= 1)
+  for i=1,#line_cache.screen_line_starting_pos do
+    local pos = line_cache.screen_line_starting_pos[i]
     if pos < startpos then
       -- render nothing
 --?       print('skipping', f)
     else
+      final_screen_line_starting_pos = pos
+      local f = Text.screen_line(line, line_cache, i)
+--?       print('text.draw:', f, 'at', line_index,pos, 'after', x,y)
+      local frag_len = utf8.len(f)
       -- render fragment
-      local frag_width = App.width(f)
-      if x + frag_width > State.right then
-        assert(x > State.left)  -- no overfull lines
-        y = y + State.line_height
-        if y + State.line_height > App.screen.height then
-          return y, screen_line_starting_pos
-        end
-        screen_line_starting_pos = pos
-        x = State.left
-      end
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
-        Text.draw_highlight(State, line, x,y, pos, lo,hi)
+        Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
       end
-      App.screen.print(f, x,y)
+      App.color(Text_color)
+      App.screen.print(f, State.left,y)
       -- render cursor if necessary
       if line_index == State.cursor1.line then
-        if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
+        if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
           if State.search_term then
             if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
-              local lo_px = Text.draw_highlight(State, line, x,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
+              local lo_px = Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
               App.color(Text_color)
-              love.graphics.print(State.search_term, x+lo_px,y)
+              love.graphics.print(State.search_term, State.left+lo_px,y)
             end
           else
-            Text.draw_cursor(State, x+Text.x(f, State.cursor1.pos-pos+1), y)
+            Text.draw_cursor(State, State.left+Text.x(f, State.cursor1.pos-pos+1), y)
           end
         end
       end
-      x = x + frag_width
-    end
-    pos = pos + frag_len
-  end
-  if State.search_term == nil then
-    if line_index == State.cursor1.line and State.cursor1.pos == pos then
-      Text.draw_cursor(State, x, y)
+      y = y + State.line_height
+      if y >= App.screen.height then
+        break
+      end
     end
   end
-  return y, screen_line_starting_pos
+  return y - State.line_height, final_screen_line_starting_pos
+end
+
+function Text.screen_line(line, line_cache, i)
+  local pos = line_cache.screen_line_starting_pos[i]
+  local offset = Text.offset(line.data, pos)
+  if i >= #line_cache.screen_line_starting_pos then
+    return line.data:sub(offset)
+  end
+  local endpos = line_cache.screen_line_starting_pos[i+1]-1
+  local end_offset = Text.offset(line.data, endpos)
+  return line.data:sub(offset, end_offset)
 end
 
 function Text.draw_cursor(State, x, y)
@@ -81,55 +82,34 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   if line_cache.screen_line_starting_pos then
     return
   end
-  -- duplicate some logic from Text.draw
-  Text.compute_fragments(State, line_index)
   line_cache.screen_line_starting_pos = {1}
-  local x = State.left
+  local x = 0
   local pos = 1
-  for _, f in ipairs(line_cache.fragments) do
-    -- render fragment
-    local frag_width = App.width(f)
-    if x + frag_width > State.right then
-      x = State.left
-      table.insert(line_cache.screen_line_starting_pos, pos)
-    end
-    x = x + frag_width
-    pos = pos + utf8.len(f)
-  end
-end
-
-function Text.compute_fragments(State, line_index)
-  local line = State.lines[line_index]
-  if line.mode ~= 'text' then return end
-  local line_cache = State.line_cache[line_index]
-  if line_cache.fragments then
-    return
-  end
-  line_cache.fragments = {}
-  local x = State.left
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_width = App.width(frag)
-    while x + frag_width > State.right do
-      if (x-State.left) < 0.8 * (State.right-State.left) then
+--?     print('-- frag:', frag, pos, x, frag_width, State.width)
+    while x + frag_width > State.width do
+--?       print('frag:', frag, pos, x, frag_width, State.width)
+      if x < 0.8 * State.width then
         -- long word; chop it at some letter
         -- We're not going to reimplement TeX here.
-        local bpos = Text.nearest_pos_less_than(frag, State.right - x)
-        if bpos == 0 then break end  -- avoid infinite loop when window is too narrow
+        local bpos = Text.nearest_pos_less_than(frag, State.width - x)
+        -- everything works if bpos == 0, but is a little inefficient
+        pos = pos + bpos
         local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
-        local frag1 = string.sub(frag, 1, boffset-1)
-        local frag1_width = App.width(frag1)
-        assert(x + frag1_width <= State.right)
-        table.insert(line_cache.fragments, frag1)
         frag = string.sub(frag, boffset)
+--?         if bpos > 0 then
+--?           print('after chop:', frag)
+--?         end
         frag_width = App.width(frag)
       end
-      x = State.left  -- new line
-    end
-    if #frag > 0 then
-      table.insert(line_cache.fragments, frag)
+--?       print('screen line:', pos)
+      table.insert(line_cache.screen_line_starting_pos, pos)
+      x = 0  -- new screen line
     end
     x = x + frag_width
+    pos = pos + utf8.len(frag)
   end
 end
 
@@ -974,7 +954,6 @@ function Text.redraw_all(State)
 end
 
 function Text.clear_screen_line_cache(State, line_index)
-  State.line_cache[line_index].fragments = nil
   State.line_cache[line_index].screen_line_starting_pos = nil
 end
 

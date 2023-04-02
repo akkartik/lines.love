@@ -373,7 +373,7 @@ end
 -- prepend file/line/test
 function prepend_debug_info_to_test_failure(test_name, err)
   local err_without_line_number = err:gsub('^[^:]*:[^:]*: ', '')
-  local stack_trace = debug.traceback('', --[[stack frame]]4)
+  local stack_trace = debug.traceback('', --[[stack frame]]5)
   local file_and_line_number = stack_trace:gsub('stack traceback:\n', ''):gsub(': .*', '')
   local full_error = file_and_line_number..':'..test_name..' -- '..err_without_line_number
 --?   local full_error = file_and_line_number..':'..test_name..' -- '..err_without_line_number..'\t\t'..stack_trace:gsub('\n', '\n\t\t')
