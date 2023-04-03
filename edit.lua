@@ -183,7 +183,6 @@ function edit.draw(State)
         })
       end
       y, State.screen_bottom1.pos = Text.draw(State, line_index, y, startpos)
-      y = y + State.line_height
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top

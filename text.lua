@@ -2,7 +2,7 @@
 Text = {}
 
 -- draw a line starting from startpos to screen at y between State.left and State.right
--- return the final y, and position of start of final screen line drawn
+-- return y for the next line, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos)
 --?   print('text.draw', line_index, y)
   local line = State.lines[line_index]
@@ -50,7 +50,7 @@ function Text.draw(State, line_index, y, startpos)
       end
     end
   end
-  return y - State.line_height, final_screen_line_starting_pos
+  return y, final_screen_line_starting_pos
 end
 
 function Text.screen_line(line, line_cache, i)
