@@ -6,9 +6,6 @@ Editor_state = {}
 function run.initialize_globals()
   -- tests currently mostly clear their own state
 
-  -- a few text objects we can avoid recomputing unless the font changes
-  Text_cache = {}
-
   -- blinking cursor
   Cursor_time = 0
 end

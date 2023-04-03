@@ -184,7 +184,6 @@ function edit.draw(State, hide_cursor)
         })
       end
       y, State.screen_bottom1.pos = Text.draw(State, line_index, y, startpos, hide_cursor)
-      y = y + State.line_height
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top
@@ -508,7 +507,6 @@ function edit.update_font_settings(State, font_height)
   State.font_height = font_height
   love.graphics.setFont(love.graphics.newFont(State.font_height))
   State.line_height = math.floor(font_height*1.3)
-  Text_cache = {}
 end
 
 --== some methods for tests

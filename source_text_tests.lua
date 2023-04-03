@@ -977,7 +977,7 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl ', 'screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'mno ', 'screen:3')
+  App.screen.check(y, 'mn', 'screen:3')
 end
 
 function test_pagedown_never_moves_up()

@@ -2,82 +2,82 @@
 Text = {}
 
 -- draw a line starting from startpos to screen at y between State.left and State.right
--- return the final y, and position of start of final screen line drawn
+-- return y for the next line, and position of start of final screen line drawn
 function Text.draw(State, line_index, y, startpos, hide_cursor)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   line_cache.starty = y
   line_cache.startpos = startpos
   -- wrap long lines
-  local x = State.left
-  local pos = 1
-  local screen_line_starting_pos = startpos
+  local final_screen_line_starting_pos = startpos  -- track value to return
   Text.populate_screen_line_starting_pos(State, line_index)
-  local pos = 1
+  Text.populate_link_offsets(State, line_index)
   initialize_color()
-  for _, f in ipairs(line_cache.fragments) do
-    App.color(Text_color)
-    select_color(f)
-    local frag_len = utf8.len(f)
---?     print('text.draw:', f, 'at', line_index,pos, 'after', x,y)
+  assert(#line_cache.screen_line_starting_pos >= 1)
+  for i=1,#line_cache.screen_line_starting_pos do
+    local pos = line_cache.screen_line_starting_pos[i]
     if pos < startpos then
       -- render nothing
 --?       print('skipping', f)
     else
-      -- render fragment
-      local frag_width = App.width(f)
-      if x + frag_width > State.right then
-        assert(x > State.left)  -- no overfull lines
-        y = y + State.line_height
-        if y + State.line_height > App.screen.height then
-          return y, screen_line_starting_pos
-        end
-        screen_line_starting_pos = pos
-        x = State.left
-      end
-      if State.selection1.line then
-        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
-        Text.draw_highlight(State, line, x,y, pos, lo,hi)
-      end
-      -- Make [[WikiWords]] (single word, all in one screen line) clickable.
-      local trimmed_word = rtrim(f)  -- compute_fragments puts whitespace at the end
-      if starts_with(trimmed_word, '[[') and ends_with(trimmed_word, ']]') then
-        local filename = trimmed_word:gsub('^..(.*)..$', '%1')
-        if source.link_exists(State, filename) then
-          button(State, 'link', {x=x+App.width('[['), y=y, w=App.width(filename), h=State.line_height, color={1,1,1},
+      final_screen_line_starting_pos = pos
+      local f = Text.screen_line(line, line_cache, i)
+--?       print('text.draw:', f, 'at', line_index,pos, 'after', x,y)
+      local frag_len = utf8.len(f)
+      -- render any link decorations
+      for _,link_offsets in ipairs(line_cache.link_offsets) do
+        local s,e,filename = unpack(link_offsets)
+        local lo, hi = Text.clip_wikiword_with_screen_line(line, line_cache, i, s, e)
+        if lo then
+          button(State, 'link', {x=State.left+lo, y=y, w=hi-lo, h=State.line_height, color={1,1,1},
             icon = icon.hyperlink_decoration,
             onpress1 = function()
-                         source.switch_to_file(filename)
-                        end,
+                         if file_exists(filename) then
+                           source.switch_to_file(filename)
+                         end
+                       end,
           })
         end
       end
-      App.screen.print(f, x,y)
+      -- render fragment
+      if State.selection1.line then
+        local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
+        Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
+      end
+      select_color(f)
+      App.screen.print(f, State.left,y)
       -- render cursor if necessary
-      if line_index == State.cursor1.line then
-        if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
+      if not hide_cursor and line_index == State.cursor1.line then
+        if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
           if State.search_term then
             if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
-              local lo_px = Text.draw_highlight(State, line, x,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
+              local lo_px = Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
               App.color(Text_color)
-              love.graphics.print(State.search_term, x+lo_px,y)
+              love.graphics.print(State.search_term, State.left+lo_px,y)
             end
           elseif Focus == 'edit' then
-            Text.draw_cursor(State, x+Text.x(f, State.cursor1.pos-pos+1), y)
-            App.color(Text_color)
+            Text.draw_cursor(State, State.left+Text.x(f, State.cursor1.pos-pos+1), y)
           end
         end
       end
-      x = x + frag_width
-    end
-    pos = pos + frag_len
-  end
-  if Focus == 'edit' and not hide_cursor and State.search_term == nil then
-    if line_index == State.cursor1.line and State.cursor1.pos == pos then
-      Text.draw_cursor(State, x, y)
+      y = y + State.line_height
+      if y >= App.screen.height then
+        break
+      end
     end
   end
-  return y, screen_line_starting_pos
+  return y, final_screen_line_starting_pos
+end
+
+function Text.screen_line(line, line_cache, i)
+  local pos = line_cache.screen_line_starting_pos[i]
+  local offset = Text.offset(line.data, pos)
+  if i >= #line_cache.screen_line_starting_pos then
+    return line.data:sub(offset)
+  end
+  local endpos = line_cache.screen_line_starting_pos[i+1]-1
+  local end_offset = Text.offset(line.data, endpos)
+  return line.data:sub(offset, end_offset)
 end
 
 function Text.draw_cursor(State, x, y)
@@ -97,56 +97,84 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   if line_cache.screen_line_starting_pos then
     return
   end
-  -- duplicate some logic from Text.draw
-  Text.compute_fragments(State, line_index)
   line_cache.screen_line_starting_pos = {1}
-  local x = State.left
+  local x = 0
   local pos = 1
-  for _, f in ipairs(line_cache.fragments) do
-    -- render fragment
-    local frag_width = App.width(f)
-    if x + frag_width > State.right then
-      x = State.left
-      table.insert(line_cache.screen_line_starting_pos, pos)
-    end
-    x = x + frag_width
-    pos = pos + utf8.len(f)
-  end
-end
-
-function Text.compute_fragments(State, line_index)
-  local line = State.lines[line_index]
-  if line.mode ~= 'text' then return end
-  local line_cache = State.line_cache[line_index]
-  if line_cache.fragments then
-    return
-  end
-  line_cache.fragments = {}
-  local x = State.left
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
     local frag_width = App.width(frag)
-    while x + frag_width > State.right do
-      if (x-State.left) < 0.8 * (State.right-State.left) then
+--?     print('-- frag:', frag, pos, x, frag_width, State.width)
+    while x + frag_width > State.width do
+--?       print('frag:', frag, pos, x, frag_width, State.width)
+      if x < 0.8 * State.width then
         -- long word; chop it at some letter
         -- We're not going to reimplement TeX here.
-        local bpos = Text.nearest_pos_less_than(frag, State.right - x)
-        if bpos == 0 then break end  -- avoid infinite loop when window is too narrow
+        local bpos = Text.nearest_pos_less_than(frag, State.width - x)
+        -- everything works if bpos == 0, but is a little inefficient
+        pos = pos + bpos
         local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
-        local frag1 = string.sub(frag, 1, boffset-1)
-        local frag1_width = App.width(frag1)
-        assert(x + frag1_width <= State.right)
-        table.insert(line_cache.fragments, frag1)
         frag = string.sub(frag, boffset)
+--?         if bpos > 0 then
+--?           print('after chop:', frag)
+--?         end
         frag_width = App.width(frag)
       end
-      x = State.left  -- new line
-    end
-    if #frag > 0 then
-      table.insert(line_cache.fragments, frag)
+--?       print('screen line:', pos)
+      table.insert(line_cache.screen_line_starting_pos, pos)
+      x = 0  -- new screen line
     end
     x = x + frag_width
+    pos = pos + utf8.len(frag)
   end
+end
+
+function Text.populate_link_offsets(State, line_index)
+  local line = State.lines[line_index]
+  if line.mode ~= 'text' then return end
+  local line_cache = State.line_cache[line_index]
+  if line_cache.link_offsets then
+    return
+  end
+  line_cache.link_offsets = {}
+  local pos = 1
+  -- try to wrap at word boundaries
+  local s, e = 1, 0
+  while s <= #line.data do
+    s, e = line.data:find('%[%[%S+%]%]', s)
+    if s == nil then break end
+    local word = line.data:sub(s+2, e-2)  -- strip out surrounding '[[..]]'
+--?     print('wikiword:', s, e, word)
+    table.insert(line_cache.link_offsets, {s, e, word})
+    s = e + 1
+  end
+end
+
+-- Intersect the filename between byte offsets s,e with the bounds of screen line i.
+-- Return the left/right pixel coordinates of of the intersection,
+-- or nil if it doesn't intersect with screen line i.
+function Text.clip_wikiword_with_screen_line(line, line_cache, i, s, e)
+  local spos = line_cache.screen_line_starting_pos[i]
+  local soff = Text.offset(line.data, spos)
+  if e < soff then
+    return
+  end
+  local eoff
+  if i < #line_cache.screen_line_starting_pos then
+    local epos = line_cache.screen_line_starting_pos[i+1]
+    eoff = Text.offset(line.data, epos)
+    if s > eoff then
+      return
+    end
+  end
+  local loff = math.max(s, soff)
+  local hoff
+  if eoff then
+    hoff = math.min(e, eoff)
+  else
+    hoff = e
+  end
+--?   print(s, e, soff, eoff, loff, hoff)
+  return App.width(line.data:sub(1, loff-1)), App.width(line.data:sub(1, hoff))
 end
 
 function Text.text_input(State, t)
@@ -972,7 +1000,7 @@ end
 
 -- slightly expensive since it redraws the screen
 function Text.cursor_out_of_screen(State)
-  App.draw()
+  edit.draw(State)
   return State.cursor_y == nil
   -- this approach is cheaper and almost works, except on the final screen
   -- where file ends above bottom of screen
@@ -981,28 +1009,17 @@ function Text.cursor_out_of_screen(State)
 --?   return Text.lt1(State.screen_bottom1, botline1)
 end
 
-function source.link_exists(State, filename)
-  if State.link_cache == nil then
-    State.link_cache = {}
-  end
-  if State.link_cache[filename] == nil then
-    State.link_cache[filename] = file_exists(filename)
-  end
-  return State.link_cache[filename]
-end
-
 function Text.redraw_all(State)
 --?   print('clearing fragments')
   State.line_cache = {}
   for i=1,#State.lines do
     State.line_cache[i] = {}
   end
-  State.link_cache = {}
 end
 
 function Text.clear_screen_line_cache(State, line_index)
-  State.line_cache[line_index].fragments = nil
   State.line_cache[line_index].screen_line_starting_pos = nil
+  State.line_cache[line_index].link_offsets = nil
 end
 
 function trim(s)

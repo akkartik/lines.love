@@ -10,6 +10,8 @@ end
 
 function icon.hyperlink_decoration(button_params)
   local x,y = button_params.x, button_params.y
+  -- hack: set the hyperlink color so that caller can draw the text of the
+  -- hyperlink in the same color
   App.color(Hyperlink_decoration_color)
   love.graphics.line(x,y+Editor_state.line_height, x+button_params.w,y+Editor_state.line_height)
 end

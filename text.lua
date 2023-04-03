@@ -69,7 +69,6 @@ function Text.draw_cursor(State, x, y)
   if math.floor(Cursor_time*2)%2 == 0 then
     App.color(Cursor_color)
     love.graphics.rectangle('fill', x,y, 3,State.line_height)
-    App.color(Text_color)
   end
   State.cursor_x = x
   State.cursor_y = y+State.line_height

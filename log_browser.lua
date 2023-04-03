@@ -117,7 +117,7 @@ function log_browser.draw(State)
         if type(line.data) == 'string' then
           local old_left, old_right = State.left,State.right
           State.left,State.right = xleft,xright
-          y = Text.draw(State, line_index, y, --[[startpos]] 1)
+          Text.draw(State, line_index, y, --[[startpos]] 1)
           State.left,State.right = old_left,old_right
         else
           height = log_render[line.data.name](line.data, xleft, y, xright-xleft)

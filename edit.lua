@@ -506,7 +506,6 @@ function edit.update_font_settings(State, font_height)
   State.font_height = font_height
   love.graphics.setFont(love.graphics.newFont(State.font_height))
   State.line_height = math.floor(font_height*1.3)
-  Text_cache = {}
 end
 
 --== some methods for tests
