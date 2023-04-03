@@ -936,7 +936,7 @@ end
 
 -- slightly expensive since it redraws the screen
 function Text.cursor_out_of_screen(State)
-  App.draw()
+  edit.draw(State)
   return State.cursor_y == nil
   -- this approach is cheaper and almost works, except on the final screen
   -- where file ends above bottom of screen
