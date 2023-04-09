@@ -44,8 +44,13 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
       end
-      select_color(f)
-      App.screen.print(f, State.left,y)
+      -- render colorized text
+      local x = State.left
+      for frag in f:gmatch('%S*%s*') do
+        select_color(frag)
+        App.screen.print(frag, x,y)
+        x = x+App.width(frag)
+      end
       -- render cursor if necessary
       if not hide_cursor and line_index == State.cursor1.line then
         if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
