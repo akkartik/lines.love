@@ -17,19 +17,18 @@ function Text.draw(State, line_index, y, startpos)
     local pos = line_cache.screen_line_starting_pos[i]
     if pos < startpos then
       -- render nothing
---?       print('skipping', f)
     else
       final_screen_line_starting_pos = pos
-      local f = Text.screen_line(line, line_cache, i)
---?       print('text.draw:', f, 'at', line_index,pos, 'after', x,y)
-      local frag_len = utf8.len(f)
+      local screen_line = Text.screen_line(line, line_cache, i)
+--?       print('text.draw:', screen_line, 'at', line_index,pos, 'after', x,y)
+      local frag_len = utf8.len(screen_line)
       -- render fragment
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
       end
       App.color(Text_color)
-      App.screen.print(f, State.left,y)
+      App.screen.print(screen_line, State.left,y)
       -- render cursor if necessary
       if line_index == State.cursor1.line then
         if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
@@ -40,7 +39,7 @@ function Text.draw(State, line_index, y, startpos)
               love.graphics.print(State.search_term, State.left+lo_px,y)
             end
           else
-            Text.draw_cursor(State, State.left+Text.x(f, State.cursor1.pos-pos+1), y)
+            Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
           end
         end
       end
