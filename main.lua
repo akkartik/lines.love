@@ -1,5 +1,13 @@
--- Entrypoint for the app. You can edit this file from within the app if
--- you're careful.
+-- Wrapper that combines the app with a 'source editor' that allows editing
+-- the app in place.
+--
+-- The source editor is a sharp tool. I find it convenient, but I also often
+-- end up in a bad state that requires dropping down to external tools
+-- (editor, file manager) to fix.
+--
+-- Downstream forks provide a better, "freewheeling" experience for editing
+-- apps live. The source editor provides a half-baked experience for editing
+-- some of the primitives used by true freewheeling apps.
 
 -- files that come with LÖVE; we can't edit those from within the app
 utf8 = require 'utf8'
