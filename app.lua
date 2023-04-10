@@ -214,17 +214,6 @@ function App.width(text)
   return love.graphics.getFont():getWidth(text)
 end
 
-function App.screen.draw(obj, x,y)
-  if type(obj) == 'userdata' then
-    -- ignore most things as graphics the test harness can't handle
-  elseif obj.type == 'text' then
-    App.screen.print(obj.data, x,y)
-  else
-    print(obj.type)
-    assert(false)
-  end
-end
-
 App.clipboard = ''
 function App.getClipboardText()
   return App.clipboard
@@ -415,7 +404,6 @@ function App.disable_tests()
   App.screen.move = love.window.setPosition
   App.screen.position = love.window.getPosition
   App.screen.print = love.graphics.print
-  App.screen.draw = love.graphics.draw
   if Current_app == nil or Current_app == 'run' then
     App.open_for_reading = function(filename) return io.open(filename, 'r') end
     App.open_for_writing = function(filename) return io.open(filename, 'w') end
