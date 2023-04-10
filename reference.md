@@ -182,6 +182,55 @@ assertions on their side-effects.
 
 There's much more I could include here; check out [the LÖVE manual](https://love2d.org/wiki/love.graphics).
 
+### text editor primitives
+
+The text-editor widget includes extremely thorough automated tests to give you
+early warning if you break something.
+
+* `state = edit.initialize_state(top, left, right, font_height, line_height)` --
+  returns an object that can be used to render an interactive editor widgets
+  for text and line drawings starting at `y=top` on the app window, between
+  `x=left` and `x=right`. Wraps long lines at word boundaries where possible,
+  or in the middle of words (no hyphenation yet) when it must.
+
+* `edit.quit()` -- calling this ensures any final edits are flushed to disk
+  before the app exits.
+
+* `edit.draw(state)` -- Call this from `App.draw` to display the current
+  editor state on the app window as requested in the call to
+  `edit.initialize_state` that created `state`.
+
+* `edit.update(state, dt)` -- call this from `App.update` to periodically auto
+  saves editor contents to disk.
+
+* `edit.mouse_press(state, x,y, mouse_button)` and `edit.mouse_release(x,y,
+  mouse_button)` -- call these to position the cursor or select some text.
+
+* `edit.mouse_wheel_move(state, dx,dy)` -- call this to scroll the editor in
+  response to a mouse wheel.
+
+* `edit.keychord_press(state, chord, key)` and `edit.key_release(state, key)`
+  -- call these to perform some standard shortcuts: insert new lines,
+  backspace/delete, zoom in/out font size, cut/copy/paste to and from the
+  clipboard, undo/redo.
+
+* `edit.text_input(state, t)` -- call this to insert keystrokes into the
+  buffer.
+
+* `Text.redraw_all(state)` -- call this to clear and recompute any cached
+  state as the cursor moves and the buffer scrolls.
+
+If you need more precise control, look at the comment at the top of
+`edit.initialize_state` in edit.lua. In brief, the widget contains an array of
+`lines`. Positions in the buffer are described in _schema-1_ locations
+consisting of a `line` index and a code-point `pos`. We may also convert them
+at times to _schema-2_ locations consisting of a `line`, `screen_line` and
+`pos` that better indicates how long lines wrap. Schema-2 locations are never
+persisted, just generated as needed from schema-1. Important schema-1
+locations in the widget are `cursor1` describing where text is inserted or
+deleted and `screen_top1` which specifies how far down the lines is currently
+visible on screen.
+
 ### mouse primitives
 
 * `App.mouse_move(x, y)` -- sets the current position of the mouse to (`x`,
