@@ -188,7 +188,7 @@ The text-editor widget includes extremely thorough automated tests to give you
 early warning if you break something.
 
 * `state = edit.initialize_state(top, left, right, font_height, line_height)` --
-  returns an object that can be used to render an interactive editor widgets
+  returns an object that can be used to render an interactive editor widget
   for text and line drawings starting at `y=top` on the app window, between
   `x=left` and `x=right`. Wraps long lines at word boundaries where possible,
   or in the middle of words (no hyphenation yet) when it must.
@@ -196,12 +196,12 @@ early warning if you break something.
 * `edit.quit()` -- calling this ensures any final edits are flushed to disk
   before the app exits.
 
-* `edit.draw(state)` -- Call this from `App.draw` to display the current
+* `edit.draw(state)` -- call this from `App.draw` to display the current
   editor state on the app window as requested in the call to
   `edit.initialize_state` that created `state`.
 
-* `edit.update(state, dt)` -- call this from `App.update` to periodically auto
-  saves editor contents to disk.
+* `edit.update(state, dt)` -- call this from `App.update` to periodically
+  auto-save editor contents to disk.
 
 * `edit.mouse_press(state, x,y, mouse_button)` and `edit.mouse_release(x,y,
   mouse_button)` -- call these to position the cursor or select some text.
