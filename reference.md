@@ -311,3 +311,30 @@ and [the Lua manual](https://www.lua.org/manual/5.1/manual.html#5.7).
 
 There's much more I could include here; check out [the LÖVE manual](https://love2d.org/wiki)
 and [the Lua manual](https://www.lua.org/manual/5.1/manual.html).
+
+### writing tests
+
+* `App.screen.init{width=.., height=..}` -- creates a fake screen for a test
+
+* `App.screen.check(y, expected_contents, msg)` -- verifies text written to
+  the fake screen at `y`. This isn't very realistic; `y` must exactly match
+  what was displayed, and the expected contents show everything printed to
+  that `y` in chronological order, regardless of `x` coordinate. In spite of
+  these limitations, you can write lots of useful tests with this.
+
+* `App.run_after_textinput(t)` -- mimics keystrokes resulting in `t` and then
+  draws one frame.
+
+* `App.run_after_keychord(chord)` -- mimics keystrokes resulting in `chord`
+  and then draws one frame.
+
+* `App.run_after_mouse_press(x,y, mouse_button)` -- mimics a mouse press down
+  followed by drawing a frame.
+
+* `App.run_after_mouse_release(x,y, mouse_button)` -- mimics a mouse release
+  up followed by drawing a frame.
+
+* `App.run_after_mouse_click(x,y, mouse_button)` -- mimics a mouse press down
+  and mouse release up followed by drawing a frame.
+
+* `App.wait_fake_time(t)` -- simulates the passage of time for `App.getTime()`.

@@ -145,7 +145,7 @@ function App.run_tests_and_initialize()
 end
 
 function App.initialize_for_test()
-  App.screen.init({width=100, height=50})
+  App.screen.init{width=100, height=50}
   App.screen.contents = {}  -- clear screen
   App.filesystem = {}
   App.fake_keys_pressed = {}
