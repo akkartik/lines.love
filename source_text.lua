@@ -429,19 +429,7 @@ end
 
 function Text.pagedown(State)
 --?   print('pagedown')
-  -- If a line/paragraph gets to a page boundary, I often want to scroll
-  -- before I get to the bottom.
-  -- However, only do this if it makes forward progress.
-  local bot2 = Text.to2(State, State.screen_bottom1)
-  if bot2.screen_line > 1 then
-    bot2.screen_line = math.max(bot2.screen_line-10, 1)
-  end
-  local new_top1 = Text.to1(State, bot2)
-  if Text.lt1(State.screen_top1, new_top1) then
-    State.screen_top1 = new_top1
-  else
-    State.screen_top1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
-  end
+  State.screen_top1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
 --?   print('setting top to', State.screen_top1.line, State.screen_top1.pos)
   State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
@@ -687,6 +675,9 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
 --?     print('cursor skips', State.cursor1.line)
     y = y + Drawing_padding_height + Drawing.pixels(State.lines[State.cursor1.line].h, State.width)
     State.cursor1.line = State.cursor1.line + 1
+  end
+  if State.cursor1.pos == nil then
+    State.cursor1.pos = 1
   end
   -- hack: insert a text line at bottom of file if necessary
   if State.cursor1.line > #State.lines then

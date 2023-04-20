@@ -617,6 +617,9 @@ function Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necess
     y = y + Drawing_padding_height + Drawing.pixels(State.lines[State.cursor1.line].h, State.width)
     State.cursor1.line = State.cursor1.line + 1
   end
+  if State.cursor1.pos == nil then
+    State.cursor1.pos = 1
+  end
   -- hack: insert a text line at bottom of file if necessary
   if State.cursor1.line > #State.lines then
     assert(State.cursor1.line == #State.lines+1)
