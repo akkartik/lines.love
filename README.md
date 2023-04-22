@@ -71,10 +71,6 @@ found anything amiss: http://akkartik.name/contact
 * No clipping yet for drawings. In particular, circles/squares/rectangles and
   point labels can overflow a drawing.
 
-* Long wrapping lines can't yet distinguish between the cursor at end of one
-  screen line and start of the next, so clicking the mouse to position the
-  cursor can very occasionally do the wrong thing.
-
 * Touchpads can drag the mouse pointer using a light touch or a heavy click.
   On Linux, drags using the light touch get interrupted when a key is pressed.
   You'll have to press down to drag.
