@@ -33,7 +33,9 @@ function Text.draw(State, line_index, y, startpos)
       if line_index == State.cursor1.line then
         if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
           if State.search_term then
-            if State.lines[State.cursor1.line].data:sub(State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term)-1) == State.search_term then
+            local data = State.lines[State.cursor1.line].data
+            local cursor_offset = Text.offset(data, State.cursor1.pos)
+            if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
               local lo_px = Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, State.cursor1.pos+utf8.len(State.search_term))
               App.color(Text_color)
               love.graphics.print(State.search_term, State.left+lo_px,y)
