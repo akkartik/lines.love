@@ -1955,7 +1955,7 @@ end
 function test_search()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'```lines', '```', 'def', 'ghi', 'deg'}
+  Editor_state.lines = load_array{'```lines', '```', 'def', 'ghi', '’deg'}  -- contains unicode quote in final line
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -1976,15 +1976,15 @@ function test_search()
   edit.run_after_keychord(Editor_state, 'down')
   edit.run_after_keychord(Editor_state, 'return')
   check_eq(Editor_state.cursor1.line, 4, '2/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 1, '2/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 2, '2/cursor:pos')
 end
 
 function test_search_upwards()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc abd'}
+  Editor_state.lines = load_array{'’abc', 'abd'}  -- contains unicode quote
   Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=1, pos=2}
+  Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
@@ -1994,15 +1994,15 @@ function test_search_upwards()
   -- search for previous occurrence
   edit.run_after_keychord(Editor_state, 'up')
   check_eq(Editor_state.cursor1.line, 1, '2/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 1, '2/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 2, '2/cursor:pos')
 end
 
 function test_search_wrap()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc'}
+  Editor_state.lines = load_array{'’abc', 'def'}  -- contains unicode quote in first line
   Text.redraw_all(Editor_state)
-  Editor_state.cursor1 = {line=1, pos=3}
+  Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
@@ -2012,13 +2012,13 @@ function test_search_wrap()
   edit.run_after_keychord(Editor_state, 'return')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, '1/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 1, '1/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 2, '1/cursor:pos')
 end
 
 function test_search_wrap_upwards()
   App.screen.init{width=120, height=60}
   Editor_state = edit.initialize_test_state()
-  Editor_state.lines = load_array{'abc abd'}
+  Editor_state.lines = load_array{'abc ’abd'}  -- contains unicode quote
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
@@ -2030,5 +2030,5 @@ function test_search_wrap_upwards()
   edit.run_after_keychord(Editor_state, 'up')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, '1/cursor:line')
-  check_eq(Editor_state.cursor1.pos, 5, '1/cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 6, '1/cursor:pos')
 end

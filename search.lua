@@ -18,38 +18,45 @@ end
 
 function Text.search_next(State)
   -- search current line from cursor
-  local pos = find(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos, --[[literal]] true)
-  if pos then
-    State.cursor1.pos = pos
+  local curr_pos = State.cursor1.pos
+  local curr_line = State.lines[State.cursor1.line].data
+  local curr_offset = Text.offset(curr_line, curr_pos)
+  local offset = find(curr_line, State.search_term, curr_offset, --[[literal]] true)
+  if offset then
+    State.cursor1.pos = utf8.len(curr_line, 1, offset)
   end
-  if pos == nil then
+  if offset == nil then
     -- search lines below cursor
     for i=State.cursor1.line+1,#State.lines do
-      pos = find(State.lines[i].data, State.search_term, --[[from start]] nil, --[[literal]] true)
-      if pos then
-        State.cursor1 = {line=i, pos=pos}
+      local curr_line = State.lines[i].data
+      offset = find(curr_line, State.search_term, --[[from start]] nil, --[[literal]] true)
+      if offset then
+        State.cursor1 = {line=i, pos=utf8.len(curr_line, 1, offset)}
         break
       end
     end
   end
-  if pos == nil then
+  if offset == nil then
     -- wrap around
     for i=1,State.cursor1.line-1 do
-      pos = find(State.lines[i].data, State.search_term, --[[from start]] nil, --[[literal]] true)
-      if pos then
-        State.cursor1 = {line=i, pos=pos}
+      local curr_line = State.lines[i].data
+      offset = find(curr_line, State.search_term, --[[from start]] nil, --[[literal]] true)
+      if offset then
+        State.cursor1 = {line=i, pos=utf8.len(curr_line, 1, offset)}
         break
       end
     end
   end
-  if pos == nil then
+  if offset == nil then
     -- search current line until cursor
-    pos = find(State.lines[State.cursor1.line].data, State.search_term, --[[from start]] nil, --[[literal]] true)
+    local curr_line = State.lines[State.cursor1.line].data
+    offset = find(curr_line, State.search_term, --[[from start]] nil, --[[literal]] true)
+    local pos = utf8.len(curr_line, 1, offset)
     if pos and pos < State.cursor1.pos then
       State.cursor1.pos = pos
     end
   end
-  if pos == nil then
+  if offset == nil then
     State.cursor1.line = State.search_backup.cursor.line
     State.cursor1.pos = State.search_backup.cursor.pos
     State.screen_top1.line = State.search_backup.screen_top.line
@@ -64,38 +71,45 @@ end
 
 function Text.search_previous(State)
   -- search current line before cursor
-  local pos = rfind(State.lines[State.cursor1.line].data, State.search_term, State.cursor1.pos-1, --[[literal]] true)
-  if pos then
-    State.cursor1.pos = pos
+  local curr_pos = State.cursor1.pos
+  local curr_line = State.lines[State.cursor1.line].data
+  local curr_offset = Text.offset(curr_line, curr_pos)
+  local offset = rfind(curr_line, State.search_term, curr_offset-1, --[[literal]] true)
+  if offset then
+    State.cursor1.pos = utf8.len(curr_line, 1, offset)
   end
-  if pos == nil then
+  if offset == nil then
     -- search lines above cursor
     for i=State.cursor1.line-1,1,-1 do
-      pos = rfind(State.lines[i].data, State.search_term, --[[from end]] nil, --[[literal]] true)
-      if pos then
-        State.cursor1 = {line=i, pos=pos}
+      local curr_line = State.lines[i].data
+      offset = rfind(curr_line, State.search_term, --[[from end]] nil, --[[literal]] true)
+      if offset then
+        State.cursor1 = {line=i, pos=utf8.len(curr_line, 1, offset)}
         break
       end
     end
   end
-  if pos == nil then
+  if offset == nil then
     -- wrap around
     for i=#State.lines,State.cursor1.line+1,-1 do
-      pos = rfind(State.lines[i].data, State.search_term, --[[from end]] nil, --[[literal]] true)
-      if pos then
-        State.cursor1 = {line=i, pos=pos}
+      local curr_line = State.lines[i].data
+      offset = rfind(curr_line, State.search_term, --[[from end]] nil, --[[literal]] true)
+      if offset then
+        State.cursor1 = {line=i, pos=utf8.len(curr_line, 1, offset)}
         break
       end
     end
   end
-  if pos == nil then
+  if offset == nil then
     -- search current line after cursor
-    pos = rfind(State.lines[State.cursor1.line].data, State.search_term, --[[from end]] nil, --[[literal]] true)
+    local curr_line = State.lines[State.cursor1.line].data
+    offset = rfind(curr_line, State.search_term, --[[from end]] nil, --[[literal]] true)
+    local pos = utf8.len(curr_line, 1, offset)
     if pos and pos > State.cursor1.pos then
       State.cursor1.pos = pos
     end
   end
-  if pos == nil then
+  if offset == nil then
     State.cursor1.line = State.search_backup.cursor.line
     State.cursor1.pos = State.search_backup.cursor.pos
     State.screen_top1.line = State.search_backup.screen_top.line
