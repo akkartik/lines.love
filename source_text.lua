@@ -486,6 +486,7 @@ end
 function Text.down(State)
   assert(State.lines[State.cursor1.line].mode == 'text')
 --?   print('down', State.cursor1.line, State.cursor1.pos, State.screen_top1.line, State.screen_top1.pos, State.screen_bottom1.line, State.screen_bottom1.pos)
+  assert(State.cursor1.pos)
   if Text.cursor_at_final_screen_line(State) then
     -- line is done, skip to next text line
 --?     print('cursor at final screen line of its line')
