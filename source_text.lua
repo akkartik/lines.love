@@ -181,7 +181,7 @@ function Text.clip_wikiword_with_screen_line(line, line_cache, i, s, e)
     hoff = e
   end
 --?   print(s, e, soff, eoff, loff, hoff)
-  return App.width(line.data:sub(1, loff-1)), App.width(line.data:sub(1, hoff))
+  return App.width(line.data:sub(soff, loff-1)), App.width(line.data:sub(soff, hoff))
 end
 
 function Text.text_input(State, t)
