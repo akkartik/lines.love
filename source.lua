@@ -265,7 +265,7 @@ function source.draw()
     App.color(Divider_color)
     love.graphics.rectangle('fill', App.screen.width/2-1,Menu_status_bar_height, 3,App.screen.height)
     --
-    log_browser.draw(Log_browser_state)
+    log_browser.draw(Log_browser_state, --[[hide_cursor]] Focus ~= 'log_browser')
   end
   source.draw_menu_bar()
 end

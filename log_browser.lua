@@ -84,7 +84,7 @@ function guess_source(filename)
   end
 end
 
-function log_browser.draw(State)
+function log_browser.draw(State, hide_cursor)
   assert(#State.lines == #State.line_cache)
   local mouse_line_index = log_browser.line_index(State, App.mouse_x(), App.mouse_y())
   local y = State.top
@@ -117,7 +117,7 @@ function log_browser.draw(State)
         if type(line.data) == 'string' then
           local old_left, old_right = State.left,State.right
           State.left,State.right = xleft,xright
-          Text.draw(State, line_index, y, --[[startpos]] 1)
+          Text.draw(State, line_index, y, --[[startpos]] 1, hide_cursor)
           State.left,State.right = old_left,old_right
         else
           height = log_render[line.data.name](line.data, xleft, y, xright-xleft)
