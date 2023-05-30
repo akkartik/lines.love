@@ -316,16 +316,26 @@ end
 -- fake files
 function App.open_for_writing(filename)
   App.filesystem[filename] = ''
-  return {
-    write = function(self, ...)
-              local args = {...}
-              for i,s in ipairs(args) do
+  if Current_app == nil or Current_app == 'run' then
+    return {
+      write = function(self, ...)
+                local args = {...}
+                for i,s in ipairs(args) do
+                  App.filesystem[filename] = App.filesystem[filename]..s
+                end
+              end,
+      close = function(self)
+              end,
+    }
+  elseif Current_app == 'source' then
+    return {
+      write = function(self, s)
                 App.filesystem[filename] = App.filesystem[filename]..s
-              end
-            end,
-    close = function(self)
-            end,
-  }
+              end,
+      close = function(self)
+              end,
+    }
+  end
 end
 
 function App.open_for_reading(filename)
