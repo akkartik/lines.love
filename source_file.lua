@@ -93,21 +93,26 @@ function store_drawing(outfile, drawing)
   outfile:write('```lines\n')
   for _,shape in ipairs(drawing.shapes) do
     if shape.mode == 'freehand' then
-      outfile:write(json.encode(shape), '\n')
+      outfile:write(json.encode(shape))
+      outfile:write('\n')
     elseif shape.mode == 'line' or shape.mode == 'manhattan' then
       local line = json.encode({mode=shape.mode, p1=drawing.points[shape.p1], p2=drawing.points[shape.p2]})
-      outfile:write(line, '\n')
+      outfile:write(line)
+      outfile:write('\n')
     elseif shape.mode == 'polygon' or shape.mode == 'rectangle' or shape.mode == 'square' then
       local obj = {mode=shape.mode, vertices={}}
       for _,p in ipairs(shape.vertices) do
         table.insert(obj.vertices, drawing.points[p])
       end
       local line = json.encode(obj)
-      outfile:write(line, '\n')
+      outfile:write(line)
+      outfile:write('\n')
     elseif shape.mode == 'circle' then
-      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius}), '\n')
+      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius}))
+      outfile:write('\n')
     elseif shape.mode == 'arc' then
-      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius, start_angle=shape.start_angle, end_angle=shape.end_angle}), '\n')
+      outfile:write(json.encode({mode=shape.mode, center=drawing.points[shape.center], radius=shape.radius, start_angle=shape.start_angle, end_angle=shape.end_angle}))
+      outfile:write('\n')
     elseif shape.mode == 'deleted' then
       -- ignore
     else
