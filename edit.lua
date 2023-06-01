@@ -249,7 +249,7 @@ function edit.mouse_press(State, x,y, mouse_button)
             line=line_index,
             pos=Text.to_pos_on_line(State, line_index, x, y),
         }
-        print_and_log(('edit.mouse_press: selection now %d,%d'):format(State.selection1.line, State.selection1.pos))
+        State.recent_mouse = {time=Current_time, line=State.selection1.line, pos=State.selection1.pos}
         break
       end
     elseif line.mode == 'drawing' then
@@ -286,6 +286,7 @@ function edit.mouse_release(State, x,y, mouse_button)
               pos=Text.to_pos_on_line(State, line_index, x, y),
           }
           print_and_log(('edit.mouse_release: cursor now %d,%d'):format(State.cursor1.line, State.cursor1.pos))
+          State.recent_mouse = {time=Current_time, line=State.cursor1.line, pos=State.cursor1.pos}
           if State.mousepress_shift then
             if State.old_selection1.line == nil then
               State.selection1 = State.old_cursor1
