@@ -8,13 +8,17 @@
 -- Result: positions spos,epos between apos,bpos.
 function Text.clip_selection(State, line_index, apos, bpos)
   if State.selection1.line == nil then return nil,nil end
+  print_and_log('text.clip_selection')
   -- min,max = sorted(State.selection1,State.cursor1)
   local minl,minp = State.selection1.line,State.selection1.pos
+  print_and_log(('text.clip_selection: one end from selection: %d,%d'):format(minl,minp))
   local maxl,maxp
   if App.mouse_down(1) then
     maxl,maxp = Text.mouse_pos(State)
+    print_and_log(('text.clip_selection: other end from mouse: %d,%d'):format(maxl,maxp))
   else
     maxl,maxp = State.cursor1.line,State.cursor1.pos
+    print_and_log(('text.clip_selection: other end from cursor: %d,%d'):format(maxl,maxp))
   end
   if Text.lt1({line=maxl, pos=maxp},
               {line=minl, pos=minp}) then

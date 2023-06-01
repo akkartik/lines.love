@@ -48,6 +48,11 @@ function run.initialize(arg)
   end
 end
 
+function print_and_log(s)
+  print(s)
+  log(3, s)
+end
+
 function run.load_settings()
   love.graphics.setFont(love.graphics.newFont(Settings.font_height))
   -- determine default dimensions and flags

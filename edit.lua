@@ -223,7 +223,7 @@ end
 
 function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('press', State.cursor1.line)
+  print_and_log(('edit.mouse_press: cursor at %d,%d').format(State.cursor1.line, State.cursor1.pos))
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
@@ -241,6 +241,7 @@ function edit.mouse_press(State, x,y, mouse_button)
         --  press and hold to start a selection: sets selection on press, cursor on release
         --  press and hold, then press shift: ignore shift
         --    i.e. mouse_release should never look at shift state
+        print_and_log(('edit.mouse_press: in line %d').format(line_index))
         State.old_cursor1 = State.cursor1
         State.old_selection1 = State.selection1
         State.mousepress_shift = App.shift_down()
@@ -248,7 +249,7 @@ function edit.mouse_press(State, x,y, mouse_button)
             line=line_index,
             pos=Text.to_pos_on_line(State, line_index, x, y),
         }
---?         print('selection', State.selection1.line, State.selection1.pos)
+        print_and_log(('edit.mouse_press: selection now %d,%d').format(State.selection1.line, State.selection1.pos))
         break
       end
     elseif line.mode == 'drawing' then
@@ -266,7 +267,7 @@ end
 
 function edit.mouse_release(State, x,y, mouse_button)
   if State.search_term then return end
---?   print('release', State.cursor1.line)
+  print_and_log(('edit.mouse_release: cursor at %d,%d').format(State.cursor1.line, State.cursor1.pos))
   if State.lines.current_drawing then
     Drawing.mouse_release(State, x,y, mouse_button)
     schedule_save(State)
@@ -275,15 +276,16 @@ function edit.mouse_release(State, x,y, mouse_button)
       Drawing.before = nil
     end
   else
+    print_and_log('edit.mouse_release: no current drawing')
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
         if Text.in_line(State, line_index, x,y) then
---?           print('reset selection')
+          print_and_log(('edit.mouse_release: in line %d').format(line_index))
           State.cursor1 = {
               line=line_index,
               pos=Text.to_pos_on_line(State, line_index, x, y),
           }
---?           print('cursor', State.cursor1.line, State.cursor1.pos)
+          print_and_log(('edit.mouse_release: cursor now %d,%d').format(State.cursor1.line, State.cursor1.pos))
           if State.mousepress_shift then
             if State.old_selection1.line == nil then
               State.selection1 = State.old_cursor1
@@ -299,7 +301,7 @@ function edit.mouse_release(State, x,y, mouse_button)
         end
       end
     end
---?     print('selection:', State.selection1.line, State.selection1.pos)
+    print_and_log(('edit.mouse_release: finally selection %s,%s cursor %d,%d').format(tostring(State.selection1.line), tostring(State.selection1.pos), State.cursor1.line, State.cursor1.pos))
   end
 end
 
