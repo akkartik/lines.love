@@ -8,17 +8,13 @@
 -- Result: positions spos,epos between apos,bpos.
 function Text.clip_selection(State, line_index, apos, bpos)
   if State.selection1.line == nil then return nil,nil end
-  print_and_log('text.clip_selection')
   -- min,max = sorted(State.selection1,State.cursor1)
   local minl,minp = State.selection1.line,State.selection1.pos
-  print_and_log(('text.clip_selection: one end from selection: %d,%d'):format(minl,minp))
   local maxl,maxp
   if App.mouse_down(1) then
     maxl,maxp = Text.mouse_pos(State)
-    print_and_log(('text.clip_selection: other end from mouse: %d,%d'):format(maxl,maxp))
   else
     maxl,maxp = State.cursor1.line,State.cursor1.pos
-    print_and_log(('text.clip_selection: other end from cursor: %d,%d'):format(maxl,maxp))
   end
   if Text.lt1({line=maxl, pos=maxp},
               {line=minl, pos=minp}) then
@@ -33,7 +29,6 @@ function Text.clip_selection(State, line_index, apos, bpos)
   -- compare bounds more carefully (start inclusive, end exclusive)
   local a_ge = Text.le1({line=minl, pos=minp}, {line=line_index, pos=apos})
   local b_lt = Text.lt1({line=line_index, pos=bpos}, {line=maxl, pos=maxp})
---?   print(minl,line_index,maxl, '--', minp,apos,bpos,maxp, '--', a_ge,b_lt)
   if a_ge and b_lt then
     -- fully contained
     return apos,bpos
@@ -64,7 +59,6 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
       local before = line.data:sub(pos_offset, lo_offset-1)
       lo_px = App.width(before)
     end
---?     print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
     local s = line.data:sub(lo_offset, hi_offset-1)
     App.color(Highlight_color)
     love.graphics.rectangle('fill', x+lo_px,y, App.width(s),State.line_height)
@@ -77,6 +71,7 @@ end
 function Text.mouse_pos(State)
   local time = love.timer.getTime()
   if State.recent_mouse.time and State.recent_mouse.time > time-0.1 then
+    print_and_log(('text.mouse_pos: returning recent value %d,%d'):format(State.recent_mouse.line, State.recent_mouse.pos))
     return State.recent_mouse.line, State.recent_mouse.pos
   end
   State.recent_mouse.time = time
