@@ -90,9 +90,14 @@ backspace can scroll up screen line
 # selection
 select text using shift and cursor movement operations
 select text using mouse
+  clicking to left of a line = start of line
+  clicking to right of a line = end of line
+  clicking above topmost line = top of screen
+  clicking below bottom-most line = bottom of screen
 select text using mouse and shift
 select text repeatedly using mouse and shift
 cursor movement without shift resets selection
+mouse click without shift resets selection
 edit deletes selection
 edit with shift key deletes selection
 deleting selection may scroll
