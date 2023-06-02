@@ -882,6 +882,52 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   check_eq(Editor_state.cursor1.pos, 2, 'cursor:pos')
 end
 
+function test_select_all_text()
+  -- display a single line of text
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- select all
+  App.fake_key_press('lctrl')
+  edit.run_after_keychord(Editor_state, 'C-a')
+  App.fake_key_release('lctrl')
+  edit.key_release(Editor_state, 'lctrl')
+  -- selection
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 1, 'selection:pos')
+  check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
+  check_eq(Editor_state.cursor1.pos, 8, 'cursor:pos')
+end
+
+function test_select_all_text_then_mouse_press_outside_text()
+  -- display a single line of text
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- select all
+  App.fake_key_press('lctrl')
+  edit.run_after_keychord(Editor_state, 'C-a')
+  App.fake_key_release('lctrl')
+  edit.key_release(Editor_state, 'lctrl')
+  -- selection
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 1, 'selection:pos')
+  check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
+  check_eq(Editor_state.cursor1.pos, 8, 'cursor:pos')
+  -- part of a mouse click outside the selected line
+  edit.run_after_mouse_press(Editor_state, 45, Margin_top + Editor_state.line_height + 10, --[[mouse button]] 1)
+end
+
 function test_cut_without_selection()
   -- display a few lines
   App.screen.init{width=Editor_state.left+30, height=60}
