@@ -1,0 +1,113 @@
+== Summary of tests for the text editor
+
+This doesn't include all tests and might not change between forks, but it's
+intended to be the "timeless core" of a text editor widget that shouldn't
+change across forks.
+
+# basic
+initial state
+draw text
+draw wrapping text
+draw word wrapping text
+draw text wrapping within word
+draw wrapping text containing non ascii
+
+# mouse
+click moves cursor
+click to left of line
+click takes margins into account
+click on empty line
+click on wrapping line
+click on wrapping line takes margins into account
+click on wrapping line
+click on wrapping line rendered from partway at top of screen
+click past end of wrapping line
+click past end of wrapping line containing non ascii
+click past end of word wrapping line
+
+# cursor movement
+move left
+  move left to previous line
+move right
+  move right to next line
+
+move to start of word
+  move to start of previous word
+  move to start of word on previous line
+move past end of word
+  move past end of word on next line
+skip to previous word
+  skip past tab to previous word
+  skip multiple spaces to previous word
+skip to next word
+  skip past tab to next word
+  skip multiple spaces to next word
+
+# mutating text
+insert first character
+edit wrapping text
+insert newline
+insert newline at start of line
+insert from clipboard
+backspace from start of final line
+backspace past line boundary
+backspace over selection
+backspace over selection reverse
+backspace over multiple lines
+backspace to end of line
+backspace to start of line
+
+# scroll
+pagedown
+pagedown often shows start of wrapping line
+pagedown can start from middle of long wrapping line
+pagedown never moves up
+down arrow moves cursor
+down arrow scrolls down by one line
+down arrow scrolls down by one screen line
+down arrow scrolls down by one screen line after splitting within word
+pagedown followed by down arrow does not scroll screen up
+up arrow moves cursor
+up arrow scrolls up by one line
+up arrow scrolls up by one screen line
+up arrow scrolls up to final screen line
+up arrow scrolls up to empty line
+pageup
+pageup scrolls up by screen line
+pageup scrolls up from middle screen line
+enter on bottom line scrolls down
+enter on final line avoids scrolling down when not at bottom
+inserting text on final line avoids scrolling down when not at bottom
+typing on bottom line scrolls down
+left arrow scrolls up in wrapped line
+right arrow scrolls down in wrapped line
+home scrolls up in wrapped line
+end scrolls down in wrapped line
+position cursor on recently edited wrapping line
+backspace can scroll up
+backspace can scroll up screen line
+
+# selection
+select text using shift and cursor movement operations
+select text using mouse
+select text using mouse and shift
+select text repeatedly using mouse and shift
+cursor movement without shift resets selection
+edit deletes selection
+edit with shift key deletes selection
+deleting selection may scroll
+copy does not reset selection
+cut
+cut without selection
+paste replaces selection
+
+# search
+search
+search upwards
+search wrap
+search wrap upwards
+
+# undo
+undo insert text
+undo delete text
+undo restores selection
