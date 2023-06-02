@@ -69,17 +69,8 @@ end
 
 -- inefficient for some reason, so don't do it on every frame
 function Text.mouse_pos(State)
-  if State.recent_mouse.time and State.recent_mouse.time > Current_time-0.1 then
-    print_and_log(('text.mouse_pos: returning recent value %d,%d'):format(State.recent_mouse.line, State.recent_mouse.pos))
-    return State.recent_mouse.line, State.recent_mouse.pos
-  end
-  State.recent_mouse.time = Current_time
   local line,pos = Text.to_pos(State, App.mouse_x(), App.mouse_y())
-  if line then
-    State.recent_mouse.line = line
-    State.recent_mouse.pos = pos
-  end
-  return State.recent_mouse.line, State.recent_mouse.pos
+  return line, pos
 end
 
 function Text.to_pos(State, x,y)
