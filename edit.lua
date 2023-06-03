@@ -232,8 +232,8 @@ function edit.mouse_press(State, x,y, mouse_button)
     State.old_selection1 = State.selection1
     State.mousepress_shift = App.shift_down()
     State.selection1 = {
-        line=1,
-        pos=1,
+        line=State.screen_top1.line,
+        pos=State.screen_top1.pos,
     }
     return
   end

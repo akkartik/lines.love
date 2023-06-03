@@ -847,6 +847,23 @@ function test_select_text_using_mouse_starting_above_text()
   check_eq(Editor_state.selection1.pos, 1, 'selection:pos')
 end
 
+function test_select_text_using_mouse_starting_above_text_wrapping_line()
+  -- first screen line starts in the middle of a line
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'defgh', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=2, pos=5}
+  Editor_state.screen_top1 = {line=2, pos=3}
+  Editor_state.screen_bottom1 = {}
+  -- press mouse above first line of text
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,5, 1)
+  -- selection is at screen top
+  check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
+  check_eq(Editor_state.selection1.line, 2, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 3, 'selection:pos')
+end
+
 function test_select_text_using_mouse_and_shift()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
