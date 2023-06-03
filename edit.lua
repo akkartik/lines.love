@@ -227,6 +227,17 @@ function edit.mouse_press(State, x,y, mouse_button)
     return
   end
 
+  if y < State.top then
+    State.old_cursor1 = State.cursor1
+    State.old_selection1 = State.selection1
+    State.mousepress_shift = App.shift_down()
+    State.selection1 = {
+        line=1,
+        pos=1,
+    }
+    return
+  end
+
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
       if Text.in_line(State, line_index, x,y) then

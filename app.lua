@@ -361,6 +361,7 @@ function App.run_tests()
   for _,name in ipairs(sorted_names) do
     App.initialize_for_test()
 --?     print('=== '..name)
+--?     _G[name]()
     xpcall(_G[name], function(err) prepend_debug_info_to_test_failure(name, err) end)
   end
   -- clean up all test methods

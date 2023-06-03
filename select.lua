@@ -74,6 +74,9 @@ function Text.mouse_pos(State)
 end
 
 function Text.to_pos(State, x,y)
+  if y < State.line_cache[State.screen_top1.line].starty then
+    return State.screen_top1.line, State.screen_top1.pos
+  end
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
       if Text.in_line(State, line_index, x,y) then
