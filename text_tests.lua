@@ -864,6 +864,33 @@ function test_select_text_using_mouse_starting_above_text_wrapping_line()
   check_eq(Editor_state.selection1.pos, 3, 'selection:pos')
 end
 
+function test_select_text_using_mouse_starting_below_text()
+  -- I'd like to test what happens when a mouse click is below some page of
+  -- text, potentially even in the middle of a line.
+  -- However, it's brittle to set up a text line boundary just right.
+  -- So I'm going to just check things below the bottom of the final line of
+  -- text when it's in the middle of the screen.
+  -- final screen line ends in the middle of screen
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abcde'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'ab', 'baseline:screen:1')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'cde', 'baseline:screen:2')
+  -- press mouse above first line of text
+  edit.run_after_mouse_press(Editor_state, 5,App.screen.height-5, 1)
+  -- selection is past bottom-most text in screen
+  check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 6, 'selection:pos')
+end
+
 function test_select_text_using_mouse_and_shift()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()

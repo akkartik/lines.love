@@ -152,12 +152,13 @@ function edit.draw(State)
   State.cursor_x = nil
   State.cursor_y = nil
   local y = State.top
+  local screen_bottom1 = {line=nil, pos=nil}
 --?   print('== draw')
   for line_index = State.screen_top1.line,#State.lines do
     local line = State.lines[line_index]
 --?     print('draw:', y, line_index, line)
     if y + State.line_height > App.screen.height then break end
-    State.screen_bottom1 = {line=line_index, pos=nil}
+    screen_bottom1.line = line_index
     if line.mode == 'text' then
 --?       print('text.draw', y, line_index)
       local startpos = 1
@@ -180,7 +181,7 @@ function edit.draw(State)
                      end,
         })
       end
-      y, State.screen_bottom1.pos = Text.draw(State, line_index, y, startpos)
+      y, screen_bottom1.pos = Text.draw(State, line_index, y, startpos)
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top
@@ -191,6 +192,7 @@ function edit.draw(State)
       assert(false)
     end
   end
+  State.screen_bottom1 = screen_bottom1
   if State.search_term then
     Text.draw_search_bar(State)
   end
@@ -221,7 +223,7 @@ end
 
 function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
-  print_and_log(('edit.mouse_press: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
+--?   print_and_log(('edit.mouse_press: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
     return
@@ -258,7 +260,7 @@ function edit.mouse_press(State, x,y, mouse_button)
             line=line_index,
             pos=Text.to_pos_on_line(State, line_index, x, y),
         }
-        break
+        return
       end
     elseif line.mode == 'drawing' then
       local line_cache = State.line_cache[line_index]
@@ -267,15 +269,24 @@ function edit.mouse_press(State, x,y, mouse_button)
         State.lines.current_drawing = line
         Drawing.before = snapshot(State, line_index)
         Drawing.mouse_press(State, line_index, x,y, mouse_button)
-        break
+        return
       end
     end
   end
+
+  -- still here? click is below all screen lines
+  State.old_cursor1 = State.cursor1
+  State.old_selection1 = State.selection1
+  State.mousepress_shift = App.shift_down()
+  State.selection1 = {
+      line=State.screen_bottom1.line,
+      pos=Text.pos_at_end_of_screen_line(State, State.screen_bottom1),
+  }
 end
 
 function edit.mouse_release(State, x,y, mouse_button)
   if State.search_term then return end
-  print_and_log(('edit.mouse_release: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
+--?   print_and_log(('edit.mouse_release: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
   if State.lines.current_drawing then
     Drawing.mouse_release(State, x,y, mouse_button)
     schedule_save(State)
@@ -284,16 +295,16 @@ function edit.mouse_release(State, x,y, mouse_button)
       Drawing.before = nil
     end
   else
-    print_and_log('edit.mouse_release: no current drawing')
+--?     print_and_log('edit.mouse_release: no current drawing')
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
         if Text.in_line(State, line_index, x,y) then
-          print_and_log(('edit.mouse_release: in line %d'):format(line_index))
+--?           print_and_log(('edit.mouse_release: in line %d'):format(line_index))
           State.cursor1 = {
               line=line_index,
               pos=Text.to_pos_on_line(State, line_index, x, y),
           }
-          print_and_log(('edit.mouse_release: cursor now %d,%d'):format(State.cursor1.line, State.cursor1.pos))
+--?           print_and_log(('edit.mouse_release: cursor now %d,%d'):format(State.cursor1.line, State.cursor1.pos))
           if State.mousepress_shift then
             if State.old_selection1.line == nil then
               State.selection1 = State.old_cursor1
@@ -309,7 +320,7 @@ function edit.mouse_release(State, x,y, mouse_button)
         end
       end
     end
-    print_and_log(('edit.mouse_release: finally selection %s,%s cursor %d,%d'):format(tostring(State.selection1.line), tostring(State.selection1.pos), State.cursor1.line, State.cursor1.pos))
+--?     print_and_log(('edit.mouse_release: finally selection %s,%s cursor %d,%d'):format(tostring(State.selection1.line), tostring(State.selection1.pos), State.cursor1.line, State.cursor1.pos))
   end
 end
 

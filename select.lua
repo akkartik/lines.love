@@ -67,13 +67,8 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
   end
 end
 
--- inefficient for some reason, so don't do it on every frame
 function Text.mouse_pos(State)
-  local line,pos = Text.to_pos(State, App.mouse_x(), App.mouse_y())
-  return line, pos
-end
-
-function Text.to_pos(State, x,y)
+  local x,y = App.mouse_x(), App.mouse_y()
   if y < State.line_cache[State.screen_top1.line].starty then
     return State.screen_top1.line, State.screen_top1.pos
   end
@@ -84,6 +79,7 @@ function Text.to_pos(State, x,y)
       end
     end
   end
+  return State.screen_bottom1.line, Text.pos_at_end_of_screen_line(State, State.screen_bottom1)
 end
 
 function Text.cut_selection(State)
