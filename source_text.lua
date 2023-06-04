@@ -650,6 +650,7 @@ function Text.right_without_scroll(State)
   end
 end
 
+-- result: pos, index of screen line
 function Text.pos_at_start_of_screen_line(State, loc1)
   Text.populate_screen_line_starting_pos(State, loc1.line)
   local line_cache = State.line_cache[loc1.line]
@@ -658,6 +659,20 @@ function Text.pos_at_start_of_screen_line(State, loc1)
     if spos <= loc1.pos then
       return spos,i
     end
+  end
+  assert(false)
+end
+
+function Text.pos_at_end_of_screen_line(State, loc1)
+  Text.populate_screen_line_starting_pos(State, loc1.line)
+  local line_cache = State.line_cache[loc1.line]
+  local most_recent_final_pos = utf8.len(State.lines[loc1.line].data)+1
+  for i=#line_cache.screen_line_starting_pos,1,-1 do
+    local spos = line_cache.screen_line_starting_pos[i]
+    if spos <= loc1.pos then
+      return most_recent_final_pos
+    end
+    most_recent_final_pos = spos-1
   end
   assert(false)
 end

@@ -113,6 +113,11 @@ function source.initialize_edit_side()
   end
 end
 
+function print_and_log(s)
+  print(s)
+  log(3, s)
+end
+
 function source.load_settings()
   local settings = Settings.source
   love.graphics.setFont(love.graphics.newFont(settings.font_height))

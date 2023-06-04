@@ -252,7 +252,7 @@ function edit.mouse_press(State, x,y, mouse_button)
         --  press and hold to start a selection: sets selection on press, cursor on release
         --  press and hold, then press shift: ignore shift
         --    i.e. mouse_release should never look at shift state
-        print_and_log(('edit.mouse_press: in line %d'):format(line_index))
+--?         print_and_log(('edit.mouse_press: in line %d'):format(line_index))
         State.old_cursor1 = State.cursor1
         State.old_selection1 = State.selection1
         State.mousepress_shift = App.shift_down()

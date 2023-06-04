@@ -1,4 +1,6 @@
 -- major tests for text editing flows
+-- Arguably this should be called source_edit_tests.lua,
+-- but that would mess up the git blame at this point.
 
 function test_initial_state()
   App.screen.init{width=120, height=60}
@@ -828,6 +830,67 @@ function test_select_text_using_mouse()
   check_eq(Editor_state.cursor1.pos, 4, 'cursor:pos')
 end
 
+function test_select_text_using_mouse_starting_above_text()
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  edit.draw(Editor_state)  -- populate line_cache.starty for each line Editor_state.line_cache
+  -- press mouse above first line of text
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,5, 1)
+  check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 1, 'selection:pos')
+end
+
+function test_select_text_using_mouse_starting_above_text_wrapping_line()
+  -- first screen line starts in the middle of a line
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'defgh', 'xyz'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=2, pos=5}
+  Editor_state.screen_top1 = {line=2, pos=3}
+  Editor_state.screen_bottom1 = {}
+  -- press mouse above first line of text
+  edit.run_after_mouse_press(Editor_state, Editor_state.left+8,5, 1)
+  -- selection is at screen top
+  check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
+  check_eq(Editor_state.selection1.line, 2, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 3, 'selection:pos')
+end
+
+function test_select_text_using_mouse_starting_below_text()
+  -- I'd like to test what happens when a mouse click is below some page of
+  -- text, potentially even in the middle of a line.
+  -- However, it's brittle to set up a text line boundary just right.
+  -- So I'm going to just check things below the bottom of the final line of
+  -- text when it's in the middle of the screen.
+  -- final screen line ends in the middle of screen
+  App.screen.init{width=50, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abcde'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  local y = Editor_state.top
+  App.screen.check(y, 'ab', 'baseline:screen:1')
+  y = y + Editor_state.line_height
+  App.screen.check(y, 'cde', 'baseline:screen:2')
+  -- press mouse above first line of text
+  edit.run_after_mouse_press(Editor_state, 5,App.screen.height-5, 1)
+  -- selection is past bottom-most text in screen
+  check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 6, 'selection:pos')
+end
+
 function test_select_text_using_mouse_and_shift()
   App.screen.init{width=50, height=60}
   Editor_state = edit.initialize_test_state()
@@ -880,6 +943,28 @@ function test_select_text_repeatedly_using_mouse_and_shift()
   check_eq(Editor_state.selection1.pos, 2, 'selection:pos')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'cursor:pos')
+end
+
+function test_select_all_text()
+  -- display a single line of text
+  App.screen.init{width=75, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc def'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  edit.draw(Editor_state)
+  -- select all
+  App.fake_key_press('lctrl')
+  edit.run_after_keychord(Editor_state, 'C-a')
+  App.fake_key_release('lctrl')
+  edit.key_release(Editor_state, 'lctrl')
+  -- selection
+  check_eq(Editor_state.selection1.line, 1, 'selection:line')
+  check_eq(Editor_state.selection1.pos, 1, 'selection:pos')
+  check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
+  check_eq(Editor_state.cursor1.pos, 8, 'cursor:pos')
 end
 
 function test_cut_without_selection()

@@ -1,6 +1,4 @@
 -- helpers for selecting portions of text
--- To keep things simple, we'll ignore the B side when selections start on the
--- A side, and stick to within a single B side selections start in.
 
 -- Return any intersection of the region from State.selection1 to State.cursor1 (or
 -- current mouse, if mouse is pressed; or recent mouse if mouse is pressed and
@@ -31,7 +29,6 @@ function Text.clip_selection(State, line_index, apos, bpos)
   -- compare bounds more carefully (start inclusive, end exclusive)
   local a_ge = Text.le1({line=minl, pos=minp}, {line=line_index, pos=apos})
   local b_lt = Text.lt1({line=line_index, pos=bpos}, {line=maxl, pos=maxp})
---?   print(minl,line_index,maxl, '--', minp,apos,bpos,maxp, '--', a_ge,b_lt)
   if a_ge and b_lt then
     -- fully contained
     return apos,bpos
@@ -62,7 +59,6 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
       local before = line.data:sub(pos_offset, lo_offset-1)
       lo_px = App.width(before)
     end
---?     print(lo,pos,hi, '--', lo_offset,pos_offset,hi_offset, '--', lo_px)
     local s = line.data:sub(lo_offset, hi_offset-1)
     App.color(Highlight_color)
     love.graphics.rectangle('fill', x+lo_px,y, App.width(s),State.line_height)
@@ -71,22 +67,11 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
   end
 end
 
--- inefficient for some reason, so don't do it on every frame
 function Text.mouse_pos(State)
-  local time = love.timer.getTime()
-  if State.recent_mouse.time and State.recent_mouse.time > time-0.1 then
-    return State.recent_mouse.line, State.recent_mouse.pos
+  local x,y = App.mouse_x(), App.mouse_y()
+  if y < State.line_cache[State.screen_top1.line].starty then
+    return State.screen_top1.line, State.screen_top1.pos
   end
-  State.recent_mouse.time = time
-  local line,pos = Text.to_pos(State, App.mouse_x(), App.mouse_y())
-  if line then
-    State.recent_mouse.line = line
-    State.recent_mouse.pos = pos
-  end
-  return State.recent_mouse.line, State.recent_mouse.pos
-end
-
-function Text.to_pos(State, x,y)
   for line_index,line in ipairs(State.lines) do
     if line.mode == 'text' then
       if Text.in_line(State, line_index, x,y) then
@@ -94,6 +79,7 @@ function Text.to_pos(State, x,y)
       end
     end
   end
+  return State.screen_bottom1.line, Text.pos_at_end_of_screen_line(State, State.screen_bottom1)
 end
 
 function Text.cut_selection(State)
