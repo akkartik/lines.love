@@ -34,19 +34,19 @@ function App.any_modifier_down()
 end
 
 function App.ctrl_down()
-  return App.modifier_down('lctrl') or App.modifier_down('rctrl')
+  return App.key_down('lctrl') or App.key_down('rctrl')
 end
 
 function App.alt_down()
-  return App.modifier_down('lalt') or App.modifier_down('ralt')
+  return App.key_down('lalt') or App.key_down('ralt')
 end
 
 function App.shift_down()
-  return App.modifier_down('lshift') or App.modifier_down('rshift')
+  return App.key_down('lshift') or App.key_down('rshift')
 end
 
 function App.cmd_down()
-  return App.modifier_down('lgui') or App.modifier_down('rgui')
+  return App.key_down('lgui') or App.key_down('rgui')
 end
 
 function App.is_cursor_movement(key)

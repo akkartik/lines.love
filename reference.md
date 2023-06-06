@@ -251,8 +251,7 @@ visible on screen.
 
 ### keyboard primitives
 
-* `App.modifier_down(key)` -- returns `true` if the given key (doesn't
-  actually have to be just a modifier) is currently pressed.
+* `App.key_down(key)` -- returns `true` if the given key is currently pressed.
   (Based on [LÖVE](https://love2d.org/wiki/love.keyboard.isDown).)
 
 ### interacting with files

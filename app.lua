@@ -229,7 +229,7 @@ end
 function App.fake_key_release(key)
   App.fake_keys_pressed[key] = nil
 end
-function App.modifier_down(key)
+function App.key_down(key)
   return App.fake_keys_pressed[key]
 end
 
@@ -444,7 +444,7 @@ function App.disable_tests()
   App.getTime = love.timer.getTime
   App.getClipboardText = love.system.getClipboardText
   App.setClipboardText = love.system.setClipboardText
-  App.modifier_down = love.keyboard.isDown
+  App.key_down = love.keyboard.isDown
   App.mouse_move = love.mouse.setPosition
   App.mouse_down = love.mouse.isDown
   App.mouse_x = love.mouse.getX
