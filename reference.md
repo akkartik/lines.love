@@ -317,6 +317,12 @@ and [the Lua manual](https://www.lua.org/manual/5.1/manual.html#5.7).
 * `App.setClipboardText(text)` -- stores the string `text` in the clipboard.
   (Based on [LÖVE](https://love2d.org/wiki/love.system.setClipboardText).)
 
+* `array.find(arr, elem)` -- scan table `arr` for `elem` assuming it's
+  organized as an array (just numeric indices).
+
+* `array.any(arr, f)` -- scan table `arr` for any elements satisfying
+  predicate `f`. Return first such element or `false` if none.
+
 There's much more I could include here; check out [the LÖVE manual](https://love2d.org/wiki)
 and [the Lua manual](https://www.lua.org/manual/5.1/manual.html).
 
