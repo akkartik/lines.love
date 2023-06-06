@@ -231,6 +231,60 @@ locations in the widget are `cursor1` describing where text is inserted or
 deleted and `screen_top1` which specifies how far down the lines is currently
 visible on screen.
 
+### clickable buttons
+
+There's a facility for rendering buttons and responding to events when they're
+clicked. It requires setting up 3 things:
+  - a `state` table housing all buttons. Can be the same `state` variable the
+    text-editor widget uses, but doesn't have to be.
+  - specifying buttons to create in `state`. This must happen either directly
+    or indirectly within `App.draw`.
+  - responding to clicks on buttons in `state`. This must happen either
+    directly or indirectly within `App.mousepressed`.
+
+The following facilities help set these things up:
+
+* Clear `state` at the start of each frame:
+
+    ```
+    state.button_handlers = {}
+    ```
+
+  Don't forget to do this, or your app will get slower over time.
+
+* `button` creates a single button. The syntax is:
+
+    ```
+    button(state, name, {x=..., y=..., w=..., h=..., color={r,g,b},
+      icon = function({x=..., y=..., w=..., h=...}) ... end,
+      onpress1 = ...
+    })
+    ```
+
+  Call this either directly or indirectly from `App.draw`. It will paint a
+  rectangle to the screen with top-left at (x,y), dimensions w×h pixels in the
+  specified `color`. It will then overlay any drawing instructions within
+  `icon` atop it. The `icon` callback will receive a table containing the same
+  x/y/w/h.
+
+  The rectangle also registers within `state` the `onpress1` callback (without
+  any arguments) when mouse button 1 is clicked on it. This way you can see
+  everything about a button in one place. Create as many buttons as you like
+  within a single shared `state`.
+
+* `mouse_press_consumed_by_any_button_handler(state, x,y, mouse_button)`
+
+  Call this either directly or indirectly from `App.mousepressed`. It will
+  pass on a click to any button registered in `state`. It's also helpful to
+  ensure clicks on a button don't have other effects, so I prefer the
+  following boilerplate early in `mousepressed`:
+
+    ```
+    if mouse_press_consumed_by_any_button_handler(state, x,y, mouse_button) then
+      return
+    end
+    ```
+
 ### mouse primitives
 
 * `App.mouse_move(x, y)` -- sets the current position of the mouse to (`x`,
