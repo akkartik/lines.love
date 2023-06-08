@@ -109,7 +109,7 @@ function edit.check_locs(State)
   -- if State is inconsistent (i.e. file changed by some other program),
   --   throw away all cursor state entirely
   if edit.invalid1(State, State.screen_top1)
-      or edit.invalid1(State, State.cursor1)
+      or edit.invalid_cursor1(State)
       or not edit.cursor_on_text(State)
       or not Text.le1(State.screen_top1, State.cursor1) then
     State.screen_top1 = {line=1, pos=1}
@@ -122,6 +122,16 @@ function edit.invalid1(State, loc1)
   local l = State.lines[loc1.line]
   if l.mode ~= 'text' then return false end  -- pos is irrelevant to validity for a drawing line
   return loc1.pos > #State.lines[loc1.line].data
+end
+
+-- cursor loc in particular differs from other locs in one way:
+-- pos might occur just after end of line
+function edit.invalid_cursor1(State)
+  local cursor1 = State.cursor1
+  if cursor1.line > #State.lines then return true end
+  local l = State.lines[cursor1.line]
+  if l.mode ~= 'text' then return false end  -- pos is irrelevant to validity for a drawing line
+  return cursor1.pos > #State.lines[cursor1.line].data + 1
 end
 
 function edit.cursor_on_text(State)

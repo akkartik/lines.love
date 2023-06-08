@@ -19,7 +19,7 @@ function run.initialize(arg)
     run.initialize_default_settings()
   end
 
-  if #arg > 0 then
+  if #arg > 0 and Editor_state.filename ~= absolutize(arg[1]) then
     Editor_state.filename = arg[1]
     load_from_disk(Editor_state)
     Text.redraw_all(Editor_state)
@@ -154,17 +154,20 @@ function run.settings()
   if Current_app == 'run' then
     Settings.x, Settings.y, Settings.displayindex = App.screen.position()
   end
-  local filename = Editor_state.filename
-  if is_relative_path(filename) then
-    filename = love.filesystem.getWorkingDirectory()..'/'..filename  -- '/' should work even on Windows
-  end
   return {
     x=Settings.x, y=Settings.y, displayindex=Settings.displayindex,
     width=App.screen.width, height=App.screen.height,
     font_height=Editor_state.font_height,
-    filename=filename,
+    filename=absolutize(Editor_state.filename),
     screen_top=Editor_state.screen_top1, cursor=Editor_state.cursor1
   }
+end
+
+function absolutize(path)
+  if is_relative_path(path) then
+    return love.filesystem.getWorkingDirectory()..'/'..path  -- '/' should work even on Windows
+  end
+  return path
 end
 
 function run.mouse_press(x,y, mouse_button)

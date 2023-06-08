@@ -5,6 +5,10 @@ record those here.
 
 Initializing settings:
   - delete app settings, start; window opens running the text editor
+  - run with a filename on commandline, scroll around, quit; restart without a filename; window opens running the text editor in same position+dimensions
+  - run with a filename on commandline, scroll around, quit; restart with same filename; window opens running the text editor in same position+dimensions
+  - run with a filename on commandline, scroll around, quit; restart with new filename; window opens new filename with cursor up top
+  - run editor, scroll around, move cursor to end of some line, quit; restart with new filename; window opens running the text editor in same position+dimensions
   - quit while running the text editor, restart; window opens running the text editor in same position+dimensions
   - quit while editing source (color; no drawings; no selection), restart; window opens editing source in same position+dimensions
   - start out running the text editor, move window, press ctrl+e twice; window is running text editor in same position+dimensions
