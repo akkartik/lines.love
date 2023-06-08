@@ -4,7 +4,9 @@ because I don't know how to test them or because I've been lazy. I'll at least
 record those here.
 
 Initializing settings:
-  - delete app settings, start; window opens running the text editor
+  - delete app settings, start with a filename; window opens running the text editor with cursor at top of file
+  - run with absolute file path; quit; restart; window opens running the text editor in same position+dimensions
+  - run with relative file path; quit; switch to new directory; restart without a filename; window opens running the text editor in same file in same position+dimensions
   - run with a filename on commandline, scroll around, quit; restart without a filename; window opens running the text editor in same position+dimensions
   - run with a filename on commandline, scroll around, quit; restart with same filename; window opens running the text editor in same position+dimensions
   - run with a filename on commandline, scroll around, quit; restart with new filename; window opens new filename with cursor up top
