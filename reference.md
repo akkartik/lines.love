@@ -231,6 +231,25 @@ locations in the widget are `cursor1` describing where text is inserted or
 deleted and `screen_top1` which specifies how far down the lines is currently
 visible on screen.
 
+Some constants that affect editor behavior:
+* `Margin_top`, `Margin_left`, `Margin_right` are integers in pixel units that
+  affect where the editor is drawn on window (it always extends to bottom of
+  window as needed)
+* `Drawing_padding_top` and `Drawing_padding_bottom` affect spacing around
+  drawings.
+
+* Various color constants are represented as tables with r/g/b keys:
+  * `Text_color`, `Cursor_color`, `Highlight_color` for drawing text.
+  * `Stroke_color`, `Current_stroke_color` for line drawings.
+  * `Icon_color` affects the color of the little mode icon on the top right of
+    a drawing.
+  * `Current_name_background_color` manages the color when naming points using
+    `ctrl+n`.
+  * `Focus_stroke_color` affects the color of a point or line when you hover
+    over it.
+  * `Help_color` and `Help_background_color` affect the color of online help
+    within line drawings.
+
 ### clickable buttons
 
 There's a facility for rendering buttons and responding to events when they're
