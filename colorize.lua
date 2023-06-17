@@ -6,8 +6,9 @@ Next_state = {
   normal={
     {prefix='--[[', target='block_comment'},  -- only single-line for now
     {prefix='--', target='comment'},
-    {prefix='"', target='dstring'},
-    {prefix="'", target='sstring'},
+    -- these don't mostly work well until we can change color within words
+    -- {prefix='"', target='dstring'},
+    -- {prefix="'", target='sstring'},
     {prefix='[[', target='block_string'},  -- only single line for now
   },
   dstring={
