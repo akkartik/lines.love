@@ -91,6 +91,7 @@ to the website above:
 * https://notabug.org/akkartik/lines.love
 * https://codeberg.org/akkartik/lines.love
 * https://pagure.io/lines.love
+* https://nest.pijul.com/akkartik/lines.love (using the Pijul version control system)
 
 Forks of lines.love are encouraged. If you show me your fork, I'll link to it
 here.
