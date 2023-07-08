@@ -12,6 +12,11 @@ function App.keypressed(key, scancode, isrepeat)
 end
 
 function App.combine_modifiers(key)
+  if love.keyboard.isModifierActive then  -- waiting for LÖVE v12
+    if key:match('^kp') then
+      key = App.translate_numlock(key)
+    end
+  end
   local result = ''
   if App.ctrl_down() then
     result = result..'C-'
@@ -51,6 +56,38 @@ end
 
 function App.is_cursor_movement(key)
   return array.find({'left', 'right', 'up', 'down', 'home', 'end', 'pageup', 'pagedown'}, key)
+end
+
+-- mappings only to non-printable keys; leave out mappings that textinput will handle
+Numlock_off = {
+  kp0='insert',
+  kp1='end',
+  kp2='down',
+  kp3='pagedown',
+  kp4='left',
+  -- numpad 5 translates to nothing
+  kp6='right',
+  kp7='home',
+  kp8='up',
+  kp9='pageup',
+  ['kp.']='delete',
+  -- LÖVE handles keypad operators in textinput
+  -- what's with the `kp=` and `kp,` keys? None of my keyboards have one.
+  -- Hopefully LÖVE handles them as well in textinput.
+  kpenter='enter',
+  kpdel='delete',
+}
+Numlock_on = {
+  kpenter='enter',
+  kpdel='delete',
+}
+function App.translate_numlock(key)
+  if love.keyboard.isModifierActive('numlock') then
+    return Numlock_on[key] or key
+  else
+    return Numlock_off[key] or key
+  end
+  return key
 end
 
 array = {}
