@@ -63,11 +63,21 @@ function run.load_settings()
   App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.width, App.screen.height = Settings.width, Settings.height
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
-  App.screen.move(Settings.x, Settings.y, Settings.displayindex)
+  run.set_window_position_from_settings(Settings)
   Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, Settings.font_height, math.floor(Settings.font_height*1.3))
   Editor_state.filename = Settings.filename
   Editor_state.screen_top1 = Settings.screen_top
   Editor_state.cursor1 = Settings.cursor
+end
+
+function run.set_window_position_from_settings(settings)
+  local os = love.system.getOS()
+  if os == 'Linux' then
+    -- love.window.setPosition doesn't quite seem to do what is asked of it on Linux.
+    App.screen.move(settings.x, settings.y-37, settings.displayindex)
+  else
+    App.screen.move(settings.x, settings.y, settings.displayindex)
+  end
 end
 
 function run.initialize_default_settings()
