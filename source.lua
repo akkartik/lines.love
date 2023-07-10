@@ -164,8 +164,13 @@ function source.resize_window_from_settings(settings)
 end
 
 function source.set_window_position_from_settings(settings)
-  -- love.window.setPosition doesn't quite seem to do what is asked of it on Linux.
-  App.screen.move(settings.x, settings.y-37, settings.displayindex)
+  local os = love.system.getOS()
+  if os == 'Linux' then
+    -- love.window.setPosition doesn't quite seem to do what is asked of it on Linux.
+    App.screen.move(settings.x, settings.y-37, settings.displayindex)
+  else
+    App.screen.move(settings.x, settings.y, settings.displayindex)
+  end
 end
 
 function source.initialize_default_settings()
