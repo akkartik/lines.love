@@ -59,8 +59,6 @@ function run.load_settings()
   App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
   -- set up desired window dimensions
   App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.width, App.screen.height = Settings.width, Settings.height
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   run.set_window_position_from_settings(Settings)
@@ -105,8 +103,6 @@ function run.initialize_window_geometry(em_width)
   App.screen.height = App.screen.height-100
   App.screen.width = 40*em_width
   App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
 

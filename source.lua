@@ -156,8 +156,6 @@ function source.resize_window_from_settings(settings)
   Display_width, Display_height, App.screen.flags = App.screen.size()
   -- set up desired window dimensions
   App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(Display_width, 200)
-  App.screen.flags.minheight = math.min(Display_height, 200)
   App.screen.width, App.screen.height = settings.width, settings.height
 --?   print('setting window from settings:', App.screen.width, App.screen.height)
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
@@ -198,8 +196,6 @@ function source.initialize_window_geometry(em_width)
   App.screen.height = Display_height-100
   App.screen.width = 40*em_width
   App.screen.flags.resizable = true
-  App.screen.flags.minwidth = math.min(App.screen.width, 200)
-  App.screen.flags.minheight = math.min(App.screen.height, 200)
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   print('initializing source position')
   if Settings == nil then Settings = {} end
