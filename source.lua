@@ -121,8 +121,11 @@ end
 function source.load_settings()
   local settings = Settings.source
   love.graphics.setFont(love.graphics.newFont(settings.font_height))
-  source.resize_window_from_settings(settings)
---?   print('loading source position', settings.x, settings.y, settings.displayindex)
+  -- set up desired window dimensions and make window resizable
+  _, _, App.screen.flags = App.screen.size()
+  App.screen.flags.resizable = true
+  App.screen.width, App.screen.height = settings.width, settings.height
+  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   source.set_window_position_from_settings(settings)
   Show_log_browser_side = settings.show_log_browser_side
   local right = App.screen.width - Margin_right
@@ -141,24 +144,6 @@ function source.load_settings()
     Editor_state.screen_top1 = {line=1, pos=1}
     Editor_state.cursor1 = {line=1, pos=1}
   end
-end
-
-function source.resize_window_from_settings(settings)
-  local os = love.system.getOS()
-  if os == 'Android' or os == 'iOS' then
-    -- maximizing on iOS breaks text rendering: https://github.com/deltadaedalus/vudu/issues/7
-    -- no point second-guessing window dimensions on mobile
-    App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
-    return
-  end
-  -- maximize window to determine maximum allowable dimensions
-  App.screen.resize(0, 0)  -- maximize
-  Display_width, Display_height, App.screen.flags = App.screen.size()
-  -- set up desired window dimensions
-  App.screen.flags.resizable = true
-  App.screen.width, App.screen.height = settings.width, settings.height
---?   print('setting window from settings:', App.screen.width, App.screen.height)
-  App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
 
 function source.set_window_position_from_settings(settings)
@@ -182,19 +167,16 @@ function source.initialize_default_settings()
 end
 
 function source.initialize_window_geometry(em_width)
-  local os = love.system.getOS()
-  if os == 'Android' or os == 'iOS' then
-    -- maximizing on iOS breaks text rendering: https://github.com/deltadaedalus/vudu/issues/7
-    -- no point second-guessing window dimensions on mobile
-    App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
-    return
-  end
-  -- maximize window
-  App.screen.resize(0, 0)  -- maximize
-  Display_width, Display_height, App.screen.flags = App.screen.size()
-  -- shrink height slightly to account for window decoration
-  App.screen.height = Display_height-100
-  App.screen.width = 40*em_width
+  -- Initialize window width/height and make window resizable.
+  --
+  -- I get tempted to have opinions about window dimensions here, but they're
+  -- non-portable:
+  --  - maximizing doesn't work on mobile and messes things up
+  --  - maximizing keeps the title bar on screen in Linux, but off screen on
+  --    Windows. And there's no way to get the height of the title bar.
+  -- It seems more robust to just follow LÖVE's default window size until
+  -- someone overrides it.
+  App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
   App.screen.flags.resizable = true
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   print('initializing source position')
@@ -378,20 +360,15 @@ function source.keychord_press(chord, key)
 --?     print('C-l')
     Show_log_browser_side = not Show_log_browser_side
     if Show_log_browser_side then
-      App.screen.width = math.min(Display_width, App.screen.width*2)
       Editor_state.right = App.screen.width/2 - Margin_right
+      Editor_state.width = Editor_state.right-Editor_state.left
+      Text.redraw_all(Editor_state)
       Log_browser_state.left = App.screen.width/2 + Margin_left
       Log_browser_state.right = App.screen.width - Margin_right
     else
-      App.screen.width = Editor_state.right + Margin_right
-    end
---?     print('setting window:', App.screen.width, App.screen.height)
-    App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
---?     print('done setting window')
-    -- try to restore position if possible
-    -- if the window gets wider the window manager may not respect this
-    if not App.run_tests then
-      source.set_window_position_from_settings(Settings.source)
+      Editor_state.right = App.screen.width - Margin_right
+      Editor_state.width = Editor_state.right-Editor_state.left
+      Text.redraw_all(Editor_state)
     end
     return
   end

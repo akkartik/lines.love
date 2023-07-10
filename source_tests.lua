@@ -19,7 +19,6 @@ end
 
 function test_show_log_browser_side()
   App.screen.init{width=300, height=300}
-  Display_width = App.screen.width
   Current_app = 'source'
   Editor_state = edit.initialize_test_state()
   Editor_state.filename = 'foo'
@@ -34,41 +33,9 @@ function test_show_log_browser_side()
   check(Show_log_browser_side, 'check')
 end
 
-function test_show_log_browser_side_doubles_window_width_if_possible()
-  -- initialize screen dimensions to half width
-  App.screen.init{width=300, height=300}
-  Display_width = App.screen.width*2
-  -- initialize source app with left side occupying entire window (half the display)
-  Current_app = 'source'
-  Editor_state = edit.initialize_test_state()
-  Editor_state.filename = 'foo'
-  Editor_state.left = Margin_left
-  Editor_state.right = App.screen.width - Margin_right
-  local old_editor_right = Editor_state.right
-  Text.redraw_all(Editor_state)
-  Log_browser_state = edit.initialize_test_state()
-  -- log browser has some arbitrary margins
-  Log_browser_state.left = 200 + Margin_left
-  Log_browser_state.right = 400
-  Text.redraw_all(Log_browser_state)
-  log_browser.parse(Log_browser_state)
-  -- display log browser
-  Current_time = Current_time + 0.1
-  App.run_after_keychord('C-l')
-  -- window width is doubled
-  check_eq(App.screen.width, 600, 'display:width')
-  -- left side margins are unchanged
-  check_eq(Editor_state.left, Margin_left, 'edit:left')
-  check_eq(Editor_state.right, old_editor_right, 'edit:right')
-  -- log browser margins are adjusted
-  check_eq(Log_browser_state.left, App.screen.width/2 + Margin_left, 'log:left')
-  check_eq(Log_browser_state.right, App.screen.width - Margin_right, 'log:right')
-end
-
-function test_show_log_browser_side_resizes_both_sides_if_cannot_double_window_width()
+function test_show_log_browser_side_splits_window_width()
   -- initialize screen dimensions and indicate that it is maximized
   App.screen.init{width=300, height=300}
-  Display_width = 300
   -- initialize source app with left side occupying more than half the display
   Current_app = 'source'
   Editor_state = edit.initialize_test_state()

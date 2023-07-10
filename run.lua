@@ -55,9 +55,8 @@ end
 
 function run.load_settings()
   love.graphics.setFont(love.graphics.newFont(Settings.font_height))
-  -- determine default dimensions and flags
-  App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
-  -- set up desired window dimensions
+  -- set up desired window dimensions and make window resizable
+  _, _, App.screen.flags = App.screen.size()
   App.screen.flags.resizable = true
   App.screen.width, App.screen.height = Settings.width, Settings.height
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
@@ -89,19 +88,16 @@ function run.initialize_default_settings()
 end
 
 function run.initialize_window_geometry(em_width)
-  local os = love.system.getOS()
-  if os == 'Android' or os == 'iOS' then
-    -- maximizing on iOS breaks text rendering: https://github.com/deltadaedalus/vudu/issues/7
-    -- no point second-guessing window dimensions on mobile
-    App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
-    return
-  end
-  -- maximize window
-  App.screen.resize(0, 0)  -- maximize
+  -- Initialize window width/height and make window resizable.
+  --
+  -- I get tempted to have opinions about window dimensions here, but they're
+  -- non-portable:
+  --  - maximizing doesn't work on mobile and messes things up
+  --  - maximizing keeps the title bar on screen in Linux, but off screen on
+  --    Windows. And there's no way to get the height of the title bar.
+  -- It seems more robust to just follow LÖVE's default window size until
+  -- someone overrides it.
   App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
-  -- shrink height slightly to account for window decoration
-  App.screen.height = App.screen.height-100
-  App.screen.width = 40*em_width
   App.screen.flags.resizable = true
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
