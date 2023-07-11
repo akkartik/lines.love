@@ -150,9 +150,7 @@ function run.quit()
 end
 
 function run.settings()
-  if Settings == nil then
-    Settings = {}
-  end
+  if Settings == nil then Settings = {} end
   Settings.x, Settings.y, Settings.displayindex = App.screen.position()
   return {
     x=Settings.x, y=Settings.y, displayindex=Settings.displayindex,

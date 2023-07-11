@@ -179,10 +179,6 @@ function source.initialize_window_geometry(em_width)
   App.screen.width, App.screen.height, App.screen.flags = App.screen.size()
   App.screen.flags.resizable = true
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
-  print('initializing source position')
-  if Settings == nil then Settings = {} end
-  if Settings.source == nil then Settings.source = {} end
-  Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
 end
 
 function source.resize(w, h)
@@ -273,6 +269,8 @@ function source.quit()
 end
 
 function source.settings()
+  if Settings == nil then Settings = {} end
+  if Settings.source == nil then Settings.source = {} end
   Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
   File_navigation.cursors[Editor_state.filename] = {cursor1=Editor_state.cursor1, screen_top1=Editor_state.screen_top1}
   return {
