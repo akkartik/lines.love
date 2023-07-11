@@ -273,11 +273,7 @@ function source.quit()
 end
 
 function source.settings()
-  if Current_app == 'source' then
---?     print('reading source window position')
-    Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
-  end
---?   print('saving source settings', Settings.source.x, Settings.source.y, Settings.source.displayindex)
+  Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
   File_navigation.cursors[Editor_state.filename] = {cursor1=Editor_state.cursor1, screen_top1=Editor_state.screen_top1}
   return {
     x=Settings.source.x, y=Settings.source.y, displayindex=Settings.source.displayindex,

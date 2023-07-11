@@ -153,9 +153,7 @@ function run.settings()
   if Settings == nil then
     Settings = {}
   end
-  if Current_app == 'run' then
-    Settings.x, Settings.y, Settings.displayindex = App.screen.position()
-  end
+  Settings.x, Settings.y, Settings.displayindex = App.screen.position()
   return {
     x=Settings.x, y=Settings.y, displayindex=Settings.displayindex,
     width=App.screen.width, height=App.screen.height,
