@@ -39,17 +39,10 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
           })
         end
       end
-      -- render fragment
+      -- render any highlights
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
-      end
-      -- render colorized text
-      local x = State.left
-      for frag in screen_line:gmatch('%S*%s*') do
-        select_color(frag)
-        App.screen.print(frag, x,y)
-        x = x+App.width(frag)
       end
       if not hide_cursor and line_index == State.cursor1.line then
         -- render search highlight or cursor
@@ -59,9 +52,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
             local cursor_offset = Text.offset(data, State.cursor1.pos)
             if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
               local hi = State.cursor1.pos+utf8.len(State.search_term)
-              local lo_px = Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, hi)
-              App.color(Text_color)
-              love.graphics.print(State.search_term, State.left+lo_px,y)
+              Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, hi)
             end
           end
         elseif Focus == 'edit' then
@@ -74,6 +65,13 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
             Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
           end
         end
+      end
+      -- render colorized text
+      local x = State.left
+      for frag in screen_line:gmatch('%S*%s*') do
+        select_color(frag)
+        App.screen.print(frag, x,y)
+        x = x+App.width(frag)
       end
       y = y + State.line_height
       if y >= App.screen.height then
