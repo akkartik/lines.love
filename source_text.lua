@@ -24,8 +24,9 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
       local screen_line = Text.screen_line(line, line_cache, i)
 --?       print('text.draw:', screen_line, 'at', line_index,pos, 'after', x,y)
       local frag_len = utf8.len(screen_line)
-      -- render any link decorations
+      -- render any highlights
       for _,link_offsets in ipairs(line_cache.link_offsets) do
+        -- render link decorations
         local s,e,filename = unpack(link_offsets)
         local lo, hi = Text.clip_wikiword_with_screen_line(line, line_cache, i, s, e)
         if lo then
@@ -39,7 +40,6 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
           })
         end
       end
-      -- render any highlights
       if State.selection1.line then
         local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
         Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
