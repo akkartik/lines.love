@@ -31,8 +31,8 @@ function Text.draw(State, line_index, y, startpos)
       App.screen.print(screen_line, State.left,y)
       if line_index == State.cursor1.line then
         -- render search highlight or cursor
-        if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
-          if State.search_term then
+        if State.search_term then
+          if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
             local data = State.lines[State.cursor1.line].data
             local cursor_offset = Text.offset(data, State.cursor1.pos)
             if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
@@ -40,7 +40,9 @@ function Text.draw(State, line_index, y, startpos)
               App.color(Text_color)
               love.graphics.print(State.search_term, State.left+lo_px,y)
             end
-          else
+          end
+        else
+          if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
             Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
           end
         end
