@@ -32,7 +32,7 @@ function Text.draw(State, line_index, y, startpos)
       if line_index == State.cursor1.line then
         -- render search highlight or cursor
         if State.search_term then
-          if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
+          if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
             local data = State.lines[State.cursor1.line].data
             local cursor_offset = Text.offset(data, State.cursor1.pos)
             if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
@@ -42,7 +42,12 @@ function Text.draw(State, line_index, y, startpos)
             end
           end
         else
-          if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
+          if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
+            Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
+          elseif pos + frag_len == State.cursor1.pos then
+            -- Show cursor at end of line.
+            -- This place also catches end of wrapping screen lines. That doesn't seem worth distinguishing.
+            -- It seems useful to see a cursor whether your eye is on the left or right margin.
             Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
           end
         end
