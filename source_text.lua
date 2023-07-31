@@ -47,13 +47,14 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
       if not hide_cursor and line_index == State.cursor1.line then
         -- render search highlight or cursor
         if State.search_term then
-          if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
-            local data = State.lines[State.cursor1.line].data
-            local cursor_offset = Text.offset(data, State.cursor1.pos)
-            if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
-              local hi = State.cursor1.pos+utf8.len(State.search_term)
-              Text.draw_highlight(State, line, State.left,y, pos, State.cursor1.pos, hi)
-            end
+          local data = State.lines[State.cursor1.line].data
+          local cursor_offset = Text.offset(data, State.cursor1.pos)
+          if data:sub(cursor_offset, cursor_offset+#State.search_term-1) == State.search_term then
+            local save_selection = State.selection1
+            State.selection1 = {line=line_index, pos=State.cursor1.pos+utf8.len(State.search_term)}
+            local lo, hi = Text.clip_selection(State, line_index, pos, pos+frag_len)
+            Text.draw_highlight(State, line, State.left,y, pos, lo,hi)
+            State.selection1 = save_selection
           end
         elseif Focus == 'edit' then
           if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
