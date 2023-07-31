@@ -29,8 +29,8 @@ function Text.draw(State, line_index, y, startpos)
       end
       App.color(Text_color)
       App.screen.print(screen_line, State.left,y)
-      -- render cursor if necessary
       if line_index == State.cursor1.line then
+        -- render search highlight or cursor
         if pos <= State.cursor1.pos and pos + frag_len >= State.cursor1.pos then
           if State.search_term then
             local data = State.lines[State.cursor1.line].data
