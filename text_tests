@@ -1,8 +1,7 @@
 == Summary of tests for the text editor
 
-This doesn't include all tests and might not change between forks, but it's
-intended to be the "timeless core" of a text editor widget that shouldn't
-change across forks.
+This doesn't include all tests. Intended to be the "timeless core" of a text
+editor widget that shouldn't change across forks.
 
 # basic
 initial state
