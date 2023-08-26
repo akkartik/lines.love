@@ -36,7 +36,7 @@ automatically called for you as appropriate.
 * `App.resize(w,h)` -- called when you resize the app window. Provides new
   window dimensions in `w` and `h`. Don't bother updating `App.screen.width`
   and `App.screen.height`, that will happen automatically before calling
-  `on.resize`.
+  `App.resize`.
   (Based on [LÖVE](https://love2d.org/wiki/love.resize))
 
 * `App.filedropped(file)` -- called when a file icon is dragged and dropped on
@@ -51,9 +51,9 @@ automatically called for you as appropriate.
 * `App.draw()` -- called to draw on the window, around 30 times a second.
   (Based on [LÖVE](https://love2d.org/wiki/love.draw).)
 
-* `App.update(dt)` -- called after every call to `on.draw`. Make changes to
-  your app's variables here rather than in `on.draw`. Provides in `dt` the
-  time since the previous call to `on.update`, which can be useful for things
+* `App.update(dt)` -- called after every call to `App.draw`. Make changes to
+  your app's variables here rather than in `App.draw`. Provides in `dt` the
+  time since the previous call to `App.update`, which can be useful for things
   like smooth animations.
   (Based on [LÖVE](https://love2d.org/wiki/love.update).)
 
@@ -67,7 +67,7 @@ automatically called for you as appropriate.
   (Based on [LÖVE](https://love2d.org/wiki/love.mousepressed).)
 
 * `App.mousereleased(x,y, mouse_button)` -- called when you release a mouse
-  button. Provides the same arguments as `on.mouse_press()` above.
+  button. Provides the same arguments as `App.mousepressed()` above.
   (Based on [LÖVE](https://love2d.org/wiki/love.mousereleased).)
 
 * `App.wheelmoved(dx,dy)` -- called when you use the scroll wheel on a mouse
@@ -88,7 +88,7 @@ automatically called for you as appropriate.
 
 * `App.textinput(t)` -- called when you press a key combination that yields
   (roughly) a printable character. For example, `shift` and `a` pressed
-  together will call `on.textinput` with `A`.
+  together will call `App.textinput` with `A`.
   (Based on [LÖVE](https://love2d.org/wiki/love.textinput).)
 
 * `App.keyreleased(key)` -- called when you press a key on the keyboard.
@@ -311,7 +311,7 @@ The following facilities help set these things up:
   (Based on [LÖVE](https://love2d.org/wiki/love.mouse.setPosition).)
 
 * `App.mouse_down(mouse_button)` -- returns `true` if the button
-  `mouse_button` is pressed. See `on.mouse_press` for `mouse_button` codes.
+  `mouse_button` is pressed. See `App.mousepressed` for `mouse_button` codes.
   (Based on [LÖVE](https://love2d.org/wiki/love.mouse.isDown).)
 
 * `App.mouse_x()` -- returns the x coordinate of the current position of the
