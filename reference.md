@@ -91,7 +91,7 @@ automatically called for you as appropriate.
   together will call `on.textinput` with `A`.
   (Based on [LÖVE](https://love2d.org/wiki/love.textinput).)
 
-* `App.keyrelease(key)` -- called when you press a key on the keyboard.
+* `App.keyreleased(key)` -- called when you press a key on the keyboard.
   Provides in `key` a string name for the key ([valid values](https://love2d.org/wiki/KeyConstant)).
   (Based on [LÖVE](https://love2d.org/wiki/love.keyreleased), including other
   variants.)
