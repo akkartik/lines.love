@@ -1,15 +1,11 @@
 -- love.run: main entrypoint function for LÖVE
 --
 -- Most apps can just use the default shown in https://love2d.org/wiki/love.run,
--- but we need to override it to install a test harness.
---
--- A test harness needs to check what the 'real' code did.
--- To do this it needs to hook into primitive operations performed by code.
--- Our hooks all go through the `App` global. When running tests they operate
--- on fake screen, keyboard and so on. Once all tests pass, the App global
--- will hook into the real screen, keyboard and so on.
---
--- Scroll below this function for more details.
+-- but we need to override it to:
+--   * run all tests (functions starting with 'test_') on startup, and
+--   * save some state that makes it possible to switch between the main app
+--     and a source editor, while giving each the illusion of complete
+--     control.
 function love.run()
   App.snapshot_love()
   -- Tests always run at the start.
@@ -44,81 +40,14 @@ function love.run()
   end
 end
 
--- I've been building LÖVE apps for a couple of months now, and often feel
--- stupid. I seem to have a smaller short-term memory than most people, and
--- LÖVE apps quickly grow to a point where I need longer and longer chunks of
--- focused time to make changes to them. The reason: I don't have a way to
--- write tests yet. So before I can change any piece of an app, I have to
--- bring into my head all the ways it can break. This isn't the case on other
--- platforms, where I can be productive in 5- or 10-minute increments. Because
--- I have tests.
+-- The rest of this file wraps around various LÖVE primitives to support
+-- automated tests. Often tests will run with a fake version of a primitive
+-- that redirects to the real love.* version once we're done with tests.
 --
--- Most test harnesses punt on testing I/O, and conventional wisdom is to test
--- business logic, not I/O. However, any non-trivial app does non-trivial I/O
--- that benefits from tests. And tests aren't very useful if it isn't obvious
--- after reading them what the intent is. Including the I/O allows us to write
--- tests that mimic how people use our program.
---
--- There's a major open research problem in testing I/O: how to write tests
--- for graphics. Pixel-by-pixel assertions get too verbose, and they're often
--- brittle because you don't care about the precise state of every last pixel.
--- Except when you do. Pixels are usually -- but not always -- the trees
--- rather than the forest.
---
--- I'm not in the business of doing research, so I'm going to shave off a
--- small subset of the problem for myself here: how to write tests about text
--- (ignoring font, color, etc.) on a graphic screen.
---
--- For example, here's how you may write a test of a simple text paginator
--- like `less`:
---   function test_paginator()
---     -- initialize environment
---     App.filesystem['/tmp/foo'] = filename([[
---       >abc
---       >def
---       >ghi
---       >jkl
---     ]])
---     App.args = {'/tmp/foo'}
---     -- define a screen with room for 2 lines of text
---     App.screen.init{
---       width=100
---       height=30
---     }
---     App.font.init{
---       height=15
---     }
---     -- check that screen shows next 2 lines of text after hitting pagedown
---     App.run_after_keychord('pagedown')
---     App.screen.check(0, 'ghi')
---     App.screen.check(15, 'jkl')
---   end
---
--- All functions starting with 'test_' (no modules) will run before the app
--- runs "for real". Each such test is a fake run of our entire program. It can
--- set as much of the environment as it wants, then run the app. Here we've
--- got a 30px screen and a 15px font, so the screen has room for 2 lines. The
--- file we're viewing has 4 lines. We assert that hitting the 'pagedown' key
--- shows the third and fourth lines.
---
--- Programs can still perform graphics, and all graphics will work in the real
--- program. We can't yet write tests for graphics, though. Those pixels are
--- basically always blank in tests. Really, there isn't even any
--- representation for them. All our fake screens know about is lines of text,
--- and what (x,y) coordinates they start at. There's some rudimentary support
--- for concatenating all blobs of text that start at the same 'y' coordinate,
--- but beware: text at y=100 is separate and non-overlapping with text at
--- y=101. You have to use the test harness within these limitations for your
--- tests to faithfully model the real world.
---
--- One drawback of this approach: the y coordinate used depends on font size,
--- which feels brittle.
---
--- In the fullness of time App will support all side-effecting primitives
--- exposed by LÖVE, but so far it supports just a rudimentary set of things I
--- happen to have needed so far.
+-- Not everything is so wrapped yet. Sometimes you still have to use love.*
+-- primitives directly.
 
-App = {screen={}}
+App = {}
 
 -- save/restore various framework globals we care about -- only on very first load
 function App.snapshot_love()
@@ -144,6 +73,26 @@ function App.run_tests_and_initialize()
   App.initialize(love.arg.parseGameArguments(arg), arg)
 end
 
+function App.run_tests()
+  local sorted_names = {}
+  for name,binding in pairs(_G) do
+    if name:find('test_') == 1 then
+      table.insert(sorted_names, name)
+    end
+  end
+  table.sort(sorted_names)
+  for _,name in ipairs(sorted_names) do
+    App.initialize_for_test()
+--?     print('=== '..name)
+--?     _G[name]()
+    xpcall(_G[name], function(err) prepend_debug_info_to_test_failure(name, err) end)
+  end
+  -- clean up all test methods
+  for _,name in ipairs(sorted_names) do
+    _G[name] = nil
+  end
+end
+
 function App.initialize_for_test()
   App.screen.init{width=100, height=50}
   App.screen.contents = {}  -- clear screen
@@ -153,12 +102,19 @@ function App.initialize_for_test()
   App.initialize_globals()
 end
 
+-- App.screen.resize and App.screen.move seem like better names than
+-- love.window.setMode and love.window.setPosition respectively. They'll
+-- be side-effect-free during tests, and they'll save their results in
+-- attributes of App.screen for easy access.
+
+App.screen={}
+
+-- Use App.screen.init in tests to initialize the fake screen.
 function App.screen.init(dims)
   App.screen.width = dims.width
   App.screen.height = dims.height
 end
 
--- operations on the LÖVE window within the monitor/display
 function App.screen.resize(width, height, flags)
   App.screen.width = width
   App.screen.height = height
@@ -179,6 +135,12 @@ function App.screen.position()
   return App.screen.x, App.screen.y, App.screen.displayindex
 end
 
+-- If you use App.screen.print instead of love.graphics.print,
+-- tests will be able to check what was printed using App.screen.check below.
+--
+-- One drawback of this approach: the y coordinate used depends on font size,
+-- which feels brittle.
+
 function App.screen.print(msg, x,y)
   local screen_row = 'y'..tostring(y)
 --?   print('drawing "'..msg..'" at y '..tostring(y))
@@ -194,13 +156,22 @@ function App.screen.print(msg, x,y)
   end
 end
 
-function App.color(color)
-  love.graphics.setColor(color.r, color.g, color.b, color.a)
+function App.screen.check(y, expected_contents, msg)
+--?   print('checking for "'..expected_contents..'" at y '..tostring(y))
+  local screen_row = 'y'..tostring(y)
+  local contents = ''
+  if App.screen.contents[screen_row] == nil then
+    error('no text at y '..tostring(y))
+  end
+  for i,s in ipairs(App.screen.contents[screen_row]) do
+    contents = contents..s
+  end
+  check_eq(contents, expected_contents, msg)
 end
 
-function colortable(app_color)
-  return {app_color.r, app_color.g, app_color.b, app_color.a}
-end
+-- If you access the time using App.getTime instead of love.timer.getTime,
+-- tests will be able to move the time back and forwards as needed using
+-- App.wait_fake_time below.
 
 App.time = 1
 function App.getTime()
@@ -214,6 +185,11 @@ function App.width(text)
   return love.graphics.getFont():getWidth(text)
 end
 
+-- If you access the clipboard using App.getClipboardText and
+-- App.setClipboardText instead of love.system.getClipboardText and
+-- love.system.setClipboardText respectively, tests will be able to manipulate
+-- the clipboard by reading/writing App.clipboard.
+
 App.clipboard = ''
 function App.getClipboardText()
   return App.clipboard
@@ -222,28 +198,34 @@ function App.setClipboardText(s)
   App.clipboard = s
 end
 
+-- In tests I mostly send chords all at once to the keyboard handlers.
+-- However, you'll occasionally need to check if a key is down outside a handler.
+-- If you use App.key_down instead of love.keyboard.isDown, tests will be able to
+-- simulate keypresses using App.fake_key_press and App.fake_key_release
+-- below. This isn't very realistic, though, and it's up to tests to
+-- orchestrate key presses that correspond to the handlers they invoke.
+
 App.fake_keys_pressed = {}
+function App.key_down(key)
+  return App.fake_keys_pressed[key]
+end
+
 function App.fake_key_press(key)
   App.fake_keys_pressed[key] = true
 end
 function App.fake_key_release(key)
   App.fake_keys_pressed[key] = nil
 end
-function App.key_down(key)
-  return App.fake_keys_pressed[key]
-end
+
+-- Tests mostly will invoke mouse handlers directly. However, you'll
+-- occasionally need to check if a mouse button is down outside a handler.
+-- If you use App.mouse_down instead of love.mouse.isDown, tests will be able to
+-- simulate mouse clicks using App.fake_mouse_press and App.fake_mouse_release
+-- below. This isn't very realistic, though, and it's up to tests to
+-- orchestrate presses that correspond to the handlers they invoke.
 
 App.fake_mouse_state = {x=-1, y=-1}  -- x,y always set
-function App.fake_mouse_press(x,y, mouse_button)
-  App.fake_mouse_state.x = x
-  App.fake_mouse_state.y = y
-  App.fake_mouse_state[mouse_button] = true
-end
-function App.fake_mouse_release(x,y, mouse_button)
-  App.fake_mouse_state.x = x
-  App.fake_mouse_state.y = y
-  App.fake_mouse_state[mouse_button] = nil
-end
+
 function App.mouse_move(x,y)
   App.fake_mouse_state.x = x
   App.fake_mouse_state.y = y
@@ -257,6 +239,60 @@ end
 function App.mouse_y()
   return App.fake_mouse_state.y
 end
+
+function App.fake_mouse_press(x,y, mouse_button)
+  App.fake_mouse_state.x = x
+  App.fake_mouse_state.y = y
+  App.fake_mouse_state[mouse_button] = true
+end
+function App.fake_mouse_release(x,y, mouse_button)
+  App.fake_mouse_state.x = x
+  App.fake_mouse_state.y = y
+  App.fake_mouse_state[mouse_button] = nil
+end
+
+-- If you use App.open_for_reading and App.open_for_writing instead of other
+-- various Lua and LÖVE helpers, tests will be able to check the results of
+-- file operations inside the App.filesystem table.
+
+function App.open_for_writing(filename)
+  App.filesystem[filename] = ''
+  if Current_app == nil or Current_app == 'run' then
+    return {
+      write = function(self, ...)
+                local args = {...}
+                for i,s in ipairs(args) do
+                  App.filesystem[filename] = App.filesystem[filename]..s
+                end
+              end,
+      close = function(self)
+              end,
+    }
+  elseif Current_app == 'source' then
+    return {
+      write = function(self, s)
+                App.filesystem[filename] = App.filesystem[filename]..s
+              end,
+      close = function(self)
+              end,
+    }
+  end
+end
+
+function App.open_for_reading(filename)
+  if App.filesystem[filename] then
+    return {
+      lines = function(self)
+                return App.filesystem[filename]:gmatch('[^\n]+')
+              end,
+      close = function(self)
+              end,
+    }
+  end
+end
+
+-- Some helpers to trigger an event and then refresh the screen. Akin to one
+-- iteration of the event loop.
 
 -- all textinput events are also keypresses
 -- TODO: handle chords of multiple keys
@@ -300,74 +336,14 @@ function App.run_after_mouse_release(x,y, mouse_button)
   App.draw()
 end
 
-function App.screen.check(y, expected_contents, msg)
---?   print('checking for "'..expected_contents..'" at y '..tostring(y))
-  local screen_row = 'y'..tostring(y)
-  local contents = ''
-  if App.screen.contents[screen_row] == nil then
-    error('no text at y '..tostring(y))
-  end
-  for i,s in ipairs(App.screen.contents[screen_row]) do
-    contents = contents..s
-  end
-  check_eq(contents, expected_contents, msg)
+-- miscellaneous internal helpers
+
+function App.color(color)
+  love.graphics.setColor(color.r, color.g, color.b, color.a)
 end
 
--- fake files
-function App.open_for_writing(filename)
-  App.filesystem[filename] = ''
-  if Current_app == nil or Current_app == 'run' then
-    return {
-      write = function(self, ...)
-                local args = {...}
-                for i,s in ipairs(args) do
-                  App.filesystem[filename] = App.filesystem[filename]..s
-                end
-              end,
-      close = function(self)
-              end,
-    }
-  elseif Current_app == 'source' then
-    return {
-      write = function(self, s)
-                App.filesystem[filename] = App.filesystem[filename]..s
-              end,
-      close = function(self)
-              end,
-    }
-  end
-end
-
-function App.open_for_reading(filename)
-  if App.filesystem[filename] then
-    return {
-      lines = function(self)
-                return App.filesystem[filename]:gmatch('[^\n]+')
-              end,
-      close = function(self)
-              end,
-    }
-  end
-end
-
-function App.run_tests()
-  local sorted_names = {}
-  for name,binding in pairs(_G) do
-    if name:find('test_') == 1 then
-      table.insert(sorted_names, name)
-    end
-  end
-  table.sort(sorted_names)
-  for _,name in ipairs(sorted_names) do
-    App.initialize_for_test()
---?     print('=== '..name)
---?     _G[name]()
-    xpcall(_G[name], function(err) prepend_debug_info_to_test_failure(name, err) end)
-  end
-  -- clean up all test methods
-  for _,name in ipairs(sorted_names) do
-    _G[name] = nil
-  end
+function colortable(app_color)
+  return {app_color.r, app_color.g, app_color.b, app_color.a}
 end
 
 -- prepend file/line/test
