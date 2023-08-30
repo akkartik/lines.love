@@ -448,13 +448,13 @@ function edit.keychord_press(State, chord, key)
   elseif chord == 'C-c' then
     local s = Text.selection(State)
     if s then
-      App.setClipboardText(s)
+      App.set_clipboard(s)
     end
   elseif chord == 'C-x' then
     for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end  -- just in case we scroll
     local s = Text.cut_selection(State, State.left, State.right)
     if s then
-      App.setClipboardText(s)
+      App.set_clipboard(s)
     end
     schedule_save(State)
   elseif chord == 'C-v' then
@@ -463,7 +463,7 @@ function edit.keychord_press(State, chord, key)
     -- and sometimes scroll when we didn't quite need to.
     local before_line = State.cursor1.line
     local before = snapshot(State, before_line)
-    local clipboard_data = App.getClipboardText()
+    local clipboard_data = App.get_clipboard()
     for _,code in utf8.codes(clipboard_data) do
       local c = utf8.char(code)
       if c == '\n' then

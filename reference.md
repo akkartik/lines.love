@@ -379,15 +379,15 @@ and [the Lua manual](https://www.lua.org/manual/5.1/manual.html#5.7).
 
 ### desiderata
 
-* `App.getTime()` -- returns the number of seconds elapsed since some
+* `App.get_time()` -- returns the number of seconds elapsed since some
   unspecified start time.
   (Based on [LÖVE](https://love2d.org/wiki/love.timer.getTime).)
 
-* `App.getClipboardText()` -- returns a string with the current clipboard
+* `App.get_clipboard()` -- returns a string with the current clipboard
   contents.
   (Based on [LÖVE](https://love2d.org/wiki/love.system.getClipboardText).)
 
-* `App.setClipboardText(text)` -- stores the string `text` in the clipboard.
+* `App.set_clipboard(text)` -- stores the string `text` in the clipboard.
   (Based on [LÖVE](https://love2d.org/wiki/love.system.setClipboardText).)
 
 * `array.find(arr, elem)` -- scan table `arr` for `elem` assuming it's

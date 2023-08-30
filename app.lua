@@ -169,12 +169,12 @@ function App.screen.check(y, expected_contents, msg)
   check_eq(contents, expected_contents, msg)
 end
 
--- If you access the time using App.getTime instead of love.timer.getTime,
+-- If you access the time using App.get_time instead of love.timer.getTime,
 -- tests will be able to move the time back and forwards as needed using
 -- App.wait_fake_time below.
 
 App.time = 1
-function App.getTime()
+function App.get_time()
   return App.time
 end
 function App.wait_fake_time(t)
@@ -185,16 +185,16 @@ function App.width(text)
   return love.graphics.getFont():getWidth(text)
 end
 
--- If you access the clipboard using App.getClipboardText and
--- App.setClipboardText instead of love.system.getClipboardText and
--- love.system.setClipboardText respectively, tests will be able to manipulate
--- the clipboard by reading/writing App.clipboard.
+-- If you access the clipboard using App.get_clipboard and App.set_clipboard
+-- instead of love.system.getClipboardText and love.system.setClipboardText
+-- respectively, tests will be able to manipulate the clipboard by
+-- reading/writing App.clipboard.
 
 App.clipboard = ''
-function App.getClipboardText()
+function App.get_clipboard()
   return App.clipboard
 end
-function App.setClipboardText(s)
+function App.set_clipboard(s)
   App.clipboard = s
 end
 
@@ -417,9 +417,9 @@ function App.disable_tests()
           end
         end
   end
-  App.getTime = love.timer.getTime
-  App.getClipboardText = love.system.getClipboardText
-  App.setClipboardText = love.system.setClipboardText
+  App.get_time = love.timer.getTime
+  App.get_clipboard = love.system.getClipboardText
+  App.set_clipboard = love.system.setClipboardText
   App.key_down = love.keyboard.isDown
   App.mouse_move = love.mouse.setPosition
   App.mouse_down = love.mouse.isDown
