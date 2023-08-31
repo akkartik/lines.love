@@ -37,7 +37,7 @@ end
 
 function save_to_disk(State)
   local outfile = App.open_for_writing(State.filename)
-  if outfile == nil then
+  if not outfile then
     error('failed to write to "'..State.filename..'"')
   end
   for _,line in ipairs(State.lines) do
