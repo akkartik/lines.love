@@ -10,8 +10,9 @@ function file_exists(filename)
   end
 end
 
+-- the source editor supports only files in the save dir, not even subdirectories
 function load_from_disk(State)
-  local infile = App.open_for_reading(State.filename)
+  local infile = App.open_for_reading(App.save_dir..State.filename)
   State.lines = load_from_file(infile)
   if infile then infile:close() end
 end
@@ -37,7 +38,7 @@ function load_from_file(infile)
 end
 
 function save_to_disk(State)
-  local outfile = App.open_for_writing(State.filename)
+  local outfile = App.open_for_writing(App.save_dir..State.filename)
   if outfile == nil then
     error('failed to write to "'..State.filename..'"')
   end

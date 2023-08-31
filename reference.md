@@ -358,16 +358,12 @@ The following facilities help set these things up:
 * `json.decode(obj)` -- turns a JSON string into a Lua object.
   (From [json.lua](https://github.com/rxi/json.lua).)
 
-* `love.filesystem.getDirectoryItems(dir)` -- returns an unsorted array of the
-  files and directories available under `dir`. `dir` must be relative to
-  [LÖVE's save directory](https://love2d.org/wiki/love.filesystem.getSaveDirectory).
-  There is no easy, portable way in Lua/LÖVE to list directories outside the
-  save dir.
+* `App.files(dir)` -- returns an unsorted array of the files and directories
+  available under `dir`.
   (From [LÖVE](https://love2d.org/wiki/love.filesystem.getDirectoryItems).]
 
 * `love.filesystem.getInfo(filename)` -- returns some information about
   `filename`, particularly whether it exists (non-`nil` return value) or not.
-  `filename` must be relative to [LÖVE's save directory](https://love2d.org/wiki/love.filesystem.getSaveDirectory).
   (From [LÖVE](https://love2d.org/wiki/love.filesystem.getInfo).]
 
 * `os.remove(filename)` -- removes a file or empty directory. Definitely make

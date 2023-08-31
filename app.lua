@@ -97,6 +97,9 @@ function App.initialize_for_test()
   App.screen.init{width=100, height=50}
   App.screen.contents = {}  -- clear screen
   App.filesystem = {}
+  App.source_dir = ''
+  App.current_dir = ''
+  App.save_dir = ''
   App.fake_keys_pressed = {}
   App.fake_mouse_state = {x=-1, y=-1}
   App.initialize_globals()
@@ -257,26 +260,13 @@ end
 
 function App.open_for_writing(filename)
   App.filesystem[filename] = ''
-  if Current_app == nil or Current_app == 'run' then
-    return {
-      write = function(self, ...)
-                local args = {...}
-                for i,s in ipairs(args) do
-                  App.filesystem[filename] = App.filesystem[filename]..s
-                end
-              end,
-      close = function(self)
-              end,
-    }
-  elseif Current_app == 'source' then
-    return {
-      write = function(self, s)
-                App.filesystem[filename] = App.filesystem[filename]..s
-              end,
-      close = function(self)
-              end,
-    }
-  end
+  return {
+    write = function(self, s)
+              App.filesystem[filename] = App.filesystem[filename]..s
+            end,
+    close = function(self)
+            end,
+  }
 end
 
 function App.open_for_reading(filename)
@@ -356,6 +346,8 @@ function prepend_debug_info_to_test_failure(test_name, err)
   table.insert(Test_errors, full_error)
 end
 
+nativefs = require 'nativefs'
+
 -- call this once all tests are run
 -- can't run any tests after this
 function App.disable_tests()
@@ -391,32 +383,30 @@ function App.disable_tests()
   App.screen.move = love.window.setPosition
   App.screen.position = love.window.getPosition
   App.screen.print = love.graphics.print
-  if Current_app == nil or Current_app == 'run' then
-    App.open_for_reading = function(filename) return io.open(filename, 'r') end
-    App.open_for_writing = function(filename) return io.open(filename, 'w') end
-  elseif Current_app == 'source' then
-    -- HACK: source editor requires a couple of different foundational definitions
-    App.open_for_reading =
-        function(filename)
-          local result = love.filesystem.newFile(filename)
-          local ok, err = result:open('r')
-          if ok then
-            return result
-          else
-            return ok, err
-          end
+  App.open_for_reading =
+      function(filename)
+        local result = nativefs.newFile(filename)
+        local ok, err = result:open('r')
+        if ok then
+          return result
+        else
+          return ok, err
         end
-    App.open_for_writing =
-        function(filename)
-          local result = love.filesystem.newFile(filename)
-          local ok, err = result:open('w')
-          if ok then
-            return result
-          else
-            return ok, err
-          end
+      end
+  App.open_for_writing =
+      function(filename)
+        local result = nativefs.newFile(filename)
+        local ok, err = result:open('w')
+        if ok then
+          return result
+        else
+          return ok, err
         end
-  end
+      end
+  App.files = nativefs.getDirectoryItems
+  App.source_dir = love.filesystem.getSource()..'/'
+  App.current_dir = nativefs.getWorkingDirectory()..'/'
+  App.save_dir = love.filesystem.getSaveDirectory()..'/'
   App.get_time = love.timer.getTime
   App.get_clipboard = love.system.getClipboardText
   App.set_clipboard = love.system.setClipboardText
