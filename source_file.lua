@@ -1,7 +1,10 @@
 -- primitives for saving to file and loading from file
 
 function file_exists(filename)
-  local infile = App.open_for_reading(filename)
+  local infile = App.open_for_reading(App.save_dir..filename)
+  if not infile then
+    infile = App.open_for_reading(App.source_dir..filename)
+  end
   if infile then
     infile:close()
     return true
@@ -10,9 +13,12 @@ function file_exists(filename)
   end
 end
 
--- the source editor supports only files in the save dir, not even subdirectories
+-- the source editor supports only files in the save dir backed by the source dir
 function load_from_disk(State)
   local infile = App.open_for_reading(App.save_dir..State.filename)
+  if not infile then
+    infile = App.open_for_reading(App.source_dir..State.filename)
+  end
   State.lines = load_from_file(infile)
   if infile then infile:close() end
 end
