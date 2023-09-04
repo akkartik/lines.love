@@ -348,13 +348,29 @@ end
 
 nativefs = require 'nativefs'
 
+local Keys_down = {}
+
 -- call this once all tests are run
 -- can't run any tests after this
 function App.disable_tests()
   -- have LÖVE delegate all handlers to App if they exist
   for name in pairs(love.handlers) do
     if App[name] then
-      love.handlers[name] = App[name]
+      -- love.keyboard.isDown doesn't work on Android, so emulate it using
+      -- keypressed and keyreleased events
+      if name == 'keypressed' then
+        love.handlers[name] = function(key, scancode, isrepeat)
+                                Keys_down[key] = true
+                                return App.keypressed(key, scancode, isrepeat)
+                              end
+      elseif name == 'keyreleased' then
+        love.handlers[name] = function(key, scancode)
+                                Keys_down[key] = nil
+                                return App.keyreleased(key, scancode)
+                              end
+      else
+        love.handlers[name] = App[name]
+      end
     end
   end
 
@@ -410,7 +426,7 @@ function App.disable_tests()
   App.get_time = love.timer.getTime
   App.get_clipboard = love.system.getClipboardText
   App.set_clipboard = love.system.setClipboardText
-  App.key_down = love.keyboard.isDown
+  App.key_down = function(key) return Keys_down[key] end
   App.mouse_move = love.mouse.setPosition
   App.mouse_down = love.mouse.isDown
   App.mouse_x = love.mouse.getX
