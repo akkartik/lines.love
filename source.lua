@@ -252,6 +252,13 @@ function source.draw()
     log_browser.draw(Log_browser_state, --[[hide_cursor]] Focus ~= 'log_browser')
   end
   source.draw_menu_bar()
+  if Error_message then
+    local height = math.min(20*Editor_state.line_height, App.screen.height*0.2)
+    App.color{r=0.8,g=0,b=0}
+    love.graphics.rectangle('fill', 150, App.screen.height - height-10, App.screen.width, height+10)
+    App.color{r=0,g=0,b=0}
+    love.graphics.print(Error_message, 150+10, App.screen.height - height)
+  end
 end
 
 function source.update(dt)

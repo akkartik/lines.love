@@ -183,10 +183,12 @@ function App.keychord_press(chord, key)
       Settings.source = source_settings
       if run.quit then run.quit() end
       Current_app = 'source'
+      -- preserve any Error_message when going from run to source
     elseif Current_app == 'source' then
       Settings.source = source.settings()
       if source.quit then source.quit() end
       Current_app = 'run'
+      Error_message = nil
     else
       assert(false, 'unknown app "'..Current_app..'"')
     end
