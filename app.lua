@@ -290,10 +290,21 @@ function App.open_for_reading(filename)
       lines = function(self)
                 return App.filesystem[filename]:gmatch('[^\n]+')
               end,
+      read = function(self)
+               return App.filesystem[filename]
+             end,
       close = function(self)
               end,
     }
   end
+end
+
+function App.mkdir(dirname)
+  -- nothing in test mode
+end
+
+function App.remove(filename)
+  App.filesystem[filename] = nil
 end
 
 -- Some helpers to trigger an event and then refresh the screen. Akin to one
@@ -435,6 +446,8 @@ function App.disable_tests()
         end
       end
   App.files = nativefs.getDirectoryItems
+  App.mkdir = nativefs.createDirectory
+  App.remove = nativefs.remove
   App.source_dir = love.filesystem.getSource()..'/'
   App.current_dir = nativefs.getWorkingDirectory()..'/'
   App.save_dir = love.filesystem.getSaveDirectory()..'/'
