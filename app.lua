@@ -444,7 +444,7 @@ function App.disable_tests()
           return ok, err
         end
       end
-  App.read =
+  App.read_file =
       function(path)
         if not is_absolute_path(path) then
           return --[[status]] false, 'Please use an unambiguous absolute path.'
@@ -467,7 +467,7 @@ function App.disable_tests()
           return ok, err
         end
       end
-  App.write =
+  App.write_file =
       function(filename, contents)
         if not is_absolute_path(path) then
           return --[[status]] false, 'Please use an unambiguous absolute path.'
@@ -478,6 +478,7 @@ function App.disable_tests()
         end
         f:write(contents)
         f:close()
+        return --[[status]] true
       end
   App.files = nativefs.getDirectoryItems
   App.mkdir = nativefs.createDirectory
