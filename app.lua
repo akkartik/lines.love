@@ -273,17 +273,6 @@ end
 -- various Lua and LÖVE helpers, tests will be able to check the results of
 -- file operations inside the App.filesystem table.
 
-function App.open_for_writing(filename)
-  App.filesystem[filename] = ''
-  return {
-    write = function(self, s)
-              App.filesystem[filename] = App.filesystem[filename]..s
-            end,
-    close = function(self)
-            end,
-  }
-end
-
 function App.open_for_reading(filename)
   if App.filesystem[filename] then
     return {
@@ -297,6 +286,17 @@ function App.open_for_reading(filename)
               end,
     }
   end
+end
+
+function App.open_for_writing(filename)
+  App.filesystem[filename] = ''
+  return {
+    write = function(self, s)
+              App.filesystem[filename] = App.filesystem[filename]..s
+            end,
+    close = function(self)
+            end,
+  }
 end
 
 function App.mkdir(dirname)
