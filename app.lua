@@ -468,11 +468,11 @@ function App.disable_tests()
         end
       end
   App.write_file =
-      function(filename, contents)
+      function(path, contents)
         if not is_absolute_path(path) then
           return --[[status]] false, 'Please use an unambiguous absolute path.'
         end
-        local f, err = App.open_for_writing(filename)
+        local f, err = App.open_for_writing(path)
         if err then
           return --[[status]] false, err
         end
