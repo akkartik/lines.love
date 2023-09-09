@@ -288,6 +288,10 @@ function App.open_for_reading(filename)
   end
 end
 
+function App.read_file(filename)
+  return App.filesystem[filename]
+end
+
 function App.open_for_writing(filename)
   App.filesystem[filename] = ''
   return {
@@ -297,6 +301,11 @@ function App.open_for_writing(filename)
     close = function(self)
             end,
   }
+end
+
+function App.write_file(filename, contents)
+  App.filesystem[filename] = contents
+  return --[[status]] true
 end
 
 function App.mkdir(dirname)
@@ -435,6 +444,19 @@ function App.disable_tests()
           return ok, err
         end
       end
+  App.read =
+      function(path)
+        if not is_absolute_path(path) then
+          return --[[status]] false, 'Please use an unambiguous absolute path.'
+        end
+        local f, err = App.open_for_reading(path)
+        if err then
+          return --[[status]] false, err
+        end
+        local contents = f:read()
+        f:close()
+        return contents
+      end
   App.open_for_writing =
       function(filename)
         local result = nativefs.newFile(filename)
@@ -444,6 +466,18 @@ function App.disable_tests()
         else
           return ok, err
         end
+      end
+  App.write =
+      function(filename, contents)
+        if not is_absolute_path(path) then
+          return --[[status]] false, 'Please use an unambiguous absolute path.'
+        end
+        local f, err = App.open_for_writing(filename)
+        if err then
+          return --[[status]] false, err
+        end
+        f:write(contents)
+        f:close()
       end
   App.files = nativefs.getDirectoryItems
   App.mkdir = nativefs.createDirectory
