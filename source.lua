@@ -1,10 +1,3 @@
--- Source editor that lets me edit the app from within. However, it's a sharp
--- tool. I find it convenient, but I also often end up in a bad state that
--- requires dropping down to external tools (editor, file manager) to fix.
---
--- Downstream forks provide a better, "freewheeling" experience for editing
--- apps live. The source editor provides a half-baked experience for editing
--- some of the primitives used by true freewheeling apps.
 source = {}
 
 Editor_state = {}
