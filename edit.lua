@@ -113,7 +113,7 @@ function edit.check_locs(State)
       or not edit.cursor_on_text(State)
       or not Text.le1(State.screen_top1, State.cursor1) then
     State.screen_top1 = {line=1, pos=1}
-    edit.put_cursor_on_first_text_line(State)
+    edit.put_cursor_on_next_text_line(State)
   end
 end
 
@@ -139,12 +139,16 @@ function edit.cursor_on_text(State)
       and State.lines[State.cursor1.line].mode == 'text'
 end
 
-function edit.put_cursor_on_first_text_line(State)
-  for i,line in ipairs(State.lines) do
-    if line.mode == 'text' then
-      State.cursor1 = {line=i, pos=1}
-      break
-    end
+function edit.put_cursor_on_next_text_line(State)
+  while true do
+  if State.cursor1.line >= #State.lines then
+    break
+  end
+  if State.lines[State.cursor1.line].mode == 'text' then
+    break
+  end
+  State.cursor1.line = State.cursor1.line+1
+  State.cursor1.pos = 1
   end
 end
 
