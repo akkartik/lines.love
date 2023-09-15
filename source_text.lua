@@ -12,6 +12,8 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
   local final_screen_line_starting_pos = startpos  -- track value to return
   Text.populate_screen_line_starting_pos(State, line_index)
   Text.populate_link_offsets(State, line_index)
+  App.color(Line_number_color)
+  love.graphics.print(line_index, State.left-Line_number_width*App.width('m')+10,y)
   initialize_color()
   assert(#line_cache.screen_line_starting_pos >= 1)
   for i=1,#line_cache.screen_line_starting_pos do

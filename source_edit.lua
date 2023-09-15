@@ -7,6 +7,7 @@ Current_stroke_color = {r=0.7, g=0.7, b=0.7}  -- in process of being drawn
 Current_name_background_color = {r=1, g=0, b=0, a=0.1}  -- name currently being edited
 Focus_stroke_color = {r=1, g=0, b=0}  -- what mouse is hovering over
 Highlight_color = {r=0.7, g=0.7, b=0.9}  -- selected text
+Line_number_color = {r=0.6, g=0.6, b=0.6}
 Icon_color = {r=0.7, g=0.7, b=0.7}  -- color of current mode icon in drawings
 Help_color = {r=0, g=0.5, b=0}
 Help_background_color = {r=0, g=0.5, b=0, a=0.1}
@@ -168,7 +169,7 @@ function edit.draw(State, hide_cursor)
       end
       if line.data == '' then
         -- button to insert new drawing
-        button(State, 'draw', {x=State.left-Margin_left+4, y=y+4, w=12,h=12, color={1,1,0},
+        button(State, 'draw', {x=4, y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
