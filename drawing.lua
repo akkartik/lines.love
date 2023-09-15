@@ -249,6 +249,12 @@ function Drawing.update(State)
   if State.lines.current_drawing == nil then return end
   local drawing = State.lines.current_drawing
   local line_cache = State.line_cache[State.lines.current_drawing_index]
+  if line_cache.starty == nil then
+    -- some event cleared starty just this frame
+    -- draw in this frame will soon set starty
+    -- just skip this frame
+    return
+  end
   assert(drawing.mode == 'drawing')
   local pmx, pmy = App.mouse_x(), App.mouse_y()
   local mx = Drawing.coord(pmx-State.left, State.width)
