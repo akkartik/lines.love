@@ -35,7 +35,6 @@ function log_browser.parse(State)
       if rest then
         line.data = rest
       end
-      line.filename = guess_source(line.filename)
       line.line_number = tonumber(line.line_number)
       if line.data:sub(1,1) == '{' then
         local data = json.decode(line.data)
@@ -73,15 +72,6 @@ end
 
 function table.shallowcopy(x)
   return {unpack(x)}
-end
-
-function guess_source(filename)
-  local possible_source = filename:gsub('%.lua$', '%.splua')
-  if file_exists(possible_source) then
-    return possible_source
-  else
-    return filename
-  end
 end
 
 function log_browser.draw(State, hide_cursor)
