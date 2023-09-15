@@ -191,8 +191,9 @@ function Drawing.draw_pending_shape(drawing, top, left,right)
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
       return
     end
+    local r = round(geom.dist(center.x, center.y, mx, my))
     local cx,cy = px(center.x), py(center.y)
-    love.graphics.circle('line', cx,cy, geom.dist(cx,cy, App.mouse_x(),App.mouse_y()))
+    love.graphics.circle('line', cx,cy, Drawing.pixels(r, width))
   elseif shape.mode == 'arc' then
     local center = drawing.points[shape.center]
     if mx < 0 or mx >= 256 or my < 0 or my >= drawing.h then
