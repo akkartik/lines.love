@@ -333,11 +333,13 @@ end
 function edit.mouse_wheel_move(State, dx,dy)
   if dy > 0 then
     State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+    edit.put_cursor_on_next_text_line(State)
     for i=1,math.floor(dy) do
       Text.up(State)
     end
   elseif dy < 0 then
     State.cursor1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
+    edit.put_cursor_on_next_text_line(State)
     for i=1,math.floor(-dy) do
       Text.down(State)
     end
