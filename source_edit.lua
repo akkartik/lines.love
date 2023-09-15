@@ -89,7 +89,7 @@ function edit.initialize_state(top, left, right, font_height, line_height)  -- c
     line_height = line_height,
 
     top = top,
-    left = math.floor(left),
+    left = math.floor(left),  -- left margin for text; line numbers go to the left of this
     right = math.floor(right),
     width = right-left,
 
@@ -144,7 +144,7 @@ function edit.put_cursor_on_next_text_line(State)
   end
 end
 
-function edit.draw(State, hide_cursor)
+function edit.draw(State, hide_cursor, show_line_numbers)
   State.button_handlers = {}
   App.color(Text_color)
   if #State.lines ~= #State.line_cache then
@@ -173,7 +173,11 @@ function edit.draw(State, hide_cursor)
       end
       if line.data == '' then
         -- button to insert new drawing
-        button(State, 'draw', {x=4, y=y+4, w=12,h=12, color={1,1,0},
+        local buttonx = State.left-Margin_left+4
+        if show_line_numbers then
+          buttonx = 4  -- HACK: position draw buttons at a fixed x on screen
+        end
+        button(State, 'draw', {x=buttonx, y=y+4, w=12,h=12, color={1,1,0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
@@ -187,7 +191,7 @@ function edit.draw(State, hide_cursor)
                      end,
         })
       end
-      y, screen_bottom1.pos = Text.draw(State, line_index, y, startpos, hide_cursor)
+      y, screen_bottom1.pos = Text.draw(State, line_index, y, startpos, hide_cursor, show_line_numbers)
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top

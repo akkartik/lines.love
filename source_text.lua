@@ -3,7 +3,7 @@ Text = {}
 
 -- draw a line starting from startpos to screen at y between State.left and State.right
 -- return y for the next line, and position of start of final screen line drawn
-function Text.draw(State, line_index, y, startpos, hide_cursor)
+function Text.draw(State, line_index, y, startpos, hide_cursor, show_line_numbers)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
   line_cache.starty = y
@@ -12,8 +12,10 @@ function Text.draw(State, line_index, y, startpos, hide_cursor)
   local final_screen_line_starting_pos = startpos  -- track value to return
   Text.populate_screen_line_starting_pos(State, line_index)
   Text.populate_link_offsets(State, line_index)
-  App.color(Line_number_color)
-  love.graphics.print(line_index, State.left-Line_number_width*App.width('m')+10,y)
+  if show_line_numbers then
+    App.color(Line_number_color)
+    love.graphics.print(line_index, State.left-Line_number_width*App.width('m')+10,y)
+  end
   initialize_color()
   assert(#line_cache.screen_line_starting_pos >= 1)
   for i=1,#line_cache.screen_line_starting_pos do
