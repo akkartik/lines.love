@@ -74,7 +74,7 @@ function source.initialize()
 
 
   -- keep a few blank lines around: https://merveilles.town/@akkartik/110084833821965708
-  love.window.setTitle('lines.love - source')
+  love.window.setTitle('lines.love - source - '..Editor_state.filename)
 
 
 
