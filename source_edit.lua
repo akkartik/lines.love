@@ -144,14 +144,14 @@ end
 
 function edit.put_cursor_on_next_text_line(State)
   while true do
-  if State.cursor1.line >= #State.lines then
-    break
-  end
-  if State.lines[State.cursor1.line].mode == 'text' then
-    break
-  end
-  State.cursor1.line = State.cursor1.line+1
-  State.cursor1.pos = 1
+    if State.cursor1.line >= #State.lines then
+      break
+    end
+    if State.lines[State.cursor1.line].mode == 'text' then
+      break
+    end
+    State.cursor1.line = State.cursor1.line+1
+    State.cursor1.pos = 1
   end
 end
 
