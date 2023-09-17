@@ -113,6 +113,7 @@ function edit.check_locs(State)
       or not edit.cursor_on_text(State)
       or not Text.le1(State.screen_top1, State.cursor1) then
     State.screen_top1 = {line=1, pos=1}
+    State.cursor1 = {line=1, pos=1}
     edit.put_cursor_on_next_text_line(State)
   end
 end
