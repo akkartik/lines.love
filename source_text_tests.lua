@@ -275,6 +275,7 @@ function test_click_to_left_of_line()
   Editor_state.cursor1 = {line=1, pos=3}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
   -- click to the left of the line
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left-4,Editor_state.top+5, 1)
@@ -294,6 +295,7 @@ function test_click_takes_margins_into_account()
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
   -- click on the other line
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
@@ -312,11 +314,33 @@ function test_click_on_empty_line()
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
   -- click on the empty line
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+5, 1)
   -- cursor moves
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
+  -- selection remains empty
+  check_nil(Editor_state.selection1.line, 'selection is empty to avoid perturbing future edits')
+end
+
+function test_click_below_all_lines()
+  -- display one line
+  App.screen.init{width=50, height=80}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=1}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  Editor_state.screen_bottom1 = {}
+  Editor_state.selection1 = {}
+  -- click below first line
+  edit.draw(Editor_state)
+  edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+50, 1)
+  -- cursor doesn't move
+  check_eq(Editor_state.cursor1.line, 1, 'cursor')
+  -- selection remains empty
+  check_nil(Editor_state.selection1.line, 'selection is empty to avoid perturbing future edits')
 end
 
 function test_draw_text()

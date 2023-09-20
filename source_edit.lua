@@ -295,7 +295,7 @@ function edit.mouse_press(State, x,y, mouse_button)
     end
   end
 
-  -- still here? click is below all screen lines
+  -- still here? mouse press is below all screen lines
   State.old_cursor1 = State.cursor1
   State.old_selection1 = State.selection1
   State.mousepress_shift = App.shift_down()
@@ -317,6 +317,12 @@ function edit.mouse_release(State, x,y, mouse_button)
     end
   else
 --?     print_and_log('edit.mouse_release: no current drawing')
+    if y < State.top then
+      State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+      edit.clean_up_mouse_press(State)
+      return
+    end
+
     for line_index,line in ipairs(State.lines) do
       if line.mode == 'text' then
         if Text.in_line(State, line_index, x,y) then
@@ -326,22 +332,30 @@ function edit.mouse_release(State, x,y, mouse_button)
               pos=Text.to_pos_on_line(State, line_index, x, y),
           }
 --?           print_and_log(('edit.mouse_release: cursor now %d,%d'):format(State.cursor1.line, State.cursor1.pos))
-          if State.mousepress_shift then
-            if State.old_selection1.line == nil then
-              State.selection1 = State.old_cursor1
-            else
-              State.selection1 = State.old_selection1
-            end
-          end
-          State.old_cursor1, State.old_selection1, State.mousepress_shift = nil
-          if eq(State.cursor1, State.selection1) then
-            State.selection1 = {}
-          end
-          break
+          edit.clean_up_mouse_press(State)
+          return
         end
       end
     end
+
+    -- still here? mouse release is below all screen lines
+    State.cursor1.line, State.cursor1.pos = State.screen_bottom1.line, Text.pos_at_end_of_screen_line(State, State.screen_bottom1)
+    edit.clean_up_mouse_press(State)
 --?     print_and_log(('edit.mouse_release: finally selection %s,%s cursor %d,%d'):format(tostring(State.selection1.line), tostring(State.selection1.pos), State.cursor1.line, State.cursor1.pos))
+  end
+end
+
+function edit.clean_up_mouse_press(State)
+  if State.mousepress_shift then
+    if State.old_selection1.line == nil then
+      State.selection1 = State.old_cursor1
+    else
+      State.selection1 = State.old_selection1
+    end
+  end
+  State.old_cursor1, State.old_selection1, State.mousepress_shift = nil
+  if eq(State.cursor1, State.selection1) then
+    State.selection1 = {}
   end
 end
 
