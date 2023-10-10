@@ -8,6 +8,7 @@
 --     and a source editor, while giving each the illusion of complete
 --     control.
 function love.run()
+  App.version_check()
   App.snapshot_love()
   -- Tests always run at the start.
   App.run_tests_and_initialize()

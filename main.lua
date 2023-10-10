@@ -71,6 +71,23 @@ function App.load()
   end
 end
 
+function App.version_check()
+  -- available modes: run, error
+  Error_message = nil
+  Error_count = 0
+  -- we'll reuse error mode on load for an initial version check
+  local supported_versions = {'11.4', '12.0'}  -- put the recommended version first
+  local minor_version
+  Major_version, minor_version = love.getVersion()
+  Version = Major_version..'.'..minor_version
+  if array.find(supported_versions, Version) == nil then
+    Current_app = 'error'
+    Error_message = ("This app doesn't support version %s; please use version %s. Press any key to try it with this version anyway."):format(Version, supported_versions[1])
+    print(Error_message)
+    -- continue initializing everything; hopefully we won't have errors during initialization
+  end
+end
+
 function App.initialize_globals()
   if Current_app == 'run' then
     run.initialize_globals()
@@ -136,7 +153,12 @@ function App.focus(in_focus)
 end
 
 function App.draw()
-  if Current_app == 'run' then
+  if Current_app == 'error' then
+    love.graphics.setColor(0,0,1)
+    love.graphics.rectangle('fill', 0,0, App.screen.width, App.screen.height)
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf(Error_message, 40,40, 600)
+  elseif Current_app == 'run' then
     run.draw()
   elseif Current_app == 'source' then
     source.draw()
@@ -167,6 +189,12 @@ function App.keychord_press(chord, key)
     return
   end
   --
+  if Current_app == 'error' then
+    if chord == 'C-c' then
+      love.system.setClipboardText(Error_message)
+    end
+    return
+  end
   if chord == 'C-e' then
     -- carefully save settings
     if Current_app == 'run' then
@@ -202,6 +230,7 @@ function App.keychord_press(chord, key)
 end
 
 function App.textinput(t)
+  if Current_app == 'error' then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -217,6 +246,7 @@ function App.textinput(t)
 end
 
 function App.keyreleased(key, scancode)
+  if Current_app == 'error' then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -232,6 +262,7 @@ function App.keyreleased(key, scancode)
 end
 
 function App.mousepressed(x,y, mouse_button)
+  if Current_app == 'error' then return end
 --?   print('mouse press', x,y)
   if Current_app == 'run' then
     if run.mouse_press then run.mouse_press(x,y, mouse_button) end
@@ -243,6 +274,7 @@ function App.mousepressed(x,y, mouse_button)
 end
 
 function App.mousereleased(x,y, mouse_button)
+  if Current_app == 'error' then return end
   if Current_app == 'run' then
     if run.mouse_release then run.mouse_release(x,y, mouse_button) end
   elseif Current_app == 'source' then
@@ -253,6 +285,7 @@ function App.mousereleased(x,y, mouse_button)
 end
 
 function App.wheelmoved(dx,dy)
+  if Current_app == 'error' then return end
   if Current_app == 'run' then
     if run.mouse_wheel_move then run.mouse_wheel_move(dx,dy) end
   elseif Current_app == 'source' then
@@ -263,6 +296,7 @@ function App.wheelmoved(dx,dy)
 end
 
 function love.quit()
+  if Current_app == 'error' then return end
   if Current_app == 'run' then
     local source_settings = Settings.source
     Settings = run.settings()
