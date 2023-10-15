@@ -141,3 +141,10 @@ function rfind(s, pat, i, plain)
   assert (endpos >= #pat)
   return endpos-#pat+1
 end
+
+function test_rfind()
+  check_eq(rfind('abc', 'c'), 3, 'final char')
+  check_eq(rfind('acbc', 'c', 3), 2, 'previous char')
+  check_nil(rfind('abc', 'd'), 'missing char')
+  check_nil(rfind('abc', 'c', 2), 'no more char')
+end
