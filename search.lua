@@ -131,6 +131,7 @@ end
 -- Particularly if we only care about literal matches, we don't need all of string.find
 function rfind(s, pat, i, plain)
   if s == nil then return end
+  if #pat == 0 then return #s end
   local rs = s:reverse()
   local rpat = pat:reverse()
   if i == nil then i = #s end
@@ -143,6 +144,7 @@ function rfind(s, pat, i, plain)
 end
 
 function test_rfind()
+  check_eq(rfind('abc', ''), 3, 'empty pattern')
   check_eq(rfind('abc', 'c'), 3, 'final char')
   check_eq(rfind('acbc', 'c', 3), 2, 'previous char')
   check_nil(rfind('abc', 'd'), 'missing char')
