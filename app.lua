@@ -368,10 +368,6 @@ function App.color(color)
   love.graphics.setColor(color.r, color.g, color.b, color.a)
 end
 
-function colortable(app_color)
-  return {app_color.r, app_color.g, app_color.b, app_color.a}
-end
-
 -- prepend file/line/test
 function prepend_debug_info_to_test_failure(test_name, err)
   local err_without_line_number = err:gsub('^[^:]*:[^:]*: ', '')

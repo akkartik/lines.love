@@ -183,7 +183,7 @@ function edit.draw(State)
       end
       if line.data == '' then
         -- button to insert new drawing
-        button(State, 'draw', {x=State.left-Margin_left+4, y=y+4, w=12,h=12, color={1,1,0},
+        button(State, 'draw', {x=State.left-Margin_left+4, y=y+4, w=12,h=12, bg={r=1,g=1,b=0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)

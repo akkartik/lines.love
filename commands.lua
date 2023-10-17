@@ -116,7 +116,7 @@ function add_file_to_menu(x,y, s, cursor_highlight)
   if cursor_highlight then
     color = Menu_highlight_color
   end
-  button(Editor_state, 'menu', {x=x-5, y=y-2, w=width+5*2, h=Editor_state.line_height+2*2, color=colortable(color),
+  button(Editor_state, 'menu', {x=x-5, y=y-2, w=width+5*2, h=Editor_state.line_height+2*2, bg=color,
     onpress1 = function()
       navigate_to_file(s)
     end

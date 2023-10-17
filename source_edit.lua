@@ -188,7 +188,7 @@ function edit.draw(State, hide_cursor, show_line_numbers)
         if show_line_numbers then
           buttonx = 4  -- HACK: position draw buttons at a fixed x on screen
         end
-        button(State, 'draw', {x=buttonx, y=y+4, w=12,h=12, color={1,1,0},
+        button(State, 'draw', {x=buttonx, y=y+4, w=12,h=12, bg={r=1,g=1,b=0},
           icon = icon.insert_drawing,
           onpress1 = function()
                        Drawing.before = snapshot(State, line_index-1, line_index)
