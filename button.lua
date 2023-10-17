@@ -12,7 +12,7 @@ function button(State, name, params)
   if State.button_handlers == nil then
     State.button_handlers = {}
   end
-  love.graphics.setColor(params.bg.r, params.bg.g, params.bg.b)
+  love.graphics.setColor(params.bg.r, params.bg.g, params.bg.b, params.bg.a)
   love.graphics.rectangle('fill', params.x,params.y, params.w,params.h, 5,5)
   if params.icon then params.icon(params) end
   table.insert(State.button_handlers, params)
