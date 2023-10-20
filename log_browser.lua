@@ -42,15 +42,15 @@ function log_browser.parse(State)
           line.data = data
         end
         line.section_stack = table.shallowcopy(Section_stack)
-      elseif line.data:match('\u{250c}') then
+      elseif line.data:match('%[ u250c') then
         line.section_stack = table.shallowcopy(Section_stack)  -- as it is at the beginning
-        local section_name = line.data:match('\u{250c}%s*(.*)')
+        local section_name = line.data:match('u250c%s*(.*)')
         table.insert(Section_stack, {name=section_name})
         line.section_begin = true
         line.section_name = section_name
         line.data = nil
-      elseif line.data:match('\u{2518}') then
-        local section_name = line.data:match('\u{2518}%s*(.*)')
+      elseif line.data:match('%] u2518') then
+        local section_name = line.data:match('] u2518%s*(.*)')
         if array.find(Section_stack, function(x) return x.name == section_name end) then
           while table.remove(Section_stack).name ~= section_name do
             --

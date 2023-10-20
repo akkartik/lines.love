@@ -14,13 +14,17 @@ function log_start(name, stack_frame_index)
 	if stack_frame_index == nil then
 		stack_frame_index = 3
 	end
-	log(stack_frame_index, '\u{250c} ' .. name)
+	-- I'd like to use the unicode character \u{250c} here, but it doesn't work
+	-- in OpenBSD.
+	log(stack_frame_index, '[ u250c ' .. name)
 end
 function log_end(name, stack_frame_index)
 	if stack_frame_index == nil then
 		stack_frame_index = 3
 	end
-	log(stack_frame_index, '\u{2518} ' .. name)
+	-- I'd like to use the unicode character \u{2518} here, but it doesn't work
+	-- in OpenBSD.
+	log(stack_frame_index, '] u2518 ' .. name)
 end
 
 function log_new(name, stack_frame_index)
