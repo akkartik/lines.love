@@ -37,7 +37,7 @@ Lua is dynamically typed. Tests can't patch over lack of type-checking.
   For example, `string.sub` should never use a `_pos`, only an `_offset`.
 
 * Some ADT/interface support would be helpful in keeping per-line state in
-  sync. Any change to line data should clear line `fragments` and
+  sync. Any change to line data should clear the derived line property
   `screen_line_starting_pos`.
 
 * Some inputs get processed in love.textinput and some in love.keypressed.
