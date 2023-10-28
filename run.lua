@@ -163,7 +163,7 @@ end
 
 function absolutize(path)
   if is_relative_path(path) then
-    return love.filesystem.getWorkingDirectory()..'/'..path  -- '/' should work even on Windows
+    return App.current_dir..path
   end
   return path
 end

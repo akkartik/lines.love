@@ -480,7 +480,7 @@ function App.disable_tests()
   App.files = nativefs.getDirectoryItems
   App.mkdir = nativefs.createDirectory
   App.remove = nativefs.remove
-  App.source_dir = love.filesystem.getSource()..'/'
+  App.source_dir = love.filesystem.getSource()..'/'  -- '/' should work even on Windows
   App.current_dir = nativefs.getWorkingDirectory()..'/'
   App.save_dir = love.filesystem.getSaveDirectory()..'/'
   App.get_time = love.timer.getTime
