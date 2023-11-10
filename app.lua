@@ -44,7 +44,7 @@ end
 
 function handle_error(err)
   local callstack = debug.traceback('', --[[stack frame]]2)
-  Error_message = 'Error: ' .. tostring(err)..'\n'..clean_up_callstack(callstack)
+  Error_message = 'Error: ' .. tostring(err)..'\n'..cleaned_up_callstack(callstack)
   print(Error_message)
   if Current_app == 'run' then
     Settings.current_app = 'source'
@@ -61,7 +61,7 @@ end
 -- rather than offload that to load().
 -- Functions compiled in this manner have ugly filenames of the form [string "filename"]
 -- This function cleans out this cruft from error callstacks.
-function clean_up_callstack(callstack)
+function cleaned_up_callstack(callstack)
   local frames = {}
   for frame in string.gmatch(callstack, '[^\n]+\n*') do
     local line = frame:gsub('^%s*(.-)\n?$', '%1')
