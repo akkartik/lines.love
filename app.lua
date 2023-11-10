@@ -63,7 +63,6 @@ end
 -- This function cleans out this cruft from error callstacks.
 function clean_up_callstack(callstack)
   local frames = {}
-  print(callstack)
   for frame in string.gmatch(callstack, '[^\n]+\n*') do
     local line = frame:gsub('^%s*(.-)\n?$', '%1')
     local filename, rest = line:match('([^:]*):(.*)')
