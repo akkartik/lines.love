@@ -43,7 +43,7 @@ function love.run()
 end
 
 function handle_error(err)
-  Error_message = debug.traceback('Error: ' .. tostring(err), --[[stack frame]]2):gsub('\n[^\n]+$', '')
+  Error_message = debug.traceback('Error: ' .. tostring(err), --[[stack frame]]2)
   print(Error_message)
   if Current_app == 'run' then
     Settings.current_app = 'source'
