@@ -43,7 +43,8 @@ function love.run()
 end
 
 function handle_error(err)
-  Error_message = debug.traceback('Error: ' .. tostring(err), --[[stack frame]]2)
+  local callstack = debug.traceback('', --[[stack frame]]2)
+  Error_message = 'Error: ' .. tostring(err)..'\n'..clean_up_callstack(callstack)
   print(Error_message)
   if Current_app == 'run' then
     Settings.current_app = 'source'
@@ -54,6 +55,26 @@ function handle_error(err)
   else
     love.event.quit()
   end
+end
+
+-- I tend to read code from files myself (say using love.filesystem calls)
+-- rather than offload that to load().
+-- Functions compiled in this manner have ugly filenames of the form [string "filename"]
+-- This function cleans out this cruft from error callstacks.
+function clean_up_callstack(callstack)
+  local frames = {}
+  print(callstack)
+  for frame in string.gmatch(callstack, '[^\n]+\n*') do
+    local line = frame:gsub('^%s*(.-)\n?$', '%1')
+    local filename, rest = line:match('([^:]*):(.*)')
+    local core_filename = filename:match('^%[string "(.*)"%]$')
+    -- pass through frames that don't match this format
+    -- this includes the initial line "stack traceback:"
+    local new_frame = (core_filename or filename)..':'..rest
+    table.insert(frames, new_frame)
+  end
+  -- the initial "stack traceback:" line was unindented and remains so
+  return table.concat(frames, '\n\t')
 end
 
 -- The rest of this file wraps around various LÖVE primitives to support
