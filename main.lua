@@ -232,7 +232,6 @@ function App.keychord_press(chord, key)
     if run.keychord_press then run.keychord_press(chord, key) end
   elseif Current_app == 'source' then
     if source.keychord_press then source.keychord_press(chord, key) end
-  elseif Current_app == 'error' then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
