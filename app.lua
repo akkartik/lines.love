@@ -406,6 +406,7 @@ local Keys_down = {}
 -- can't run any tests after this
 function App.disable_tests()
   -- have LÖVE delegate all handlers to App if they exist
+  -- make sure to late-bind handlers like LÖVE's defaults do
   for name in pairs(love.handlers) do
     if App[name] then
       -- love.keyboard.isDown doesn't work on Android, so emulate it using
@@ -421,7 +422,7 @@ function App.disable_tests()
                                 return App.keyreleased(key, scancode)
                               end
       else
-        love.handlers[name] = App[name]
+        love.handlers[name] = function(...) App[name](...) end
       end
     end
   end
