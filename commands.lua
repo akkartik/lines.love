@@ -136,7 +136,7 @@ end
 
 function move_candidate_to_front(s)
   local index = array.find(File_navigation.all_candidates, s)
-  assert(index)
+  assert(index, 'file missing from manifest')
   table.remove(File_navigation.all_candidates, index)
   table.insert(File_navigation.all_candidates, 1, s)
 end

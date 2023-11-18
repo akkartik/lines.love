@@ -158,14 +158,8 @@ end
 function edit.draw(State, hide_cursor, show_line_numbers)
   State.button_handlers = {}
   App.color(Text_color)
-  if #State.lines ~= #State.line_cache then
-    print(('line_cache is out of date; %d when it should be %d'):format(#State.line_cache, #State.lines))
-    assert(false)
-  end
-  if not Text.le1(State.screen_top1, State.cursor1) then
-    print(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
-    assert(false)
-  end
+  assert(#State.lines == #State.line_cache, ('line_cache is out of date; %d elements when it should be %d'):format(#State.line_cache, #State.lines))
+  assert(Text.le1(State.screen_top1, State.cursor1), ('screen_top (line=%d,pos=%d) is below cursor (line=%d,pos=%d)'):format(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos))
   State.cursor_x = nil
   State.cursor_y = nil
   local y = State.top
@@ -209,8 +203,7 @@ function edit.draw(State, hide_cursor, show_line_numbers)
       Drawing.draw(State, line_index, y)
       y = y + Drawing.pixels(line.h, State.width) + Drawing_padding_bottom
     else
-      print(line.mode)
-      assert(false)
+      assert(false, ('unknown line mode %s'):format(line.mode))
     end
   end
   State.screen_bottom1 = screen_bottom1

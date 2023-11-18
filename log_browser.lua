@@ -75,7 +75,7 @@ function table.shallowcopy(x)
 end
 
 function log_browser.draw(State, hide_cursor)
-  assert(#State.lines == #State.line_cache)
+  assert(#State.lines == #State.line_cache, ('line_cache is out of date; %d elements when it should be %d'):format(#State.line_cache, #State.lines))
   local mouse_line_index = log_browser.line_index(State, App.mouse_x(), App.mouse_y())
   local y = State.top
   for line_index = State.screen_top1.line,#State.lines do
@@ -95,7 +95,7 @@ function log_browser.draw(State, hide_cursor)
           love.graphics.line(xleft,sectiony, xleft+50-2,sectiony)
           love.graphics.print(line.section_name, xleft+50,y)
           love.graphics.line(xleft+50+App.width(line.section_name)+2,sectiony, xright,sectiony)
-        else assert(line.section_end)
+        else assert(line.section_end, "log line has a section name, but it's neither the start nor end of a section")
           local sectiony = y+State.line_height-Section_border_padding_vertical
           love.graphics.line(xleft,y, xleft,sectiony)
           love.graphics.line(xright,y, xright,sectiony)

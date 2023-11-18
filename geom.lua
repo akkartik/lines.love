@@ -38,8 +38,7 @@ function geom.on_shape(x,y, drawing, shape)
     return geom.angle_between(center.x,center.y, x,y, shape.start_angle,shape.end_angle)
   elseif shape.mode == 'deleted' then
   else
-    print(shape.mode)
-    assert(false)
+    assert(false, ('unknown drawing mode %s'):format(shape.mode))
   end
 end
 

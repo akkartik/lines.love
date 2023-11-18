@@ -36,11 +36,11 @@ end
 -- Make copies of objects; the rest of the app may mutate them in place, but undo requires immutable histories.
 function snapshot(State, s,e)
   -- Snapshot everything by default, but subset if requested.
-  assert(s)
+  assert(s, 'failed to snapshot operation for undo history')
   if e == nil then
     e = s
   end
-  assert(#State.lines > 0)
+  assert(#State.lines > 0, 'failed to snapshot operation for undo history')
   if s < 1 then s = 1 end
   if s > #State.lines then s = #State.lines end
   if e < 1 then e = 1 end
@@ -65,8 +65,7 @@ function snapshot(State, s,e)
     elseif line.mode == 'drawing' then
       table.insert(event.lines, {mode='drawing', h=line.h, points=deepcopy(line.points), shapes=deepcopy(line.shapes), pending={}})
     else
-      print(line.mode)
-      assert(false)
+      assert(false, ('unknown line mode %s'):format(line.mode))
     end
   end
   return event
@@ -80,22 +79,22 @@ function patch(lines, from, to)
 --?     lines[from.start_line] = to.lines[1]
 --?     return
 --?   end
-  assert(from.start_line == to.start_line)
+  assert(from.start_line == to.start_line, 'failed to patch undo operation')
   for i=from.end_line,from.start_line,-1 do
     table.remove(lines, i)
   end
-  assert(#to.lines == to.end_line-to.start_line+1)
+  assert(#to.lines == to.end_line-to.start_line+1, 'failed to patch undo operation')
   for i=1,#to.lines do
     table.insert(lines, to.start_line+i-1, to.lines[i])
   end
 end
 
 function patch_placeholders(line_cache, from, to)
-  assert(from.start_line == to.start_line)
+  assert(from.start_line == to.start_line, 'failed to patch undo operation')
   for i=from.end_line,from.start_line,-1 do
     table.remove(line_cache, i)
   end
-  assert(#to.lines == to.end_line-to.start_line+1)
+  assert(#to.lines == to.end_line-to.start_line+1, 'failed to patch undo operation')
   for i=1,#to.lines do
     table.insert(line_cache, to.start_line+i-1, {})
   end

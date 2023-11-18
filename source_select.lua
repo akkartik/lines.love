@@ -33,13 +33,13 @@ function Text.clip_selection(State, line_index, apos, bpos)
     -- fully contained
     return apos,bpos
   elseif a_ge then
-    assert(maxl == line_index)
+    assert(maxl == line_index, ('maxl %d not equal to line_index %d'):format(maxl, line_index))
     return apos,maxp
   elseif b_lt then
-    assert(minl == line_index)
+    assert(minl == line_index, ('minl %d not equal to line_index %d'):format(minl, line_index))
     return minp,bpos
   else
-    assert(minl == maxl and minl == line_index)
+    assert(minl == maxl and minl == line_index, ('minl %d, maxl %d and line_index %d are not all equal'):format(minl, maxl, line_index))
     return minp,maxp
   end
 end
@@ -127,7 +127,7 @@ function Text.delete_selection_without_undo(State)
     State.lines[minl].data = State.lines[minl].data:sub(1, min_offset-1)..State.lines[minl].data:sub(max_offset)
     return
   end
-  assert(minl < maxl)
+  assert(minl < maxl, ('minl %d not < maxl %d'):format(minl, maxl))
   local rhs = State.lines[maxl].data:sub(max_offset)
   for i=maxl,minl+1,-1 do
     table.remove(State.lines, i)
@@ -154,7 +154,7 @@ function Text.selection(State)
   if minl == maxl then
     return State.lines[minl].data:sub(min_offset, max_offset-1)
   end
-  assert(minl < maxl)
+  assert(minl < maxl, ('minl %d not < maxl %d'):format(minl, maxl))
   local result = {State.lines[minl].data:sub(min_offset)}
   for i=minl+1,maxl-1 do
     if State.lines[i].mode == 'text' then

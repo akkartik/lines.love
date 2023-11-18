@@ -63,7 +63,7 @@ function load_drawing(infile_next_line)
   local drawing = {mode='drawing', h=256/2, points={}, shapes={}, pending={}}
   while true do
     local line = infile_next_line()
-    assert(line)
+    assert(line, 'drawing in file is incomplete')
     if line == '```' then break end
     local shape = json.decode(line)
     if shape.mode == 'freehand' then
@@ -88,8 +88,7 @@ function load_drawing(infile_next_line)
     elseif shape.mode == 'deleted' then
       -- ignore
     else
-      print(shape.mode)
-      assert(false)
+      assert(false, ('unknown drawing mode %s'):format(shape.mode))
     end
     table.insert(drawing.shapes, shape)
   end
@@ -123,8 +122,7 @@ function store_drawing(outfile, drawing)
     elseif shape.mode == 'deleted' then
       -- ignore
     else
-      print(shape.mode)
-      assert(false)
+      assert(false, ('unknown drawing mode %s'):format(shape.mode))
     end
   end
   outfile:write('```\n')
@@ -162,7 +160,7 @@ function load_drawing_from_array(iter, a, i)
   local line
   while true do
     i, line = iter(a, i)
-    assert(i)
+    assert(i, 'drawing in array is incomplete')
 --?     print(i)
     if line == '```' then break end
     local shape = json.decode(line)
@@ -188,8 +186,7 @@ function load_drawing_from_array(iter, a, i)
     elseif shape.mode == 'deleted' then
       -- ignore
     else
-      print(shape.mode)
-      assert(false)
+      assert(false, ('unknown drawing mode %s'):format(shape.mode))
     end
     table.insert(drawing.shapes, shape)
   end

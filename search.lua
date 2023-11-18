@@ -139,7 +139,7 @@ function rfind(s, pat, i, plain)
   local rendpos = rs:find(rpat, ri, plain)
   if rendpos == nil then return nil end
   local endpos = #s - rendpos + 1
-  assert (endpos >= #pat)
+  assert (endpos >= #pat, ('rfind: endpos %d should be >= #pat %d at this point'):format(endpos, #pat))
   return endpos-#pat+1
 end
 
