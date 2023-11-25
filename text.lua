@@ -973,6 +973,12 @@ end
 
 function Text.redraw_all(State)
 --?   print('clearing fragments')
+  -- Perform some early sanity checking here, in hopes that we correctly call
+  -- this whenever we change editor state.
+  if State.right <= State.left then
+    assert(false, ('Right margin %d must be to the right of the left margin %d'):format(State.right, State.left))
+  end
+
   State.line_cache = {}
   for i=1,#State.lines do
     State.line_cache[i] = {}
