@@ -11,7 +11,7 @@ function Text.clip_selection(State, line_index, apos, bpos)
   -- min,max = sorted(State.selection1,State.cursor1)
   local minl,minp = State.selection1.line,State.selection1.pos
   local maxl,maxp
-  if App.mouse_down(1) then
+  if State.mouse_down then
     maxl,maxp = Text.mouse_pos(State)
   else
     maxl,maxp = State.cursor1.line,State.cursor1.pos

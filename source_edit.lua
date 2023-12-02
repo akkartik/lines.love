@@ -237,6 +237,7 @@ end
 
 function edit.mouse_press(State, x,y, mouse_button)
   if State.search_term then return end
+  State.mouse_down = mouse_button
 --?   print_and_log(('edit.mouse_press: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
   if mouse_press_consumed_by_any_button_handler(State, x,y, mouse_button) then
     -- press on a button and it returned 'true' to short-circuit
@@ -301,6 +302,7 @@ end
 function edit.mouse_release(State, x,y, mouse_button)
   if State.search_term then return end
 --?   print_and_log(('edit.mouse_release: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
+  State.mouse_down = nil
   if State.lines.current_drawing then
     Drawing.mouse_release(State, x,y, mouse_button)
     schedule_save(State)
