@@ -107,6 +107,7 @@ function App.run_tests_and_initialize()
   App.disable_tests()
   App.initialize_globals()
   App.initialize(love.arg.parseGameArguments(arg), arg)
+  App.version_check()
 end
 
 function App.run_tests()

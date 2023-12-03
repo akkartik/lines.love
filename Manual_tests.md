@@ -17,6 +17,8 @@ Initializing settings:
   - start out editing source, move window, press ctrl+e twice; window is editing source in same position+dimensions
   - no log file; switching to source works
 
+  - run with an unsupported version. Error message pops up and waits for a key. The app attempts to continue, and doesn't receive the key.
+
 Code loading:
 * run love with directory; text editor runs
 * run love with zip file; text editor runs

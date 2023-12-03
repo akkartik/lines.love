@@ -254,13 +254,14 @@ function App.textinput(t)
 end
 
 function App.keyreleased(key, scancode)
-  if Current_app == 'error' then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
   end
   --
-  if Current_app == 'run' then
+  if Current_app == 'error' then
+    Current_app = 'run'
+  elseif Current_app == 'run' then
     if run.key_release then run.key_release(key, scancode) end
   elseif Current_app == 'source' then
     if source.key_release then source.key_release(key, scancode) end
