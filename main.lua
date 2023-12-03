@@ -77,7 +77,7 @@ function App.version_check()
   Error_message = nil
   Error_count = 0
   -- we'll reuse error mode on load for an initial version check
-  local supported_versions = {'11.4', '12.0'}  -- put the recommended version first
+  local supported_versions = {'11.5', '11.4', '12.0'}  -- put the recommended version first
   local minor_version
   Major_version, minor_version = love.getVersion()
   Version = Major_version..'.'..minor_version
