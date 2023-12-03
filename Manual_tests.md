@@ -29,6 +29,7 @@ Code loading:
     - analogously, how a shape precisely looks as you draw it
 
 * start out running the text editor, press ctrl+e to edit source, make a change to the source, press ctrl+e twice to return to the source editor; the change should be preserved.
+* run with an unsupported version. Error message pops up and waits for a key. The app attempts to continue, and doesn't receive the key. Press ctrl+e to edit source. Source editor opens up without checking version.
 
 ### Other compromises
 

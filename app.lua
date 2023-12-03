@@ -8,10 +8,10 @@
 --     and a source editor, while giving each the illusion of complete
 --     control.
 function love.run()
-  App.version_check()
   App.snapshot_love()
   -- Tests always run at the start.
   App.run_tests_and_initialize()
+  App.version_check()
 --?   print('==')
 
   love.timer.step()
@@ -107,7 +107,6 @@ function App.run_tests_and_initialize()
   App.disable_tests()
   App.initialize_globals()
   App.initialize(love.arg.parseGameArguments(arg), arg)
-  App.version_check()
 end
 
 function App.run_tests()
