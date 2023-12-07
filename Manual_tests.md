@@ -18,6 +18,7 @@ Initializing settings:
   - no log file; switching to source works
 
   - run with an unsupported version. Error message pops up and waits for a key. The app attempts to continue, and doesn't receive the key.
+  - run with a LÖVE v12 release candidate. No errors; it is a supported version. All tests pass.
 
 Code loading:
 * run love with directory; text editor runs
