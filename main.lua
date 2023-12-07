@@ -219,7 +219,7 @@ function App.keychord_press(chord, key)
   Skip_rest_of_key_events = nil
   if current_app_is_warning() then
     if chord == 'C-c' then
-      love.system.setClipboardText(Error_message)
+      love.system.setClipboardText(warning_message())
     else
       clear_warning()
       Skip_rest_of_key_events = true
@@ -366,4 +366,9 @@ end
 function clear_warning()
   assert(type(Current_app) == 'table')
   Current_app = Current_app.next_app
+end
+
+function warning_message()
+  assert(type(Current_app) == 'table')
+  return Current_app.message
 end
