@@ -72,24 +72,10 @@ function App.load()
   end
 end
 
-function App.version_check()
-  -- available modes: run, error
-  Error_message = nil
-  Error_count = 0
-  -- we'll reuse error mode on load for an initial version check
-  local supported_versions = {'11.5', '11.4', '12.0'}  -- put the recommended version first
-  local minor_version
-  Major_version, minor_version = love.getVersion()
-  Version = Major_version..'.'..minor_version
-  if array.find(supported_versions, Version) == nil then
-    Current_app = 'error'
-    Error_message = ("This app doesn't support version %s; please use version %s. Press any key to try it with this version anyway."):format(Version, supported_versions[1])
-    print(Error_message)
-    -- continue initializing everything; hopefully we won't have errors during initialization
-  end
-end
-
 function App.initialize_globals()
+  Supported_versions = {'11.5', '11.4', '12.0'}  -- put the recommended version first
+  check_love_version_for_tests()
+
   if Current_app == 'run' then
     run.initialize_globals()
   elseif Current_app == 'source' then
@@ -103,6 +89,23 @@ function App.initialize_globals()
   Current_time = 0
   Last_focus_time = 0  -- https://love2d.org/forums/viewtopic.php?p=249700
   Last_resize_time = 0
+end
+
+function check_love_version_for_tests()
+  if array.find(Supported_versions, Version) == nil then
+    Unsupported_version = true
+    -- warning to include in an error message if any tests failed
+    Warning_before_tests = ("This app hasn't been tested with LÖVE version %s."):format(Version)
+  end
+end
+
+function App.love_version_check()
+  if Unsupported_version then
+    Current_app = 'error'
+    Error_message = ("This app hasn't been tested with LÖVE version %s; please switch to version %s if you run into issues. Press any key to continue."):format(Version, Supported_versions[1])
+    print(Error_message)
+    -- continue initializing everything; hopefully we won't have errors during initialization
+  end
 end
 
 function App.initialize(arg)

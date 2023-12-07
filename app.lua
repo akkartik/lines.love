@@ -8,11 +8,11 @@
 --     and a source editor, while giving each the illusion of complete
 --     control.
 function love.run()
-  App.version_check()
+  Version, Major_version = App.love_version()
   App.snapshot_love()
   -- Tests always run at the start.
   App.run_tests_and_initialize()
-  App.version_check()
+  App.love_version_check()  -- hack: we want to run this just the first time and not every time we bounce between 'run' and 'source'
 --?   print('==')
 
   love.timer.step()
@@ -86,6 +86,12 @@ end
 
 App = {}
 
+function App.love_version()
+  local major_version, minor_version = love.getVersion()
+  local version = major_version..'.'..minor_version
+  return version, major_version
+end
+
 -- save/restore various framework globals we care about -- only on very first load
 function App.snapshot_love()
   if Love_snapshot then return end
@@ -103,7 +109,12 @@ function App.run_tests_and_initialize()
   Test_errors = {}
   App.run_tests()
   if #Test_errors > 0 then
-    error(('There were %d test failures:\n\n%s'):format(#Test_errors, table.concat(Test_errors)))
+    local error_message = ''
+    if Warning_before_tests then
+      error_message = Warning_before_tests..'\n\n'
+    end
+    error_message = error_message .. ('There were %d test failures:\n%s'):format(#Test_errors, table.concat(Test_errors))
+    error(error_message)
   end
   App.disable_tests()
   App.initialize_globals()

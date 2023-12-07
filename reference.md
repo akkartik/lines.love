@@ -11,6 +11,9 @@ automatically called for you as appropriate.
   * `flags` -- some properties of the app window. See [`flags` in `love.graphics.getMode`](https://love2d.org/wiki/love.window.getMode)
     for details.
 
+* `Version` -- the running version of LÖVE as a string, e.g. '11.4'.
+* `Major_version` -- just the part before the period as an int, e.g. 11.
+
 ## Functions that get automatically called
 
 * `App.initialize_globals()` -- called before running each test and also
