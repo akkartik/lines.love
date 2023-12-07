@@ -12,7 +12,6 @@ function love.run()
   App.snapshot_love()
   -- Tests always run at the start.
   App.run_tests_and_initialize()
-  App.love_version_check()  -- hack: we want to run this just the first time and not every time we bounce between 'run' and 'source'
 --?   print('==')
 
   love.timer.step()

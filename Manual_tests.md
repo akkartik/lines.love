@@ -30,7 +30,7 @@ Code loading:
     - analogously, how a shape precisely looks as you draw it
 
 * start out running the text editor, press ctrl+e to edit source, make a change to the source, press ctrl+e twice to return to the source editor; the change should be preserved.
-* run with an untested version. Error message pops up. Press a key. Text editor comes up, and doesn't receive the key. Press ctrl+e. Source editor opens up. Press ctrl+e. Text editor returns.
+* run with an untested version. Error message pops up. Press a key. Text editor comes up, and doesn't receive the key. Press ctrl+e. Error pops up. Press a key. Source editor opens up. Press ctrl+e. Error pops up. Press a key. Text editor returns.
 * create a couple of spuriously failing tests. Run with an untested version. Error message includes message about untested version.
 
 ### Other compromises

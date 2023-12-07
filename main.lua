@@ -89,22 +89,27 @@ function App.initialize_globals()
   Current_time = 0
   Last_focus_time = 0  -- https://love2d.org/forums/viewtopic.php?p=249700
   Last_resize_time = 0
+
+  -- Another weird bit for a class of corner cases. E.g.:
+  -- * I press ctrl+e, switch Current_app. I don't want the new app to receive
+  --   text_input and key_release events.
+  -- If I try to avoid text_input events by switching modes on key_release, I
+  -- hit a new problem:
+  -- * I press ctrl+e, am running an untested version, Current_app goes to
+  --   'error', and immediately rolls back out of 'error' in the key_release
+  --   event.
+  -- Skip_rest_of_key_events is ugly, but feels cleaner than creating yet
+  -- another possible value for Current_app.
+  Skip_rest_of_key_events = nil
+
+  -- Where to go from 'error' app.
+  Next_app = nil
 end
 
 function check_love_version_for_tests()
   if array.find(Supported_versions, Version) == nil then
-    Unsupported_version = true
     -- warning to include in an error message if any tests failed
     Warning_before_tests = ("This app hasn't been tested with LÖVE version %s."):format(Version)
-  end
-end
-
-function App.love_version_check()
-  if Unsupported_version then
-    Current_app = 'error'
-    Error_message = ("This app hasn't been tested with LÖVE version %s; please switch to version %s if you run into issues. Press any key to continue."):format(Version, Supported_versions[1])
-    print(Error_message)
-    -- continue initializing everything; hopefully we won't have errors during initialization
   end
 end
 
@@ -122,14 +127,25 @@ function App.initialize(arg)
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
+
+  check_love_version()
+end
+
+function check_love_version()
+  if array.find(Supported_versions, Version) == nil then
+    Next_app = Current_app
+    Current_app = 'error'
+    Error_message = ("This app hasn't been tested with LÖVE version %s; please switch to version %s if you run into issues. Press any key to continue."):format(Version, Supported_versions[1])
+    -- continue initializing everything; hopefully we won't have errors during initialization
+  end
 end
 
 function App.resize(w,h)
+  if Current_app == 'error' then return end
   if Current_app == 'run' then
     if run.resize then run.resize(w,h) end
   elseif Current_app == 'source' then
     if source.resize then source.resize(w,h) end
-  elseif Current_app == 'error' then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -137,17 +153,18 @@ function App.resize(w,h)
 end
 
 function App.filedropped(file)
+  if Current_app == 'error' then return end
   if Current_app == 'run' then
     if run.file_drop then run.file_drop(file) end
   elseif Current_app == 'source' then
     if source.file_drop then source.file_drop(file) end
-  elseif Current_app == 'error' then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
 end
 
 function App.focus(in_focus)
+  if Current_app == 'error' then return end
   if in_focus then
     Last_focus_time = Current_time
   end
@@ -155,7 +172,6 @@ function App.focus(in_focus)
     if run.focus then run.focus(in_focus) end
   elseif Current_app == 'source' then
     if source.focus then source.focus(in_focus) end
-  elseif Current_app == 'error' then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -178,6 +194,7 @@ end
 
 function App.update(dt)
   Current_time = Current_time + dt
+  if Current_app == 'error' then return end
   -- some hysteresis while resizing
   if Current_time < Last_resize_time + 0.1 then
     return
@@ -187,7 +204,6 @@ function App.update(dt)
     run.update(dt)
   elseif Current_app == 'source' then
     source.update(dt)
-  elseif Current_app == 'error' then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -199,9 +215,14 @@ function App.keychord_press(chord, key)
     return
   end
   --
+  Skip_rest_of_key_events = nil
   if Current_app == 'error' then
     if chord == 'C-c' then
       love.system.setClipboardText(Error_message)
+    else
+      Current_app = Next_app
+      Next_app = nil
+      Skip_rest_of_key_events = true
     end
     return
   end
@@ -229,6 +250,7 @@ function App.keychord_press(chord, key)
     load_file_from_source_or_save_directory('main.lua')
     App.undo_initialize()
     App.run_tests_and_initialize()
+    Skip_rest_of_key_events = true
     return
   end
   if Current_app == 'run' then
@@ -247,6 +269,7 @@ function App.textinput(t)
     return
   end
   --
+  if Skip_rest_of_key_events then return end
   if Current_app == 'run' then
     if run.text_input then run.text_input(t) end
   elseif Current_app == 'source' then
@@ -257,14 +280,14 @@ function App.textinput(t)
 end
 
 function App.keyreleased(key, scancode)
+  if Current_app == 'error' then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
   end
   --
-  if Current_app == 'error' then
-    Current_app = 'run'
-  elseif Current_app == 'run' then
+  if Skip_rest_of_key_events then return end
+  if Current_app == 'run' then
     if run.key_release then run.key_release(key, scancode) end
   elseif Current_app == 'source' then
     if source.key_release then source.key_release(key, scancode) end
