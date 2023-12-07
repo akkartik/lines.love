@@ -39,6 +39,11 @@ function App.load()
     Current_app = Settings.current_app
   end
 
+  -- Current_app =
+  --  | run
+  --  | source
+  --  | {name=warning message='...' next_app = run|source}
+
   if Current_app == nil then
     Current_app = 'run'
   end
@@ -66,7 +71,7 @@ function App.load()
         load_file_from_source_or_save_directory('colorize.lua')
       load_file_from_source_or_save_directory('source_text_tests.lua')
     load_file_from_source_or_save_directory('source_tests.lua')
-  elseif Current_app == 'error' then
+  elseif current_app_is_warning() then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -80,7 +85,7 @@ function App.initialize_globals()
     run.initialize_globals()
   elseif Current_app == 'source' then
     source.initialize_globals()
-  elseif Current_app == 'error' then
+  elseif current_app_is_warning() then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -96,14 +101,11 @@ function App.initialize_globals()
   -- If I try to avoid text_input events by switching modes on key_release, I
   -- hit a new problem:
   -- * I press ctrl+e, am running an untested version, Current_app goes to
-  --   'error', and immediately rolls back out of 'error' in the key_release
-  --   event.
+  --   'warning', and immediately rolls back out of 'warning' in the
+  --   key_release event.
   -- Skip_rest_of_key_events is ugly, but feels cleaner than creating yet
   -- another possible value for Current_app.
   Skip_rest_of_key_events = nil
-
-  -- Where to go from 'error' app.
-  Next_app = nil
 end
 
 function check_love_version_for_tests()
@@ -123,7 +125,7 @@ function App.initialize(arg)
     run.initialize(arg)
   elseif Current_app == 'source' then
     source.initialize(arg)
-  elseif Current_app == 'error' then
+  elseif current_app_is_warning() then
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -133,15 +135,14 @@ end
 
 function check_love_version()
   if array.find(Supported_versions, Version) == nil then
-    Next_app = Current_app
-    Current_app = 'error'
-    Error_message = ("This app hasn't been tested with LÖVE version %s; please switch to version %s if you run into issues. Press any key to continue."):format(Version, Supported_versions[1])
+    show_warning(
+      ("This app hasn't been tested with LÖVE version %s; please switch to version %s if you run into issues. Press any key to continue."):format(Version, Supported_versions[1]))
     -- continue initializing everything; hopefully we won't have errors during initialization
   end
 end
 
 function App.resize(w,h)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if Current_app == 'run' then
     if run.resize then run.resize(w,h) end
   elseif Current_app == 'source' then
@@ -153,7 +154,7 @@ function App.resize(w,h)
 end
 
 function App.filedropped(file)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if Current_app == 'run' then
     if run.file_drop then run.file_drop(file) end
   elseif Current_app == 'source' then
@@ -164,7 +165,7 @@ function App.filedropped(file)
 end
 
 function App.focus(in_focus)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if in_focus then
     Last_focus_time = Current_time
   end
@@ -182,11 +183,11 @@ function App.draw()
     run.draw()
   elseif Current_app == 'source' then
     source.draw()
-  elseif Current_app == 'error' then
+  elseif current_app_is_warning() then
     love.graphics.setColor(0,0,1)
     love.graphics.rectangle('fill', 0,0, App.screen.width, App.screen.height)
     love.graphics.setColor(1,1,1)
-    love.graphics.printf(Error_message, 40,40, 600)
+    love.graphics.printf(Current_app.message, 40,40, 600)
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -194,7 +195,7 @@ end
 
 function App.update(dt)
   Current_time = Current_time + dt
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   -- some hysteresis while resizing
   if Current_time < Last_resize_time + 0.1 then
     return
@@ -216,12 +217,11 @@ function App.keychord_press(chord, key)
   end
   --
   Skip_rest_of_key_events = nil
-  if Current_app == 'error' then
+  if current_app_is_warning() then
     if chord == 'C-c' then
       love.system.setClipboardText(Error_message)
     else
-      Current_app = Next_app
-      Next_app = nil
+      clear_warning()
       Skip_rest_of_key_events = true
     end
     return
@@ -240,7 +240,7 @@ function App.keychord_press(chord, key)
       if source.quit then source.quit() end
       Current_app = 'run'
       Error_message = nil
-    elseif Current_app == 'error' then
+    elseif current_app_is_warning() then
     else
       assert(false, 'unknown app "'..Current_app..'"')
     end
@@ -263,7 +263,7 @@ function App.keychord_press(chord, key)
 end
 
 function App.textinput(t)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -280,7 +280,7 @@ function App.textinput(t)
 end
 
 function App.keyreleased(key, scancode)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -297,7 +297,7 @@ function App.keyreleased(key, scancode)
 end
 
 function App.mousepressed(x,y, mouse_button)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
 --?   print('mouse press', x,y)
   if Current_app == 'run' then
     if run.mouse_press then run.mouse_press(x,y, mouse_button) end
@@ -309,7 +309,7 @@ function App.mousepressed(x,y, mouse_button)
 end
 
 function App.mousereleased(x,y, mouse_button)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if Current_app == 'run' then
     if run.mouse_release then run.mouse_release(x,y, mouse_button) end
   elseif Current_app == 'source' then
@@ -320,7 +320,7 @@ function App.mousereleased(x,y, mouse_button)
 end
 
 function App.wheelmoved(dx,dy)
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if Current_app == 'run' then
     if run.mouse_wheel_move then run.mouse_wheel_move(dx,dy) end
   elseif Current_app == 'source' then
@@ -331,7 +331,7 @@ function App.wheelmoved(dx,dy)
 end
 
 function love.quit()
-  if Current_app == 'error' then return end
+  if current_app_is_warning() then return end
   if Current_app == 'run' then
     local source_settings = Settings.source
     Settings = run.settings()
@@ -348,4 +348,22 @@ function love.quit()
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
+end
+
+function current_app_is_warning()
+  return type(Current_app) == 'table' and Current_app.name == 'warning'
+end
+
+function show_warning(message)
+  assert(type(Current_app) == 'string')
+  Current_app = {
+    name = 'warning',
+    message = message,
+    next_app = Current_app,
+  }
+end
+
+function clear_warning()
+  assert(type(Current_app) == 'table')
+  Current_app = Current_app.next_app
 end
