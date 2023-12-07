@@ -17,8 +17,9 @@ Initializing settings:
   - start out editing source, move window, press ctrl+e twice; window is editing source in same position+dimensions
   - no log file; switching to source works
 
-  - run with an untested version. Error message pops up and waits for a key. The app attempts to continue, and doesn't receive the key.
+  - run with an untested version of LÖVE. Error message pops up and waits for a key. The app attempts to continue, and doesn't receive the key.
   - run with a LÖVE v12 release candidate. No errors; it is a supported version. All tests pass.
+  - create a couple of spuriously failing tests. Run with an untested version of LÖVE. Error message includes message about untested version.
 
 Code loading:
 * run love with directory; text editor runs
@@ -30,8 +31,7 @@ Code loading:
     - analogously, how a shape precisely looks as you draw it
 
 * start out running the text editor, press ctrl+e to edit source, make a change to the source, press ctrl+e twice to return to the source editor; the change should be preserved.
-* run with an untested version. Error message pops up. Press a key. Text editor comes up, and doesn't receive the key. Press ctrl+e. Error pops up. Press a key. Source editor opens up. Press ctrl+e. Error pops up. Press a key. Text editor returns.
-* create a couple of spuriously failing tests. Run with an untested version. Error message includes message about untested version.
+* run with an untested version of LÖVE. Error message pops up. Press a key. Text editor comes up, and doesn't receive the key. Press ctrl+e. Error pops up. Press a key. Source editor opens up. Press ctrl+e. Error pops up. Press a key. Text editor returns.
 
 ### Other compromises
 
