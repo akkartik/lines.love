@@ -974,9 +974,8 @@ function Text.offset(s, pos1)
   if pos1 == 1 then return 1 end
   local result = utf8.offset(s, pos1)
   if result == nil then
-    print(pos1, #s, s)
+    assert(false, ('Text.offset(%d) called on a string of length %d (byte size %d); this is likely a failure to handle utf8\n\n^%s$\n'):format(pos1, utf8.len(s), #s, s))
   end
-  assert(result, "Text.offset returned nil; this is likely a failure to handle utf8")
   return result
 end
 

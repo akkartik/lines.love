@@ -65,7 +65,6 @@ function snapshot(State, s,e)
     elseif line.mode == 'drawing' then
       table.insert(event.lines, {mode='drawing', h=line.h, points=deepcopy(line.points), shapes=deepcopy(line.shapes), pending={}})
     else
-      print(line.mode)
       assert(false, ('unknown line mode %s'):format(line.mode))
     end
   end
