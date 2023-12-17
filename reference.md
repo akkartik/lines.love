@@ -294,7 +294,7 @@ The following facilities help set these things up:
   everything about a button in one place. Create as many buttons as you like
   within a single shared `state`.
 
-* `mouse_press_consumed_by_any_button_handler(state, x,y, mouse_button)`
+* `mouse_press_consumed_by_any_button(state, x,y, mouse_button)`
 
   Call this either directly or indirectly from `App.mousepressed`. It will
   pass on a click to any button registered in `state`. It's also helpful to
@@ -302,7 +302,7 @@ The following facilities help set these things up:
   following boilerplate early in `mousepressed`:
 
     ```
-    if mouse_press_consumed_by_any_button_handler(state, x,y, mouse_button) then
+    if mouse_press_consumed_by_any_button(state, x,y, mouse_button) then
       return
     end
     ```

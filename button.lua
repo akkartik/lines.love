@@ -9,9 +9,6 @@
 
 -- draw button and queue up event handlers
 function button(State, name, params)
-  if State.button_handlers == nil then
-    State.button_handlers = {}
-  end
   love.graphics.setColor(params.bg.r, params.bg.g, params.bg.b, params.bg.a)
   love.graphics.rectangle('fill', params.x,params.y, params.w,params.h, 5,5)
   if params.icon then params.icon(params) end
@@ -19,10 +16,7 @@ function button(State, name, params)
 end
 
 -- process button event handlers
-function mouse_press_consumed_by_any_button_handler(State, x, y, mouse_button)
-  if State.button_handlers == nil then
-    return
-  end
+function mouse_press_consumed_by_any_button(State, x, y, mouse_button)
   local button_pressed = false
   local consume_press = true
   for _,ev in ipairs(State.button_handlers) do

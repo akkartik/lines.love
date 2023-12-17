@@ -881,6 +881,7 @@ function test_select_text_using_mouse_starting_above_text_wrapping_line()
   Editor_state.screen_top1 = {line=2, pos=3}
   Editor_state.screen_bottom1 = {}
   -- press mouse above first line of text
+  edit.draw(Editor_state)
   edit.run_after_mouse_press(Editor_state, Editor_state.left+8,5, 1)
   -- selection is at screen top
   check(Editor_state.selection1.line ~= nil, 'selection:line-not-nil')
