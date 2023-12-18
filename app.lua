@@ -510,6 +510,7 @@ function App.disable_tests()
         return --[[status]] true
       end
   App.files = nativefs.getDirectoryItems
+  App.file_info = nativefs.getInfo
   App.mkdir = nativefs.createDirectory
   App.remove = nativefs.remove
   App.source_dir = love.filesystem.getSource()..'/'  -- '/' should work even on Windows

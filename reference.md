@@ -365,13 +365,16 @@ The following facilities help set these things up:
   available under `dir`.
   (From [LÖVE](https://love2d.org/wiki/love.filesystem.getDirectoryItems).]
 
-* `love.filesystem.getInfo(filename)` -- returns some information about
+* `App.file_info(filename)` -- returns some information about
   `filename`, particularly whether it exists (non-`nil` return value) or not.
   (From [LÖVE](https://love2d.org/wiki/love.filesystem.getInfo).]
 
-* `os.remove(filename)` -- removes a file or empty directory. Definitely make
+* `App.mkdir(path)` -- creates a directory. Make sure `path` is absolute.
+  (From [LÖVE](https://love2d.org/wiki/love.filesystem.remove).]
+
+* `App.remove(filename)` -- removes a file or empty directory. Definitely make
   sure `filename` is an absolute path.
-  (From [Lua](https://www.lua.org/manual/5.1/manual.html#pdf-os.remove).)
+  (From [LÖVE](https://love2d.org/wiki/love.filesystem.remove).]
 
 There's much more I could include here; check out [the LÖVE manual](https://love2d.org/wiki/love.filesystem)
 and [the Lua manual](https://www.lua.org/manual/5.1/manual.html#5.7).
