@@ -34,7 +34,7 @@ function Text.draw(State, line_index, y, startpos, hide_cursor, show_line_number
         local s,e,filename = unpack(link_offsets)
         local lo, hi = Text.clip_wikiword_with_screen_line(line, line_cache, i, s, e)
         if lo then
-          button(State, 'link', {x=State.left+lo, y=y, w=hi-lo, h=State.line_height, bg={r=1,g=1,b=1},
+          button(State, 'link', {x=State.left+lo, y=y, w=hi-lo, h=State.line_height,
             icon = icon.hyperlink_decoration,
             onpress1 = function()
                          if file_exists(filename) then

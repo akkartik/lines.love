@@ -277,22 +277,21 @@ The following facilities help set these things up:
 * `button` creates a single button. The syntax is:
 
     ```
-    button(state, name, {x=..., y=..., w=..., h=..., color={r,g,b},
+    button(state, name, {x=..., y=..., w=..., h=..., bg={r,g,b},
       icon = function({x=..., y=..., w=..., h=...}) ... end,
       onpress1 = ...
     })
     ```
 
-  Call this either directly or indirectly from `App.draw`. It will paint a
-  rectangle to the screen with top-left at (x,y), dimensions w×h pixels in the
-  specified `color`. It will then overlay any drawing instructions within
-  `icon` atop it. The `icon` callback will receive a table containing the same
-  x/y/w/h.
+  Call this either directly or indirectly from `App.draw`. It will assign a
+  rectangle with the given dimensions and trigger the provided (zero-arg)
+  `onpress1` callback when the primary mouse button is clicked within.
+  It will also optionally paint the rectangle with the specified background
+  color `bg` and a foreground described by the `icon` callback (which will
+  receive the same dimensions).
 
-  The rectangle also registers within `state` the `onpress1` callback (without
-  any arguments) when mouse button 1 is clicked on it. This way you can see
-  everything about a button in one place. Create as many buttons as you like
-  within a single shared `state`.
+  This way you can see everything about a button in one place. Create as many
+  buttons as you like within a single shared `state`.
 
 * `mouse_press_consumed_by_any_button(state, x,y, mouse_button)`
 
