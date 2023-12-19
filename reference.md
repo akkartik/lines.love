@@ -203,9 +203,6 @@ early warning if you break something.
   editor state on the app window as requested in the call to
   `edit.initialize_state` that created `state`.
 
-* `edit.update(state, dt)` -- call this from `App.update` to periodically
-  auto-save editor contents to disk.
-
 * `edit.mouse_press(state, x,y, mouse_button)` and `edit.mouse_release(x,y,
   mouse_button)` -- call these to position the cursor or select some text.
 
@@ -222,6 +219,12 @@ early warning if you break something.
 
 * `Text.redraw_all(state)` -- call this to clear and recompute any cached
   state as the cursor moves and the buffer scrolls.
+
+* `edit.update(state, dt)` -- call this from `App.update` to periodically
+  auto-save editor contents to disk.
+
+* `edit.quit(state)` -- call this from `App.quit` to ensure any final edits
+  get saved before quitting.
 
 If you need more precise control, look at the comment at the top of
 `edit.initialize_state` in edit.lua. In brief, the widget contains an array of
