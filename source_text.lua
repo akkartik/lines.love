@@ -907,7 +907,8 @@ function Text.nearest_pos_less_than(line, x)
 end
 
 function Text.x_after(s, pos)
-  local offset = Text.offset(s, math.min(pos+1, #s+1))
+  local len = utf8.len(s)
+  local offset = Text.offset(s, math.min(pos+1, len+1))
   local s_before = s:sub(1, offset-1)
 --?   print('^'..s_before..'$')
   return App.width(s_before)
