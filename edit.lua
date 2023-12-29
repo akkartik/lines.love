@@ -23,7 +23,7 @@ Same_point_distance = 4  -- pixel distance at which two points are considered th
 edit = {}
 
 -- run in both tests and a real run
-function edit.initialize_state(top, left, right, font, line_height)  -- currently always draws to bottom of screen
+function edit.initialize_state(top, left, right, font, font_height, line_height)  -- currently always draws to bottom of screen
   local result = {
     -- a line is either text or a drawing
     -- a text is a table with:
@@ -84,7 +84,7 @@ function edit.initialize_state(top, left, right, font, line_height)  -- currentl
     previous_drawing_mode = nil,  -- extra state for some ephemeral modes like moving/deleting/naming points
 
     font = font,
-    font_height = font:getHeight(),
+    font_height = font_height,
     line_height = line_height,
 
     top = top,
@@ -568,6 +568,7 @@ function edit.initialize_test_state()
       Test_margin_left,
       App.screen.width - Test_margin_right,
       love.graphics.getFont(),
+      14,
       15)  -- line height
 end
 

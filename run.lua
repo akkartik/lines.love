@@ -61,7 +61,7 @@ function run.load_settings()
   App.screen.width, App.screen.height = Settings.width, Settings.height
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   run.set_window_position_from_settings(Settings)
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, math.floor(Settings.font_height*1.3))
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, Settings.font_height, math.floor(Settings.font_height*1.3))
   Editor_state.filename = Settings.filename
   Editor_state.screen_top1 = Settings.screen_top
   Editor_state.cursor1 = Settings.cursor
@@ -81,7 +81,7 @@ function run.initialize_default_settings()
   local font_height = 20
   local font = love.graphics.newFont(font_height)
   run.initialize_window_geometry()
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, math.floor(font_height*1.3))
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, font_height, math.floor(font_height*1.3))
   Settings = run.settings()
 end
 

@@ -190,8 +190,8 @@ There's much more I could include here; check out [the LÖVE manual](https://lov
 The text-editor widget includes extremely thorough automated tests to give you
 early warning if you break something.
 
-* `state = edit.initialize_state(top, left, right, font, line_height)` --
-  returns an object that can be used to render an interactive editor widget
+* `state = edit.initialize_state(top, left, right, font, font_height, line_height)`
+  -- returns an object that can be used to render an interactive editor widget
   for text and line drawings starting at `y=top` on the app window, between
   `x=left` and `x=right`. Wraps long lines at word boundaries where possible,
   or in the middle of words (no hyphenation yet) when it must.
