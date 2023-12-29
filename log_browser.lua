@@ -6,7 +6,7 @@
 -- functions to render them into the log_render namespace.
 
 function source.initialize_log_browser_side()
-  Log_browser_state = edit.initialize_state(Margin_top, Editor_state.right + Margin_right + Margin_left, (Editor_state.right+Margin_right)*2, Editor_state.font_height, Editor_state.line_height)
+  Log_browser_state = edit.initialize_state(Margin_top, Editor_state.right + Margin_right + Margin_left, (Editor_state.right+Margin_right)*2, Editor_state.font, Editor_state.line_height)
   Log_browser_state.filename = 'log'
   load_from_disk(Log_browser_state)  -- TODO: pay no attention to Fold
   log_browser.parse(Log_browser_state)

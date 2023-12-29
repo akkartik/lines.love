@@ -54,14 +54,14 @@ function print_and_log(s)
 end
 
 function run.load_settings()
-  love.graphics.setFont(love.graphics.newFont(Settings.font_height))
+  local font = love.graphics.newFont(Settings.font_height)
   -- set up desired window dimensions and make window resizable
   _, _, App.screen.flags = App.screen.size()
   App.screen.flags.resizable = true
   App.screen.width, App.screen.height = Settings.width, Settings.height
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
   run.set_window_position_from_settings(Settings)
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, Settings.font_height, math.floor(Settings.font_height*1.3))
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, math.floor(Settings.font_height*1.3))
   Editor_state.filename = Settings.filename
   Editor_state.screen_top1 = Settings.screen_top
   Editor_state.cursor1 = Settings.cursor
@@ -79,11 +79,9 @@ end
 
 function run.initialize_default_settings()
   local font_height = 20
-  love.graphics.setFont(love.graphics.newFont(font_height))
+  local font = love.graphics.newFont(font_height)
   run.initialize_window_geometry()
-  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right)
-  Editor_state.font_height = font_height
-  Editor_state.line_height = math.floor(font_height*1.3)
+  Editor_state = edit.initialize_state(Margin_top, Margin_left, App.screen.width-Margin_right, font, math.floor(font_height*1.3))
   Settings = run.settings()
 end
 
