@@ -86,7 +86,7 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
     previous_drawing_mode = nil,  -- extra state for some ephemeral modes like moving/deleting/naming points
 
     font = font,
-    font_height = font:getHeight(),
+    font_height = font_height,
     line_height = line_height,
 
     top = top,
