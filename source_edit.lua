@@ -94,7 +94,7 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
     right = math.floor(right),
     width = right-left,
 
-    filename = love.filesystem.getSourceBaseDirectory()..'/lines.txt',  -- '/' should work even on Windows
+    filename = 'run.lua',
     next_save = nil,
 
     -- undo
