@@ -53,7 +53,8 @@ function handle_error(err)
     App.undo_initialize()
     App.run_tests_and_initialize()
   else
-    if App.disable_tests then App.disable_tests() end
+    -- abort without running love.quit handler
+    Disable_all_quit_handlers = true
     love.event.quit()
   end
 end

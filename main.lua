@@ -331,6 +331,7 @@ function App.wheelmoved(dx,dy)
 end
 
 function love.quit()
+  if Disable_all_quit_handlers then return end
   if current_app_is_warning() then return end
   if Current_app == 'run' then
     local source_settings = Settings.source

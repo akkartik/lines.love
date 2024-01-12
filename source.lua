@@ -271,7 +271,6 @@ function source.settings()
   if Settings == nil then Settings = {} end
   if Settings.source == nil then Settings.source = {} end
   Settings.source.x, Settings.source.y, Settings.source.displayindex = App.screen.position()
-  App.screen.width, App.screen.height = App.screen.size()
   File_navigation.cursors[Editor_state.filename] = {cursor1=Editor_state.cursor1, screen_top1=Editor_state.screen_top1}
   return {
     x=Settings.source.x, y=Settings.source.y, displayindex=Settings.source.displayindex,
