@@ -9,7 +9,7 @@ function draw_help_without_mouse_pressed(State, drawing_index)
   y = y + State.line_height
   love.graphics.print("* Hover on a point and press 'ctrl+u' to pick it up and start moving it,", State.left+30,y)
   y = y + State.line_height
-  love.graphics.print("then press the mouse button to drop it", State.left+30+bullet_indent(),y)
+  love.graphics.print("then press the mouse button to drop it", State.left+30+State.font:getWidth('* '),y)
   y = y + State.line_height
   love.graphics.print("* Hover on a point and press 'ctrl+n', type a name, then press 'enter'", State.left+30,y)
   y = y + State.line_height
@@ -144,8 +144,4 @@ function current_shape(State, shape)
   else
     return State.current_drawing_mode
   end
-end
-
-function bullet_indent()
-  return App.width('* ')
 end

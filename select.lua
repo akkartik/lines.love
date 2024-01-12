@@ -57,11 +57,11 @@ function Text.draw_highlight(State, line, x,y, pos, lo,hi)
       lo_px = 0
     else
       local before = line.data:sub(pos_offset, lo_offset-1)
-      lo_px = App.width(before)
+      lo_px = State.font:getWidth(before)
     end
     local s = line.data:sub(lo_offset, hi_offset-1)
     App.color(Highlight_color)
-    love.graphics.rectangle('fill', x+lo_px,y, App.width(s),State.line_height)
+    love.graphics.rectangle('fill', x+lo_px,y, State.font:getWidth(s),State.line_height)
     App.color(Text_color)
     return lo_px
   end

@@ -41,12 +41,12 @@ function Text.draw(State, line_index, y, startpos)
           end
         else
           if pos <= State.cursor1.pos and pos + frag_len > State.cursor1.pos then
-            Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
+            Text.draw_cursor(State, State.left+Text.x(State.font, screen_line, State.cursor1.pos-pos+1), y)
           elseif pos + frag_len == State.cursor1.pos then
             -- Show cursor at end of line.
             -- This place also catches end of wrapping screen lines. That doesn't seem worth distinguishing.
             -- It seems useful to see a cursor whether your eye is on the left or right margin.
-            Text.draw_cursor(State, State.left+Text.x(screen_line, State.cursor1.pos-pos+1), y)
+            Text.draw_cursor(State, State.left+Text.x(State.font, screen_line, State.cursor1.pos-pos+1), y)
           end
         end
       end
@@ -95,14 +95,14 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   local pos = 1
   -- try to wrap at word boundaries
   for frag in line.data:gmatch('%S*%s*') do
-    local frag_width = App.width(frag)
+    local frag_width = State.font:getWidth(frag)
 --?     print('-- frag:', frag, pos, x, frag_width, State.width)
     while x + frag_width > State.width do
 --?       print('frag:', frag, pos, x, frag_width, State.width)
       if x < 0.8 * State.width then
         -- long word; chop it at some letter
         -- We're not going to reimplement TeX here.
-        local bpos = Text.nearest_pos_less_than(frag, State.width - x)
+        local bpos = Text.nearest_pos_less_than(State.font, frag, State.width - x)
         if x == 0 and bpos == 0 then
           assert(false, ("Infinite loop while line-wrapping. Editor is %dpx wide; window is %dpx wide"):format(State.width, App.screen.width))
         end
@@ -112,7 +112,7 @@ function Text.populate_screen_line_starting_pos(State, line_index)
 --?         if bpos > 0 then
 --?           print('after chop:', frag)
 --?         end
-        frag_width = App.width(frag)
+        frag_width = State.font:getWidth(frag)
       end
 --?       print('screen line:', pos)
       table.insert(line_cache.screen_line_starting_pos, pos)
@@ -419,7 +419,7 @@ function Text.up(State)
         screen_line_starting_pos = screen_line_starting_pos[#screen_line_starting_pos]
         local screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, screen_line_starting_pos)
         local s = string.sub(State.lines[State.cursor1.line].data, screen_line_starting_byte_offset)
-        State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+        State.cursor1.pos = screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, State.cursor_x, State.left) - 1
         break
       end
     end
@@ -429,7 +429,7 @@ function Text.up(State)
     local new_screen_line_starting_pos = State.line_cache[State.cursor1.line].screen_line_starting_pos[screen_line_index-1]
     local new_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(State.lines[State.cursor1.line].data, new_screen_line_starting_byte_offset)
-    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, State.cursor_x, State.left) - 1
 --?     print('cursor pos is now '..tostring(State.cursor1.pos))
   end
   if Text.lt1(State.cursor1, State.screen_top1) then
@@ -454,7 +454,7 @@ function Text.down(State)
       if State.lines[new_cursor_line].mode == 'text' then
         State.cursor1 = {
           line = new_cursor_line,
-          pos = Text.nearest_cursor_pos(State.lines[new_cursor_line].data, State.cursor_x, State.left),
+          pos = Text.nearest_cursor_pos(State.font, State.lines[new_cursor_line].data, State.cursor_x, State.left),
         }
 --?         print(State.cursor1.pos)
         break
@@ -476,7 +476,7 @@ function Text.down(State)
 --?     print('switching pos of screen line at cursor from '..tostring(screen_line_starting_pos)..' to '..tostring(new_screen_line_starting_pos))
     local new_screen_line_starting_byte_offset = Text.offset(State.lines[State.cursor1.line].data, new_screen_line_starting_pos)
     local s = string.sub(State.lines[State.cursor1.line].data, new_screen_line_starting_byte_offset)
-    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(s, State.cursor_x, State.left) - 1
+    State.cursor1.pos = new_screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, State.cursor_x, State.left) - 1
 --?     print('cursor pos is now', State.cursor1.line, State.cursor1.pos)
     if scroll_down then
 --?       print('scroll up preserving cursor')
@@ -739,8 +739,8 @@ function Text.to_pos_on_line(State, line_index, mx, my)
         return line_cache.screen_line_starting_pos[screen_line_index+1]-1
       end
       local s = string.sub(line.data, screen_line_starting_byte_offset)
---?       print('return', mx, Text.nearest_cursor_pos(s, mx, State.left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, State.left) - 1)
-      return screen_line_starting_pos + Text.nearest_cursor_pos(s, mx, State.left) - 1
+--?       print('return', mx, Text.nearest_cursor_pos(State.font, s, mx, State.left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, mx, State.left) - 1)
+      return screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, mx, State.left) - 1
     end
     y = nexty
   end
@@ -760,7 +760,7 @@ function Text.screen_line_width(State, line_index, i)
   else
     screen_line = string.sub(line.data, start_pos)
   end
-  return App.width(screen_line)
+  return State.font:getWidth(screen_line)
 end
 
 function Text.screen_line_index(screen_line_starting_pos, pos)
@@ -774,12 +774,12 @@ end
 -- convert x pixel coordinate to pos
 -- oblivious to wrapping
 -- result: 1 to len+1
-function Text.nearest_cursor_pos(line, x, left)
+function Text.nearest_cursor_pos(font, line, x, left)
   if x < left then
     return 1
   end
   local len = utf8.len(line)
-  local max_x = left+Text.x(line, len+1)
+  local max_x = left+Text.x(font, line, len+1)
   if x > max_x then
     return len+1
   end
@@ -791,8 +791,8 @@ function Text.nearest_cursor_pos(line, x, left)
       return leftpos
     end
     local curr = math.floor((leftpos+rightpos)/2)
-    local currxmin = left+Text.x(line, curr)
-    local currxmax = left+Text.x(line, curr+1)
+    local currxmin = left+Text.x(font, line, curr)
+    local currxmax = left+Text.x(font, line, curr+1)
 --?     print('nearest', x, leftpos, rightpos, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       if x-currxmin < currxmax-x then
@@ -816,18 +816,18 @@ end
 -- return the nearest index of line (in utf8 code points) which lies entirely
 -- within x pixels of the left margin
 -- result: 0 to len+1
-function Text.nearest_pos_less_than(line, x)
+function Text.nearest_pos_less_than(font, line, x)
 --?   print('', '-- nearest_pos_less_than', line, x)
   local len = utf8.len(line)
-  local max_x = Text.x_after(line, len)
+  local max_x = Text.x_after(font, line, len)
   if x > max_x then
     return len+1
   end
   local left, right = 0, len+1
   while true do
     local curr = math.floor((left+right)/2)
-    local currxmin = Text.x_after(line, curr+1)
-    local currxmax = Text.x_after(line, curr+2)
+    local currxmin = Text.x_after(font, line, curr+1)
+    local currxmax = Text.x_after(font, line, curr+2)
 --?     print('', x, left, right, curr, currxmin, currxmax)
     if currxmin <= x and x < currxmax then
       return curr
@@ -844,18 +844,18 @@ function Text.nearest_pos_less_than(line, x)
   assert(false, 'failed to map x pixel to pos')
 end
 
-function Text.x_after(s, pos)
+function Text.x_after(font, s, pos)
   local len = utf8.len(s)
   local offset = Text.offset(s, math.min(pos+1, len+1))
   local s_before = s:sub(1, offset-1)
 --?   print('^'..s_before..'$')
-  return App.width(s_before)
+  return font:getWidth(s_before)
 end
 
-function Text.x(s, pos)
+function Text.x(font, s, pos)
   local offset = Text.offset(s, pos)
   local s_before = s:sub(1, offset-1)
-  return App.width(s_before)
+  return font:getWidth(s_before)
 end
 
 function Text.to2(State, loc1)

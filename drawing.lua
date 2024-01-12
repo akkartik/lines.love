@@ -61,9 +61,9 @@ function Drawing.draw(State, line_index, y)
           App.color(Current_name_background_color)
           local name_width
           if p.name == '' then
-            name_width = App.width('m')
+            name_width = State.font:getWidth('m')
           else
-            name_width = App.width(p.name)
+            name_width = State.font:getWidth(p.name)
           end
           love.graphics.rectangle('fill', x,y, name_width, State.line_height)
         end

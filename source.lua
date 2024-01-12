@@ -126,7 +126,7 @@ function source.load_settings()
   if Show_log_browser_side then
     right = App.screen.width/2 - Margin_right
   end
-  Editor_state = edit.initialize_state(Margin_top, Margin_left + Line_number_width*App.width('m'), right, font, settings.font_height, math.floor(settings.font_height*1.3))
+  Editor_state = edit.initialize_state(Margin_top, Margin_left + Line_number_width*font:getWidth('m'), right, font, settings.font_height, math.floor(settings.font_height*1.3))
   Editor_state.filename = settings.filename
   Editor_state.filename = basename(Editor_state.filename)  -- migrate settings that used full paths; we now support only relative paths within the app
   if settings.cursors then
@@ -154,7 +154,7 @@ function source.initialize_default_settings()
   local font_height = 20
   local font = love.graphics.newFont(font_height)
   source.initialize_window_geometry()
-  Editor_state = edit.initialize_state(Margin_top, Margin_left + Line_number_width*App.width('m'), App.screen.width-Margin_right, font, font_height, math.floor(font_height*1.3))
+  Editor_state = edit.initialize_state(Margin_top, Margin_left + Line_number_width*font:getWidth('m'), App.screen.width-Margin_right, font, font_height, math.floor(font_height*1.3))
   Editor_state.filename = 'run.lua'
 end
 
