@@ -53,6 +53,7 @@ function handle_error(err)
     App.undo_initialize()
     App.run_tests_and_initialize()
   else
+    if App.disable_tests then App.disable_tests() end
     love.event.quit()
   end
 end
