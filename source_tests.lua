@@ -29,7 +29,7 @@ function test_show_log_browser_side()
   check(not Show_log_browser_side, 'baseline')
   -- pressing ctrl+l shows log-browser side
   Current_time = Current_time + 0.1
-  App.run_after_keychord('C-l')
+  App.run_after_keychord('C-l', 'l')
   check(Show_log_browser_side, 'check')
 end
 
@@ -51,7 +51,7 @@ function test_show_log_browser_side_splits_window_width()
   log_browser.parse(Log_browser_state)
   -- display log browser
   Current_time = Current_time + 0.1
-  App.run_after_keychord('C-l')
+  App.run_after_keychord('C-l', 'l')
   -- margins are now adjusted
   check_eq(Editor_state.left, Margin_left, 'edit:left')
   check_eq(Editor_state.right, App.screen.width/2 - Margin_right, 'edit:right')

@@ -36,7 +36,7 @@ function test_backspace_to_delete_drawing()
   -- cursor is on text as always (outside tests this will get initialized correctly)
   Editor_state.cursor1.line = 2
   -- backspacing deletes the drawing
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(#Editor_state.lines, 1, '#lines')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
 end
@@ -50,7 +50,7 @@ function test_backspace_from_start_of_final_line()
   Editor_state.cursor1 = {line=2, pos=1}
   Text.redraw_all(Editor_state)
   -- backspace scrolls up
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(#Editor_state.lines, 1, '#lines')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
@@ -76,7 +76,7 @@ function test_press_ctrl()
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
-  edit.run_after_keychord(Editor_state, 'C-m')
+  edit.run_after_keychord(Editor_state, 'C-m', 'm')
 end
 
 function test_move_left()
@@ -86,7 +86,7 @@ function test_move_left()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=2}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'left')
+  edit.run_after_keychord(Editor_state, 'left', 'left')
   check_eq(Editor_state.cursor1.pos, 1, 'check')
 end
 
@@ -97,7 +97,7 @@ function test_move_right()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'right')
+  edit.run_after_keychord(Editor_state, 'right', 'right')
   check_eq(Editor_state.cursor1.pos, 2, 'check')
 end
 
@@ -108,7 +108,7 @@ function test_move_left_to_previous_line()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'left')
+  edit.run_after_keychord(Editor_state, 'left', 'left')
   check_eq(Editor_state.cursor1.line, 1, 'line')
   check_eq(Editor_state.cursor1.pos, 4, 'pos')  -- past end of line
 end
@@ -120,7 +120,7 @@ function test_move_right_to_next_line()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- past end of line
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'right')
+  edit.run_after_keychord(Editor_state, 'right', 'right')
   check_eq(Editor_state.cursor1.line, 2, 'line')
   check_eq(Editor_state.cursor1.pos, 1, 'pos')
 end
@@ -132,7 +132,7 @@ function test_move_to_start_of_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=3}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.pos, 1, 'check')
 end
 
@@ -143,7 +143,7 @@ function test_move_to_start_of_previous_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.pos, 1, 'check')
 end
 
@@ -154,7 +154,7 @@ function test_skip_to_previous_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=5}  -- at the start of second word
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.pos, 1, 'check')
 end
 
@@ -165,7 +165,7 @@ function test_skip_past_tab_to_previous_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=10}  -- within third word
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.pos, 9, 'check')
 end
 
@@ -176,7 +176,7 @@ function test_skip_multiple_spaces_to_previous_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=6}  -- at the start of second word
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.pos, 1, 'check')
 end
 
@@ -187,7 +187,7 @@ function test_move_to_start_of_word_on_previous_line()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-left')
+  edit.run_after_keychord(Editor_state, 'M-left', 'left')
   check_eq(Editor_state.cursor1.line, 1, 'line')
   check_eq(Editor_state.cursor1.pos, 5, 'pos')
 end
@@ -199,7 +199,7 @@ function test_move_past_end_of_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right')
+  edit.run_after_keychord(Editor_state, 'M-right', 'right')
   check_eq(Editor_state.cursor1.pos, 4, 'check')
 end
 
@@ -210,7 +210,7 @@ function test_skip_to_next_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the space between words
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right')
+  edit.run_after_keychord(Editor_state, 'M-right', 'right')
   check_eq(Editor_state.cursor1.pos, 8, 'check')
 end
 
@@ -221,7 +221,7 @@ function test_skip_past_tab_to_next_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=1}  -- at the space between words
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right')
+  edit.run_after_keychord(Editor_state, 'M-right', 'right')
   check_eq(Editor_state.cursor1.pos, 4, 'check')
 end
 
@@ -232,7 +232,7 @@ function test_skip_multiple_spaces_to_next_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the start of second word
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right')
+  edit.run_after_keychord(Editor_state, 'M-right',  'right')
   check_eq(Editor_state.cursor1.pos, 9, 'check')
 end
 
@@ -243,7 +243,7 @@ function test_move_past_end_of_word_on_next_line()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=8}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right')
+  edit.run_after_keychord(Editor_state, 'M-right',  'right')
   check_eq(Editor_state.cursor1.line, 2, 'line')
   check_eq(Editor_state.cursor1.pos, 4, 'pos')
 end
@@ -592,7 +592,7 @@ function test_select_text()
   edit.draw(Editor_state)
   -- select a letter
   App.fake_key_press('lshift')
-  edit.run_after_keychord(Editor_state, 'S-right')
+  edit.run_after_keychord(Editor_state, 'S-right',  'right')
   App.fake_key_release('lshift')
   edit.key_release(Editor_state, 'lshift')
   -- selection persists even after shift is released
@@ -614,7 +614,7 @@ function test_cursor_movement_without_shift_resets_selection()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- press an arrow key without shift
-  edit.run_after_keychord(Editor_state, 'right')
+  edit.run_after_keychord(Editor_state, 'right',  'right')
   -- no change to data, selection is reset
   check_nil(Editor_state.selection1.line, 'check')
   check_eq(Editor_state.lines[1].data, 'abc', 'data')
@@ -671,7 +671,7 @@ function test_copy_does_not_reset_selection()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- copy selection
-  edit.run_after_keychord(Editor_state, 'C-c')
+  edit.run_after_keychord(Editor_state, 'C-c', 'c')
   check_eq(App.clipboard, 'a', 'clipboard')
   -- selection is reset since shift key is not pressed
   check(Editor_state.selection1.line, 'check')
@@ -689,7 +689,7 @@ function test_cut()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- press a key
-  edit.run_after_keychord(Editor_state, 'C-x')
+  edit.run_after_keychord(Editor_state, 'C-x', 'x')
   check_eq(App.clipboard, 'a', 'clipboard')
   -- selected text is deleted
   check_eq(Editor_state.lines[1].data, 'bc', 'data')
@@ -709,7 +709,7 @@ function test_paste_replaces_selection()
   -- set clipboard
   App.clipboard = 'xyz'
   -- paste selection
-  edit.run_after_keychord(Editor_state, 'C-v')
+  edit.run_after_keychord(Editor_state, 'C-v', 'v')
   -- selection is reset since shift key is not pressed
   -- selection includes the newline, so it's also deleted
   check_eq(Editor_state.lines[1].data, 'xyzdef', 'check')
@@ -734,7 +734,7 @@ function test_deleting_selection_may_scroll()
   -- set up a selection starting above the currently displayed page
   Editor_state.selection1 = {line=1, pos=2}
   -- delete selection
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   -- page scrolls up
   check_eq(Editor_state.screen_top1.line, 1, 'check')
   check_eq(Editor_state.lines[1].data, 'ahi', 'data')
@@ -775,7 +775,7 @@ function test_insert_newline()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- hitting the enter key splits the line
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
@@ -797,7 +797,7 @@ function test_insert_newline_at_start_of_line()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- hitting the enter key splits the line
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
   check_eq(Editor_state.lines[1].data, '', 'data:1')
@@ -822,7 +822,7 @@ function test_insert_from_clipboard()
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- paste some text including a newline, check that new line is created
   App.clipboard = 'xy\nz'
-  edit.run_after_keychord(Editor_state, 'C-v')
+  edit.run_after_keychord(Editor_state, 'C-v', 'v')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, 'cursor:pos')
@@ -982,7 +982,7 @@ function test_select_all_text()
   edit.draw(Editor_state)
   -- select all
   App.fake_key_press('lctrl')
-  edit.run_after_keychord(Editor_state, 'C-a')
+  edit.run_after_keychord(Editor_state, 'C-a', 'a')
   App.fake_key_release('lctrl')
   edit.key_release(Editor_state, 'lctrl')
   -- selection
@@ -1004,7 +1004,7 @@ function test_cut_without_selection()
   Editor_state.selection1 = {}
   edit.draw(Editor_state)
   -- try to cut without selecting text
-  edit.run_after_keychord(Editor_state, 'C-x')
+  edit.run_after_keychord(Editor_state, 'C-x', 'x')
   -- no crash
   check_nil(Editor_state.selection1.line, 'check')
 end
@@ -1024,7 +1024,7 @@ function test_pagedown()
   y = y + Editor_state.line_height
   App.screen.check(y, 'def', 'baseline/screen:2')
   -- after pagedown the bottom line becomes the top
-  edit.run_after_keychord(Editor_state, 'pagedown')
+  edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'cursor')
   y = Editor_state.top
@@ -1055,7 +1055,7 @@ function test_pagedown_skips_drawings()
   App.screen.check(y, 'abc', 'baseline/screen:1')
   -- after pagedown the screen draws the drawing up top
   -- 15px margin + 10px margin + 25px drawing + 10px margin + 15px line3 = 75px < screen height 80px
-  edit.run_after_keychord(Editor_state, 'pagedown')
+  edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor')
   y = Editor_state.top + drawing_height
@@ -1079,7 +1079,7 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'baseline/screen:3')
   -- after pagedown we scroll down the very long wrapping line
-  edit.run_after_keychord(Editor_state, 'pagedown')
+  edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top:line')
   check_eq(Editor_state.screen_top1.pos, 9, 'screen_top:pos')
   y = Editor_state.top
@@ -1108,7 +1108,7 @@ function test_pagedown_never_moves_up()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- pagedown makes no change
-  edit.run_after_keychord(Editor_state, 'pagedown')
+  edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top:line')
   check_eq(Editor_state.screen_top1.pos, 9, 'screen_top:pos')
 end
@@ -1130,7 +1130,7 @@ function test_down_arrow_moves_cursor()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- after hitting the down arrow, the cursor moves down by 1 line
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'cursor')
   -- the screen is unchanged
@@ -1163,7 +1163,7 @@ function test_down_arrow_skips_drawing()
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   check(Editor_state.cursor_x, 'baseline/cursor_x')
   -- after hitting the down arrow the cursor moves down by 2 lines, skipping the drawing
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.cursor1.line, 3, 'cursor')
 end
 
@@ -1184,7 +1184,7 @@ function test_down_arrow_scrolls_down_by_one_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- after hitting the down arrow the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 4, 'cursor')
   y = Editor_state.top
@@ -1212,7 +1212,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the down arrow the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'cursor:pos')
@@ -1241,7 +1241,7 @@ function test_down_arrow_scrolls_down_by_one_screen_line_after_splitting_within_
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghij', 'baseline/screen:3')
   -- after hitting the down arrow the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'cursor:pos')
@@ -1269,12 +1269,12 @@ function test_pagedown_followed_by_down_arrow_does_not_scroll_screen_up()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghij', 'baseline/screen:3')
   -- after hitting pagedown the screen scrolls down to start of a long line
-  edit.run_after_keychord(Editor_state, 'pagedown')
+  edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 3, 'baseline2/screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'baseline2/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'baseline2/cursor:pos')
   -- after hitting down arrow the screen doesn't scroll down further, and certainly doesn't scroll up
-  edit.run_after_keychord(Editor_state, 'down')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
   check_eq(Editor_state.screen_top1.line, 3, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'cursor:pos')
@@ -1303,7 +1303,7 @@ function test_up_arrow_moves_cursor()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- after hitting the up arrow the cursor moves up by 1 line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 2, 'cursor')
   -- the screen is unchanged
@@ -1336,7 +1336,7 @@ function test_up_arrow_skips_drawing()
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   check(Editor_state.cursor_x, 'baseline/cursor_x')
   -- after hitting the up arrow the cursor moves up by 2 lines, skipping the drawing
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
 end
 
@@ -1357,7 +1357,7 @@ function test_up_arrow_scrolls_up_by_one_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up by one line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
   y = Editor_state.top
@@ -1385,7 +1385,7 @@ function test_up_arrow_scrolls_up_by_one_line_skipping_drawing()
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up to previous text line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
 end
@@ -1405,7 +1405,7 @@ function test_up_arrow_scrolls_up_by_one_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:2')
   -- after hitting the up arrow the screen scrolls up to first screen line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   y = Editor_state.top
   App.screen.check(y, 'ghi ', 'screen:1')
   y = y + Editor_state.line_height
@@ -1435,7 +1435,7 @@ function test_up_arrow_scrolls_up_to_final_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up to final screen line of previous line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   y = Editor_state.top
   App.screen.check(y, 'def', 'screen:1')
   y = y + Editor_state.line_height
@@ -1465,7 +1465,7 @@ function test_up_arrow_scrolls_up_to_empty_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- after hitting the up arrow the screen scrolls up by one line
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
   y = Editor_state.top
@@ -1491,7 +1491,7 @@ function test_pageup()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:2')
   -- after pageup the cursor goes to first line
-  edit.run_after_keychord(Editor_state, 'pageup')
+  edit.run_after_keychord(Editor_state, 'pageup', 'pageup')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
   y = Editor_state.top
@@ -1517,7 +1517,7 @@ function test_pageup_scrolls_up_by_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the page-up key the screen scrolls up to top
-  edit.run_after_keychord(Editor_state, 'pageup')
+  edit.run_after_keychord(Editor_state, 'pageup', 'pageup')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
@@ -1544,7 +1544,7 @@ function test_pageup_scrolls_up_from_middle_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the page-up key the screen scrolls up to top
-  edit.run_after_keychord(Editor_state, 'pageup')
+  edit.run_after_keychord(Editor_state, 'pageup', 'pageup')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
@@ -1573,7 +1573,7 @@ function test_enter_on_bottom_line_scrolls_down()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi', 'baseline/screen:3')
   -- after hitting the enter key the screen scrolls down
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 4, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
@@ -1598,7 +1598,7 @@ function test_enter_on_final_line_avoids_scrolling_down_when_not_at_bottom()
   local y = Editor_state.top
   App.screen.check(y, 'jkl', 'baseline/screen:1')
   -- after hitting the enter key the screen does not scroll down
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.screen_top1.line, 4, 'screen_top')
   check_eq(Editor_state.cursor1.line, 5, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, 'cursor:pos')
@@ -1674,7 +1674,7 @@ function test_left_arrow_scrolls_up_in_wrapped_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:2')
   -- after hitting the left arrow the screen scrolls up to first screen line
-  edit.run_after_keychord(Editor_state, 'left')
+  edit.run_after_keychord(Editor_state, 'left', 'left')
   y = Editor_state.top
   App.screen.check(y, 'ghi ', 'screen:1')
   y = y + Editor_state.line_height
@@ -1705,7 +1705,7 @@ function test_right_arrow_scrolls_down_in_wrapped_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the right arrow the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'right')
+  edit.run_after_keychord(Editor_state, 'right',  'right')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, 'cursor:pos')
@@ -1733,7 +1733,7 @@ function test_home_scrolls_up_in_wrapped_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:2')
   -- after hitting home the screen scrolls up to first screen line
-  edit.run_after_keychord(Editor_state, 'home')
+  edit.run_after_keychord(Editor_state, 'home', 'home')
   y = Editor_state.top
   App.screen.check(y, 'ghi ', 'screen:1')
   y = y + Editor_state.line_height
@@ -1764,7 +1764,7 @@ function test_end_scrolls_down_in_wrapped_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting end the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'end')
+  edit.run_after_keychord(Editor_state, 'end', 'end')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 8, 'cursor:pos')
@@ -1827,7 +1827,7 @@ function test_backspace_can_scroll_up()
   y = y + Editor_state.line_height
   App.screen.check(y, 'jkl', 'baseline/screen:3')
   -- after hitting backspace the screen scrolls up by one line
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top')
   check_eq(Editor_state.cursor1.line, 1, 'cursor')
   y = Editor_state.top
@@ -1853,7 +1853,7 @@ function test_backspace_can_scroll_up_screen_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'mno', 'baseline/screen:2')
   -- after hitting backspace the screen scrolls up by one screen line
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   y = Editor_state.top
   App.screen.check(y, 'ghij', 'screen:1')
   y = y + Editor_state.line_height
@@ -1874,7 +1874,7 @@ function test_backspace_past_line_boundary()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=2, pos=1}
   -- backspace joins with previous line
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'abcdef', 'check')
 end
 
@@ -1890,7 +1890,7 @@ function test_backspace_over_selection()
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.selection1 = {line=1, pos=2}
   -- backspace deletes the selected character, even though it's after the cursor
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'bc', 'data')
   -- cursor (remains) at start of selection
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
@@ -1908,7 +1908,7 @@ function test_backspace_over_selection_reverse()
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=1}
   -- backspace deletes the selected character
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'bc', 'data')
   -- cursor moves to start of selection
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
@@ -1926,7 +1926,7 @@ function test_backspace_over_multiple_lines()
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=4, pos=2}
   -- backspace deletes the region and joins the remaining portions of lines on either side
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'akl', 'data:1')
   check_eq(Editor_state.lines[2].data, 'mno', 'data:2')
   -- cursor remains at start of selection
@@ -1945,7 +1945,7 @@ function test_backspace_to_end_of_line()
   Editor_state.cursor1 = {line=1, pos=2}
   Editor_state.selection1 = {line=1, pos=4}
   -- backspace deletes rest of line without joining to any other line
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'a', 'data:1')
   check_eq(Editor_state.lines[2].data, 'def', 'data:2')
   -- cursor remains at start of selection
@@ -1964,7 +1964,7 @@ function test_backspace_to_start_of_line()
   Editor_state.cursor1 = {line=2, pos=1}
   Editor_state.selection1 = {line=2, pos=3}
   -- backspace deletes beginning of line without joining to any other line
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.lines[1].data, 'abc', 'data:1')
   check_eq(Editor_state.lines[2].data, 'f', 'data:2')
   -- cursor remains at start of selection
@@ -1996,7 +1996,7 @@ function test_undo_insert_text()
   y = y + Editor_state.line_height
   App.screen.check(y, 'xyz', 'baseline/screen:3')
   -- undo
-  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'cursor:pos')
   check_nil(Editor_state.selection1.line, 'selection:line')
@@ -2018,7 +2018,7 @@ function test_undo_delete_text()
   Editor_state.screen_top1 = {line=1, pos=1}
   Editor_state.screen_bottom1 = {}
   -- delete a character
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   check_eq(Editor_state.cursor1.line, 2, 'baseline/cursor:line')
   check_eq(Editor_state.cursor1.pos, 4, 'baseline/cursor:pos')
   check_nil(Editor_state.selection1.line, 'baseline/selection:line')
@@ -2031,7 +2031,7 @@ function test_undo_delete_text()
   App.screen.check(y, 'xyz', 'baseline/screen:3')
   -- undo
 --?   -- after undo, the backspaced key is selected
-  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
   check_eq(Editor_state.cursor1.line, 2, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 5, 'cursor:pos')
   check_nil(Editor_state.selection1.line, 'selection:line')
@@ -2062,8 +2062,8 @@ function test_undo_restores_selection()
   check_eq(Editor_state.lines[1].data, 'xbc', 'baseline')
   check_nil(Editor_state.selection1.line, 'baseline:selection')
   -- undo
-  edit.run_after_keychord(Editor_state, 'C-z')
-  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
   -- selection is restored
   check_eq(Editor_state.selection1.line, 1, 'line')
   check_eq(Editor_state.selection1.pos, 2, 'pos')
@@ -2079,19 +2079,19 @@ function test_search()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- search for a string
-  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
   edit.run_after_text_input(Editor_state, 'd')
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.cursor1.line, 2, '1/cursor:line')
   check_eq(Editor_state.cursor1.pos, 1, '1/cursor:pos')
   -- reset cursor
   Editor_state.cursor1 = {line=1, pos=1}
   Editor_state.screen_top1 = {line=1, pos=1}
   -- search for second occurrence
-  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
   edit.run_after_text_input(Editor_state, 'de')
-  edit.run_after_keychord(Editor_state, 'down')
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.cursor1.line, 4, '2/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, '2/cursor:pos')
 end
@@ -2106,10 +2106,10 @@ function test_search_upwards()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- search for a string
-  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
   edit.run_after_text_input(Editor_state, 'a')
   -- search for previous occurrence
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   check_eq(Editor_state.cursor1.line, 1, '2/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, '2/cursor:pos')
 end
@@ -2124,9 +2124,9 @@ function test_search_wrap()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- search for a string
-  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
   edit.run_after_text_input(Editor_state, 'a')
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, '1/cursor:line')
   check_eq(Editor_state.cursor1.pos, 2, '1/cursor:pos')
@@ -2142,9 +2142,9 @@ function test_search_wrap_upwards()
   Editor_state.screen_bottom1 = {}
   edit.draw(Editor_state)
   -- search upwards for a string
-  edit.run_after_keychord(Editor_state, 'C-f')
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
   edit.run_after_text_input(Editor_state, 'a')
-  edit.run_after_keychord(Editor_state, 'up')
+  edit.run_after_keychord(Editor_state, 'up', 'up')
   -- cursor wraps
   check_eq(Editor_state.cursor1.line, 1, '1/cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, '1/cursor:pos')

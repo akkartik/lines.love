@@ -110,7 +110,7 @@ function test_draw_circle()
   check_eq(#Editor_state.lines[1].shapes, 0, 'baseline/#shapes')
   -- draw a circle
   App.mouse_move(Editor_state.left+4, Editor_state.top+Drawing_padding_top+4)  -- hover on drawing
-  edit.run_after_keychord(Editor_state, 'C-o')
+  edit.run_after_keychord(Editor_state, 'C-o', 'o')
   edit.run_after_mouse_press(Editor_state, Editor_state.left+35, Editor_state.top+Drawing_padding_top+36, 1)
   edit.run_after_mouse_release(Editor_state, Editor_state.left+35+30, Editor_state.top+Drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
@@ -140,7 +140,7 @@ function test_cancel_stroke()
   -- start drawing a line
   edit.run_after_mouse_press(Editor_state, Editor_state.left+5, Editor_state.top+Drawing_padding_top+6, 1)
   -- cancel
-  edit.run_after_keychord(Editor_state, 'escape')
+  edit.run_after_keychord(Editor_state, 'escape', 'escape')
   edit.run_after_mouse_release(Editor_state, Editor_state.left+35, Editor_state.top+Drawing_padding_top+36, 1)
   local drawing = Editor_state.lines[1]
   check_eq(#drawing.shapes, 0, '#shapes')
@@ -156,7 +156,7 @@ function test_keys_do_not_affect_shape_when_mouse_up()
   edit.draw(Editor_state)
   -- hover over drawing and press 'o' without holding mouse
   App.mouse_move(Editor_state.left+4, Editor_state.top+Drawing_padding_top+4)  -- hover on drawing
-  edit.run_after_keychord(Editor_state, 'o')
+  edit.run_after_keychord(Editor_state, 'o', 'o')
   -- no change to drawing mode
   check_eq(Editor_state.current_drawing_mode, 'line', 'drawing_mode')
   -- no change to text either because we didn't run the text_input event
@@ -406,14 +406,14 @@ function test_name_point()
   check_eq(p2.y, 36, 'baseline/p2:y')
   check_nil(p2.name, 'baseline/p2:name')
   -- enter 'name' mode without moving the mouse
-  edit.run_after_keychord(Editor_state, 'C-n')
+  edit.run_after_keychord(Editor_state, 'C-n', 'n')
   check_eq(Editor_state.current_drawing_mode, 'name', 'mode:1')
   edit.run_after_text_input(Editor_state, 'A')
   check_eq(p2.name, 'A', 'check1')
   -- still in 'name' mode
   check_eq(Editor_state.current_drawing_mode, 'name', 'mode:2')
   -- exit 'name' mode
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(Editor_state.current_drawing_mode, 'line', 'mode:3')
   check_eq(p2.name, 'A', 'check2')
   -- wait until save
@@ -450,10 +450,10 @@ function test_name_point_then_hit_backspace()
   check_eq(p2.y, 36, 'baseline/p2:y')
   check_nil(p2.name, 'baseline/p2:name')
   -- enter 'name' mode without moving the mouse
-  edit.run_after_keychord(Editor_state, 'C-n')
+  edit.run_after_keychord(Editor_state, 'C-n', 'n')
   check_eq(Editor_state.current_drawing_mode, 'name', 'mode:1')
   -- hit backspace
-  edit.run_after_keychord(Editor_state, 'backspace')
+  edit.run_after_keychord(Editor_state, 'backspace', 'backspace')
   -- no crash
 end
 
@@ -482,7 +482,7 @@ function test_name_point_then_exit_drawing()
   check_eq(p2.y, 36, 'baseline/p2:y')
   check_nil(p2.name, 'baseline/p2:name')
   -- enter 'name' mode without moving the mouse
-  edit.run_after_keychord(Editor_state, 'C-n')
+  edit.run_after_keychord(Editor_state, 'C-n', 'n')
   check_eq(Editor_state.current_drawing_mode, 'name', 'mode:1')
   -- click outside the drawing
   edit.run_after_mouse_click(Editor_state, App.screen.width-5, App.screen.height-5, 1)
@@ -525,7 +525,7 @@ function test_move_point()
   check_eq(p2.y, 36, 'save/y')
   edit.draw(Editor_state)
   -- enter 'move' mode without moving the mouse
-  edit.run_after_keychord(Editor_state, 'C-u')
+  edit.run_after_keychord(Editor_state, 'C-u', 'u')
   check_eq(Editor_state.current_drawing_mode, 'move', 'mode:1')
   -- point is lifted
   check_eq(drawing.pending.mode, 'move', 'mode:2')
@@ -568,7 +568,7 @@ function test_move_point_on_manhattan_line()
   check_eq(drawing.shapes[1].mode, 'manhattan', 'baseline/shape:1')
   edit.draw(Editor_state)
   -- enter 'move' mode
-  edit.run_after_keychord(Editor_state, 'C-u')
+  edit.run_after_keychord(Editor_state, 'C-u', 'u')
   check_eq(Editor_state.current_drawing_mode, 'move', 'mode:1')
   -- move point
   App.mouse_move(Editor_state.left+26, Editor_state.top+Drawing_padding_top+44)
@@ -596,7 +596,7 @@ function test_delete_lines_at_point()
   check_eq(drawing.shapes[2].mode, 'line', 'baseline/shape:2')
   -- hover on the common point and delete
   App.mouse_move(Editor_state.left+35, Editor_state.top+Drawing_padding_top+36)
-  edit.run_after_keychord(Editor_state, 'C-d')
+  edit.run_after_keychord(Editor_state, 'C-d', 'd')
   check_eq(drawing.shapes[1].mode, 'deleted', 'shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'shape:2')
   -- wait for some time
@@ -626,7 +626,7 @@ function test_delete_line_under_mouse_pointer()
   check_eq(drawing.shapes[2].mode, 'line', 'baseline/shape:2')
   -- hover on one of the lines and delete
   App.mouse_move(Editor_state.left+25, Editor_state.top+Drawing_padding_top+26)
-  edit.run_after_keychord(Editor_state, 'C-d')
+  edit.run_after_keychord(Editor_state, 'C-d', 'd')
   -- only that line is deleted
   check_eq(drawing.shapes[1].mode, 'deleted', 'shape:1')
   check_eq(drawing.shapes[2].mode, 'line', 'shape:2')
@@ -657,7 +657,7 @@ function test_delete_point_from_polygon()
   check_eq(#drawing.shapes[1].vertices, 4, 'baseline/vertices')
   -- hover on a point and delete
   App.mouse_move(Editor_state.left+35, Editor_state.top+Drawing_padding_top+26)
-  edit.run_after_keychord(Editor_state, 'C-d')
+  edit.run_after_keychord(Editor_state, 'C-d', 'd')
   -- just the one point is deleted
   check_eq(drawing.shapes[1].mode, 'polygon', 'shape')
   check_eq(#drawing.shapes[1].vertices, 3, 'vertices')
@@ -685,7 +685,7 @@ function test_delete_point_from_polygon()
   check_eq(#drawing.shapes[1].vertices, 3, 'baseline/vertices')
   -- hover on a point and delete
   App.mouse_move(Editor_state.left+65, Editor_state.top+Drawing_padding_top+36)
-  edit.run_after_keychord(Editor_state, 'C-d')
+  edit.run_after_keychord(Editor_state, 'C-d', 'd')
   -- there's < 3 points left, so the whole polygon is deleted
   check_eq(drawing.shapes[1].mode, 'deleted', 'check')
 end
@@ -716,15 +716,15 @@ function test_undo_name_point()
   check_eq(#Editor_state.history, 1, 'baseline/history:1')
 --?   print('a', Editor_state.lines.current_drawing)
   -- enter 'name' mode without moving the mouse
-  edit.run_after_keychord(Editor_state, 'C-n')
+  edit.run_after_keychord(Editor_state, 'C-n', 'n')
   edit.run_after_text_input(Editor_state, 'A')
-  edit.run_after_keychord(Editor_state, 'return')
+  edit.run_after_keychord(Editor_state, 'return', 'return')
   check_eq(p2.name, 'A', 'baseline')
   check_eq(#Editor_state.history, 3, 'baseline/history:2')
   check_eq(Editor_state.next_history, 4, 'baseline/next_history')
 --?   print('b', Editor_state.lines.current_drawing)
   -- undo
-  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 3, 'next_history')
@@ -762,7 +762,7 @@ function test_undo_move_point()
   check_eq(p2.y, 36, 'baseline/p2:y')
   check_nil(p2.name, 'baseline/p2:name')
   -- move p2
-  edit.run_after_keychord(Editor_state, 'C-u')
+  edit.run_after_keychord(Editor_state, 'C-u', 'u')
   App.mouse_move(Editor_state.left+26, Editor_state.top+Drawing_padding_top+44)
   edit.update(Editor_state, 0.05)
   local p2 = drawing.points[drawing.shapes[1].p2]
@@ -772,8 +772,8 @@ function test_undo_move_point()
   edit.run_after_mouse_click(Editor_state, Editor_state.left+26, Editor_state.top+Drawing_padding_top+44, 1)
   check_eq(Editor_state.next_history, 4, 'next_history')
   -- undo
-  edit.run_after_keychord(Editor_state, 'C-z')
-  edit.run_after_keychord(Editor_state, 'C-z')  -- bug: need to undo twice
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')  -- bug: need to undo twice
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 2, 'next_history')
@@ -809,11 +809,11 @@ function test_undo_delete_point()
   check_eq(drawing.shapes[2].mode, 'line', 'baseline/shape:2')
   -- hover on the common point and delete
   App.mouse_move(Editor_state.left+35, Editor_state.top+Drawing_padding_top+36)
-  edit.run_after_keychord(Editor_state, 'C-d')
+  edit.run_after_keychord(Editor_state, 'C-d', 'd')
   check_eq(drawing.shapes[1].mode, 'deleted', 'shape:1')
   check_eq(drawing.shapes[2].mode, 'deleted', 'shape:2')
   -- undo
-  edit.run_after_keychord(Editor_state, 'C-z')
+  edit.run_after_keychord(Editor_state, 'C-z', 'z')
   local drawing = Editor_state.lines[1]
   local p2 = drawing.points[drawing.shapes[1].p2]
   check_eq(Editor_state.next_history, 3, 'next_history')
