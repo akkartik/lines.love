@@ -588,9 +588,9 @@ function edit.run_after_text_input(State, t)
 end
 
 -- not all keys are text_input
-function edit.run_after_keychord(State, chord)
-  edit.keychord_press(State, chord)
-  edit.key_release(State, chord)
+function edit.run_after_keychord(State, chord, key)
+  edit.keychord_press(State, chord, key)
+  edit.key_release(State, key)
   App.screen.contents = {}
   edit.update(State, 0)
   edit.draw(State)
