@@ -365,9 +365,9 @@ end
 
 -- not all keys are textinput
 -- TODO: handle chords of multiple keys
-function App.run_after_keychord(chord)
-  App.keychord_press(chord)
-  App.keyreleased(chord)
+function App.run_after_keychord(chord, key)
+  App.keychord_press(chord, key)
+  App.keyreleased(key)
   App.screen.contents = {}
   App.draw()
 end

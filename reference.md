@@ -416,8 +416,8 @@ and [the Lua manual](https://www.lua.org/manual/5.1/manual.html).
 * `App.run_after_textinput(t)` -- mimics keystrokes resulting in `t` and then
   draws one frame.
 
-* `App.run_after_keychord(chord)` -- mimics keystrokes resulting in `chord`
-  and then draws one frame.
+* `App.run_after_keychord(chord, key)` -- mimics the final `key` press
+  resulting in `chord` and then draws one frame.
 
 * `App.run_after_mouse_press(x,y, mouse_button)` -- mimics a mouse press down
   followed by drawing a frame.
