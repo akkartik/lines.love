@@ -798,7 +798,7 @@ function Text.to_pos_on_line(State, line_index, mx, my)
       -- (The final screen line positions past end of screen line as always.)
       if screen_line_index < #line_cache.screen_line_starting_pos and mx > State.left + Text.screen_line_width(State, line_index, screen_line_index) then
 --?         print('past end of non-final line; return')
-        return line_cache.screen_line_starting_pos[screen_line_index+1]-1
+        return line_cache.screen_line_starting_pos[screen_line_index+1]
       end
       local s = string.sub(line.data, screen_line_starting_byte_offset)
 --?       print('return', mx, Text.nearest_cursor_pos(State.font, s, mx, State.left), '=>', screen_line_starting_pos + Text.nearest_cursor_pos(State.font, s, mx, State.left) - 1)

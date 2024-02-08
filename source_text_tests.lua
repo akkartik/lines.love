@@ -485,9 +485,9 @@ function test_click_past_end_of_screen_line()
   y = y + Editor_state.line_height
   -- click past end of second screen line
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
-  -- cursor moves to end of screen line
+  -- cursor moves to end of screen line (one more than final character shown)
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
-  check_eq(Editor_state.cursor1.pos, 12, 'cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 13, 'cursor:pos')
 end
 
 function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
@@ -506,9 +506,9 @@ function test_click_on_wrapping_line_rendered_from_partway_at_top_of_screen()
   y = y + Editor_state.line_height
   -- click past end of second screen line
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
-  -- cursor moves to end of screen line
+  -- cursor moves to end of screen line (one more than final character shown)
   check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
-  check_eq(Editor_state.cursor1.pos, 12, 'cursor:pos')
+  check_eq(Editor_state.cursor1.pos, 13, 'cursor:pos')
 end
 
 function test_click_past_end_of_wrapping_line()
@@ -576,8 +576,8 @@ function test_click_past_end_of_word_wrapping_line()
   y = y + Editor_state.line_height
   -- click past the end of the screen line
   edit.run_after_mouse_click(Editor_state, App.screen.width-2,y-2, 1)
-  -- cursor moves to end of screen line
-  check_eq(Editor_state.cursor1.pos, 20, 'cursor')
+  -- cursor moves to end of screen line (one more than final character shown)
+  check_eq(Editor_state.cursor1.pos, 21, 'cursor')
 end
 
 function test_select_text()
