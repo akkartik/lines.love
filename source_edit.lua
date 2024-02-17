@@ -238,6 +238,7 @@ function edit.quit(State)
 end
 
 function edit.mouse_press(State, x,y, mouse_button)
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   if State.search_term then return end
   State.mouse_down = mouse_button
 --?   print_and_log(('edit.mouse_press: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
