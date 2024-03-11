@@ -84,13 +84,14 @@ found anything amiss: http://akkartik.name/contact
 
 Updates to lines.love can be downloaded from the following mirrors in addition
 to the website above:
-* https://github.com/akkartik/lines.love
+* https://git.sr.ht/~akkartik/lines.love
 * https://repo.or.cz/lines.love.git
 * https://tildegit.org/akkartik/lines.love
+* https://git.merveilles.town/akkartik/lines.love
 * https://git.tilde.institute/akkartik/lines.love
-* https://git.sr.ht/~akkartik/lines.love
-* https://notabug.org/akkartik/lines.love
 * https://codeberg.org/akkartik/lines.love
+* https://github.com/akkartik/lines.love
+* https://notabug.org/akkartik/lines.love
 * https://pagure.io/lines.love
 * https://nest.pijul.com/akkartik/lines.love (using the Pijul version control system)
 
