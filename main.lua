@@ -341,6 +341,17 @@ function App.wheelmoved(dx,dy)
   end
 end
 
+function App.mousefocus(in_focus)
+  if current_app_is_warning() then return end
+  if Current_app == 'run' then
+    if run.mouse_focus then run.mouse_focus(in_focus) end
+  elseif Current_app == 'source' then
+    if source.mouse_focus then source.mouse_focus(in_focus) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
 function love.quit()
   if Disable_all_quit_handlers then return end
   if current_app_is_warning() then return end
