@@ -319,6 +319,17 @@ function App.mousereleased(x,y, mouse_button)
   end
 end
 
+function App.mousemoved(x,y, dx,dy, is_touch)
+  if current_app_is_warning() then return end
+  if Current_app == 'run' then
+    if run.mouse_move then run.mouse_move(dx,dy) end
+  elseif Current_app == 'source' then
+    if source.mouse_move then source.mouse_move(dx,dy) end
+  else
+    assert(false, 'unknown app "'..Current_app..'"')
+  end
+end
+
 function App.wheelmoved(dx,dy)
   if current_app_is_warning() then return end
   if Current_app == 'run' then
