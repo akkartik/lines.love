@@ -73,11 +73,18 @@ automatically called for you as appropriate.
   button. Provides the same arguments as `App.mousepressed()` above.
   (Based on [LÖVE](https://love2d.org/wiki/love.mousereleased).)
 
+* `App.mousemoved(x,y, dx,dy, is_touch)` -- called any time the mouse moves.
+  (Based on [LÖVE](https://love2d.org/wiki/love.mousemoved).)
+
 * `App.wheelmoved(dx,dy)` -- called when you use the scroll wheel on a mouse
   that has it. Provides in `dx` and `dy` an indication of how fast the wheel
   is being scrolled. Positive values for `dx` indicate movement to the right.
   Positive values for `dy` indicate upward movement.
   (Based on [LÖVE](https://love2d.org/wiki/love.wheelmoved).)
+
+* `App.mousefocus(in_focus)` -- called when the mouse pointer moves on or off
+  the app window.
+  (Based on [LÖVE](https://love2d.org/wiki/love.mousefocus).)
 
 * `App.keychord_press(chord, key)` -- called when you press a key-combination.
   Provides in `key` a string name for the key most recently pressed ([valid
