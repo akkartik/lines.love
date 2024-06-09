@@ -3,7 +3,7 @@
 -- of specific shapes. In particular, no tests of freehand drawings.
 
 function test_creating_drawing_saves()
-  App.screen.init{width=120, height=60}
+  App.screen.init{width=800, height=600}
   Editor_state = edit.initialize_test_state()
   Editor_state.filename = 'foo'
   Editor_state.lines = load_array{}

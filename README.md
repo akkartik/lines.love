@@ -72,6 +72,11 @@ found anything amiss: http://akkartik.name/contact
 * No clipping yet for drawings. In particular, circles/squares/rectangles and
   point labels can overflow a drawing.
 
+* If you ever see a crash when clicking on the mouse, it might be because a
+  mouse press and release need to happen in separate frames. Try pressing and
+  releasing more slowly and let me know if that helps or not. This is klunky,
+  sorry.
+
 * Touchpads can drag the mouse pointer using a light touch or a heavy click.
   On Linux, drags using the light touch get interrupted when a key is pressed.
   You'll have to press down to drag.
