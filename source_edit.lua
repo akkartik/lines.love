@@ -68,8 +68,10 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
     --
     -- Make sure these coordinates are never aliased, so that changing one causes
     -- action at a distance.
+    --
+    -- On lines that are drawings, pos will be nil.
     screen_top1 = {line=1, pos=1},  -- position of start of screen line at top of screen
-    cursor1 = {line=1, pos=1},  -- position of cursor
+    cursor1 = {line=1, pos=1},  -- position of cursor; must be on a text line
     screen_bottom1 = {line=1, pos=1},  -- position of start of screen line at bottom of screen
 
     selection1 = {},
@@ -190,6 +192,7 @@ function edit.draw(State, hide_cursor, show_line_numbers)
                        Drawing.before = snapshot(State, line_index-1, line_index)
                        table.insert(State.lines, line_index, {mode='drawing', y=y, h=256/2, points={}, shapes={}, pending={}})
                        table.insert(State.line_cache, line_index, {})
+                       for _,line_cache in ipairs(State.line_cache) do line_cache.starty = nil end
                        if State.cursor1.line >= line_index then
                          State.cursor1.line = State.cursor1.line+1
                        end
@@ -296,10 +299,7 @@ function edit.mouse_press(State, x,y, mouse_button)
   State.old_cursor1 = State.cursor1
   State.old_selection1 = State.selection1
   State.mousepress_shift = App.shift_down()
-  State.selection1 = {
-      line=State.screen_bottom1.line,
-      pos=Text.pos_at_end_of_screen_line(State, State.screen_bottom1),
-  }
+  State.selection1 = Text.final_text_loc_on_screen(State)
 end
 
 function edit.mouse_release(State, x,y, mouse_button)
@@ -337,7 +337,7 @@ function edit.mouse_release(State, x,y, mouse_button)
     end
 
     -- still here? mouse release is below all screen lines
-    State.cursor1.line, State.cursor1.pos = State.screen_bottom1.line, Text.pos_at_end_of_screen_line(State, State.screen_bottom1)
+    State.cursor1 = Text.final_text_loc_on_screen(State)
     edit.clean_up_mouse_press(State)
 --?     print_and_log(('edit.mouse_release: finally selection %s,%s cursor %d,%d'):format(tostring(State.selection1.line), tostring(State.selection1.pos), State.cursor1.line, State.cursor1.pos))
   end
@@ -600,6 +600,7 @@ end
 function edit.run_after_mouse_click(State, x,y, mouse_button)
   App.fake_mouse_press(x,y, mouse_button)
   edit.mouse_press(State, x,y, mouse_button)
+  edit.draw(State)
   App.fake_mouse_release(x,y, mouse_button)
   edit.mouse_release(State, x,y, mouse_button)
   App.screen.contents = {}

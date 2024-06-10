@@ -16,7 +16,7 @@ function test_initial_state()
 end
 
 function test_click_to_create_drawing()
-  App.screen.init{width=120, height=60}
+  App.screen.init{width=800, height=600}
   Editor_state = edit.initialize_test_state()
   Editor_state.lines = load_array{}
   Text.redraw_all(Editor_state)

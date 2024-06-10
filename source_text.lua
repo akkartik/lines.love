@@ -683,6 +683,7 @@ function Text.pos_at_start_of_screen_line(State, loc1)
 end
 
 function Text.pos_at_end_of_screen_line(State, loc1)
+  assert(State.lines[loc1.line].mode == 'text')
   Text.populate_screen_line_starting_pos(State, loc1.line)
   local line_cache = State.line_cache[loc1.line]
   local most_recent_final_pos = utf8.len(State.lines[loc1.line].data)+1
@@ -694,6 +695,24 @@ function Text.pos_at_end_of_screen_line(State, loc1)
     most_recent_final_pos = spos-1
   end
   assert(false, ('invalid pos %d'):format(loc1.pos))
+end
+
+function Text.final_text_loc_on_screen(State)
+  if State.lines[State.screen_bottom1.line].mode == 'text' then
+    return {
+      line=State.screen_bottom1.line,
+      pos=Text.pos_at_end_of_screen_line(State, State.screen_bottom1),
+    }
+  end
+  local loc2 = Text.to2(State, State.screen_bottom1)
+  while true do
+    if State.lines[loc2.line].mode == 'text' then break end
+    assert(loc2.line > 1 or loc2.screen_line > 1 and loc2.screen_pos > 1)  -- elsewhere we're making sure there's always at least one text line on screen
+    loc2 = Text.previous_screen_line(State, loc2)
+  end
+  local result = Text.to1(State, loc2)
+  result.pos = Text.pos_at_end_of_screen_line(State, result)
+  return result
 end
 
 function Text.cursor_at_final_screen_line(State)
