@@ -231,7 +231,7 @@ function test_skip_multiple_spaces_to_next_word()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=4}  -- at the start of second word
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right',  'right')
+  edit.run_after_keychord(Editor_state, 'M-right', 'right')
   check_eq(Editor_state.cursor1.pos, 9, 'check')
 end
 
@@ -242,7 +242,7 @@ function test_move_past_end_of_word_on_next_line()
   Text.redraw_all(Editor_state)
   Editor_state.cursor1 = {line=1, pos=8}
   edit.draw(Editor_state)
-  edit.run_after_keychord(Editor_state, 'M-right',  'right')
+  edit.run_after_keychord(Editor_state, 'M-right', 'right')
   check_eq(Editor_state.cursor1.line, 2, 'line')
   check_eq(Editor_state.cursor1.pos, 4, 'pos')
 end
@@ -573,7 +573,7 @@ function test_select_text()
   edit.draw(Editor_state)
   -- select a letter
   App.fake_key_press('lshift')
-  edit.run_after_keychord(Editor_state, 'S-right',  'right')
+  edit.run_after_keychord(Editor_state, 'S-right', 'right')
   App.fake_key_release('lshift')
   edit.key_release(Editor_state, 'lshift')
   -- selection persists even after shift is released
@@ -594,7 +594,7 @@ function test_cursor_movement_without_shift_resets_selection()
   Editor_state.screen_top1 = {line=1, pos=1}
   edit.draw(Editor_state)
   -- press an arrow key without shift
-  edit.run_after_keychord(Editor_state, 'right',  'right')
+  edit.run_after_keychord(Editor_state, 'right', 'right')
   -- no change to data, selection is reset
   check_nil(Editor_state.selection1.line, 'check')
   check_eq(Editor_state.lines[1].data, 'abc', 'data')
@@ -1641,7 +1641,7 @@ function test_right_arrow_scrolls_down_in_wrapped_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'ghi ', 'baseline/screen:3')  -- line wrapping includes trailing whitespace
   -- after hitting the right arrow the screen scrolls down by one line
-  edit.run_after_keychord(Editor_state, 'right',  'right')
+  edit.run_after_keychord(Editor_state, 'right', 'right')
   check_eq(Editor_state.screen_top1.line, 2, 'screen_top')
   check_eq(Editor_state.cursor1.line, 3, 'cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, 'cursor:pos')
