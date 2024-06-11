@@ -439,11 +439,14 @@ function Text.starty(State, line_index)
   local loc2 = Text.to2(State, State.screen_top1)
   local y = State.top
   while true do
+    if State.lines[loc2.line].mode == 'drawing' then
+      y = y + Drawing_padding_top
+    end
     if loc2.line == line_index then return y end
     if State.lines[loc2.line].mode == 'text' then
       y = y + State.line_height
     elseif State.lines[loc2.line].mode == 'drawing' then
-      y = y + Drawing_padding_height + Drawing.pixels(State.lines[loc2.line].h, State.width)
+      y = y + Drawing.pixels(State.lines[loc2.line].h, State.width) + Drawing_padding_bottom
     end
     if y + State.line_height > App.screen.height then break end
     local next_loc2 = Text.next_screen_line(State, loc2)
@@ -1102,13 +1105,8 @@ function Text.tweak_screen_top_and_cursor(State)
   if Text.lt1(State.cursor1, State.screen_top1) then
     State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
   elseif State.cursor1.line >= screen_bottom1.line then
---?     print('too low')
     if Text.cursor_out_of_screen(State) then
---?       print('tweak')
-      State.cursor1 = {
-          line=screen_bottom1.line,
-          pos=Text.to_pos_on_line(State, screen_bottom1.line, State.right-5, App.screen.height-5),
-      }
+      State.cursor1 = Text.final_text_loc_on_screen(State)
     end
   end
 end

@@ -69,7 +69,7 @@ end
 
 function Text.mouse_pos(State)
   local x,y = App.mouse_x(), App.mouse_y()
-  if y < State.line_cache[State.screen_top1.line].starty then
+  if y < State.top then
     return State.screen_top1.line, State.screen_top1.pos
   end
   for line_index,line in ipairs(State.lines) do
