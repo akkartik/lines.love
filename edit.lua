@@ -70,7 +70,6 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
     -- On lines that are drawings, pos will be nil.
     screen_top1 = {line=1, pos=1},  -- position of start of screen line at top of screen
     cursor1 = {line=1, pos=1},  -- position of cursor; must be on a text line
-    screen_bottom1 = {line=1, pos=1},  -- position of start of screen line at bottom of screen
 
     selection1 = {},
     -- some extra state to compute selection between mouse press and release
@@ -166,13 +165,11 @@ function edit.draw(State)
   State.cursor_x = nil
   State.cursor_y = nil
   local y = State.top
-  local screen_bottom1 = {line=nil, pos=nil}
 --?   print('== draw')
   for line_index = State.screen_top1.line,#State.lines do
     local line = State.lines[line_index]
 --?     print('draw:', y, line_index, line)
     if y + State.line_height > App.screen.height then break end
-    screen_bottom1.line = line_index
     if line.mode == 'text' then
 --?       print('text.draw', y, line_index)
       local startpos = 1
@@ -196,7 +193,7 @@ function edit.draw(State)
                      end,
         })
       end
-      y, screen_bottom1.pos = Text.draw(State, line_index, y, startpos)
+      y = Text.draw(State, line_index, y, startpos)
 --?       print('=> y', y)
     elseif line.mode == 'drawing' then
       y = y+Drawing_padding_top
@@ -206,7 +203,6 @@ function edit.draw(State)
       assert(false, ('unknown line mode %s'):format(line.mode))
     end
   end
-  State.screen_bottom1 = screen_bottom1
   if State.search_term then
     Text.draw_search_bar(State)
   end
@@ -361,7 +357,7 @@ function edit.mouse_wheel_move(State, dx,dy)
       Text.up(State)
     end
   elseif dy < 0 then
-    State.cursor1 = {line=State.screen_bottom1.line, pos=State.screen_bottom1.pos}
+    State.cursor1 = Text.screen_bottom1(State)
     edit.put_cursor_on_next_text_line(State)
     for i=1,math.floor(-dy) do
       Text.down(State)

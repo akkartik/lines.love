@@ -79,7 +79,8 @@ function Text.mouse_pos(State)
       end
     end
   end
-  return State.screen_bottom1.line, Text.pos_at_end_of_screen_line(State, State.screen_bottom1)
+  local screen_bottom1 = Text.screen_bottom1(State)
+  return screen_bottom1.line, Text.pos_at_end_of_screen_line(State, screen_bottom1)
 end
 
 function Text.cut_selection(State)
