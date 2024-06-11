@@ -7,7 +7,6 @@ function Text.draw(State, line_index, y, startpos)
 --?   print('text.draw', line_index, y)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
-  line_cache.starty = y
   line_cache.startpos = startpos
   -- wrap long lines
   Text.populate_screen_line_starting_pos(State, line_index)
@@ -355,6 +354,31 @@ function Text.pageup(State)
   State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+end
+
+-- return the top y coordinate of a given line_index,
+-- or nil if no part of it is on screen
+function Text.starty(State, line_index)
+  -- duplicate some logic from love.draw
+  -- does not modify State (except to populate line_cache)
+  if line_index < State.screen_top1.line then return end
+  local loc2 = Text.to2(State, State.screen_top1)
+  local y = State.top
+  while true do
+    if State.lines[loc2.line].mode == 'drawing' then
+      y = y + Drawing_padding_top
+    end
+    if loc2.line == line_index then return y end
+    if State.lines[loc2.line].mode == 'text' then
+      y = y + State.line_height
+    elseif State.lines[loc2.line].mode == 'drawing' then
+      y = y + Drawing.pixels(State.lines[loc2.line].h, State.width) + Drawing_padding_bottom
+    end
+    if y + State.line_height > App.screen.height then break end
+    local next_loc2 = Text.next_screen_line(State, loc2)
+    if Text.eq2(next_loc2, loc2) then break end  -- end of file
+    loc2 = next_loc2
+  end
 end
 
 function Text.previous_screen_top1(State)
@@ -737,19 +761,21 @@ end
 function Text.in_line(State, line_index, x,y)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
-  if line_cache.starty == nil then return false end  -- outside current page
-  if y < line_cache.starty then return false end
+  local starty = Text.starty(State, line_index)
+  if starty == nil then return false end  -- outside current page
+  if y < starty then return false end
   Text.populate_screen_line_starting_pos(State, line_index)
-  return y < line_cache.starty + State.line_height*(#line_cache.screen_line_starting_pos - Text.screen_line_index(line_cache.screen_line_starting_pos, line_cache.startpos) + 1)
+  return y < starty + State.line_height*(#line_cache.screen_line_starting_pos - Text.screen_line_index(line_cache.screen_line_starting_pos, line_cache.startpos) + 1)
 end
 
 -- convert mx,my in pixels to schema-1 coordinates
 function Text.to_pos_on_line(State, line_index, mx, my)
   local line = State.lines[line_index]
   local line_cache = State.line_cache[line_index]
-  assert(my >= line_cache.starty, 'failed to map y pixel to line')
+  local starty = Text.starty(State, line_index)
+  assert(my >= starty, 'failed to map y pixel to line')
   -- duplicate some logic from Text.draw
-  local y = line_cache.starty
+  local y = starty
   local start_screen_line_index = Text.screen_line_index(line_cache.screen_line_starting_pos, line_cache.startpos)
   for screen_line_index = start_screen_line_index,#line_cache.screen_line_starting_pos do
     local screen_line_starting_pos = line_cache.screen_line_starting_pos[screen_line_index]

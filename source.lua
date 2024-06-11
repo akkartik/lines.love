@@ -307,7 +307,6 @@ function source.mouse_press(x,y, mouse_button)
       return
     end
     log_browser.mouse_press(Log_browser_state, x,y, mouse_button)
-    for _,line_cache in ipairs(Editor_state.line_cache) do line_cache.starty = nil end  -- just in case we scroll
   end
 end
 
