@@ -51,8 +51,7 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
 
     -- rendering wrapped text lines needs some additional short-lived data per line:
     --   startpos, the index of data the line starts rendering from, can only be >1 for topmost line on screen
-    --   fragments: snippets of the line guaranteed to not straddle screen lines
-    --   screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
+    --   screen_line_starting_pos: optional array of codepoint indices if it wraps over more than one screen line
     line_cache = {},
 
     -- Given wrapping, any potential location for the text cursor can be described in two ways:
