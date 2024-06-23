@@ -308,7 +308,7 @@ function edit.mouse_release(State, x,y, mouse_button)
   else
 --?     print_and_log('edit.mouse_release: no current drawing')
     if y < State.top then
-      State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+      State.cursor1 = deepcopy(State.screen_top1)
       edit.clean_up_mouse_press(State)
       return
     end
@@ -351,7 +351,7 @@ end
 
 function edit.mouse_wheel_move(State, dx,dy)
   if dy > 0 then
-    State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+    State.cursor1 = deepcopy(State.screen_top1)
     edit.put_cursor_on_next_text_line(State)
     for i=1,math.floor(dy) do
       Text.up(State)

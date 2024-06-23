@@ -338,12 +338,12 @@ function Text.keychord_press(State, chord)
     State.selection1 = {}
   elseif chord == 'S-left' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.left(State)
   elseif chord == 'S-right' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.right(State)
   -- C- hotkeys reserved for drawings, so we'll use M-
@@ -355,12 +355,12 @@ function Text.keychord_press(State, chord)
     State.selection1 = {}
   elseif chord == 'M-S-left' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.word_left(State)
   elseif chord == 'M-S-right' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.word_right(State)
   elseif chord == 'home' then
@@ -371,12 +371,12 @@ function Text.keychord_press(State, chord)
     State.selection1 = {}
   elseif chord == 'S-home' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.start_of_line(State)
   elseif chord == 'S-end' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.end_of_line(State)
   elseif chord == 'up' then
@@ -387,12 +387,12 @@ function Text.keychord_press(State, chord)
     State.selection1 = {}
   elseif chord == 'S-up' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.up(State)
   elseif chord == 'S-down' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.down(State)
   elseif chord == 'pageup' then
@@ -403,12 +403,12 @@ function Text.keychord_press(State, chord)
     State.selection1 = {}
   elseif chord == 'S-pageup' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.pageup(State)
   elseif chord == 'S-pagedown' then
     if State.selection1.line == nil then
-      State.selection1 = {line=State.cursor1.line, pos=State.cursor1.pos}
+      State.selection1 = deepcopy(State.cursor1)
     end
     Text.pagedown(State)
   end
@@ -425,7 +425,7 @@ end
 
 function Text.pageup(State)
   State.screen_top1 = Text.previous_screen_top1(State)
-  State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+  State.cursor1 = deepcopy(State.screen_top1)
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
@@ -474,7 +474,7 @@ end
 
 function Text.pagedown(State)
   State.screen_top1 = Text.screen_bottom1(State)
-  State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+  State.cursor1 = deepcopy(State.screen_top1)
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
   Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
 end
@@ -594,7 +594,7 @@ end
 function Text.start_of_line(State)
   State.cursor1.pos = 1
   if Text.lt1(State.cursor1, State.screen_top1) then
-    State.screen_top1 = {line=State.cursor1.line, pos=State.cursor1.pos}  -- copy
+    State.screen_top1 = deepcopy(State.cursor1)
   end
 end
 
@@ -1103,7 +1103,7 @@ function Text.tweak_screen_top_and_cursor(State)
   -- make sure cursor is on screen
   local screen_bottom1 = Text.screen_bottom1(State)
   if Text.lt1(State.cursor1, State.screen_top1) then
-    State.cursor1 = {line=State.screen_top1.line, pos=State.screen_top1.pos}
+    State.cursor1 = deepcopy(State.screen_top1)
   elseif State.cursor1.line >= screen_bottom1.line then
     if Text.cursor_out_of_screen(State) then
       State.cursor1 = Text.final_text_loc_on_screen(State)
