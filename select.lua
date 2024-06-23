@@ -1,9 +1,8 @@
 -- helpers for selecting portions of text
 
--- Return any intersection of the region from State.selection1 to State.cursor1 (or
--- current mouse, if mouse is pressed; or recent mouse if mouse is pressed and
--- currently over a drawing) with the region between {line=line_index, pos=apos}
--- and {line=line_index, pos=bpos}.
+-- Return any intersection of the region from State.selection1 to
+-- State.cursor1 (or current mouse, if mouse is pressed) with the region
+-- between {line=line_index, pos=apos} and {line=line_index, pos=bpos}.
 -- apos must be less than bpos. However State.selection1 and State.cursor1 can be in any order.
 -- Result: positions spos,epos between apos,bpos.
 function Text.clip_selection(State, line_index, apos, bpos)
@@ -45,7 +44,6 @@ function Text.clip_selection(State, line_index, apos, bpos)
 end
 
 -- draw highlight for line corresponding to (lo,hi) given an approximate x,y and pos on the same screen line
--- Creates text objects every time, so use this sparingly.
 -- Returns some intermediate computation useful elsewhere.
 function Text.draw_highlight(State, line, x,y, pos, lo,hi)
   if lo then
