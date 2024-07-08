@@ -53,8 +53,7 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
 
     -- rendering wrapped text lines needs some additional short-lived data per line:
     --   startpos, the index of data the line starts rendering from, can only be >1 for topmost line on screen
-    --   fragments: snippets of the line guaranteed to not straddle screen lines
-    --   screen_line_starting_pos: optional array of grapheme indices if it wraps over more than one screen line
+    --   screen_line_starting_pos: optional array of codepoint indices if it wraps over more than one screen line
     line_cache = {},
 
     -- Given wrapping, any potential location for the text cursor can be described in two ways:
@@ -400,7 +399,7 @@ function edit.keychord_press(State, chord, key)
       State.cursor1 = State.search_backup.cursor
       State.screen_top1 = State.search_backup.screen_top
       State.search_backup = nil
-      Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
     elseif chord == 'return' then
       State.search_term = nil
       State.search_backup = nil
@@ -445,8 +444,7 @@ function edit.keychord_press(State, chord, key)
       patch_placeholders(State.line_cache, event.after, event.before)
       -- invalidate various cached bits of lines
       State.lines.current_drawing = nil
-      -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      Text.redraw_all(State)
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
       schedule_save(State)
     end
   elseif chord == 'C-y' then
@@ -459,8 +457,7 @@ function edit.keychord_press(State, chord, key)
       patch(State.lines, event.before, event.after)
       -- invalidate various cached bits of lines
       State.lines.current_drawing = nil
-      -- if we're scrolling, reclaim all fragments to avoid memory leaks
-      Text.redraw_all(State)
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
       schedule_save(State)
     end
   -- clipboard

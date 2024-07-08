@@ -47,7 +47,7 @@ function Text.draw(State, line_index, y, startpos)
           end
         end
       end
-      -- render fragment
+      -- render screen line
       App.color(Text_color)
       App.screen.print(screen_line, State.left,y)
       y = y + State.line_height
@@ -215,7 +215,7 @@ function Text.keychord_press(State, chord)
         line=State.cursor1.line,
         pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
       }
-      Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+      Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
     end
     Text.clear_screen_line_cache(State, State.cursor1.line)
     assert(Text.le1(State.screen_top1, State.cursor1), ('screen_top (line=%d,pos=%d) is below cursor (line=%d,pos=%d)'):format(State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos))
@@ -353,7 +353,7 @@ function Text.pageup(State)
   State.screen_top1 = Text.previous_screen_top1(State)
   State.cursor1 = deepcopy(State.screen_top1)
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
-  Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+  Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
 end
 
 -- return the top y coordinate of a given line_index,
@@ -402,7 +402,7 @@ function Text.pagedown(State)
   State.screen_top1 = Text.screen_bottom1(State)
   State.cursor1 = deepcopy(State.screen_top1)
   Text.move_cursor_down_to_next_text_line_while_scrolling_again_if_necessary(State)
-  Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+  Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
 end
 
 -- return the location of the start of the bottom-most line on screen
@@ -464,7 +464,7 @@ function Text.up(State)
       line=State.cursor1.line,
       pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
     }
-    Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+    Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
   end
 end
 
@@ -610,7 +610,7 @@ function Text.left(State)
       line=State.cursor1.line,
       pos=Text.pos_at_start_of_screen_line(State, State.cursor1),
     }
-    Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+    Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
   end
 end
 
@@ -755,7 +755,7 @@ function Text.snap_cursor_to_bottom_of_screen(State)
   State.screen_top1 = Text.to1(State, top2)
 --?   print('top1 finally:', State.screen_top1.line, State.screen_top1.pos)
 --?   print('snap =>', State.screen_top1.line, State.screen_top1.pos, State.cursor1.line, State.cursor1.pos)
-  Text.redraw_all(State)  -- if we're scrolling, reclaim all fragments to avoid memory leaks
+  Text.redraw_all(State)  -- if we're scrolling, reclaim all line caches to avoid memory leaks
 end
 
 function Text.in_line(State, line_index, x,y)
@@ -1044,7 +1044,7 @@ function Text.cursor_out_of_screen(State)
 end
 
 function Text.redraw_all(State)
---?   print('clearing fragments')
+--?   print('clearing line caches')
   -- Perform some early sanity checking here, in hopes that we correctly call
   -- this whenever we change editor state.
   if State.right <= State.left then
