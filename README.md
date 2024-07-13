@@ -120,6 +120,9 @@ here.
   and (non-editable) SVG.
 * https://git.sr.ht/~akkartik/lines2html.love exports lines.love files to html
   and inline SVG.
+* https://codeberg.org/eril/lines2html.love provides the option to export
+  just the drawings to a directory. Also provides a CLI, which should be more
+  natural for many people.
 
 ## Feedback
 
