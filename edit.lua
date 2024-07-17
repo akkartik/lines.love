@@ -184,8 +184,8 @@ function edit.draw(State)
                        if State.cursor1.line >= line_index then
                          State.cursor1.line = State.cursor1.line+1
                        end
-                       schedule_save(State)
                        record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
+                       schedule_save(State)
                      end,
         })
       end
@@ -295,11 +295,11 @@ function edit.mouse_release(State, x,y, mouse_button)
   State.mouse_down = nil
   if State.lines.current_drawing then
     Drawing.mouse_release(State, x,y, mouse_button)
-    schedule_save(State)
     if Drawing.before then
       record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
       Drawing.before = nil
     end
+    schedule_save(State)
   else
 --?     print_and_log('edit.mouse_release: no current drawing')
     if y < State.top then
@@ -490,8 +490,8 @@ function edit.keychord_press(State, chord, key)
     if Text.cursor_out_of_screen(State) then
       Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
-    schedule_save(State)
     record_undo_event(State, {before=before, after=snapshot(State, before_line, State.cursor1.line)})
+    schedule_save(State)
   -- dispatch to drawing or text
   elseif App.mouse_down(1) or chord:sub(1,2) == 'C-' then
     local drawing_index, drawing = Drawing.current_drawing(State)
