@@ -198,7 +198,7 @@ function Text.text_input(State, t)
   if App.mouse_down(1) then return end
   if App.any_modifier_down() then
     if App.key_down(t) then
-      -- The modifiers didn't change the key. Handle it in keychord_pressed.
+      -- The modifiers didn't change the key. Handle it in keychord_press.
       return
     else
       -- Key mutated by the keyboard layout. Continue below.
