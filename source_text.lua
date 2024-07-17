@@ -230,7 +230,6 @@ function Text.keychord_press(State, chord)
     local before_line = State.cursor1.line
     local before = snapshot(State, before_line)
     Text.insert_return(State)
-    State.selection1 = {}
     if State.cursor_y > App.screen.height - State.line_height then
       Text.snap_cursor_to_bottom_of_screen(State, State.left, State.right)
     end
