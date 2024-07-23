@@ -113,6 +113,8 @@ here.
 * https://git.sr.ht/~akkartik/capture.love -- a blank-slate mode for the
   note-taking app, so all the stuff pensieve.love puts on screen doesn't cause
   you to forget what you came to write down.
+* https://git.sr.ht/~akkartik/lines2.love -- an entirely new implementation of
+  some foundations that seems more elegant.
 
 ## Associated tools
 
