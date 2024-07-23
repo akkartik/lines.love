@@ -128,4 +128,5 @@ here.
 
 ## Feedback
 
-[Most appreciated.](http://akkartik.name/contact)
+[Most appreciated.](http://akkartik.name/contact) Messages, PRs, patches,
+forks, it's all good.
