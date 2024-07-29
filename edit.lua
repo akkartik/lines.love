@@ -152,7 +152,6 @@ function edit.put_cursor_on_next_text_line(State)
   end
 end
 
--- return y drawn until
 function edit.draw(State)
   State.button_handlers = {}
   love.graphics.setFont(State.font)
@@ -202,7 +201,6 @@ function edit.draw(State)
   if State.search_term then
     Text.draw_search_bar(State)
   end
-  return y
 end
 
 function edit.update(State, dt)
