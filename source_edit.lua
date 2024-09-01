@@ -190,6 +190,7 @@ function edit.draw(State, hide_cursor, show_line_numbers)
                          State.cursor1.line = State.cursor1.line+1
                        end
                        record_undo_event(State, {before=Drawing.before, after=snapshot(State, line_index-1, line_index+1)})
+                       Drawing.before = nil
                        schedule_save(State)
                      end,
         })
