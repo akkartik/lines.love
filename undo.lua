@@ -1,8 +1,7 @@
 -- undo/redo by managing the sequence of events in the current session
 -- based on https://github.com/akkartik/mu1/blob/master/edit/012-editor-undo.mu
 
--- Incredibly inefficient; we make a copy of lines on every single keystroke.
--- The hope here is that we're either editing small files or just reading large files.
+-- makes a copy of lines on every single keystroke; will be inefficient with really long lines.
 -- TODO: highlight stuff inserted by any undo/redo operation
 -- TODO: coalesce multiple similar operations
 

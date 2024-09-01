@@ -51,13 +51,6 @@ found anything amiss: http://akkartik.name/contact
 
 * No support yet for right-to-left languages.
 
-* Undo/redo may be sluggish in large files. Large files may grow sluggish in
-  other ways. lines.love works well in all circumstances with files under
-  50KB.
-
-* If you kill the process, say by force-quitting because things things get
-  sluggish, you can lose data.
-
 * The text cursor will always stay on the screen. This can have some strange
   implications:
 
