@@ -248,7 +248,7 @@ function Text.keychord_press(State, chord)
     schedule_save(State)
   elseif chord == 'backspace' then
     if State.selection1.line then
-      Text.delete_selection(State, State.left, State.right)
+      Text.delete_selection_and_record_undo_event(State)
       schedule_save(State)
       return
     end
@@ -296,7 +296,7 @@ function Text.keychord_press(State, chord)
     schedule_save(State)
   elseif chord == 'delete' then
     if State.selection1.line then
-      Text.delete_selection(State, State.left, State.right)
+      Text.delete_selection_and_record_undo_event(State)
       schedule_save(State)
       return
     end

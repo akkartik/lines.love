@@ -83,14 +83,14 @@ function Text.mouse_pos(State)
   return screen_bottom1.line, Text.pos_at_end_of_screen_line(State, screen_bottom1)
 end
 
-function Text.cut_selection(State)
+function Text.cut_selection_and_record_undo_event(State)
   if State.selection1.line == nil then return end
   local result = Text.selection(State)
-  Text.delete_selection(State)
+  Text.delete_selection_and_record_undo_event(State)
   return result
 end
 
-function Text.delete_selection(State)
+function Text.delete_selection_and_record_undo_event(State)
   if State.selection1.line == nil then return end
   local minl,maxl = minmax(State.selection1.line, State.cursor1.line)
   local before = snapshot(State, minl, maxl)
