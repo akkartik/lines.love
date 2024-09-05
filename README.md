@@ -1,5 +1,7 @@
 # Plain text with lines
 
+[![0 dependencies!](https://0dependencies.dev/0dependencies.svg)](https://0dependencies.dev)
+
 An editor for plain text where you can also seamlessly insert line drawings.
 Designed above all to be easy to modify and give you early warning if your
 modifications break something.
