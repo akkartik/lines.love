@@ -116,7 +116,6 @@ function check_love_version_for_tests()
 end
 
 function App.initialize(arg)
-  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
   love.keyboard.setKeyRepeat(true)
 
   love.graphics.setBackgroundColor(1,1,1)
