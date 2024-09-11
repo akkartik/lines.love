@@ -285,6 +285,7 @@ end
 
 function source.mouse_press(x,y, mouse_button)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
+  love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
 --?   print('mouse click', x, y)
 --?   print(Editor_state.left, Editor_state.right)
 --?   print(Log_browser_state.left, Log_browser_state.right)
