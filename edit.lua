@@ -5,7 +5,7 @@ Stroke_color = {r=0, g=0, b=0}
 Current_stroke_color = {r=0.7, g=0.7, b=0.7}  -- in process of being drawn
 Current_name_background_color = {r=1, g=0, b=0, a=0.1}  -- name currently being edited
 Focus_stroke_color = {r=1, g=0, b=0}  -- what mouse is hovering over
-Highlight_color = {r=0.7, g=0.7, b=0.9}  -- selected text
+Highlight_color = {r=0.7, g=0.7, b=0.9, a=0.4}  -- selected text
 Icon_color = {r=0.7, g=0.7, b=0.7}  -- color of current mode icon in drawings
 Help_color = {r=0, g=0.5, b=0}
 Help_background_color = {r=0, g=0.5, b=0, a=0.1}
