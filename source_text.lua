@@ -90,9 +90,9 @@ function Text.screen_line(line, line_cache, i)
   if i >= #line_cache.screen_line_starting_pos then
     return line.data:sub(offset)
   end
-  local endpos = line_cache.screen_line_starting_pos[i+1]-1
+  local endpos = line_cache.screen_line_starting_pos[i+1]
   local end_offset = Text.offset(line.data, endpos)
-  return line.data:sub(offset, end_offset)
+  return line.data:sub(offset, end_offset-1)
 end
 
 function Text.draw_cursor(State, x, y)
