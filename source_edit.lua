@@ -432,10 +432,14 @@ function edit.keychord_press(State, chord, key)
       State.screen_top = deepcopy(State.search_backup.screen_top)
       Text.search_next(State)
     elseif chord == 'down' then
-      edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
-      Text.search_next(State)
+      if #State.search_term > 0 then
+        edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
+        Text.search_next(State)
+      end
     elseif chord == 'up' then
-      Text.search_previous(State)
+      if #State.search_term > 0 then
+        Text.search_previous(State)
+      end
     end
     return
   elseif chord == 'C-f' then
