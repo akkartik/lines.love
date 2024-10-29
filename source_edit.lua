@@ -407,6 +407,9 @@ function edit.keychord_press(State, chord, key)
       local len = utf8.len(State.search_term)
       local byte_offset = Text.offset(State.search_term, len)
       State.search_term = string.sub(State.search_term, 1, byte_offset-1)
+      State.cursor = deepcopy(State.search_backup.cursor)
+      State.screen_top = deepcopy(State.search_backup.screen_top)
+      Text.search_next(State)
     elseif chord == 'down' then
       State.cursor1.pos = State.cursor1.pos+1
       Text.search_next(State)
