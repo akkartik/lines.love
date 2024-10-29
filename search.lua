@@ -17,7 +17,7 @@ function Text.draw_search_bar(State)
 end
 
 function Text.search_next(State)
-  assert(#State.search_term > 0)
+  if #State.search_term == 0 then return end
   -- search current line from cursor
   local curr_pos = State.cursor1.pos
   local curr_line = State.lines[State.cursor1.line].data
@@ -72,7 +72,7 @@ function Text.search_next(State)
 end
 
 function Text.search_previous(State)
-  assert(#State.search_term > 0)
+  if #State.search_term == 0 then return end
   -- search current line before cursor
   local curr_pos = State.cursor1.pos
   local curr_line = State.lines[State.cursor1.line].data
