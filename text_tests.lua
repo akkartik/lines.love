@@ -2073,3 +2073,17 @@ function test_search_wrap_upwards()
   check_eq(Editor_state.cursor1.line, 1, '1/cursor:line')
   check_eq(Editor_state.cursor1.pos, 6, '1/cursor:pos')
 end
+
+function test_search_downwards_from_end_of_line()
+  App.screen.init{width=120, height=60}
+  Editor_state = edit.initialize_test_state()
+  Editor_state.lines = load_array{'abc', 'def', 'ghi'}
+  Text.redraw_all(Editor_state)
+  Editor_state.cursor1 = {line=1, pos=4}
+  Editor_state.screen_top1 = {line=1, pos=1}
+  edit.draw(Editor_state)
+  -- search for empty string
+  edit.run_after_keychord(Editor_state, 'C-f', 'f')
+  edit.run_after_keychord(Editor_state, 'down', 'down')
+  -- no crash
+end

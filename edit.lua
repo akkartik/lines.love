@@ -140,15 +140,36 @@ function edit.cursor_on_text(State)
 end
 
 function edit.put_cursor_on_next_text_line(State)
-  while true do
-    if State.cursor1.line >= #State.lines then
+  local line = State.cursor1.line
+  while line < #State.lines do
+    line = line+1
+    if State.lines[line].mode == 'text' then
+      State.cursor1.line = line
+      State.cursor1.pos = 1
       break
     end
-    if State.lines[State.cursor1.line].mode == 'text' then
+  end
+end
+
+function edit.put_cursor_on_next_text_line_wrapping_around_if_necessary(State)
+  local line = State.cursor1.line
+  local max = #State.lines
+  for _ = 1, max-1 do
+    line = (line+1) % max
+    if State.lines[line].mode == 'text' then
+      State.cursor1.line = line
+      State.cursor1.pos = 1
       break
     end
-    State.cursor1.line = State.cursor1.line+1
-    State.cursor1.pos = 1
+  end
+end
+
+function edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
+  local cursor_line = State.lines[State.cursor1.line].data
+  if State.cursor1.pos <= utf8.len(cursor_line) then
+    State.cursor1.pos = State.cursor1.pos + 1
+  else
+    edit.put_cursor_on_next_text_line_wrapping_around_if_necessary(State)
   end
 end
 
@@ -405,7 +426,7 @@ function edit.keychord_press(State, chord, key)
       State.screen_top = deepcopy(State.search_backup.screen_top)
       Text.search_next(State)
     elseif chord == 'down' then
-      State.cursor1.pos = State.cursor1.pos+1
+      edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
       Text.search_next(State)
     elseif chord == 'up' then
       Text.search_previous(State)

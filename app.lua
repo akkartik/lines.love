@@ -131,7 +131,7 @@ function App.run_tests()
   end
   table.sort(sorted_names)
 --?   App.initialize_for_test() -- debug: run a single test at a time like these 2 lines
---?   test_click_below_all_lines()
+--?   test_search()
   for _,name in ipairs(sorted_names) do
     App.initialize_for_test()
 --?     print('=== '..name)
