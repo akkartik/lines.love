@@ -437,9 +437,7 @@ function edit.keychord_press(State, chord, key)
         Text.search_next(State)
       end
     elseif chord == 'up' then
-      if #State.search_term > 0 then
-        Text.search_previous(State)
-      end
+      Text.search_previous(State)
     end
     return
   elseif chord == 'C-f' then
