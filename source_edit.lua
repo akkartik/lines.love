@@ -153,28 +153,6 @@ function edit.put_cursor_on_next_text_line(State)
   end
 end
 
-function edit.put_cursor_on_next_text_line_wrapping_around_if_necessary(State)
-  local line = State.cursor1.line
-  local max = #State.lines
-  for _ = 1, max-1 do
-    line = (line+1) % max
-    if State.lines[line].mode == 'text' then
-      State.cursor1.line = line
-      State.cursor1.pos = 1
-      break
-    end
-  end
-end
-
-function edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
-  local cursor_line = State.lines[State.cursor1.line].data
-  if State.cursor1.pos <= utf8.len(cursor_line) then
-    State.cursor1.pos = State.cursor1.pos + 1
-  else
-    edit.put_cursor_on_next_text_line_wrapping_around_if_necessary(State)
-  end
-end
-
 function edit.draw(State, hide_cursor, show_line_numbers)
   State.button_handlers = {}
   love.graphics.setFont(State.font)
@@ -433,7 +411,7 @@ function edit.keychord_press(State, chord, key)
       Text.search_next(State)
     elseif chord == 'down' then
       if #State.search_term > 0 then
-        edit.put_cursor_on_next_text_loc_wrapping_around_if_necessary(State)
+        Text.right(State)
         Text.search_next(State)
       end
     elseif chord == 'up' then
