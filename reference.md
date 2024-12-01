@@ -203,9 +203,6 @@ early warning if you break something.
   `x=left` and `x=right`. Wraps long lines at word boundaries where possible,
   or in the middle of words (no hyphenation yet) when it must.
 
-* `edit.quit()` -- calling this ensures any final edits are flushed to disk
-  before the app exits.
-
 * `edit.draw(state)` -- call this from `App.draw` to display the current
   editor state on the app window as requested in the call to
   `edit.initialize_state` that created `state`.
