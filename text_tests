@@ -23,7 +23,7 @@ click on wrapping line rendered from partway at top of screen
 click past end of wrapping line
 click past end of wrapping line containing non ascii
 click past end of word wrapping line
-click below final line does nothing
+click below final line of file
 
 # cursor movement
 move left

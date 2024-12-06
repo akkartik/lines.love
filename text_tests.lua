@@ -319,7 +319,7 @@ function test_click_on_empty_line()
   check_nil(Editor_state.selection1.line, 'selection is empty to avoid perturbing future edits')
 end
 
-function test_click_below_all_lines()
+function test_click_below_final_line_of_file()
   -- display one line
   App.screen.init{width=50, height=80}
   Editor_state = edit.initialize_test_state()
@@ -331,8 +331,9 @@ function test_click_below_all_lines()
   -- click below first line
   edit.draw(Editor_state)
   edit.run_after_mouse_click(Editor_state, Editor_state.left+8,Editor_state.top+50, 1)
-  -- cursor doesn't move
-  check_eq(Editor_state.cursor1.line, 1, 'cursor')
+  -- cursor goes to bottom
+  check_eq(Editor_state.cursor1.line, 1, 'cursor:line')
+  check_eq(Editor_state.cursor1.pos, 4, 'cursor:pos')
   -- selection remains empty
   check_nil(Editor_state.selection1.line, 'selection is empty to avoid perturbing future edits')
 end
