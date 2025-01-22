@@ -143,13 +143,13 @@ end
 
 function edit.put_cursor_on_next_text_line(State)
   local line = State.cursor1.line
-  while line < #State.lines do
+  if State.lines[line].mode == 'text' then return end
+  while line <= #State.lines and State.lines[line].mode ~= 'text' do
     line = line+1
-    if State.lines[line].mode == 'text' then
-      State.cursor1.line = line
-      State.cursor1.pos = 1
-      break
-    end
+  end
+  if line <= #State.lines and State.lines[line].mode == 'text' then
+    State.cursor1.line = line
+    State.cursor1.pos = 1
   end
 end
 
