@@ -84,12 +84,12 @@ end
 -- https://stackoverflow.com/questions/640642/how-do-you-copy-a-lua-table-by-value/26367080#26367080
 function deepcopy(obj, seen)
   if type(obj) ~= 'table' then return obj end
-  if seen and seen[obj] then return seen[obj] end
-  local s = seen or {}
+  seen = seen or {}
+  if seen[obj] then return seen[obj] end
   local result = setmetatable({}, getmetatable(obj))
-  s[obj] = result
+  seen[obj] = result
   for k,v in pairs(obj) do
-    result[deepcopy(k, s)] = deepcopy(v, s)
+    result[deepcopy(k, seen)] = deepcopy(v, seen)
   end
   return result
 end
