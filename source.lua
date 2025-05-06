@@ -393,6 +393,6 @@ function source.key_release(key, scancode)
   if Focus == 'edit' then
     return edit.key_release(Editor_state, key, scancode)
   else
-    return log_browser.keychord_press(Log_browser_state, chordkey, scancode)
+    return log_browser.key_release(Log_browser_state, key, scancode)
   end
 end
