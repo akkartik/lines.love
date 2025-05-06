@@ -11,7 +11,7 @@ function run.initialize_globals()
 end
 
 -- called only for real run
-function run.initialize(arg)
+function run.initialize(arg, unfiltered_arg)
   log_new('run')
   if Settings then
     run.load_settings()
@@ -100,7 +100,7 @@ function run.initialize_window_geometry()
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
 
-function run.resize(w, h)
+function run.resize(w,h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Text.redraw_all(Editor_state)
@@ -166,15 +166,15 @@ function absolutize(path)
   return path
 end
 
-function run.mouse_press(x,y, mouse_button)
+function run.mouse_press(x,y, mouse_button, is_touch, presses)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
-  return edit.mouse_press(Editor_state, x,y, mouse_button)
+  return edit.mouse_press(Editor_state, x,y, mouse_button, is_touch, presses)
 end
 
-function run.mouse_release(x,y, mouse_button)
+function run.mouse_release(x,y, mouse_button, is_touch, presses)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.mouse_release(Editor_state, x,y, mouse_button)
+  return edit.mouse_release(Editor_state, x,y, mouse_button, is_touch, presses)
 end
 
 function run.mouse_wheel_move(dx,dy)
@@ -187,9 +187,9 @@ function run.text_input(t)
   return edit.text_input(Editor_state, t)
 end
 
-function run.keychord_press(chord, key)
+function run.keychord_press(chord, key, scancode, is_repeat)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
-  return edit.keychord_press(Editor_state, chord, key)
+  return edit.keychord_press(Editor_state, chord, key, scancode, is_repeat)
 end
 
 function run.key_release(key, scancode)

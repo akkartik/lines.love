@@ -149,7 +149,7 @@ function Text.insert_at_cursor(State, t)
 end
 
 -- Don't handle any keys here that would trigger text_input above.
-function Text.keychord_press(State, chord)
+function Text.keychord_press(State, chord, key, scancode, is_repeat)
 --?   print('chord', chord, State.selection1.line, State.selection1.pos)
   --== shortcuts that mutate text (must schedule_save)
   if chord == 'return' then

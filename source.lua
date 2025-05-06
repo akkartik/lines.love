@@ -56,7 +56,7 @@ function source.initialize_globals()
 end
 
 -- called only for real run
-function source.initialize()
+function source.initialize(arg, unfiltered_arg)
   log_new('source')
   if Settings and Settings.source then
     source.load_settings()
@@ -173,7 +173,7 @@ function source.initialize_window_geometry()
   App.screen.resize(App.screen.width, App.screen.height, App.screen.flags)
 end
 
-function source.resize(w, h)
+function source.resize(w,h)
 --?   print(("Window resized to width: %d and height: %d."):format(w, h))
   App.screen.width, App.screen.height = w, h
   Text.redraw_all(Editor_state)
@@ -283,7 +283,7 @@ function source.settings()
   }
 end
 
-function source.mouse_press(x,y, mouse_button)
+function source.mouse_press(x,y, mouse_button, is_touch, presses)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   love.keyboard.setTextInput(true)  -- bring up keyboard on touch screen
 --?   print('mouse click', x, y)
@@ -291,7 +291,7 @@ function source.mouse_press(x,y, mouse_button)
 --?   print(Log_browser_state.left, Log_browser_state.right)
   if Show_file_navigator and y < Menu_status_bar_height + File_navigation.num_lines * Editor_state.line_height then
     -- send click to buttons
-    edit.mouse_press(Editor_state, x,y, mouse_button)
+    edit.mouse_press(Editor_state, x,y, mouse_button, is_touch, presses)
     return
   end
   if x < Editor_state.right + Margin_right then
@@ -300,23 +300,23 @@ function source.mouse_press(x,y, mouse_button)
       Focus = 'edit'
       return
     end
-    edit.mouse_press(Editor_state, x,y, mouse_button)
+    edit.mouse_press(Editor_state, x,y, mouse_button, is_touch, presses)
   elseif Show_log_browser_side and Log_browser_state.left <= x and x < Log_browser_state.right then
 --?     print('click on log_browser side')
     if Focus ~= 'log_browser' then
       Focus = 'log_browser'
       return
     end
-    log_browser.mouse_press(Log_browser_state, x,y, mouse_button)
+    log_browser.mouse_press(Log_browser_state, x,y, mouse_button, is_touch, presses)
   end
 end
 
-function source.mouse_release(x,y, mouse_button)
+function source.mouse_release(x,y, mouse_button, is_touch, presses)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
   if Focus == 'edit' then
-    return edit.mouse_release(Editor_state, x,y, mouse_button)
+    return edit.mouse_release(Editor_state, x,y, mouse_button, is_touch, presses)
   else
-    return log_browser.mouse_release(Log_browser_state, x,y, mouse_button)
+    return log_browser.mouse_release(Log_browser_state, x,y, mouse_button, is_touch, presses)
   end
 end
 
@@ -342,7 +342,7 @@ function source.text_input(t)
   end
 end
 
-function source.keychord_press(chord, key)
+function source.keychord_press(chord, key, scancode, is_repeat)
   Cursor_time = 0  -- ensure cursor is visible immediately after it moves
 --?   print('source keychord')
   if Show_file_navigator then
@@ -382,9 +382,9 @@ function source.keychord_press(chord, key)
     return
   end
   if Focus == 'edit' then
-    return edit.keychord_press(Editor_state, chord, key)
+    return edit.keychord_press(Editor_state, chord, key, scancode, is_repeat)
   else
-    return log_browser.keychord_press(Log_browser_state, chord, key)
+    return log_browser.keychord_press(Log_browser_state, chord, key, scancode, is_repeat)
   end
 end
 

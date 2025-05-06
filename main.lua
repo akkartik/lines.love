@@ -115,15 +115,15 @@ function check_love_version_for_tests()
   end
 end
 
-function App.initialize(arg)
+function App.initialize(arg, unfiltered_arg)
   love.keyboard.setKeyRepeat(true)
 
   love.graphics.setBackgroundColor(1,1,1)
 
   if Current_app == 'run' then
-    run.initialize(arg)
+    run.initialize(arg, unfiltered_arg)
   elseif Current_app == 'source' then
-    source.initialize(arg)
+    source.initialize(arg, unfiltered_arg)
   elseif current_app_is_warning() then
   else
     assert(false, 'unknown app "'..Current_app..'"')
@@ -209,7 +209,7 @@ function App.update(dt)
   end
 end
 
-function App.keychord_press(chord, key)
+function App.keychord_press(chord, key, scancode, is_repeat)
   -- ignore events for some time after window in focus (mostly alt-tab)
   if Current_time < Last_focus_time + 0.01 then
     return
@@ -253,9 +253,9 @@ function App.keychord_press(chord, key)
     return
   end
   if Current_app == 'run' then
-    if run.keychord_press then run.keychord_press(chord, key) end
+    if run.keychord_press then run.keychord_press(chord, key, scancode, is_repeat) end
   elseif Current_app == 'source' then
-    if source.keychord_press then source.keychord_press(chord, key) end
+    if source.keychord_press then source.keychord_press(chord, key, scancode, is_repeat) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -295,24 +295,24 @@ function App.keyreleased(key, scancode)
   end
 end
 
-function App.mousepressed(x,y, mouse_button)
+function App.mousepressed(x,y, mouse_button, is_touch, presses)
   if current_app_is_warning() then return end
 --?   print('mouse press', x,y)
   if Current_app == 'run' then
-    if run.mouse_press then run.mouse_press(x,y, mouse_button) end
+    if run.mouse_press then run.mouse_press(x,y, mouse_button, is_touch, presses) end
   elseif Current_app == 'source' then
-    if source.mouse_press then source.mouse_press(x,y, mouse_button) end
+    if source.mouse_press then source.mouse_press(x,y, mouse_button, is_touch, presses) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
 end
 
-function App.mousereleased(x,y, mouse_button)
+function App.mousereleased(x,y, mouse_button, is_touch, presses)
   if current_app_is_warning() then return end
   if Current_app == 'run' then
-    if run.mouse_release then run.mouse_release(x,y, mouse_button) end
+    if run.mouse_release then run.mouse_release(x,y, mouse_button, is_touch, presses) end
   elseif Current_app == 'source' then
-    if source.mouse_release then source.mouse_release(x,y, mouse_button) end
+    if source.mouse_release then source.mouse_release(x,y, mouse_button, is_touch, presses) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end
@@ -321,9 +321,9 @@ end
 function App.mousemoved(x,y, dx,dy, is_touch)
   if current_app_is_warning() then return end
   if Current_app == 'run' then
-    if run.mouse_move then run.mouse_move(dx,dy) end
+    if run.mouse_move then run.mouse_move(x,y, dx,dy, is_touch) end
   elseif Current_app == 'source' then
-    if source.mouse_move then source.mouse_move(dx,dy) end
+    if source.mouse_move then source.mouse_move(x,y, dx,dy, is_touch) end
   else
     assert(false, 'unknown app "'..Current_app..'"')
   end

@@ -232,7 +232,7 @@ function edit.quit(State)
   end
 end
 
-function edit.mouse_press(State, x,y, mouse_button)
+function edit.mouse_press(State, x,y, mouse_button, is_touch, presses)
   if State.search_term then return end
   State.mouse_down = mouse_button
 --?   print_and_log(('edit.mouse_press: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
@@ -279,7 +279,7 @@ function edit.mouse_press(State, x,y, mouse_button)
         State.lines.current_drawing_index = line_index
         State.lines.current_drawing = line
         Drawing.before = snapshot(State, line_index)
-        Drawing.mouse_press(State, line_index, x,y, mouse_button)
+        Drawing.mouse_press(State, line_index, x,y, mouse_button, is_touch, presses)
         return
       end
     end
@@ -292,12 +292,12 @@ function edit.mouse_press(State, x,y, mouse_button)
   State.selection1 = Text.final_text_loc_on_screen(State)
 end
 
-function edit.mouse_release(State, x,y, mouse_button)
+function edit.mouse_release(State, x,y, mouse_button, is_touch, presses)
   if State.search_term then return end
 --?   print_and_log(('edit.mouse_release: cursor at %d,%d'):format(State.cursor1.line, State.cursor1.pos))
   State.mouse_down = nil
   if State.lines.current_drawing then
-    Drawing.mouse_release(State, x,y, mouse_button)
+    Drawing.mouse_release(State, x,y, mouse_button, is_touch, presses)
     if Drawing.before then
       record_undo_event(State, {before=Drawing.before, after=snapshot(State, State.lines.current_drawing_index)})
       Drawing.before = nil
@@ -383,7 +383,7 @@ function edit.text_input(State, t)
   schedule_save(State)
 end
 
-function edit.keychord_press(State, chord, key)
+function edit.keychord_press(State, chord, key, scancode, is_repeat)
   if State.selection1.line and
       not State.lines.current_drawing and
       -- printable character created using shift key => delete selection
@@ -502,7 +502,7 @@ function edit.keychord_press(State, chord, key)
     local drawing_index, drawing = Drawing.current_drawing(State)
     if drawing_index then
       local before = snapshot(State, drawing_index)
-      Drawing.keychord_press(State, chord)
+      Drawing.keychord_press(State, chord, key, scancode, is_repeat)
       record_undo_event(State, {before=before, after=snapshot(State, drawing_index)})
       schedule_save(State)
     end
@@ -535,7 +535,7 @@ function edit.keychord_press(State, chord, key)
     end
     schedule_save(State)
   else
-    Text.keychord_press(State, chord)
+    Text.keychord_press(State, chord, key, scancode, is_repeat)
   end
 end
 

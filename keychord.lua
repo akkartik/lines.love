@@ -8,7 +8,7 @@ function App.keypressed(key, scancode, is_repeat)
     return
   end
   -- include the modifier(s) when the non-modifer is pressed
-  App.keychord_press(App.combine_modifiers(key), key)
+  App.keychord_press(App.combine_modifiers(key), key, scancode, is_repeat)
 end
 
 function App.combine_modifiers(key)

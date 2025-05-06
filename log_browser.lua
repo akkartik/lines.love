@@ -183,7 +183,7 @@ end
 function log_browser.quit(State)
 end
 
-function log_browser.mouse_press(State, x,y, mouse_button)
+function log_browser.mouse_press(State, x,y, mouse_button, is_touch, presses)
   local line_index = log_browser.line_index(State, x,y)
   if line_index == nil then
     -- below lower margin
@@ -249,7 +249,7 @@ function log_browser.line_index(State, mx,my)
   end
 end
 
-function log_browser.mouse_release(State, x,y, mouse_button)
+function log_browser.mouse_release(State, x,y, mouse_button, is_touch, presses)
 end
 
 function log_browser.mouse_wheel_move(State, dx,dy)
@@ -267,7 +267,7 @@ end
 function log_browser.text_input(State, t)
 end
 
-function log_browser.keychord_press(State, chord, key)
+function log_browser.keychord_press(State, chord, key, scancode, is_repeat)
   -- move
   if chord == 'up' then
     log_browser.up(State)
