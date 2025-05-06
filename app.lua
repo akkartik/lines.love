@@ -428,9 +428,9 @@ function App.disable_tests()
       -- love.keyboard.isDown doesn't work on Android, so emulate it using
       -- keypressed and keyreleased events
       if name == 'keypressed' then
-        love.handlers[name] = function(key, scancode, isrepeat)
+        love.handlers[name] = function(key, scancode, is_repeat)
                                 Keys_down[key] = true
-                                return App.keypressed(key, scancode, isrepeat)
+                                return App.keypressed(key, scancode, is_repeat)
                               end
       elseif name == 'keyreleased' then
         love.handlers[name] = function(key, scancode)

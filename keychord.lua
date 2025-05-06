@@ -2,7 +2,7 @@
 
 Modifiers = {'lctrl', 'rctrl', 'lalt', 'ralt', 'lshift', 'rshift', 'lgui', 'rgui'}
 
-function App.keypressed(key, scancode, isrepeat)
+function App.keypressed(key, scancode, is_repeat)
   if array.find(Modifiers, key) then
     -- do nothing when the modifier is pressed
     return
