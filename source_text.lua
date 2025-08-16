@@ -68,6 +68,9 @@ function Text.draw(State, line_index, y, startpos, hide_cursor, show_line_number
           end
         end
       end
+--?       -- render screen line
+--?       App.color(Text_color)
+--?       App.screen.print(screen_line, State.left,y)
       -- render colorized text
       local x = State.left
       for frag in screen_line:gmatch('%S*%s*') do
@@ -116,33 +119,54 @@ function Text.populate_screen_line_starting_pos(State, line_index)
   local x = 0
   local pos = 1
   -- try to wrap at word boundaries
-  for frag in line.data:gmatch('%S*%s*') do
-    local frag_width = State.font:getWidth(frag)
---?     print('-- frag:', frag, pos, x, frag_width, State.width)
-    while x + frag_width > State.width do
---?       print('frag:', frag, pos, x, frag_width, State.width)
-      if x < 0.8 * State.width then
-        -- long word; chop it at some letter
-        -- We're not going to reimplement TeX here.
-        local bpos = Text.nearest_pos_less_than(State.font, frag, State.width - x)
-        if x == 0 and bpos == 0 then
-          assert(false, ("Infinite loop while line-wrapping. Editor is %dpx wide; window is %dpx wide"):format(State.width, App.screen.width))
-        end
-        pos = pos + bpos
-        local boffset = Text.offset(frag, bpos+1)  -- byte _after_ bpos
-        frag = string.sub(frag, boffset)
---?         if bpos > 0 then
---?           print('after chop:', frag)
---?         end
-        frag_width = State.font:getWidth(frag)
-      end
---?       print('screen line:', pos)
+  for pos,char in utf8chars(line.data) do
+    local w = State.font:getWidth(char)
+    if Text.should_word_wrap(State, line.data, pos, char, x)
+        or x+w > State.width  -- truncate within a word
+    then
       table.insert(line_cache.screen_line_starting_pos, pos)
-      x = 0  -- new screen line
+      x = 0
     end
-    x = x + frag_width
-    pos = pos + utf8.len(frag)
+    x = x + w
   end
+end
+
+-- Check whether to word-wrap line at pos which will be positioned at x.
+--
+-- We wrap at the start of a word (non-space just after space) if the word
+-- (non-spaces followed by spaces) wouldn't fit in the rest of the line.
+--
+-- x lies between 0 and editor.width.
+--
+-- Postcondition:
+--  Current line is not wider than editor.width
+--
+-- Desired properties in priority order:
+--  Next line doesn't start with whitespace
+--  Current line ends with whitespace (a.k.a. word wrap)
+--  Current line is close to full
+-- None of these is guaranteed. But we should never satisfy a lower priority
+-- before a higher one.
+function Text.should_word_wrap(editor, line, pos, char, x)
+  if char:match('%s') then return false end
+  if pos == 1 then return false end
+  if Text.match(line, pos-1, '%S') then return false end
+  local offset = Text.offset(line, pos)
+  -- most of the time a word is printable chars + whitespace
+  local s = line:match('%S+%s*', offset)
+  assert(s)
+  local w = editor.font:getWidth(s)
+  if x+w < editor.width then return false end
+  if w > editor.width then return false end  -- we're going to need to truncate the next word anyway
+  if x < 0.8*editor.width then
+    local s2 = line:match('%S+', offset)
+    local w2 = editor.font:getWidth(s2)
+    if x+w2 > editor.width then
+      -- there'll be some non-whitespace left over for the next line
+      return false
+    end
+  end
+  return true
 end
 
 function Text.populate_link_offsets(State, line_index)
@@ -225,7 +249,7 @@ end
 -- Don't handle any keys here that would trigger text_input above.
 function Text.keychord_press(State, chord, key, scancode, is_repeat)
 --?   print('chord', chord, State.selection1.line, State.selection1.pos)
-  --== shortcuts that mutate text
+  --== shortcuts that mutate text (must schedule_save)
   if chord == 'return' then
     local before_line = State.cursor1.line
     local before = snapshot(State, before_line)
@@ -1169,4 +1193,20 @@ function ends_with(s, suffix)
     end
   end
   return true
+end
+
+-- create a new iterator for s which provides the index and UTF-8 bytes corresponding to each codepoint
+function utf8chars(s, startpos)
+  local next_pos = startpos or 1  -- in code points
+  local next_offset = utf8.offset(s, next_pos)  -- in bytes
+  return function()
+    assert(next_offset)  -- never call the iterator after it returns nil
+    local curr_pos = next_pos
+    next_pos = next_pos+1
+    local curr_offset = next_offset
+    next_offset = utf8.offset(s, 2, next_offset)
+    if next_offset == nil then return end
+    local curr_char = s:sub(curr_offset, next_offset-1)
+    return curr_pos, curr_char
+  end
 end

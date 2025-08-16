@@ -542,9 +542,9 @@ end
 function edit.key_release(State, key, scancode)
 end
 
-function edit.update_font_settings(State, font_height)
+function edit.update_font_settings(State, font_height, font)
   State.font_height = font_height
-  State.font = love.graphics.newFont(State.font_height)
+  State.font = font or love.graphics.newFont(State.font_height)
   State.line_height = math.floor(font_height*1.3)
 end
 
