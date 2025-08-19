@@ -463,7 +463,19 @@ function App.disable_tests()
   App.fake_mouse_press = nil
   App.fake_mouse_release = nil
   -- other methods dispatch to real hardware
-  App.screen.resize = love.window.setMode
+  App.screen.resize = function(w, h, flags)
+    -- Hack. On Linux with LÖVE 12, I've observed love.window.setMode go awry.
+    -- Guidance from LÖVE folks (https://github.com/love2d/love/issues/2214)
+    -- is that everything should be working with density-independent units
+    -- most of the time, but on some platforms love.window.setMode doesn't do
+    -- so. In that case, make sure to pass in values in raw pixel units to it.
+    local w1 = love.window.getMode()
+    local w2 = love.graphics.getDimensions()
+    if w1 ~= w2 then
+      w, h = love.window.toPixels(w, h)
+    end
+    love.window.setMode(w, h, flags)
+  end
   App.screen.size = love.window.getMode
   App.screen.move = love.window.setPosition
   App.screen.position = love.window.getPosition
