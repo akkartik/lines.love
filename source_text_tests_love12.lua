@@ -448,7 +448,7 @@ function test_draw_wrapping_text_containing_non_ascii()
   y = y + Editor_state.line_height
   App.screen.check(y, 'm ', 'screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'I’m a', 'screen:3')
+  App.screen.check(y, 'I’m ad', 'screen:3')
 end
 
 function test_click_past_end_of_screen_line()
@@ -1033,17 +1033,17 @@ function test_pagedown_can_start_from_middle_of_long_wrapping_line()
   y = y + Editor_state.line_height
   App.screen.check(y, 'def g', 'baseline/screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'hi jkl ', 'baseline/screen:3')
+  App.screen.check(y, 'hi ', 'baseline/screen:3')
   -- after pagedown we scroll down the very long wrapping line
   edit.run_after_keychord(Editor_state, 'pagedown', 'pagedown')
   check_eq(Editor_state.screen_top1.line, 1, 'screen_top:line')
   check_eq(Editor_state.screen_top1.pos, 10, 'screen_top:pos')
   y = Editor_state.top
-  App.screen.check(y, 'hi jkl ', 'screen:1')
+  App.screen.check(y, 'hi ', 'screen:1')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'mno ', 'screen:2')
+  App.screen.check(y, 'jkl m', 'screen:2')
   y = y + Editor_state.line_height
-  App.screen.check(y, 'pqr ', 'screen:3')
+  App.screen.check(y, 'no p', 'screen:3')
 end
 
 function test_pagedown_never_moves_up()
