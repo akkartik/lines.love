@@ -20,6 +20,9 @@ Drawing_padding_height = Drawing_padding_top + Drawing_padding_bottom
 
 Same_point_distance = 4  -- pixel distance at which two points are considered the same
 
+Hand_icon = love.mouse.getSystemCursor('hand')
+Arrow_icon = love.mouse.getSystemCursor('arrow')
+
 edit = {}
 
 -- run in both tests and a real run
@@ -100,6 +103,8 @@ function edit.initialize_state(top, left, right, font, font_height, line_height)
     -- search
     search_term = nil,
     search_backup = nil,  -- stuff to restore when cancelling search
+
+    button_handlers = {},
   }
   return result
 end  -- edit.initialize_state
@@ -204,6 +209,12 @@ function edit.draw(State)
 end
 
 function edit.update(State, dt)
+  local x, y = love.mouse.getPosition()
+  if mouse_hover_on_any_button(State, x,y) then
+    love.mouse.setCursor(Hand_icon)
+  else
+    love.mouse.setCursor(Arrow_icon)
+  end
   Drawing.update(State, dt)
   if State.next_save and State.next_save < Current_time then
     save_to_disk(State)

@@ -17,6 +17,16 @@ function button(State, name, params)
   table.insert(State.button_handlers, params)
 end
 
+function mouse_hover_on_any_button(State, x, y)
+  for _,ev in ipairs(State.button_handlers) do
+    if x>ev.x and x<ev.x+ev.w and y>ev.y and y<ev.y+ev.h then
+      if ev.onpress1 then
+        return true
+      end
+    end
+  end
+end
+
 -- process button event handlers
 function mouse_press_consumed_by_any_button(State, x, y, mouse_button)
   local button_pressed = false
