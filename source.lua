@@ -141,8 +141,7 @@ function source.load_settings()
 end
 
 function source.set_window_position_from_settings(settings)
-  local os = love.system.getOS()
-  if os == 'Linux' then
+  if OS == 'Linux' then
     -- love.window.setPosition doesn't quite seem to do what is asked of it on Linux.
     App.screen.move(settings.x, settings.y-37, settings.displayindex)
   else

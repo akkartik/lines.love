@@ -81,6 +81,8 @@ function App.initialize_globals()
   Supported_versions = {'11.5', '11.4', '12.0'}  -- put the recommended version first
   check_love_version_for_tests()
 
+  OS = love.system.getOS()
+
   if Current_app == 'run' then
     run.initialize_globals()
   elseif Current_app == 'source' then

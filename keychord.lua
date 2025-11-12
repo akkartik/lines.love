@@ -34,6 +34,15 @@ function App.combine_modifiers(key)
   return result
 end
 
+-- use idiomatic cmd key on Mac OS, ctrl elsewhere
+function App.default_modifier(key)
+  if OS == 'OS X' then
+    return 's-'..key
+  else
+    return 'C-'..key
+  end
+end
+
 function App.any_modifier_down()
   return App.ctrl_down() or App.alt_down() or App.shift_down() or App.cmd_down()
 end
@@ -52,6 +61,14 @@ end
 
 function App.cmd_down()
   return App.key_down('lgui') or App.key_down('rgui')
+end
+
+function App.default_modifier_down()
+  if OS == 'OS X' then
+    return App.cmd_down()
+  else
+    return App.ctrl_down()
+  end
 end
 
 function App.is_cursor_movement(key)
