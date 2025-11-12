@@ -36,7 +36,7 @@ end
 
 -- use idiomatic cmd key on Mac OS, ctrl elsewhere
 function App.default_modifier(key)
-  if OS == 'OS X' then
+  if OS == 'OS X' and not App.run_tests then
     return 's-'..key
   else
     return 'C-'..key
