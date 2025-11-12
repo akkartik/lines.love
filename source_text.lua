@@ -386,10 +386,10 @@ function Text.keychord_press(State, chord, key, scancode, is_repeat)
       State.selection1 = deepcopy(State.cursor1)
     end
     Text.word_right(State)
-  elseif chord == 'home' then
+  elseif chord == 'home' or (OS == 'OS X' and chord == 's-left') then
     Text.start_of_line(State)
     State.selection1 = {}
-  elseif chord == 'end' then
+  elseif chord == 'end' or (OS == 'OS X' and chord == 's-right') then
     Text.end_of_line(State)
     State.selection1 = {}
   elseif chord == 'S-home' then
